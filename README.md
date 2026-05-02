@@ -9,7 +9,7 @@
 
 ---
 
-## 이 플러그인이 뭐야
+## 플러그인 설명
 
 Claude Code의 [superpowers](https://github.com/obra/superpowers) 플러그인을 베이스로, **한국어 1인/소수 개발 환경**에 맞춘 spec-driven 워크플로우 확장이다. superpowers의 검증된 패턴(brainstorming → writing-plans → executing-plans)은 그대로 두고, 그 위에 다음 6가지를 얹었다:
 
@@ -57,9 +57,45 @@ docs/features/2026-05-02-<feature-slug>/
 
 ---
 
-## 설치 (마켓플레이스 배포 없이 사용)
+## 설치
 
-이 플러그인은 마켓플레이스에 등록하지 않고 **로컬 클론 그대로 사용**할 수 있다. 세 가지 방법이 있다.
+두 가지 방식 — 일반 사용자는 **A (GitHub)**, 본인이 직접 코드를 수정하며 쓸 거라면 **B (로컬)**.
+
+---
+
+### A. GitHub-hosted (사용자 권장)
+
+본인 환경에 깃이 깔려있고 인터넷이 되면 이 방식이 가장 간단합니다.
+
+**한 번만 등록 + install:**
+
+```
+# Claude Code 안에서
+/plugin marketplace add https://github.com/LonerStayle/js-super.git
+/plugin install js-super@js-super
+```
+
+세션 재시작 → 끝.
+
+**업데이트 받기 (새 버전 push 됐을 때):**
+
+```
+/plugin marketplace update js-super
+/plugin update js-super@js-super        # 버전 bump 있을 때
+```
+
+세션 재시작 후 반영. (skill 본문만 바뀌었으면 `update` 생략하고 `marketplace update` + 재시작만 해도 됨.)
+
+특정 버전(태그) 고정:
+```
+/plugin install js-super@js-super --version v1.0.0
+```
+
+---
+
+### B. 로컬 (개발자 / 본인)
+
+본인이 skill 본문을 수정하면서 즉시 반영하고 싶거나, 인터넷 없이 쓸 때.
 
 > **Note**: 아래 명령에서 `<JS_SUPER_PATH>` 는 이 저장소를 클론/다운로드한 **본인의 절대 경로**로 치환하세요 (예: `~/projects/js-super`, `/opt/plugins/js-super` 등).
 > 환경변수로 미리 지정해두면 편합니다:
@@ -67,9 +103,7 @@ docs/features/2026-05-02-<feature-slug>/
 > export JS_SUPER_PATH="$HOME/path/to/js-super"
 > ```
 
-### 방법 1. 심볼릭 링크 (개발 중 권장)
-
-플러그인 코드를 직접 수정하면서 즉시 반영하고 싶을 때.
+#### B-1. 심볼릭 링크 (라이브 반영, 본인 개발에 권장)
 
 ```bash
 # 1) Claude Code 플러그인 디렉터리로 심볼릭 링크 걸기
@@ -81,33 +115,42 @@ ln -s "$JS_SUPER_PATH" ~/.claude/plugins/js-super
 
 수정하면 다음 세션에서 바로 반영된다.
 
-### 방법 2. 디렉터리 복사 (안정 사용)
+#### B-2. 디렉터리 복사 (스냅샷 고정 사용)
 
-수정 없이 그냥 쓸 때.
+수정 없이 특정 시점 그대로 쓸 때.
 
 ```bash
 cp -a "$JS_SUPER_PATH" ~/.claude/plugins/js-super
 ```
 
-### 방법 3. 로컬 마켓플레이스 등록 (`/plugin` 커맨드 사용)
+#### B-3. 로컬 마켓플레이스 등록 (`/plugin` UI로 관리)
 
-Claude Code의 `/plugin` 워크플로우로 enable/disable 하고 싶을 때.
-
-```bash
+```
 # Claude Code 안에서 (절대 경로로 입력)
 /plugin marketplace add <JS_SUPER_PATH>
 /plugin install js-super@js-super
 ```
 
-이 방식은 `.claude-plugin/marketplace.json`을 활용한다 (이 저장소에 이미 들어있음).
+`.claude-plugin/marketplace.json`을 활용 — 이 저장소에 이미 들어있다.
 
-### 설치 확인
+---
 
-설치 후 Claude Code 세션을 시작하면 다음 슬래시가 보여야 한다:
+### 설치 확인 (A/B 공통)
+
+설치 + 세션 재시작 후 다음 슬래시가 자동완성에 보여야 한다:
 
 - `/brainstorm`, `/design`, `/write-plan`, `/execute-plan`, `/api-test`, `/worktree`
 
-`/help`나 명령 자동완성으로 확인.
+`/help`로도 확인 가능.
+
+### 제거
+
+```
+/plugin uninstall js-super@js-super
+/plugin marketplace remove js-super
+```
+
+(B-1/B-2 로 깔았다면 `~/.claude/plugins/js-super` 디렉터리/심볼릭 링크 직접 삭제.)
 
 ---
 
