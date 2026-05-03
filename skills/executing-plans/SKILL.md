@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan (<slug>-implementation-plan.md) to execute in a separate session with review checkpoints. js-superpowers extension — every code edit follows a 4-step discipline (before-snapshot → risk-annotation 6-checklist → apply edit with RISK comments → change-history [코드-수정] entry with full before/after blocks) before each commit.
+description: Use when you have a written implementation plan (<slug>-implementation-plan.md) to execute in a separate session with review checkpoints. js-superpowers extension — code edits use a per-edit fast path (before-snapshot → risk-annotation 6-checklist → apply edit with RISK comments) and ONE consolidated change-history [코드-수정] entry per task (not per edit), drastically reducing 구현계획서.md Read/Edit cost.
 ---
 
 # Executing Plans
@@ -30,12 +30,19 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 ## Code Edit Discipline (REQUIRED — js-superpowers extension)
 
 <HARD-GATE>
-Every code Edit/Write you make during /execute-plan MUST follow this 4-step discipline:
-1. **Before-snapshot**: Read the target file → capture the original code for the affected line range
-2. **Risk check**: Run risk-annotation 6-checklist on the planned change
-3. **Apply edit**: perform the Edit/Write (insert `# ⚠️ RISK(...)` comments above risky lines as needed). Trust the Edit tool's success/failure return — do NOT re-Read just to confirm the comment landed.
-4. **Log**: Invoke change-history → append [코드-수정] entry to <slug>-implementation-plan.md with full schema (id / 이유 / 무엇이 / 영향범위 / 위험 카테고리 / 변경 전 코드 / 변경 후 코드)
-NEVER commit code without completing all 4 steps. The before-snapshot must be captured BEFORE the edit, otherwise the original is gone.
+Code edits in a task use a **two-phase pattern** (per-edit fast steps + one batched log at task end):
+
+**Phase 1 — Per code edit (repeat for each edit in the task):**
+1. **Before-snapshot**: Read the target file → capture the original code for the affected line range. Hold the snapshot in memory; do NOT write to 변경이력 yet.
+2. **Risk check**: Run risk-annotation 6-checklist on the planned change.
+3. **Apply edit**: Edit/Write the file (insert `# ⚠️ RISK(...)` comments above risky lines as needed). Trust the Edit tool's success/failure return — do NOT re-Read just to confirm the comment landed.
+
+(Repeat 1-3 for every code edit in the task. Track all `(file:line, before, after, risk_categories)` tuples in memory.)
+
+**Phase 2 — Once per task, AFTER all task edits + tests pass:**
+4. **Batched log**: Read <slug>-implementation-plan.md ONCE. Build ONE consolidated [코드-수정] entry covering ALL code edits made in this task. Edit ONCE to append. (Schema: id / 이유 / 무엇이 / 영향범위 / 위험 카테고리 / 세부 변경 list / 변경 전 코드 / 변경 후 코드 — see change-history skill for batched format.)
+
+NEVER commit code without completing Phase 2. The before-snapshots must be captured BEFORE each edit (otherwise originals are gone) and held in memory until Phase 2.
 </HARD-GATE>
 
 ## Trivial-Edit Exception (skip full discipline for tiny changes)
@@ -62,10 +69,10 @@ When trivial:
 
 No 영향범위, no 위험 카테고리, no before/after code blocks.
 
-**If ANY criterion is uncertain → fall back to full 4-step discipline.** Trivial is a fast path, not a shortcut for "anything that looks small".
+**If ANY criterion is uncertain → fall back to full discipline.** Trivial is a fast path, not a shortcut for "anything that looks small".
 
 <HARD-GATE>
-Triviality is determined ONLY by the three criteria above. Logic changes — even one-line ones — are NOT trivial. When in doubt, take the safe path (full 4-step).
+Triviality is determined ONLY by the three criteria above. Logic changes — even one-line ones — are NOT trivial. When in doubt, take the safe path.
 </HARD-GATE>
 
 ## Process Flow
@@ -79,12 +86,13 @@ digraph exec_flow {
     "Pick next [ ] task" [shape=box];
     "TDD: write failing test" [shape=box];
     "Run test → FAIL" [shape=box];
-    "Read target file (before-snapshot)" [shape=box];
+    "More edits in task?" [shape=diamond];
+    "Read target file (before-snapshot)\n— hold in memory" [shape=box];
     "risk-annotation 6-checklist" [shape=box];
     "Apply Edit (with RISK comments)" [shape=box];
     "Run tests for this task" [shape=box];
     "All pass?" [shape=diamond];
-    "change-history [코드-수정] entry" [shape=box];
+    "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" [shape=box];
     "Commit (skip if no git)" [shape=box];
     "Mark task [x]" [shape=box];
     "All tasks done?" [shape=diamond];
@@ -98,15 +106,17 @@ digraph exec_flow {
     "Create TodoWrite" -> "Pick next [ ] task";
     "Pick next [ ] task" -> "TDD: write failing test";
     "TDD: write failing test" -> "Run test → FAIL";
-    "Run test → FAIL" -> "Read target file (before-snapshot)";
-    "Read target file (before-snapshot)" -> "risk-annotation 6-checklist";
+    "Run test → FAIL" -> "More edits in task?";
+    "More edits in task?" -> "Read target file (before-snapshot)\n— hold in memory" [label="yes"];
+    "Read target file (before-snapshot)\n— hold in memory" -> "risk-annotation 6-checklist";
     "risk-annotation 6-checklist" -> "Apply Edit (with RISK comments)";
-    "Apply Edit (with RISK comments)" -> "Run tests for this task";
+    "Apply Edit (with RISK comments)" -> "More edits in task?";
+    "More edits in task?" -> "Run tests for this task" [label="no — task edits done"];
     "Run tests for this task" -> "All pass?";
-    "All pass?" -> "change-history [코드-수정] entry" [label="yes"];
+    "All pass?" -> "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" [label="yes"];
     "All pass?" -> "Fix and retry" [label="no"];
     "Fix and retry" -> "Apply Edit (with RISK comments)";
-    "change-history [코드-수정] entry" -> "Commit (skip if no git)";
+    "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" -> "Commit (skip if no git)";
     "Commit (skip if no git)" -> "Mark task [x]";
     "Mark task [x]" -> "All tasks done?";
     "All tasks done?" -> "Pick next [ ] task" [label="no"];

@@ -38,7 +38,41 @@ NEVER skip this. The history is the only audit trail outside git.
 
 ## Code-Change Entry (only in <slug>-implementation-plan.md)
 
-Adds these fields on top of the common schema:
+`executing-plans` writes ONE consolidated [코드-수정] entry per task (NOT per individual code edit). This batches all code changes within a task into a single 변경이력 entry, drastically reducing 구현계획서.md Read/Edit cost.
+
+### Batched per-task entry (default form)
+
+When a task contains multiple code edits, use this consolidated form:
+
+```markdown
+### [YYYY-MM-DD HH:MM] [코드-수정] (task: Task N — <task name>)
+- **id**: CH-YYYYMMDD-NNN
+- **이유**: <task-level reason — what the task accomplished>
+- **무엇이**: <comma-separated list of files touched>
+- **영향범위**: <combined scope of all edits in this task — callers, dependencies, etc.>
+- **위험 카테고리**: <union of all triggered categories — e.g., "side-effect, perf">
+- **세부 변경 (N건)**:
+  - `<file:line-range>` — `<short description>` (`<risk-category-or-none>`)
+  - `<file:line-range>` — `<short description>` (`<risk-category-or-none>`)
+  - …
+- **변경 전 코드** (per file)
+  ```<lang>
+  // file: <path>
+  <consolidated before content for the touched ranges>
+  ```
+- **변경 후 코드** (per file)
+  ```<lang>
+  // file: <path>
+  <consolidated after content, including RISK comments>
+  ```
+- **연관 항목**: CH-... (related entries; omit if none)
+```
+
+The "(task: Task N — ...)" tag right after [코드-수정] makes it obvious this entry covers a whole task's worth of edits, not a single edit.
+
+If a task has only ONE code edit, you may still use this form (single-item 세부 변경 list) for consistency, OR drop the 세부 변경 list and use the simple legacy form below.
+
+### Legacy single-edit form (when task touches one file/range only)
 
 ```markdown
 - **위험 카테고리**: side-effect | race | breaking | perf
