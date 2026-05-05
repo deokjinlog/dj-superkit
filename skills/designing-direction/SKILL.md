@@ -20,8 +20,8 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 3. **Run technical design questions** — architecture (2-3 candidates) → impacted components → data model → external interfaces → key decisions + alternatives → risk candidates → test strategy
 4. **Self-review (internal)** — FR mapping coverage, alternatives present, risk categorization (no user prompt yet)
 5. **Run verifying-spec FIRST** (with Tolerance for missing skill) — main agent runs A+C verification, produces 4-axis report internally
-6. **Single combined approval gate** — show the full `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / fix / partial"
-7. **Invoke docs-pretty skill** — one-shot format-only pass on the freshly approved doc (Sonnet subagent). Runs ONLY here, BEFORE the first change-history entry. NEVER on later edits.
+6. **Invoke docs-pretty skill** — pre-review format pass on the draft (Sonnet subagent). Runs BEFORE the user-approval gate so the user reviews a prettified doc. Re-fires after each revision iteration. Stops once first change-history entry is logged.
+7. **Single combined approval gate** — show the full prettified `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / fix / partial". On `fix`/`partial` → revise → loop back to step 6 (re-prettify, re-show).
 8. **Invoke change-history skill** — append first `[개발방향-수정]` entry
 9. **Ask proceed-to-writing-plans gate** — emit "✅ ... Proceed to writing-plans? — yes / no", parse intent in any language
 10. **On approval → auto-invoke writing-plans via Skill tool. On hold → exit with notice telling the user to run /write-plan later**
@@ -70,8 +70,8 @@ digraph design_flow {
     "Q: test strategy?" [shape=box];
     "Self-review (internal)" [shape=box];
     "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)" [shape=box];
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" [shape=box];
     "Single combined approval gate\n(doc + verify report)" [shape=diamond];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [shape=box];
     "Invoke change-history" [shape=box];
     "Ask: proceed to writing-plans?" [shape=diamond];
     "Auto-invoke writing-plans skill" [shape=doublecircle];
@@ -87,10 +87,10 @@ digraph design_flow {
     "Q: risk candidates?" -> "Q: test strategy?";
     "Q: test strategy?" -> "Self-review (internal)";
     "Self-review (internal)" -> "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)";
-    "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)" -> "Single combined approval gate\n(doc + verify report)";
-    "Single combined approval gate\n(doc + verify report)" -> "Self-review (internal)" [label="fix / partial"];
-    "Single combined approval gate\n(doc + verify report)" -> "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [label="approve"];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" -> "Invoke change-history";
+    "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)" -> "Invoke docs-pretty\n(pre-review, Sonnet subagent)";
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" -> "Single combined approval gate\n(doc + verify report)";
+    "Single combined approval gate\n(doc + verify report)" -> "Self-review (internal)" [label="fix / partial — re-prettify on next loop"];
+    "Single combined approval gate\n(doc + verify report)" -> "Invoke change-history" [label="approve"];
     "Invoke change-history" -> "Ask: proceed to writing-plans?";
     "Ask: proceed to writing-plans?" -> "Auto-invoke writing-plans skill" [label="approve"];
     "Ask: proceed to writing-plans?" -> "Exit: tell user to run /write-plan later" [label="hold"];
@@ -127,19 +127,20 @@ digraph design_flow {
 - The main agent runs consistency check + code impact analysis and produces the 4-axis report
 - Tolerance: if verifying-spec is not installed, skip and emit the notice (existing tolerance rule)
 
-**6. Single combined user-approval gate**
-- Present BOTH the full `<slug>-tech-design.md` AND the verifying-spec report in one message
+**6. Invoke docs-pretty skill** (pre-review formatting)
+- Runs BEFORE the user-approval gate so the user reviews a prettified doc
+- Re-fires after each revision iteration (fix/partial → revise → docs-pretty → re-show)
+- Stops the moment the first change-history entry is logged
+- Dispatches a Sonnet subagent for a strict format-only pass (no rewording, no reordering, footer/frontmatter byte-preserved)
+- See `docs-pretty` skill for full pre-flight + sanity-check protocol
+
+**7. Single combined user-approval gate**
+- Present BOTH the full prettified `<slug>-tech-design.md` AND the verifying-spec report in one message
 - Ask once: "Approve `<slug>-tech-design.md` and proceed? — yes / fix / partial"
 - DO NOT split into "approve doc" and "approve verify report" — that's two gates for one decision
-- On `yes` → continue to step 7
-- On `fix` → re-enter the relevant question(s), then re-run from step 4
+- On `yes` → continue to step 8
+- On `fix` → re-enter the relevant question(s), then re-run from step 4 (which will loop back through step 6 docs-pretty before showing again)
 - On `partial` → ask which sections to revisit, then re-enter
-
-**7. Invoke docs-pretty skill** (one-shot initial formatting)
-- Runs ONLY here, on the freshly approved doc, BEFORE the first change-history entry
-- Dispatches a Sonnet subagent for a strict format-only pass (no rewording, no reordering, footer/frontmatter byte-preserved)
-- NEVER fires on subsequent edits or change-propagation cascades
-- See `docs-pretty` skill for full pre-flight + sanity-check protocol
 
 **8. Invoke change-history**
 - Entry: `[개발방향-수정] CH-YYYYMMDD-NNN / 이유: 신규 기술 설계 / 무엇이: <slug>-tech-design.md 전체 / 영향범위: 없음 (최초 생성)`
@@ -210,8 +211,8 @@ This summarizes the corrected order (matches Process detail steps 5-9 above):
    - One question: "Approve `<slug>-tech-design.md` and proceed? — yes / fix / partial"
    - DO NOT split into "approve doc" → "approve verify report". One gate, one decision.
 
-3. On `yes` → invoke `docs-pretty` (one-shot format pass) → invoke change-history (`[개발방향-수정]` entry) → continue to step 4.
-   On `fix` → re-enter the relevant question(s), then re-run from "Self-review (internal)".
+3. On `yes` → invoke change-history (`[개발방향-수정]` entry) → continue to step 4.
+   On `fix` → re-enter the relevant question(s), then re-run from "Self-review (internal)" — docs-pretty fires again before the next user gate.
    On `partial` → ask which sections to revisit, then re-enter.
 
 4. **Proceed-to-writing-plans gate** (separate, after change-history is logged):

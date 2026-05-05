@@ -1,31 +1,36 @@
 ---
 name: docs-pretty
-description: Use ONCE at first creation of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md, immediately after the final user approval and BEFORE the first change-history entry. Dispatches a Sonnet subagent that performs a strict format-only pass — improves headers, lists, tables, code blocks, spacing, and visual hierarchy WITHOUT changing any wording, ordering, or semantic content. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
+description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md — fires immediately AFTER the agent writes/rewrites the draft and BEFORE showing it to the user for review, so the user always sees a prettified version. Allowed multiple times during the review loop (each new draft prettified before display). STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches a Sonnet subagent that performs a strict format-only pass — improves headers, lists, tables, code blocks, spacing, and visual hierarchy WITHOUT changing any wording, ordering, or semantic content. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
 ---
 
-# Docs Pretty (One-Shot Initial Formatting)
+# Docs Pretty (Pre-Review Formatting)
 
-This skill prettifies a freshly written feature MD exactly once at the moment it is born. It exists because the agent-authored first draft is content-correct but visually noisy (inconsistent header levels, ad-hoc list bullets, unaligned tables, rough spacing). This pass tightens visual hierarchy WITHOUT touching meaning.
+This skill prettifies a freshly written or rewritten feature MD just before the user reviews it during the initial creation phase. It exists because the agent-authored draft is content-correct but visually noisy (inconsistent header levels, ad-hoc list bullets, unaligned tables, rough spacing). This pass tightens visual hierarchy WITHOUT touching meaning, so the user reviews a clean version. The user's review is the safety net: if the format pass ever drifts meaning, they catch it BEFORE it gets locked into change-history.
 
-**Announce at start:** "I'm using the docs-pretty skill to do a one-shot initial formatting pass on `<file>`."
+**Announce at start:** "I'm using the docs-pretty skill to format `<file>` before the user reviews it."
 
 <HARD-GATE>
-This skill MUST be invoked EXACTLY ONCE per doc, at first creation, after the final user approval and BEFORE the first `change-history` entry. It MUST NOT run on:
-- Any subsequent edit (user-requested partial revision, fix, addition)
+This skill MUST be invoked BEFORE every user review of the doc during initial creation — i.e., right after the agent writes or rewrites the draft, before sending it to the user. It runs as many times as the review loop iterates (write → pretty → review → maybe revise → pretty → review again).
+
+It STOPS firing the moment the first `change-history` entry has been logged. That boundary marks the doc as "live" — from then on, no docs-pretty.
+
+Specifically, docs-pretty MUST NOT run on:
+- Any user-requested edit AFTER the first change-history entry exists (partial revisions, fixes, additions)
 - Any `change-history` entry append (the `## 변경이력` footer is the audit trail — never reformat it)
 - Any `change-propagation` cascade
 - Any in-task code-edit logging during `/execute-plan`
 
-If you are unsure whether this is a "first creation" — STOP. Look for an existing `## 변경이력` footer with one or more entries. If ANY entry exists, this is NOT the first creation. Skip this skill.
+If you are unsure whether this is still in the "initial creation phase" — STOP. Look for an existing `## 변경이력` footer with one or more entries. If ANY entry exists, this is NOT initial creation. Skip this skill.
 </HARD-GATE>
 
 ## When to Use
 
 | Trigger (yes) | Anti-trigger (no) |
 |---|---|
-| `brainstorming` finished `<slug>-requirements.md`, user approved, no `## 변경이력` entries yet | User asked to update FR-3 wording in an existing requirements.md |
-| `designing-direction` finished `<slug>-tech-design.md`, user approved, no `## 변경이력` entries yet | `change-propagation` is cascading edits across MDs |
-| `writing-plans` finished `<slug>-implementation-plan.md`, user approved, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/execute-plan` |
+| `brainstorming` just wrote/rewrote `<slug>-requirements.md`, about to show to user, no `## 변경이력` entries yet | User asked to update FR-3 wording in an already-live requirements.md (i.e., one with change-history entries) |
+| `designing-direction` just wrote/rewrote `<slug>-tech-design.md`, about to show to user, no `## 변경이력` entries yet | `change-propagation` is cascading edits across MDs |
+| `writing-plans` just wrote/rewrote `<slug>-implementation-plan.md`, about to show to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/execute-plan` |
+| User requested revision in the review loop, agent rewrote, about to re-show — fire again | First change-history entry has been logged — doc is now "live", do NOT fire |
 
 ## Why a Subagent (and which model)
 
@@ -65,8 +70,7 @@ Use the `Agent` tool with these exact parameters:
 After the subagent returns:
 1. Read the file back (1 Read)
 2. Spot-check: section headers count unchanged, frontmatter intact, `## 변경이력` footer intact (still empty), no obvious content loss
-3. Report to the user: "✨ 포맷 정돈 완료 (`<file>`). 의미 변경 없음."
-4. Yield back to the calling skill (which will then invoke `change-history` for the first entry)
+3. Yield back to the calling skill, which will now show the prettified doc to the user for review. Do NOT emit a separate "포맷 완료" message — the calling skill's review prompt is the user-facing surface, and a separate notice would just add noise. If sanity-check (Step 3.2) fails, then DO speak up so the calling skill can decide whether to abort or proceed despite the issue.
 
 ## Subagent Prompt Template
 

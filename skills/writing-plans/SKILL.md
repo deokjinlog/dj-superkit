@@ -20,9 +20,9 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 3. **Decompose into bite-sized tasks** — each task = one TDD cycle (test → fail → impl → pass → commit), 2-5 minutes per step
 4. **Fill 위험 코드 지점 (§2)** — every risk category from <slug>-tech-design.md §6 mapped to a concrete location + mitigation
 5. **Self-review** — spec coverage / placeholder scan / type consistency / 위험 coverage
-6. **User reviews <slug>-implementation-plan.md** — show the file, get approval (loop until OK)
-7. **Invoke verifying-spec** (with Tolerance for missing skill) — main agent runs A+C verification on the plan
-8. **Invoke docs-pretty skill** — one-shot format-only pass on the freshly approved plan (Sonnet subagent). Runs ONLY here, BEFORE the first change-history entry. NEVER on later edits.
+6. **Invoke verifying-spec** (with Tolerance for missing skill) — main agent runs A+C verification on the plan
+7. **Invoke docs-pretty skill** — pre-review format pass on the draft (Sonnet subagent). Runs BEFORE showing the plan to the user. Re-fires after each revision iteration. Stops once first change-history entry is logged.
+8. **User reviews <slug>-implementation-plan.md** — show the prettified plan + verifying-spec report; get approval (loop until OK; on changes → revise → back to step 6)
 9. **Invoke change-history skill** — append first `[구현계획서-수정]` entry
 10. **Hand off to /execute-plan** — count tasks first, then offer the choice using the Execution Handoff message below. Upstream `subagent-driven-development` is NOT offered here; only invoke it if the user explicitly asks for the upstream original.
 
@@ -159,7 +159,7 @@ digraph plan_flow {
     "User reviews <slug>-implementation-plan.md" [shape=diamond];
     "Invoke verifying-spec" [shape=box];
     "Verifier report → user decision" [shape=diamond];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [shape=box];
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" [shape=box];
     "Invoke change-history" [shape=box];
     "Hand off to /execute-plan" [shape=doublecircle];
 
@@ -167,10 +167,10 @@ digraph plan_flow {
     "File structure outline" -> "Decompose into bite-sized tasks";
     "Decompose into bite-sized tasks" -> "Self-review (internal)";
     "Self-review (internal)" -> "Run verifying-spec FIRST";
-    "Run verifying-spec FIRST" -> "Single combined approval gate\n(plan + verify report)";
-    "Single combined approval gate\n(plan + verify report)" -> "Self-review (internal)" [label="fix / partial"];
-    "Single combined approval gate\n(plan + verify report)" -> "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [label="approve"];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" -> "Invoke change-history";
+    "Run verifying-spec FIRST" -> "Invoke docs-pretty\n(pre-review, Sonnet subagent)";
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" -> "Single combined approval gate\n(plan + verify report)";
+    "Single combined approval gate\n(plan + verify report)" -> "Self-review (internal)" [label="fix / partial — re-prettify on next loop"];
+    "Single combined approval gate\n(plan + verify report)" -> "Invoke change-history" [label="approve"];
     "Invoke change-history" -> "Hand off to /execute-plan";
 }
 ```
@@ -268,8 +268,8 @@ This summarizes the corrected order (matches Checklist + Process Flow above):
    - One question: "Approve `<slug>-implementation-plan.md` and proceed? — yes / fix / partial"
    - DO NOT split into "approve plan" → "approve verify report". One gate, one decision.
 
-3. On `yes` → invoke `docs-pretty` (one-shot format pass) → invoke change-history (`[구현계획서-수정]` entry) → continue to Execution Handoff below.
-   On `fix` → re-decompose specific tasks, then re-run from "Self-review (internal)".
+3. On `yes` → invoke change-history (`[구현계획서-수정]` entry) → continue to Execution Handoff below.
+   On `fix` → re-decompose specific tasks, then re-run from "Self-review (internal)" — docs-pretty fires again before the next user gate.
    On `partial` → ask which sections/tasks to revisit, then re-enter.
 
 ## Execution Handoff

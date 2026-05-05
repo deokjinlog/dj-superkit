@@ -29,8 +29,8 @@ You MUST create a TaskCreate task for each of these items and complete them in o
    - **[PRD mode]** Feature category mini-question → **Visual Companion offer** (if UI/layout/visual feature based on category — own message, mode-aware trigger) → Question plan agreement → Adaptive PRD questions (only the agreed subset). See "PRD Adaptive Planning" below.
    - **[Socratic mode]** **Visual Companion offer** (if visual questions ahead — own message) → Free-form upstream-style dialogue: one question at a time, propose 2-3 approaches with tradeoffs, section-by-section approval. See "Socratic Mode" below.
 5. **Self-review** — mode-specific (PRD: 6-item PRD scan + 4-item abstract scan; Socratic: 4-item abstract scan only)
-6. **User reviews <slug>-requirements.md** — show the file, get approval (loop until OK)
-7. **Invoke docs-pretty skill** — one-shot format-only pass (Sonnet subagent). Runs ONLY here, on the freshly approved doc, BEFORE any change-history entry. NEVER on later edits.
+6. **Invoke docs-pretty skill** — format-only pass (Sonnet subagent) on the freshly written draft, BEFORE showing to user. Re-fire after each iteration of the review loop (write/rewrite → pretty → show). Stops once first change-history entry is logged.
+7. **User reviews <slug>-requirements.md** — show the prettified file, get approval (loop until OK; on changes → revise → back to step 6)
 8. **Invoke change-history skill** — append first `[요구사항-수정]` entry
 9. **Ask user for approval to proceed** — emit a short prompt asking yes/no whether to enter designing-direction
 10. **On approval intent → auto-invoke designing-direction via Skill tool. On hold → exit with a one-line notice telling the user to run /design later**
@@ -92,7 +92,7 @@ digraph brainstorm_flow {
 
     "Self-review (mode-specific)" [shape=box];
     "User reviews <slug>-requirements.md" [shape=diamond];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [shape=box];
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" [shape=box];
     "Invoke change-history\n(first entry: 요구사항-수정/생성)" [shape=box];
     "Ask: proceed to designing-direction?" [shape=diamond];
     "Auto-invoke designing-direction skill" [shape=doublecircle];
@@ -119,10 +119,10 @@ digraph brainstorm_flow {
     "[Socratic] Propose 2-3 approaches\n(tradeoffs + recommendation)" -> "[Socratic] Present design sections\n(section-by-section approval)";
     "[Socratic] Present design sections\n(section-by-section approval)" -> "Self-review (mode-specific)";
 
-    "Self-review (mode-specific)" -> "User reviews <slug>-requirements.md";
-    "User reviews <slug>-requirements.md" -> "Self-review (mode-specific)" [label="changes"];
-    "User reviews <slug>-requirements.md" -> "Invoke docs-pretty\n(one-shot, Sonnet subagent)" [label="approve"];
-    "Invoke docs-pretty\n(one-shot, Sonnet subagent)" -> "Invoke change-history\n(first entry: 요구사항-수정/생성)";
+    "Self-review (mode-specific)" -> "Invoke docs-pretty\n(pre-review, Sonnet subagent)";
+    "Invoke docs-pretty\n(pre-review, Sonnet subagent)" -> "User reviews <slug>-requirements.md";
+    "User reviews <slug>-requirements.md" -> "Self-review (mode-specific)" [label="changes — re-prettify on next loop"];
+    "User reviews <slug>-requirements.md" -> "Invoke change-history\n(first entry: 요구사항-수정/생성)" [label="approve"];
     "Invoke change-history\n(first entry: 요구사항-수정/생성)" -> "Ask: proceed to designing-direction?";
     "Ask: proceed to designing-direction?" -> "Auto-invoke designing-direction skill" [label="approve"];
     "Ask: proceed to designing-direction?" -> "Exit: tell user to run /design later" [label="hold"];
@@ -171,15 +171,17 @@ If the user says "없음" or equivalent, §5 = the consolidated list as-is. If t
 
 **5. Self-review** (mode-specific, see checklist below)
 
-**6. Write the doc + user review gate**
-- Show the full document; await approval or change requests
-- If changes requested, run self-review again
-
-**7. Invoke docs-pretty skill** (one-shot initial formatting)
-- Runs ONLY here, on the freshly approved doc, BEFORE the first change-history entry
+**6. Invoke docs-pretty skill** (pre-review formatting)
+- Runs BEFORE showing the doc to the user — so the user always reviews a prettified version
+- Re-fires after each iteration (user requests changes → revise draft → docs-pretty → re-show)
+- Stops the moment the first change-history entry is logged
 - Dispatches a Sonnet subagent for a strict format-only pass (no rewording, no reordering, footer/frontmatter byte-preserved)
-- NEVER fires on subsequent edits, change-propagation cascades, or change-history appends
 - See `docs-pretty` skill for full pre-flight + sanity-check protocol
+
+**7. Show the doc + user review gate**
+- Show the full prettified document; await approval or change requests
+- If changes requested, revise per feedback → loop back to step 6 (self-review again, then docs-pretty, then re-show)
+- On approval → continue to step 8
 
 **8. Invoke change-history skill** (first entry: initial creation)
 - Tag: `[요구사항-수정]` (use the entry type even on first creation)
