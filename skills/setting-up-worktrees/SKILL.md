@@ -146,12 +146,15 @@ done
 
 **Step 5.5 — Symlink Claude Code memory folder (no user prompt)**
 
-Claude Code encodes the working directory into the memory path: each absolute path's `/` AND `_` characters become `-`. Without a symlink, a worktree session sees zero memory and the user starts cold despite years of context in the main repo. Note: simple `sed 's|/|-|g'` is INSUFFICIENT — `_` must also be converted (e.g. `jinsup_space` → `jinsup-space`).
+Claude Code encodes the working directory into the memory path by replacing **every character outside `[A-Za-z0-9-]`** with `-` — that includes `/`, `.`, `_`, every Korean codepoint, every space, every emoji. Verified empirically against existing `~/.claude/projects/` entries: e.g. `/Users/x/.../GNG-237-다수질문쿼리오류` → `-Users-x-...-GNG-237---------` (8 Korean chars + 1 trailing `/` = 9 dashes). Without a symlink, a worktree session sees zero memory and the user starts cold despite years of context in the main repo.
+
+⚠️ Naive rules (`sed 's|/|-|g'`, `sed 's|[/_]|-|g'`) are **INSUFFICIENT** — they miss `.` (e.g. `.worktrees`) and non-ASCII (Korean ticket names). The only correct rule is the negated character class below.
 
 ```bash
 encode_claude_path() {
-    # Replace BOTH / and _ with - (Claude Code's actual encoding rule)
-    echo "$1" | sed 's|[/_]|-|g'
+    # Claude Code's actual rule: replace EVERY non-[A-Za-z0-9-] codepoint with '-'
+    # Covers: / . _ Korean chars spaces emoji etc.
+    echo "$1" | sed 's|[^A-Za-z0-9-]|-|g'
 }
 
 MAIN_ENC=$(encode_claude_path "$ROOT")
@@ -219,7 +222,7 @@ Claude 메모리 폴더: 메인 → 워크트리 심링크 (n개)
 | Skip `.gitignore` update | Always add `.worktrees/` (idempotent check). |
 | Use `git checkout -b` first then `worktree add` | Prefer `worktree add -b <branch> <path>` (atomic). |
 | Copy `.env.example` (template, already in git) | Excluded from glob. |
-| `sed 's\|/\|-\|g'` for Claude memory path encoding | INCOMPLETE — Claude Code also converts `_` → `-`. Use `sed 's\|[/_]\|-\|g'`. |
+| `sed 's\|/\|-\|g'` or `sed 's\|[/_]\|-\|g'` for Claude memory path encoding | INCOMPLETE — Claude Code converts EVERY non-`[A-Za-z0-9-]` codepoint (incl. `.`, `_`, Korean, spaces, emoji). Only `sed 's\|[^A-Za-z0-9-]\|-\|g'` matches the real encoding. Verified against `~/.claude/projects/` directory listings. |
 | Clobber worktree's existing memory dir with a symlink | Forbidden. If `$WT_MEMORY` already exists, skip and tell user to migrate manually. |
 | Skip the symlink because "user didn't ask for it" | Always attempt. The whole point is zero-friction worktree start. Only skip when main memory missing or WT memory already there. |
 
@@ -250,7 +253,7 @@ After running this skill:
 2. Every `.env*` file from the project root (except `.env.example`/`.env.sample`/`.env.template`) is copied into each worktree
 3. `.worktrees/` is in `.gitignore`
 4. `git worktree list` shows all created worktrees
-5. For each worktree, `~/.claude/projects/<encoded-wt-path>/memory` is a symlink pointing to the main repo's memory dir — UNLESS main has no memory yet (first run) or the worktree's memory dir already existed (don't clobber). Encoding rule: replace BOTH `/` and `_` with `-`.
+5. For each worktree, `~/.claude/projects/<encoded-wt-path>/memory` is a symlink pointing to the main repo's memory dir — UNLESS main has no memory yet (first run) or the worktree's memory dir already existed (don't clobber). Encoding rule: replace EVERY non-`[A-Za-z0-9-]` codepoint with `-` (covers `/`, `.`, `_`, Korean, spaces, emoji — anything not ASCII alnum or hyphen).
 6. User got a summary report listing each worktree's path + per-file copy status + memory symlink status
 7. The user was NOT asked which env files to copy, NOR about the memory symlink
 
