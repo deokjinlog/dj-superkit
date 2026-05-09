@@ -1,221 +1,75 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: Use when implementation is complete and tests pass. Runs the test gate one final time and emits a single termination message; user manually decides merge / PR / keep / discard. (v1.1.14 슬림화 — AskUserQuestion 게이트 + boilerplate 제거)
 ---
 
-# Finishing a Development Branch
+# Finishing a Development Branch (v1.1.14 slim)
 
-## Overview
+implementation 완료 + 모든 테스트 통과 시점에 호출. 1인 개발자가 다음 행동 (merge / PR / keep / discard) 을 이미 알고 있다는 가정 하에, 추가 게이트는 두지 않고 **테스트 자동 실행 안전망 + 종료 메시지** 만 제공.
 
-Guide completion of development work by presenting clear options and handling chosen workflow.
+**Announce at start:** "I'm using the finishing-a-development-branch skill to verify tests then emit a termination summary."
 
-**Core principle:** Verify tests → Present options → Execute choice → Clean up.
+## When to Use
 
-**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
+- `executing-plans` / `js-super-subagent-driven-development` 가 모든 task 완료 후 자동 호출
+- 사용자가 명시적으로 마무리 단계 진입 시 호출
 
-## The Process
+## Process
 
-### Step 1: Verify Tests
+### Step 1 — Tests pass gate (필수 안전망)
 
-**Before presenting options, verify tests pass:**
-
-```bash
-# Run project's test suite
-npm test / cargo test / pytest / go test ./...
-```
-
-**If tests fail:**
-```
-Tests failing (<N> failures). Must fix before completing:
-
-[Show failures]
-
-Cannot proceed with merge/PR until tests pass.
-```
-
-Stop. Don't proceed to Step 2.
-
-**If tests pass:** Continue to Step 2.
-
-### Step 2: Determine Base Branch
+자동으로 프로젝트 표준 테스트 명령 실행:
 
 ```bash
-# Try common base branches
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+# Python (이 저장소 기본)
+source .venv/bin/activate && pytest -v
+
+# 다른 stack 의 경우 README / package.json scripts 확인
 ```
 
-Or ask: "This branch split from main - is that correct?"
+- 모든 테스트 PASS → Step 2 진행
+- FAIL 1건 이상 → **즉시 STOP**. 실패한 테스트 출력을 사용자에게 노출 + 한 줄 안내: "❌ 테스트 실패. 마무리 진행 안 함. 실패 원인 확인 후 다시 호출."
 
-### Step 3: Present Options
+이 단계는 **유일한 자동 게이트**. 깨진 코드가 main / PR 로 흘러 들어가는 것 방지.
 
-Present exactly these 4 options:
-
-**Gate #20 — Finish branch options**
-
-**Tool form (preferred)**
-
-Call `AskUserQuestion`:
-
-```json
-{
-  "question": "구현 완료. 다음 단계는?",
-  "context": "테스트 통과. 브랜치 통합 방식 선택.",
-  "choices": [
-    {"value": "merge", "label": "<base-branch> 로 로컬 머지"},
-    {"value": "pr", "label": "푸시 + PR 생성"},
-    {"value": "keep", "label": "브랜치 그대로 두기 (나중에 직접 처리)"},
-    {"value": "discard", "label": "이번 작업 폐기"}
-  ]
-}
-```
-
-**Prose fallback**
+### Step 2 — Termination Message (한 메시지, 게이트 X)
 
 ```
-Implementation complete. What would you like to do?
+✅ 모든 task 완료 + 테스트 통과.
+   - 변경 commit: <SHA list>
+   - RISK 트리거: <카테고리 카운트>
+   - 누락/초과: <list 또는 "없음">
 
-1. Merge back to <base-branch> locally
-2. Push and create a Pull Request
-3. Keep the branch as-is (I'll handle it later)
-4. Discard this work
-
-Which option?
+마무리하세요. (예: git checkout main && git merge <branch>, 또는 PR 생성, 또는 그대로 두기)
 ```
 
-**Don't add explanation** - keep options concise.
+→ AskUserQuestion 게이트 없음. 사용자가 직접 git/gh 명령 실행. boilerplate 자동 생성 X.
 
-### Step 4: Execute Choice
+## Worktree Cleanup (manual)
 
-#### Option 1: Merge Locally
+워크트리 정리는 자동 안 함 (마무리 시점이라고 자동 정리하면 사용자가 "그대로 두기" 의도일 때 자료 손실 가능). 사용자가 직접 처리:
 
 ```bash
-# Switch to base branch
-git checkout <base-branch>
-
-# Pull latest
-git pull
-
-# Merge feature branch
-git merge <feature-branch>
-
-# Verify tests on merged result
-<test command>
-
-# If tests pass
-git branch -d <feature-branch>
+git worktree remove <path>
 ```
 
-Then: Cleanup worktree (Step 5)
+## Anti-Patterns
 
-#### Option 2: Push and Create PR
+| Wrong | Right |
+|---|---|
+| AskUserQuestion 4-option 게이트 추가 | 게이트 X. 1인 개발자 마찰 회피. |
+| base branch 자동 추정 | 사용자가 본인 브랜치 알고 있음. 추정 시간 낭비. |
+| git/gh boilerplate 자동 생성 | 종료 메시지 한 줄 안내만. 명령 직접 실행. |
+| Step 1 테스트 실패 시 무시 | NEVER. 유일한 안전망. STOP 강제. |
 
-```bash
-# Push branch
-git push -u origin <feature-branch>
+## Why slim (v1.1.14)
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-## Summary
-<2-3 bullets of what changed>
+- 1인 개발 철학: 사전 verifying-spec + TDD + RISK + 변경이력으로 안전성 분산. 종료 게이트는 중복.
+- v1.1.9~12 게이트 합리화 흐름의 자연스러운 연장 (partial 제거 / fix→no / #12 복원 같은 마찰 정리).
+- discard 안전망 의도적 트레이드오프: 사용자가 직접 `git branch -D` 시 confirm 없음. 1인 개발자는 git 동작 알고 있음.
 
-## Test Plan
-- [ ] <verification steps>
-EOF
-)"
-```
+## Related Skills
 
-Then: Cleanup worktree (Step 5)
-
-#### Option 3: Keep As-Is
-
-Report: "Keeping branch <name>. Worktree preserved at <path>."
-
-**Don't cleanup worktree.**
-
-#### Option 4: Discard
-
-**Confirm first:**
-```
-This will permanently delete:
-- Branch <name>
-- All commits: <commit-list>
-- Worktree at <path>
-
-Type 'discard' to confirm.
-```
-
-Wait for exact confirmation.
-
-If confirmed:
-```bash
-git checkout <base-branch>
-git branch -D <feature-branch>
-```
-
-Then: Cleanup worktree (Step 5)
-
-### Step 5: Cleanup Worktree
-
-**For Options 1, 2, 4:**
-
-Check if in worktree:
-```bash
-git worktree list | grep $(git branch --show-current)
-```
-
-If yes:
-```bash
-git worktree remove <worktree-path>
-```
-
-**For Option 3:** Keep worktree.
-
-## Quick Reference
-
-| Option | Merge | Push | Keep Worktree | Cleanup Branch |
-|--------|-------|------|---------------|----------------|
-| 1. Merge locally | ✓ | - | - | ✓ |
-| 2. Create PR | - | ✓ | ✓ | - |
-| 3. Keep as-is | - | - | ✓ | - |
-| 4. Discard | - | - | - | ✓ (force) |
-
-## Common Mistakes
-
-**Skipping test verification**
-- **Problem:** Merge broken code, create failing PR
-- **Fix:** Always verify tests before offering options
-
-**Open-ended questions**
-- **Problem:** "What should I do next?" → ambiguous
-- **Fix:** Present exactly 4 structured options
-
-**Automatic worktree cleanup**
-- **Problem:** Remove worktree when might need it (Option 2, 3)
-- **Fix:** Only cleanup for Options 1 and 4
-
-**No confirmation for discard**
-- **Problem:** Accidentally delete work
-- **Fix:** Require typed "discard" confirmation
-
-## Red Flags
-
-**Never:**
-- Proceed with failing tests
-- Merge without verifying tests on result
-- Delete work without confirmation
-- Force-push without explicit request
-
-**Always:**
-- Verify tests before offering options
-- Present exactly 4 options
-- Get typed confirmation for Option 4
-- Clean up worktree for Options 1 & 4 only
-
-## Integration
-
-**Called by:**
-- **subagent-driven-development** (Step 7) - After all tasks complete
-- **executing-plans** (Step 5) - After all batches complete
-
-**Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
+- `executing-plans` — 인라인 모드 종료 시 호출
+- `js-super-subagent-driven-development` — 서브에이전트 모드 End-of-Run consolidator 끝 호출
+- `setting-up-worktrees` — 워크트리 생성 페어 (cleanup 은 manual)
