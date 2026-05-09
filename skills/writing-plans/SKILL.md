@@ -311,8 +311,8 @@ This summarizes the corrected order (matches Checklist + Process Flow above):
    - DO NOT split into "approve plan" → "approve verify report". One gate, one decision.
    - On `fix` → loop back to step 1 (re-verify → re-code-pretty → re-docs-pretty → re-show)
 
-3. On `yes` → invoke change-history (`[구현계획서-수정]` entry) → continue to Execution Handoff below.
-   On `fix` → re-decompose specific tasks, then re-run from "Self-review (internal)" — docs-pretty fires again before the next user gate.
+5. On `yes` → invoke change-history (`[구현계획서-수정]` entry) → continue to Execution Handoff below.
+   On `fix` → re-decompose specific tasks, then re-run from step 1 (verifying-spec) — code-pretty + docs-pretty re-fire on next loop (per-draft-state).
    On `partial` → ask which sections/tasks to revisit, then re-enter.
 
 ## Execution Handoff
