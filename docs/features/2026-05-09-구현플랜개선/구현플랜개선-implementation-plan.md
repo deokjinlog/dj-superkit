@@ -1354,3 +1354,14 @@ tech-design §6 R1~R7을 구체적 위치로 매핑:
 - **변경 전 코드**: §우려·해결 4행 표
 - **변경 후 코드**: §우려·해결 5행 표 + 새 [요구사항-수정] entry CH-20260509-014 (commit 27a6818 참조). Spec reviewer ✅ — 5행 byte-faithful, 변경이력 schema 준수.
 - **연관 항목**: CH-20260509-014 (PRD entry), CH-20260509-002 (개발방향, R7 D6 정의처)
+
+### [2026-05-09 16:56] [코드-수정] (task: Task 9 — 버전 1.1.5 → 1.1.6)
+- **id**: CH-20260509-016
+- **이유**: v1.1.6 릴리즈 manifest 동기화. plan은 3 manifest를 명시했으나 `scripts/bump-version.sh`가 6개 파일을 자동 동기화 (claude/codex/cursor + gemini extension + package.json) — scope 확장 OK.
+- **무엇이**: package.json, .claude-plugin/plugin.json, .claude-plugin/marketplace.json, .codex-plugin/plugin.json, .cursor-plugin/plugin.json, gemini-extension.json (6개 manifest 1.1.5 → 1.1.6)
+- **영향범위**: 플러그인 마켓 publish 시 사용자에게 v1.1.6으로 노출. 아직 git tag + push 전이라 unrelease 상태.
+- **위험 카테고리**: 없음 (3-checklist 0 — intentional version bump, public surface 변경이지만 의도된 행위)
+- **세부 변경 (6건)**: 모든 파일에서 `"version": "1.1.5"` → `"version": "1.1.6"` 1줄 (`없음` x6)
+- **변경 전 코드**: 6개 파일 `"version": "1.1.5"`
+- **변경 후 코드**: 6개 파일 `"version": "1.1.6"` (commit 9890bb1 참조). bump-version.sh가 audit 출력으로 다른 파일들의 v1.1.x 언급을 안내했으나 SKILL.md/README/HANDOFF는 의도적 in-text 언급이라 미변경.
+- **연관 항목**: CH-20260509-012 (Task 6 writing-plans, v1.1.6 정책의 1차 진앙지)
