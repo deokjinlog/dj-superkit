@@ -123,3 +123,21 @@ Before proposing changes to skill design, workflow philosophy, or architecture, 
 - footer가 영구적으로 빈 채로 남음 → 이후 사용자가 부분 수정을 요청할 때마다 docs-pretty가 재발동 (의도와 반대)
 
 요약: 이 두 skill의 룰 변경은 atomic하게 묶어 처리할 것.
+
+## writing-plans `**Model**:` 필드 ↔ js-super-subagent-driven-development 결합
+
+`writing-plans` 의 task block 신규 `**Model**:` 필드 (v1.1.14+) 는 `js-super-subagent-driven-development` 의 implementer dispatch model 결정에 직접 사용된다 (`skills/js-super-subagent-driven-development/SKILL.md` Plan Analysis & Wave Build 단계). 즉:
+
+- writing-plans 의 평가 룰 (haiku/sonnet/opus 분기) 변경 시 `js-super-subagent-driven-development` 의 dispatch 단계도 동시 수정
+- 한쪽만 건드리면 다음 회귀 발생: plan 작성 시 의도한 모델과 실제 dispatch 모델 불일치
+
+요약: 이 두 skill 의 `**Model**:` 룰 변경은 atomic 하게 묶어 처리할 것.
+
+## scripts/preflight.py ↔ 4 skill Pre-flight 결합
+
+v1.1.14+ 에서 `scripts/preflight.py` 가 docs-pretty / code-pretty / executing-plans / js-super-subagent-driven-development 4 skill 의 Pre-flight 검사를 deterministic 코드로 통합. 즉:
+
+- `scripts/preflight.py` 의 함수 시그니처 (반환값 형식 / exit code 룰) 변경 시 4 skill 본문의 bash one-liner 도 동시 수정
+- helper 의 매개변수 추가 시 모든 caller 의 호출 라인 동기화 필요
+
+요약: 이 helper 와 4 skill 의 Pre-flight 섹션 변경은 atomic 하게 묶어 처리할 것.
