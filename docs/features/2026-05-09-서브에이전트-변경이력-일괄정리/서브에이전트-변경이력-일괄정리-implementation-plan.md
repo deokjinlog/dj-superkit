@@ -1439,3 +1439,9 @@ Expected: ..., v1.1.6, v1.1.7
   - `README.md:34-39` (item 9/10/11 재번호) — 기존 item 8/9/10 → 9/10/11 으로 shift
 - **연관 commits**: (이번 commit SHA)
 - **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
+
+### [2026-05-09 19:50] [릴리즈]
+- **id**: CH-20260509-013
+- **이유**: v1.1.7 — subagent + 인라인 batch consolidator + [검증]/[릴리즈] entry types + buffer 인터럽트 복구
+- **무엇이**: v1.1.7 태그 (Task 11에서 박힘) + 6개 manifest 동기화 (package.json, .claude-plugin/{plugin,marketplace}.json, .codex-plugin/plugin.json, .cursor-plugin/plugin.json, gemini-extension.json)
+- **연관 commit**: (이번 commit SHA — bump-version.sh 자동 동기화), tag SHA는 Task 11 step 5 에서 박힐 예정
