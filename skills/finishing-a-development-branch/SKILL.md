@@ -50,6 +50,27 @@ Or ask: "This branch split from main - is that correct?"
 
 Present exactly these 4 options:
 
+**Gate #20 — Finish branch options**
+
+**Tool form (preferred)**
+
+Call `AskUserQuestion`:
+
+```json
+{
+  "question": "Implementation complete. What would you like to do?",
+  "context": "Tests passed. Choose how to integrate this branch.",
+  "choices": [
+    {"value": "merge", "label": "Merge back to <base-branch> locally"},
+    {"value": "pr", "label": "Push and create a Pull Request"},
+    {"value": "keep", "label": "Keep the branch as-is (handle later)"},
+    {"value": "discard", "label": "Discard this work"}
+  ]
+}
+```
+
+**Prose fallback**
+
 ```
 Implementation complete. What would you like to do?
 
