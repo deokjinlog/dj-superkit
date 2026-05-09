@@ -368,6 +368,39 @@ Mode-aware. PRD mode runs both checks; Socratic mode runs only the abstract scan
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
+## Asking the User a Gate Question (v1.1.8+)
+
+For any HARD-GATE asking enum/binary response (yes/no, yes/fix/partial, Inline/Subagent, Merge/PR/Cleanup), use the `AskUserQuestion` tool with this schema:
+
+```json
+{
+  "question": "<short question, e.g. 'Approve <slug>-tech-design.md and proceed?'>",
+  "context": "<optional 1-line context — what was just shown>",
+  "choices": [
+    {"value": "yes", "label": "Yes — approve and proceed"},
+    {"value": "fix", "label": "Fix — needs revision"},
+    {"value": "partial", "label": "Partial — revise specific sections"}
+  ]
+}
+```
+
+### Harness fallback
+
+When `AskUserQuestion` is unavailable (e.g. codex/cursor/gemini harness), fall back to a prose form:
+
+```markdown
+**Approve and proceed?** — `yes` / `fix` / `partial`
+```
+
+### Rule
+
+Always prefer the tool when available. Detect availability via the harness tool registry; on miss, fall back to the prose form. The skill body for downstream gates (brainstorming/designing-direction/writing-plans/finishing-a-development-branch) shows BOTH forms; the executor picks based on environment.
+
+### Why both forms
+
+- Tool form: harness renders a separate prompt UI, making the gate visually obvious and enforcing enum responses
+- Prose fallback: backwards-compatible with non-Claude-Code harnesses + provides human-readable inline reference
+
 ## Anti-Patterns
 
 | Wrong | Right |
