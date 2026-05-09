@@ -32,8 +32,7 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 6. **User reviews <slug>-requirements.md** — show the RAW (un-prettified) file, get approval (loop until OK; on changes → revise → re-show raw)
 7. **Invoke docs-pretty skill** — format-only pass (Sonnet subagent) on the APPROVED draft, AFTER user approval and BEFORE change-history. Single shot per feature (final-1회). Stops once first change-history entry is logged.
 8. **Invoke change-history skill** — append first `[요구사항-수정]` entry
-9. **Auto-proceed to designing-direction (v1.1.9+ — gate removed)** — change-history 직후 자동 invoke. 사용자 인터럽트 기회만 한 줄 notice 로 노출.
-10. **(v1.1.9+) Auto-invoke designing-direction via Skill tool, with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit with notice telling the user to run /design later.**
+9. **Auto-proceed to designing-direction (v1.1.9+ — gate removed)** — Right after the change-history entry is logged, auto-invoke `designing-direction` via the Skill tool with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit cleanly with notice telling the user to run /design later.
 
 If you find yourself skipping ahead, stop and create the missing task.
 

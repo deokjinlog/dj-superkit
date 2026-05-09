@@ -149,9 +149,9 @@ git diff $BASE_SHA HEAD -- <code 파일들>
 ```
 
 ```
-# (b) 3-checklist 적용 (메인 추론)
-risk-annotation 스킬 invoke
-→ 트리거 카테고리 set 확정
+# (b) Apply 3-checklist (main agent reasoning)
+Invoke risk-annotation skill
+→ Determine trigger category set
 ```
 
 ```
