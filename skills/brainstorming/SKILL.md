@@ -297,7 +297,7 @@ Branches:
 ### Step P3 — Run the agreed questions only
 
 For each section in the agreed plan:
-- ✅ 필수 → ask the full PRD question (배경/목적, 사용자 스토리, FR-N, NFR, 수용 기준 — same as before)
+- ✅ 필수 → ask the full PRD question for that section (full question shapes: 배경/목적, 사용자 스토리, FR-N, NFR, 수용 기준)
 - ➖ 간소 → ask "한 줄 요약?" only
 - ⏭ 스킵 → don't ask; write `<section>: 해당 없음 — <reason from rubric>` in the doc
 
@@ -384,7 +384,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 | Thought | Reality |
 |---|---|
 | "Just go straight to code, the user knows what they want" | Assumptions remain unvalidated. Run the questions. |
-| "Intent is obvious, summarize in one line" | Even obvious intent has gaps. Fill all six sections. |
+| "Intent is obvious, summarize in one line" | Even obvious intent has gaps. Run the agreed P2 plan instead of skipping it — fill ✅ 필수 fully, ➖ 간소 with a one-line, ⏭ 스킵 with `해당 없음 — <reason>`. Skipping the planning step is the failure mode, not slimming. |
 | "spec.md is fine, isn't it?" | js-superpowers separates PRD from technical spec. The file is <slug>-requirements.md, not spec.md. |
 
 ## After Save — Invoke change-history
