@@ -84,8 +84,8 @@ digraph per_task {
     "[main] 3-checklist on diff" [shape=box style=filled fillcolor=lightyellow];
     "RISK trigger?" [shape=diamond];
     "[main] Edit code: insert RISK comments\n+ follow-up commit" [shape=box style=filled fillcolor=lightyellow];
-    "[main] Read plan.md\n+ Edit plan.md (변경이력 append)" [shape=box style=filled fillcolor=lightyellow];
-    "[main] git add plan.md\n+ git commit -m \"[log] task N\"" [shape=box style=filled fillcolor=lightyellow];
+    "[main] Read manifest\n+ accumulator merge\n(footer 안 건드림)" [shape=box style=filled fillcolor=lightyellow];
+    "[end-of-run] consolidator\n→ 구현 요약 + footer 1회 + [log] all tasks" [shape=box style=filled fillcolor=lightcyan];
     "Mark task done in TodoWrite" [shape=box];
 
     "Snapshot BASE_SHA\n(git rev-parse HEAD)" -> "Dispatch implementer subagent\n(./implementer-prompt.md)";
@@ -101,10 +101,10 @@ digraph per_task {
     "[main] git diff BASE_SHA HEAD -- <code>" -> "[main] 3-checklist on diff";
     "[main] 3-checklist on diff" -> "RISK trigger?";
     "RISK trigger?" -> "[main] Edit code: insert RISK comments\n+ follow-up commit" [label="yes"];
-    "[main] Edit code: insert RISK comments\n+ follow-up commit" -> "[main] Read plan.md\n+ Edit plan.md (변경이력 append)";
-    "RISK trigger?" -> "[main] Read plan.md\n+ Edit plan.md (변경이력 append)" [label="no"];
-    "[main] Read plan.md\n+ Edit plan.md (변경이력 append)" -> "[main] git add plan.md\n+ git commit -m \"[log] task N\"";
-    "[main] git add plan.md\n+ git commit -m \"[log] task N\"" -> "Mark task done in TodoWrite";
+    "[main] Edit code: insert RISK comments\n+ follow-up commit" -> "[main] Read manifest\n+ accumulator merge\n(footer 안 건드림)";
+    "RISK trigger?" -> "[main] Read manifest\n+ accumulator merge\n(footer 안 건드림)" [label="no"];
+    "[main] Read manifest\n+ accumulator merge\n(footer 안 건드림)" -> "Mark task done in TodoWrite";
+    "Mark task done in TodoWrite" -> "[end-of-run] consolidator\n→ 구현 요약 + footer 1회 + [log] all tasks" [label="last task"];
 }
 ```
 
@@ -158,19 +158,100 @@ git commit -m "[risk-annotate] task N: <요약>"
 ```
 
 ```
-# (d) 변경이력 기록
-Read <slug>-implementation-plan.md  (1회)
-Edit <slug>-implementation-plan.md  (변경이력 [코드-수정] entry 1개 append)
+# (d) Buffer 무결성 + accumulator (v1.1.7 — footer 안 건드림)
+Read .js-super/changelog-buffer/<slug>/task-NN.md
+- validate manifest schema (task_id, status, files_changed, commits, ...)
+- if validation fails → ask implementer to re-emit OR raise STOP
+- merge into in-memory accumulator (kept until "모든 task 완료 후")
 
-git add <slug>-implementation-plan.md
-git commit -m "[log] task N: <요약>"
+(NOTE) per-task append + [log] commit은 v1.1.7 에서 제거됨.
+실제 footer 갱신과 단일 [log] commit은 §2 "모든 task 완료 후" 에서 1회 발화.
 ```
 
 #### 1-5. TodoWrite 체크 → 다음 task
 
-### 2. 모든 task 완료 후
-- `finishing-a-development-branch` 스킬 invoke
+### 2. 모든 task 완료 후 — End-of-Run Consolidator (v1.1.7+)
+
+이 단계는 1회만 발화. per-task append를 누적했다가 한꺼번에 정리.
+
+#### 2-1. 누적 accumulator + buffer 디렉토리 종합
+
+```bash
+# Validate every task has a manifest
+python -c "
+from pathlib import Path
+from scripts.changelog_buffer import list_buffer_files
+files = list_buffer_files(Path('.js-super/changelog-buffer/<slug>'))
+print(f'Found {len(files)} manifests; expected {len(plan_tasks)}')
+"
+```
+
+If counts mismatch → STOP, ask user (some task likely BLOCKED or interrupted).
+
+#### 2-2. "구현 요약" 메시지를 메인이 사용자에게 출력 (AC-2)
+
+```
+✅ <slug> 모든 task 완료. 구현 요약:
+- 계획서 N tasks → 실제 본 commit M개 (follow-up M' 포함)
+- RISK 트리거: side-effect=X / breaking=Y / race=Z (총 N건)
+- 누락: <list 또는 "없음">
+- 초과: <list 또는 "없음">  ← plan에 없던 follow-up commit 의 변경 범위
+- 코드 변경 0건 task: <task 번호 list>  ← [검증] entry로 별도 기록
+다음 단계: PR 작성 / finishing-a-development-branch
+```
+
+이 메시지가 plan ↔ 실제 코드 갭을 한 번에 노출 — 다음 단계(PR / merge) 진입의 자연스러운 게이트.
+
+#### 2-3. footer 1회 일괄 갱신
+
+```bash
+# Generate consolidated [코드-수정] (batch: tasks N..M) entry
+python -c "
+from pathlib import Path
+from scripts.changelog_buffer import consolidate_to_entry
+print(consolidate_to_entry(
+    manifests_dir=Path('.js-super/changelog-buffer/<slug>'),
+    ch_id='<from change_id helper>',
+    timestamp='<now>',
+))
+" >> .tmp-batch-entry.md
+```
+
+- Read `<slug>-implementation-plan.md` (1회)
+- Edit `<slug>-implementation-plan.md` (`.tmp-batch-entry.md` 내용을 footer 끝에 append)
+- 코드 변경 0건 task가 있으면 별도 `[검증]` entry도 함께 append (별도 CH-id)
+- `rm .tmp-batch-entry.md`
+
+#### 2-4. 단일 log commit + buffer cleanup
+
+```bash
+git add <slug>-implementation-plan.md
+git commit -m "[log] all tasks: <one-line summary>"
+rm -rf .js-super/changelog-buffer/<slug>
+```
+
+#### 2-5. finishing-a-development-branch invoke
+
 - 전체 테스트 재실행 + Merge / PR / 정리 옵션 제시
+
+### 3. 다음 세션 시작 시 stale buffer 검출
+
+세션 시작 시 (이 스킬 호출 직후, 0번 단계 직전) `.js-super/changelog-buffer/<slug>/` 잔존 검사:
+
+```bash
+python -c "
+from pathlib import Path
+from scripts.changelog_buffer import detect_stale_buffer
+stale = detect_stale_buffer(Path('.js-super/changelog-buffer'), '<slug>')
+print(stale or 'no stale buffer')
+"
+```
+
+발견되면 사용자에게 안내:
+> "이전 세션의 미정리 buffer 발견: `.js-super/changelog-buffer/<slug>/task-{N..M}.md`. 복구해서 consolidator 1회만 실행할까요? — yes / no"
+
+yes → §2-1~2-4 만 실행 (이전 task 본 commit은 이미 git에 있음 → 새 task 진입 안 함).
+no → 사용자가 직접 정리 또는 삭제.
 
 ## Commit History 모양 (예시)
 
@@ -214,18 +295,20 @@ git commit -m "[log] task N: <요약>"
 | Thought | Reality |
 |---|---|
 | "spec reviewer도 빼자, 사전 게이트가 있잖아" | 사전 게이트는 plan ↔ 상위 정합성, spec reviewer는 plan task ↔ 코드 정합성. 다른 시각. |
-| "후처리는 끝에 한꺼번에 하자" | task별 commit 격리가 깨지고 history 더러워짐. task당 즉시. |
+| "RISK 주석 follow-up commit도 끝에 모아 하자" | 아니. RISK 주석은 task별 즉시 (코드 인접 commit). batch 대상은 변경이력 footer 갱신뿐. |
 | "RISK 트리거 잡으면 implementer한테 재시켜야 하나" | 아니. 메인이 직접 Edit. implementer 재디스패치는 비용↑. |
 
 ## Acceptance
 
 A task is complete in this skill only when ALL hold:
-1. Implementer reported DONE
+1. Implementer reported DONE + buffer manifest written (`.js-super/changelog-buffer/<slug>/task-NN.md`)
 2. Spec reviewer reported ✅ (재리뷰 후라도 OK)
 3. 메인이 `git diff BASE_SHA HEAD` 추출 완료
 4. 3-checklist 결과가 결정됨 (트리거 0이거나 RISK 주석 + commit 완료)
-5. 변경이력 [코드-수정] entry append 완료 + commit
+5. 메인이 buffer manifest validate + accumulator 갱신 완료 (footer/commit 발화 없음 — §2 에서 1회 처리)
 6. TodoWrite 체크
+
+The whole run is complete only when §2 (End-of-Run Consolidator) emits the 구현 요약 message, appends consolidated entries, runs `[log] all tasks` commit, and removes the buffer directory.
 
 ## Related Skills
 

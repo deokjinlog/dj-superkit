@@ -1383,3 +1383,18 @@ Expected: ..., v1.1.6, v1.1.7
   - `skills/js-super-subagent-driven-development/implementer-prompt.md:139-188` — 신규 "## Changes Manifest (REQUIRED on DONE / DONE_WITH_CONCERNS)" 섹션 — Path / Python write 예제 / Field rules (risk_hints 추측 / line_range / BLOCKED 정책) / Why 설명
 - **연관 commits**: (이번 commit SHA)
 - **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
+
+### [2026-05-09 19:10] [코드-수정] (task: Task 6 — js-super-subagent SKILL.md consolidator)
+- **id**: CH-20260509-009
+- **이유**: 서브에이전트 모드 핵심 동작 변경 — per-task footer append → §2 End-of-Run Consolidator 1회 발화 (AC-1, AC-2 정수)
+- **무엇이**: `skills/js-super-subagent-driven-development/SKILL.md`
+- **영향범위**: 서브에이전트 모드 모든 실행. v1.1.6 plan 의 기존 변경이력 entry 호환은 유지(BC) — 신규 plan 부터 새 패턴 적용. Task 5 implementer-prompt 와 함께 동작.
+- **위험 카테고리**: breaking (R6 mitigation: 신규 plan 만 적용 — v1.1.6 plan 사후 재정리 안 함, PRD 범위 밖 명시 따름)
+- **세부 변경 (5건)**:
+  - `skills/.../SKILL.md:160-167` — §1-4-(d) "변경이력 기록" → "Buffer 무결성 + accumulator (footer 안 건드림)"
+  - `skills/.../SKILL.md:173-262` — §2 End-of-Run Consolidator 5단계 + §3 stale buffer recovery
+  - `skills/.../SKILL.md:87-88,104-107` — Per-task Sequence diagram 노란색 박스 라벨 갱신 (manifest accumulator + lightcyan end-of-run 노드)
+  - `skills/.../SKILL.md:300-311` — Acceptance §1 (manifest written) / §5 (accumulator 갱신) + run-level 완료 정의 추가
+  - `skills/.../SKILL.md:282-285` — Red Flags 표 행 2 ("후처리 끝에" → "RISK 주석은 task별 즉시, batch 대상은 footer 만")
+- **연관 commits**: (이번 commit SHA)
+- **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
