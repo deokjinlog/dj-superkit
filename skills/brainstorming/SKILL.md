@@ -183,6 +183,30 @@ If the user says "없음" or equivalent, §5 = the consolidated list as-is. If t
 - If changes requested, revise per feedback → loop back to step 6 (self-review again, then docs-pretty, then re-show)
 - On approval → continue to step 8
 
+#### Gate #8 — RAW 산출물 승인
+
+### Tool form (preferred)
+
+Call `AskUserQuestion`:
+
+```json
+{
+  "question": "Approve <slug>-requirements.md?",
+  "context": "RAW 산출물 검토 — 승인 시 docs-pretty + change-history 진행",
+  "choices": [
+    {"value": "yes", "label": "Yes — approve, proceed to docs-pretty + change-history"},
+    {"value": "fix", "label": "Fix — needs revision"},
+    {"value": "partial", "label": "Partial — revise specific sections"}
+  ]
+}
+```
+
+### Prose fallback
+
+When `AskUserQuestion` is unavailable, ask in prose:
+
+> Approve `<slug>-requirements.md`? — `yes` / `fix` / `partial`
+
 **8. Invoke change-history skill** (first entry: initial creation)
 - Tag: `[요구사항-수정]` (use the entry type even on first creation)
 - 이유: 신규 피처 brainstorming 결과
@@ -191,7 +215,25 @@ If the user says "없음" or equivalent, §5 = the consolidated list as-is. If t
 
 **9. Ask the user for approval to proceed (REQUIRED gate)**
 
-Output a short approval prompt. Default phrasing:
+Output a short approval prompt using the Gate Question pattern below.
+
+#### Gate #9 — proceed-to-designing-direction
+
+### Tool form (preferred)
+
+Call `AskUserQuestion`:
+
+```json
+{
+  "question": "✅ <slug>-requirements.md is finalized. Proceed to designing-direction (technical design)?",
+  "choices": [
+    {"value": "yes", "label": "Yes — auto-invoke /design"},
+    {"value": "no", "label": "No — exit, run /design later"}
+  ]
+}
+```
+
+### Prose fallback
 
 ```
 ✅ <slug>-requirements.md is finalized. Proceed to the designing-direction (technical design) stage now? — yes / no
