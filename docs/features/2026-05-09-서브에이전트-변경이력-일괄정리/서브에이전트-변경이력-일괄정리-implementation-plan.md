@@ -1426,3 +1426,16 @@ Expected: ..., v1.1.6, v1.1.7
   - `scripts/tests/test_changelog_buffer.py:88-96` — F1 fixture pytest (assertion: out.strip() == expected.strip())
 - **연관 commits**: (이번 commit SHA)
 - **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
+
+### [2026-05-09 19:40] [코드-수정] (task: Task 9 — README v1.1.7 wording)
+- **id**: CH-20260509-012
+- **이유**: 문서 정합성 — README의 워크플로우/거버넌스 섹션에 v1.1.7 batch consolidator + [검증]/[릴리즈] entry type 명시
+- **무엇이**: `README.md`
+- **영향범위**: 외부 사용자 문서. plan은 line 22 한 줄 갱신을 명시했으나 실제로는 (a) item 5 변경이력 wording 정밀화 (per-task slim) (b) 신규 item 8 추가 (c) 후속 item 8/9/10 → 9/10/11 재번호 — scope 확장 (사용자 catch 포인트가 될 수 있어 변경이력에 명시)
+- **위험 카테고리**: none (외부 사용자 문서, 코드/스킬 동작 영향 없음)
+- **세부 변경 (3건)**:
+  - `README.md:27` (item 5) — "변경 전·후 코드까지 보존" → mode 분기 명시 (per-task slim / single·none full)
+  - `README.md:30` (신규 item 8) — v1.1.7 batch consolidator + [검증]/[릴리즈] + buffer 인터럽트 복구
+  - `README.md:34-39` (item 9/10/11 재번호) — 기존 item 8/9/10 → 9/10/11 으로 shift
+- **연관 commits**: (이번 commit SHA)
+- **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
