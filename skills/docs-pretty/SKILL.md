@@ -1,6 +1,6 @@
 ---
 name: docs-pretty
-description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md — fires immediately AFTER the agent writes/rewrites the draft and BEFORE showing it to the user for review, so the user always sees a prettified version. Allowed multiple times during the review loop (each new draft prettified before display). STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches a Sonnet subagent that performs a strict format-only pass — improves headers, lists, tables, code blocks, spacing, and visual hierarchy WITHOUT changing any wording, ordering, or semantic content. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
+description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md. For requirements/tech-design — fires AFTER the user APPROVES the raw draft and BEFORE the change-history entry is logged (final-1회 timing). For implementation-plan — fires AFTER verifying-spec passes AND code-pretty completes AND BEFORE user review (per-draft-state timing; re-fires on each user-fix iteration). STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches a Sonnet subagent that performs a strict format-only pass — improves headers, lists, tables, code blocks, spacing, and visual hierarchy WITHOUT changing any wording, ordering, or semantic content. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
 ---
 
 # Docs Pretty (Pre-Review Formatting)
@@ -10,15 +10,19 @@ This skill prettifies a freshly written or rewritten feature MD just before the 
 **Announce at start:** "I'm using the docs-pretty skill to format `<file>` before the user reviews it."
 
 <HARD-GATE>
-This skill MUST be invoked BEFORE every user review of the doc during initial creation — i.e., right after the agent writes or rewrites the draft, before sending it to the user. It runs as many times as the review loop iterates (write → pretty → review → maybe revise → pretty → review again).
+Trigger timing depends on the doc type:
 
-It STOPS firing the moment the first `change-history` entry has been logged. That boundary marks the doc as "live" — from then on, no docs-pretty.
+- **requirements.md / tech-design.md (산문 위주)** — invoked AFTER the user APPROVES the raw draft, BEFORE the change-history entry is logged. Single shot per feature (final-1회).
+- **implementation-plan.md (코드 블록 다수)** — invoked AFTER verifying-spec passes AND code-pretty completes, BEFORE user review. Re-fires on each user-fix iteration (per-draft-state).
+
+In both cases it STOPS firing the moment the first `change-history` entry has been logged. That boundary marks the doc as "live" — from then on, no docs-pretty.
 
 Specifically, docs-pretty MUST NOT run on:
 - Any user-requested edit AFTER the first change-history entry exists (partial revisions, fixes, additions)
 - Any `change-history` entry append (the `## 변경이력` footer is the audit trail — never reformat it)
 - Any `change-propagation` cascade
 - Any in-task code-edit logging during `/execute-plan`
+- requirements.md / tech-design.md BEFORE user approval (changed in v1.1.6 — was "before user review" in v1.1.5 and earlier)
 
 If you are unsure whether this is still in the "initial creation phase" — STOP. Look for an existing `## 변경이력` footer with one or more entries. If ANY entry exists, this is NOT initial creation. Skip this skill.
 </HARD-GATE>
@@ -27,10 +31,11 @@ If you are unsure whether this is still in the "initial creation phase" — STOP
 
 | Trigger (yes) | Anti-trigger (no) |
 |---|---|
-| `brainstorming` just wrote/rewrote `<slug>-requirements.md`, about to show to user, no `## 변경이력` entries yet | User asked to update FR-3 wording in an already-live requirements.md (i.e., one with change-history entries) |
-| `designing-direction` just wrote/rewrote `<slug>-tech-design.md`, about to show to user, no `## 변경이력` entries yet | `change-propagation` is cascading edits across MDs |
-| `writing-plans` just wrote/rewrote `<slug>-implementation-plan.md`, about to show to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/execute-plan` |
-| User requested revision in the review loop, agent rewrote, about to re-show — fire again | First change-history entry has been logged — doc is now "live", do NOT fire |
+| `brainstorming` just got user APPROVAL on the raw `<slug>-requirements.md` draft, about to log change-history, no entries yet | User asked to update FR-3 wording in an already-live requirements.md (one with change-history entries) |
+| `designing-direction` just got user APPROVAL on the raw `<slug>-tech-design.md` draft + verify report, about to log change-history, no entries yet | `change-propagation` is cascading edits across MDs |
+| `writing-plans` just completed verifying-spec + code-pretty on `<slug>-implementation-plan.md`, about to show prettified plan to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/execute-plan` |
+| `writing-plans` user requested revision, plan re-written, verifying-spec re-ran, code-pretty re-ran — fire docs-pretty again | First change-history entry has been logged — doc is now "live", do NOT fire |
+| `writing-plans` user requested revision on a non-code section after final approval (rare) | requirements.md / tech-design.md BEFORE user approval — wait for approval first |
 
 ## Why a Subagent (and which model)
 
