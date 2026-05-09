@@ -183,9 +183,9 @@ If the user says "없음" or equivalent, §5 = the consolidated list as-is. If t
 - If changes requested, revise per feedback → loop back to step 6 (self-review again, then docs-pretty, then re-show)
 - On approval → continue to step 8
 
-#### Gate #8 — RAW 산출물 승인
+**Gate #8 — RAW 산출물 승인**
 
-### Tool form (preferred)
+**Tool form (preferred)**
 
 Call `AskUserQuestion`:
 
@@ -201,7 +201,7 @@ Call `AskUserQuestion`:
 }
 ```
 
-### Prose fallback
+**Prose fallback**
 
 When `AskUserQuestion` is unavailable, ask in prose:
 
@@ -217,9 +217,9 @@ When `AskUserQuestion` is unavailable, ask in prose:
 
 Output a short approval prompt using the Gate Question pattern below.
 
-#### Gate #9 — proceed-to-designing-direction
+**Gate #9 — proceed-to-designing-direction**
 
-### Tool form (preferred)
+**Tool form (preferred)**
 
 Call `AskUserQuestion`:
 
@@ -233,7 +233,7 @@ Call `AskUserQuestion`:
 }
 ```
 
-### Prose fallback
+**Prose fallback**
 
 ```
 ✅ <slug>-requirements.md is finalized. Proceed to the designing-direction (technical design) stage now? — yes / no
@@ -253,7 +253,7 @@ Then wait for the user's reply.
 
 After the slug is set (step 2), ask the user to pick a mode. Use the standard Gate Question pattern (see "Asking the User a Gate Question" section).
 
-### Tool form (preferred)
+**Tool form (preferred)**
 
 Call `AskUserQuestion` with:
 
@@ -268,7 +268,7 @@ Call `AskUserQuestion` with:
 }
 ```
 
-### Prose fallback
+**Prose fallback**
 
 When `AskUserQuestion` is unavailable:
 
