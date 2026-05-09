@@ -30,7 +30,7 @@ digraph verify_flow {
     "C. Code impact analysis" [shape=box];
     "Compose 4-axis report" [shape=box];
     "Present to user" [shape=diamond];
-    "User decision:\nproceed / fix" [shape=diamond];
+    "User decision:\nproceed / no" [shape=diamond];
     "Re-enter prior skill\n(designing-direction or writing-plans)" [shape=box];
     "Proceed" [shape=doublecircle];
 
@@ -40,8 +40,8 @@ digraph verify_flow {
     "C. Code impact analysis" -> "Compose 4-axis report";
     "Compose 4-axis report" -> "Present to user";
     "Present to user" -> "User decision:\nproceed / fix";
-    "User decision:\nproceed / fix" -> "Re-enter prior skill\n(designing-direction or writing-plans)" [label="fix"];
-    "User decision:\nproceed / fix" -> "Proceed" [label="proceed"];
+    "User decision:\nproceed / no" -> "Re-enter prior skill\n(designing-direction or writing-plans)" [label="no"];
+    "User decision:\nproceed / no" -> "Proceed" [label="proceed"];
 }
 ```
 

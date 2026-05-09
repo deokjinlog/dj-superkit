@@ -202,7 +202,7 @@ digraph plan_flow {
     "Run verifying-spec FIRST" -> "Invoke code-pretty\n(pre-review, Sonnet subagent)";
     "Invoke code-pretty\n(pre-review, Sonnet subagent)" -> "Invoke docs-pretty\n(pre-review, Sonnet subagent)";
     "Invoke docs-pretty\n(pre-review, Sonnet subagent)" -> "Single combined approval gate\n(plan + verify report + code-pretty diff)";
-    "Single combined approval gate\n(plan + verify report + code-pretty diff)" -> "Self-review (internal)" [label="fix — re-verify + re-prettify"];
+    "Single combined approval gate\n(plan + verify report + code-pretty diff)" -> "Self-review (internal)" [label="no — re-verify + re-prettify"];
     "Single combined approval gate\n(plan + verify report + code-pretty diff)" -> "Invoke change-history" [label="approve"];
     "Invoke change-history" -> "Hand off to /execute-plan";
 }
@@ -319,19 +319,19 @@ This summarizes the corrected order (matches Checklist + Process Flow above):
        "context": "plan + 4축 보고서 한 메시지로 노출됨",
        "choices": [
          {"value": "yes", "label": "예 — 승인하고 change-history + 실행 모드 선택"},
-         {"value": "fix", "label": "수정 필요 — 메인이 follow-up 으로 어느 task/섹션 수정할지 묻기"}
+         {"value": "no", "label": "아니오 — 사용자 피드백 받아 수정 후 재제시"}
        ]
      }
      ```
 
      **Prose fallback**
 
-     > Approve `<slug>-implementation-plan.md` and proceed? — `yes` / `fix`
+     > Approve `<slug>-implementation-plan.md` and proceed? — `yes` / `no`
    - DO NOT split into "approve plan" → "approve verify report". One gate, one decision.
-   - On `fix` → 메인이 "어느 task/section 수정?" follow-up → 해당 task 재분해 후 step 1 (verifying-spec) 부터 재실행 (code-pretty + docs-pretty per-draft-state 자동 재발화).
+   - On `no` → 피드백 받아 수정 후 재제시. anchor 질문 강제 X.
 
 5. On `yes` → invoke change-history (`[구현계획서-수정]` entry) → continue to Execution Handoff below.
-   On `fix` → 메인이 "어느 task/section 수정?" follow-up → 해당 task 재분해 후 step 1 (verifying-spec) 부터 재실행.
+   On `no` → 피드백 받아 수정 후 재제시. anchor 질문 강제 X.
 
 ## Execution Handoff
 

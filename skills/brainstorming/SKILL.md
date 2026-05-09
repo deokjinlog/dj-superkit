@@ -194,7 +194,7 @@ Call `AskUserQuestion`:
   "context": "RAW 산출물 검토 — 승인 시 docs-pretty + change-history 진행",
   "choices": [
     {"value": "yes", "label": "예 — 승인하고 docs-pretty + change-history 진행"},
-    {"value": "fix", "label": "수정 필요 — 메인이 follow-up 으로 어느 부분 수정할지 묻기"}
+    {"value": "no", "label": "아니오 — 사용자 피드백 받아 수정 후 재제시"}
   ]
 }
 ```
@@ -203,7 +203,7 @@ Call `AskUserQuestion`:
 
 When `AskUserQuestion` is unavailable, ask in prose:
 
-> Approve `<slug>-requirements.md`? — `yes` / `fix`
+> Approve `<slug>-requirements.md`? — `yes` / `no`
 
 **8. Invoke change-history skill** (first entry: initial creation)
 - Tag: `[요구사항-수정]` (use the entry type even on first creation)
@@ -215,7 +215,7 @@ When `AskUserQuestion` is unavailable, ask in prose:
 
 After change-history entry is logged, **automatically invoke** the `designing-direction` skill (or `js-super:designing-direction` depending on harness namespace). NO user gate here.
 
-Rationale: gate #8 (RAW 산출물 승인) already captured the user's intent to move forward. A separate "proceed to /design?" gate just adds friction — if the user wanted to stop, they'd have answered `fix` at gate #8 or exited. Output a one-line notice `ℹ️ Auto-proceeding to /design (v1.1.9 — separate gate removed). Type "stop" to abort.` so the user has a chance to interrupt mid-transition if they really want to pause.
+Rationale: gate #8 (RAW 산출물 승인) already captured the user's intent to move forward. A separate "proceed to /design?" gate just adds friction — if the user wanted to stop, they'd have answered `no` at gate #8 or exited. Output a one-line notice `ℹ️ Auto-proceeding to /design (v1.1.9 — separate gate removed). Type "stop" to abort.` so the user has a chance to interrupt mid-transition if they really want to pause.
 
 If the user explicitly types "stop"/"멈춰"/"잠깐" after the notice, exit cleanly with `ℹ️ OK. Run /design later when ready.` Otherwise auto-invoke.
 
@@ -401,7 +401,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 
 ## Asking the User a Gate Question (v1.1.8+)
 
-For any HARD-GATE asking enum/binary response (yes/no, yes/fix, Inline/Subagent, Merge/PR/Cleanup), use the `AskUserQuestion` tool with this schema:
+For any HARD-GATE asking enum/binary response (yes/no, Inline/Subagent, Merge/PR/Cleanup), use the `AskUserQuestion` tool with this schema:
 
 ```json
 {
@@ -409,21 +409,21 @@ For any HARD-GATE asking enum/binary response (yes/no, yes/fix, Inline/Subagent,
   "context": "<optional 1-line context — what was just shown>",
   "choices": [
     {"value": "yes", "label": "예 — 승인하고 다음 단계 진행"},
-    {"value": "fix", "label": "수정 필요 — 메인이 follow-up 으로 어느 부분 수정할지 묻기"}
+    {"value": "no", "label": "아니오 — 사용자 피드백 받아 수정 후 재제시"}
   ]
 }
 ```
 
-### Why no `partial` choice (v1.1.9+)
+### Why simple `yes` / `no` (v1.1.10+)
 
-Earlier drafts had a separate `partial` choice ("revise specific sections"). In practice it was indistinguishable from `fix` — both led to a follow-up "어디 고칠까요?" question and partial-scope revision. Schema simplified to 2 choices: `yes` or `fix`. The "어느 섹션?" follow-up is implicit in `fix`.
+Earlier drafts had `partial` (v1.1.8) → simplified to `yes` / `fix` (v1.1.9) → simplified to `yes` / `no` (v1.1.10+). Each step removed semantic ambiguity: `partial` was indistinguishable from `fix`; `fix` felt awkward in Korean conversation. `no` is the cleanest binary — meaning "don't approve, sends user feedback for revision". Per upstream-original brainstorming pattern, do NOT force a "어디 고칠까?" anchor question — let the user volunteer feedback freely.
 
 ### Harness fallback
 
 When `AskUserQuestion` is unavailable (e.g. codex/cursor/gemini harness), fall back to a prose form:
 
 ```markdown
-**Approve and proceed?** — `yes` / `fix`
+**Approve and proceed?** — `yes` / `no`
 ```
 
 ### Rule

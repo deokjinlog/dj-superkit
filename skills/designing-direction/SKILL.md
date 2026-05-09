@@ -20,7 +20,7 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 3. **Run technical design questions** — architecture (2-3 candidates) → impacted components → data model → external interfaces → key decisions + alternatives → risk candidates → test strategy
 4. **Self-review (internal)** — FR mapping coverage, alternatives present, risk categorization (no user prompt yet)
 5. **Run verifying-spec FIRST** (with Tolerance for missing skill) — main agent runs A+C verification, produces 4-axis report internally
-6. **Single combined approval gate** — show the full RAW `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / fix". On `fix` → revise → loop back to step 4 (Self-review → re-verify → re-show RAW).
+6. **Single combined approval gate** — show the full RAW `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / no". On `no` → revise → loop back to step 4 (Self-review → re-verify → re-show RAW).
 7. **Invoke docs-pretty skill** — format pass on the APPROVED draft (Sonnet subagent). Runs AFTER user approval and BEFORE change-history. Single shot per feature (final-1회). Stops once first change-history entry is logged.
 8. **Invoke change-history skill** — append first `[개발방향-수정]` entry
 9. **Auto-proceed to writing-plans (v1.1.9+ — gate removed)** — change-history 직후 자동 invoke. 사용자 인터럽트 기회만 한 줄 notice 로 노출.
@@ -88,7 +88,7 @@ digraph design_flow {
     "Q: test strategy?" -> "Self-review (internal)";
     "Self-review (internal)" -> "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)";
     "Run verifying-spec FIRST\n(요구사항 ↔ 개발방향)" -> "Single combined approval gate\n(RAW doc + verify report)";
-    "Single combined approval gate\n(RAW doc + verify report)" -> "Self-review (internal)" [label="fix — re-show raw"];
+    "Single combined approval gate\n(RAW doc + verify report)" -> "Self-review (internal)" [label="no — re-show raw"];
     "Single combined approval gate\n(RAW doc + verify report)" -> "Invoke docs-pretty\n(post-approval, Sonnet subagent, 1회)" [label="approve"];
     "Invoke docs-pretty\n(post-approval, Sonnet subagent, 1회)" -> "Invoke change-history";
     "Invoke change-history" -> "Auto-invoke /write-plan (no gate, v1.1.9+)";
@@ -142,7 +142,7 @@ Call `AskUserQuestion`:
   "context": "doc + 4축 보고서 한 메시지로 노출됨",
   "choices": [
     {"value": "yes", "label": "예 — 승인하고 change-history + 다음 단계 진행"},
-    {"value": "fix", "label": "수정 필요 — 메인이 follow-up 으로 어느 부분 수정할지 묻기"}
+    {"value": "no", "label": "아니오 — 사용자 피드백 받아 수정 후 재제시"}
   ]
 }
 ```
@@ -151,10 +151,10 @@ Call `AskUserQuestion`:
 
 When `AskUserQuestion` is unavailable, ask once:
 
-> Approve `<slug>-tech-design.md` and proceed? — `yes` / `fix`
+> Approve `<slug>-tech-design.md` and proceed? — `yes` / `no`
 
 - On `yes` → continue to step 7 (docs-pretty)
-- On `fix` → 메인이 "어느 섹션 수정?" follow-up 으로 묻고, 해당 섹션만 재진입 → step 4 (Self-review → re-verify → re-show RAW) 부터 재실행
+- On `no` → 피드백 받아 수정 후 재제시. anchor 질문 강제 X.
 
 **7. Invoke docs-pretty skill** (post-approval, final-1회 formatting)
 - Runs AFTER the user APPROVES, BEFORE change-history is logged
@@ -236,7 +236,7 @@ This summarizes the corrected order (matches Process detail steps 5-9 above):
    **Gate #11 — doc + verify 결합 승인** — see Tool form + Prose fallback above.
 
 3. On `yes` → invoke change-history (`[개발방향-수정]` entry) → continue to step 4.
-   On `fix` → 메인이 "어느 섹션 수정?" follow-up → 해당 섹션 재진입, "Self-review (internal)" 부터 재실행 — re-show RAW; docs-pretty stays gated until final approval.
+   On `no` → 피드백 받아 수정 후 재제시. anchor 질문 강제 X.
 
 4. **Auto-proceed to writing-plans** (v1.1.9+ — separate gate removed):
 
