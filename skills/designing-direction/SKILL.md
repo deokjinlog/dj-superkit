@@ -23,8 +23,8 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 6. **Single combined approval gate** — show the full RAW `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / no". On `no` → revise → loop back to step 4 (Self-review → re-verify → re-show RAW).
 7. **Invoke docs-pretty skill** — format pass on the APPROVED draft (Sonnet subagent). Runs AFTER user approval and BEFORE change-history. Single shot per feature (final-1회). Stops once first change-history entry is logged.
 8. **Invoke change-history skill** — append first `[개발방향-수정]` entry
-9. **Auto-proceed to writing-plans (v1.1.9+ — gate removed)** — change-history 직후 자동 invoke. 사용자 인터럽트 기회만 한 줄 notice 로 노출.
-10. **(v1.1.9+) Auto-invoke writing-plans via Skill tool, with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit with notice telling the user to run /write-plan later.**
+9. **Ask proceed-to-writing-plans gate (v1.1.12+ — restored)** — change-history 직후 사용자에게 명시적 yes/no 게이트.
+10. **On approval → invoke writing-plans via Skill tool. On hold → exit with notice telling the user to run /write-plan later.**
 
 If you find yourself skipping ahead, stop and create the missing task.
 
@@ -73,7 +73,7 @@ digraph design_flow {
     "Single combined approval gate\n(RAW doc + verify report)" [shape=diamond];
     "Invoke docs-pretty\n(post-approval, Sonnet subagent, 1회)" [shape=box];
     "Invoke change-history" [shape=box];
-    "Auto-invoke /write-plan (no gate, v1.1.9+)" [shape=box];
+    "Ask: proceed to writing-plans? (Gate #12, v1.1.12+ restored)" [shape=diamond];
     "Auto-invoke writing-plans skill" [shape=doublecircle];
     "Exit: tell user to run /write-plan later" [shape=oval];
 
@@ -91,8 +91,9 @@ digraph design_flow {
     "Single combined approval gate\n(RAW doc + verify report)" -> "Self-review (internal)" [label="no — re-show raw"];
     "Single combined approval gate\n(RAW doc + verify report)" -> "Invoke docs-pretty\n(post-approval, Sonnet subagent, 1회)" [label="approve"];
     "Invoke docs-pretty\n(post-approval, Sonnet subagent, 1회)" -> "Invoke change-history";
-    "Invoke change-history" -> "Auto-invoke /write-plan (no gate, v1.1.9+)";
-    "Auto-invoke /write-plan (no gate, v1.1.9+)" -> "Auto-invoke writing-plans skill";
+    "Invoke change-history" -> "Ask: proceed to writing-plans? (Gate #12, v1.1.12+ restored)";
+    "Ask: proceed to writing-plans? (Gate #12, v1.1.12+ restored)" -> "Auto-invoke writing-plans skill" [label="yes"];
+    "Ask: proceed to writing-plans? (Gate #12, v1.1.12+ restored)" -> "Exit: tell user to run /write-plan later" [label="no"];
 }
 ```
 
@@ -165,13 +166,35 @@ When `AskUserQuestion` is unavailable, ask once:
 **8. Invoke change-history**
 - Entry: `[개발방향-수정] CH-YYYYMMDD-NNN / 이유: 신규 기술 설계 / 무엇이: <slug>-tech-design.md 전체 / 영향범위: 없음 (최초 생성)`
 
-**9. Auto-proceed to writing-plans (v1.1.9+ — no gate)**
+**9. Ask the proceed-to-writing-plans gate (v1.1.12+ — restored)**
 
-After change-history entry is logged, **automatically invoke** the `writing-plans` skill via Skill tool. NO user gate here.
+After change-history is logged, ask the user explicitly. Tech-design → implementation-plan 전환은 의사결정 깊이가 다른 단계 (구현 계획에 commit 하는 시점) 라서 자동승인보다 명시적 게이트가 안전하다는 사용자 신고 반영.
 
-Rationale: gate #11 (doc + verify 결합 승인) already captured the user's intent to move forward. A separate "proceed to /write-plan?" gate just adds friction. Output a one-line notice `ℹ️ Auto-proceeding to /write-plan (v1.1.9 — separate gate removed). Type "stop" to abort.` so the user has a chance to interrupt.
+**Gate #12 — proceed-to-writing-plans**
 
-If the user explicitly types "stop"/"멈춰"/"잠깐" after the notice, exit cleanly with `ℹ️ OK. Run /write-plan later when ready.` Otherwise auto-invoke.
+**Tool form (preferred)**
+
+Call `AskUserQuestion`:
+
+```json
+{
+  "question": "✅ <slug>-tech-design.md 확정. 다음 단계 (writing-plans, 구현계획서) 로 진행?",
+  "choices": [
+    {"value": "yes", "label": "예 — /write-plan 자동 invoke"},
+    {"value": "no", "label": "아니오 — 종료, 나중에 /write-plan 수동 실행"}
+  ]
+}
+```
+
+**Prose fallback**
+
+```
+✅ <slug>-tech-design.md 확정. 다음 단계 (writing-plans, 구현계획서) 로 진행? — yes / no
+```
+
+- The user may reply in any language; parse intent.
+- On `yes` → invoke the `writing-plans` skill via Skill tool. NEVER cross without approval.
+- On `no` → emit `ℹ️ OK. /write-plan 나중에 직접 실행.` and stop.
 
 ## Self-Review
 
@@ -238,9 +261,11 @@ This summarizes the corrected order (matches Process detail steps 5-9 above):
 3. On `yes` → invoke change-history (`[개발방향-수정]` entry) → continue to step 4.
    On `no` → 피드백 받아 수정 후 재제시. anchor 질문 강제 X.
 
-4. **Auto-proceed to writing-plans** (v1.1.9+ — separate gate removed):
+4. **Proceed-to-writing-plans gate** (v1.1.12+ restored):
 
-   After change-history entry is logged, output `ℹ️ Auto-proceeding to /write-plan (v1.1.9 — separate gate removed). Type "stop" to abort.` and immediately invoke the `writing-plans` skill via Skill tool. If the user explicitly types "stop"/"멈춰"/"잠깐", exit cleanly with `ℹ️ OK. Run /write-plan later when ready.`
+   **Gate #12 — proceed-to-writing-plans** — see Tool form + Prose fallback above (step 9 in the main Process detail).
+
+   On `yes` → invoke writing-plans via Skill tool. On `no` → emit `ℹ️ OK. /write-plan 나중에 직접 실행.` and stop.
 
 ## Related Skills
 
