@@ -141,3 +141,12 @@ v1.1.14+ 에서 `scripts/preflight.py` 가 docs-pretty / code-pretty / executing
 - helper 의 매개변수 추가 시 모든 caller 의 호출 라인 동기화 필요
 
 요약: 이 helper 와 4 skill 의 Pre-flight 섹션 변경은 atomic 하게 묶어 처리할 것.
+
+### v1.1.15+ — `human_reason` 필드 + 사용자 게이트 결합
+
+`scripts/preflight.py` 의 `PreflightResult.human_reason` 필드 추가 (v1.1.15+) 와 4 skill 의 user-gate boilerplate (FR-4) 는 결합되어 있다:
+
+- helper 의 `human_reason` 필드 시그니처 변경 시 4 skill bash one-liner 의 `result.human_reason` 출력 표현식도 동시 수정
+- user-gate boilerplate 의 AskUserQuestion choices 변경 시 4 skill 동시 적용 (한 군데만 누락 시 사용자 마찰 일관성 깨짐)
+
+요약: helper schema + user-gate boilerplate 변경은 atomic 하게 묶어 처리할 것. 5 파일 (preflight.py + 4 skill SKILL.md) 동시 push.
