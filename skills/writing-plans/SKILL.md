@@ -290,6 +290,37 @@ After writing the complete plan, look at it with fresh eyes:
 
 If you find issues, fix them inline. If you find a spec requirement with no task, add the task.
 
+### plan_byte_check helper (v2.0.0+)
+
+After all tasks are written and self-review checks pass, run the byte-equal
+verifier:
+
+```bash
+source .venv/bin/activate && python -c "
+import sys
+from pathlib import Path
+from scripts.plan_byte_check import verify_plan_block_byte_equal
+mismatches = verify_plan_block_byte_equal(
+    Path('docs/features/<date>-<slug>/<slug>-implementation-plan.md'),
+    Path('.'),
+)
+if mismatches:
+    for m in mismatches:
+        print(f'MISMATCH #{m.block_index} — {m.reason}')
+        print(f'  file: {m.file_path}')
+    sys.exit(1)
+print('plan_byte_check ✅ all blocks byte-equal')
+sys.exit(0)
+" 2>&1
+```
+
+If exit 1 (mismatches found):
+- Mismatch list shown to user.
+- Plan is NOT saved. Fix the `**원본**` blocks (they must be byte-identical
+  to current file content) and re-run the helper.
+- This enforces v2.0.0 byte-copy implementer's precondition: it will
+  fail-fast on mismatch with no LLM fuzzy match fallback.
+
 ## Anti-Patterns
 
 | Wrong | Right |
