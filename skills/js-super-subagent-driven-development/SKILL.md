@@ -50,7 +50,7 @@ digraph when_to_use {
 
 `/execute-plan` 진입 시 mode-check (이미 `executing-plans`에 정의됨)에서 `commit_policy != per-task` 면 이 스킬은 후보에서 제외.
 
-## Entry Guard (v1.1.14+)
+## Entry Guard (v1.1.15+ user-gate)
 
 이 skill 호출 시 메인은 즉시 helper 검사:
 
@@ -60,15 +60,20 @@ import sys
 from pathlib import Path
 from scripts.preflight import subagent_task_entry_check
 result = subagent_task_entry_check(Path('<PLAN_PATH>'))
-print(f'ok={result.ok} reason={result.reason}')
+print(f'ok={result.ok} reason={result.reason} | {result.human_reason}')
 sys.exit(0 if result.ok else 1)
-"
+" 2>&1
 ```
 
-- exit code 0 → Plan Analysis 단계 진입
-- exit code 1 → 한 줄 안내 후 즉시 종료. 예: `❌ <reason>. /write-plan 먼저 실행하세요.`
+**exit code 분기 (v1.1.15 user-gate)**:
 
-이유: helper 가 (a) plan 존재, (b) `commit_policy: per-task` 두 조건 모두 검사 — 단일 호출. plan 없는 dispatch 또는 `single`/`none` mode plan 모두 deterministic 거부.
+- **exit 0** → Plan Analysis 단계 진입.
+- **exit 1** (semantic fail — plan 없음 또는 `commit_policy ≠ per-task`) → `human_reason` 노출 후 `AskUserQuestion` 게이트:
+  - `"수정 후 재시도"` (사용자가 plan 작성 / commit_policy 변경 후 메인 재호출) / `"강제 진행 (위험)"` (단, 매우 위험 — plan 없으면 Wave Build 자체 불가, 메인이 한 번 더 안내) / `"스킵 (이번만)"` (subagent 모드 포기, executing-plans inline 으로 fallback 제안).
+- **exit ≠ 0,1** (invocation 실패) → stderr 노출 + `AskUserQuestion` 게이트:
+  - `"직접 디버깅"` / `"skill 단계 스킵"` (inline fallback).
+
+이유: helper 가 (a) plan 존재, (b) `commit_policy: per-task` 두 조건 모두 검사 — 단일 호출. plan 없는 dispatch 또는 `single`/`none` mode plan 모두 deterministic 거부 + 사용자 확인.
 
 ## Plan Analysis & Wave Build (v1.1.14+, 1회)
 
