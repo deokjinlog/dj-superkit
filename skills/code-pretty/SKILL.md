@@ -41,7 +41,7 @@ Do NOT use Opus (overkill) or Haiku (rephrasing risk).
 
 ## Process
 
-### Step 1 — Pre-flight check (v1.1.14+ deterministic)
+### Step 1 — Pre-flight check (v1.1.15+ user-gate)
 
 Before dispatching, run the deterministic helper:
 
@@ -51,13 +51,18 @@ import sys
 from pathlib import Path
 from scripts.preflight import code_pretty_check
 result = code_pretty_check(Path('<TARGET>'))
-print(f'ok={result.ok} reason={result.reason}')
+print(f'ok={result.ok} reason={result.reason} | {result.human_reason}')
 sys.exit(0 if result.ok else 1)
-"
+" 2>&1
 ```
 
-- exit code 0 → 검증 통과, Step 2 dispatch 진행
-- exit code 1 → reason 노출 후 즉시 종료
+**exit code 분기 (v1.1.15 user-gate)**:
+
+- **exit 0** → 검증 통과, Step 2 dispatch 진행.
+- **exit 1** (helper semantic fail) → `human_reason` 노출 후 `AskUserQuestion` 게이트:
+  - `"수정 후 재시도"` / `"강제 진행 (위험)"` (메인이 `⚠️ preflight 우회. <reason> 무시.` 한 줄 안내) / `"스킵 (이번만)"` (caller 에게 abnormal return).
+- **exit ≠ 0,1** (invocation 실패) → stderr 전문 + `AskUserQuestion` 게이트:
+  - `"직접 디버깅"` / `"skill 단계 스킵"`.
 
 **Caller 책임 (helper 가 검증 X)**: verifying-spec 가 직전에 통과했는지 — 이건 writing-plans 흐름의 책임이고 helper 가 검사할 수 없음. 호출자가 보장.
 
