@@ -1,7 +1,7 @@
 {
   "name": "js-super",
   "description": "한국형 spec-driven 워크플로우 (요구사항 → 개발방향 → 구현계획서) + 변경이력 + 위험 주석 + API 자동테스트. superpowers 5.0.7 기반.",
-  "version": "1.1.15",
+  "version": "1.1.17",
   "author": {
     "name": "이진섭",
     "email": "dlwlstjq410@gmail.com"
