@@ -49,3 +49,9 @@
 - H8 — /auto-design 기존 PRD 활용 chain (D-T9, D4)
 - H9 — mid-flight stop 인터럽트 (D7, D-T8, R11)
 - H10 — auto-execute BLOCKED → failure isolation (D6, R2, R9)
+
+## v2.0.0+ — byte-copy + reorder 3-stage fixtures
+
+| Fixture | 시나리오 |
+|---|---|
+| H11-user-edit-reorder | 사용자 mid-flight 수정 → Implementer BLOCKED → Reorder dispatch → DONE (silent overwrite 차단 검증) |
