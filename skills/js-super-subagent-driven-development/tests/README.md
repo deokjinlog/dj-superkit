@@ -24,3 +24,21 @@
 | G8-reviewer-sonnet | implementer haiku 시에도 reviewer sonnet 고정 | AC-6 | (수동 dogfood) |
 
 자동 (pytest) 항목은 `scripts/tests/test_changelog_buffer.py` + `scripts/tests/test_dag_builder.py` + `scripts/tests/test_preflight.py` 로 호출됨. G1~G8 의 동작 검증은 dogfood 에서 사용자가 직접 비교 (subagent dispatch 는 pytest 로 모킹 불가).
+
+## v1.1.15+ — flow-slim dogfood fixtures (FR-1/FR-3/FR-4/FR-5/FR-6)
+
+| Fixture | 검증 대상 | 연결 AC | 자동? |
+|---|---|---|---|
+| H1-router-small | small 신호 자동 라우팅 → og-brainstorming | AC-6, FR-3 | (수동 dogfood) |
+| H2-router-ambiguous | 모호 피처 → AskUserQuestion 게이트 | AC-7, FR-3 | (수동 dogfood) |
+| H3-adaptive-na | 비활성 토픽 dialogue 스킵 + N/A 한 줄 | AC-1, AC-8, FR-1 | (수동 dogfood) |
+| H4-preflight-fail | 변경이력 entry 존재 시 exit 1 + 게이트 | AC-11, FR-4 | (수동 dogfood) |
+| H5-docs-pretty-pre-review | docs-pretty pre-review timing 통일 | AC-14, FR-5 | (수동 dogfood) |
+| H6-task-name-friendly | Checklist 항목명 사용자 친화 한국어 | AC-15, AC-17, FR-6 | (수동 dogfood) |
+
+- H1 — entry router: small 신호 자동 라우팅 (FR-3, AC-6)
+- H2 — entry router: 모호 피처 게이트 발화 (FR-3, AC-7)
+- H3 — adaptive 7-topic: 비활성 N/A 박힘 (FR-1, AC-1, AC-8)
+- H4 — preflight 강제 실패 게이트 (FR-4, AC-11)
+- H5 — docs-pretty pre-review 통일 (FR-5, AC-14)
+- H6 — task name friendly (FR-6, AC-15, AC-17)
