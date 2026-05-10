@@ -150,3 +150,14 @@ v1.1.14+ 에서 `scripts/preflight.py` 가 docs-pretty / code-pretty / executing
 - user-gate boilerplate 의 AskUserQuestion choices 변경 시 4 skill 동시 적용 (한 군데만 누락 시 사용자 마찰 일관성 깨짐)
 
 요약: helper schema + user-gate boilerplate 변경은 atomic 하게 묶어 처리할 것. 5 파일 (preflight.py + 4 skill SKILL.md) 동시 push.
+
+## TaskCreate 명칭 룰 (v1.1.15+, FR-6)
+
+js-super 자체 skill 의 Checklist 본문에 박힌 task 명칭은 **사용자 시야 (TaskCreate UI) 에 직접 노출**됨. 다음 룰 적용:
+
+- **사용자 친화 한국어 표현 사용** — 내부 용어 (`Invoke ... skill`, `Gate #N`, `CH-id`, `verifying-spec`, `docs-pretty` 등 영어 식별자) 미노출
+- **본문의 다른 부분 (Process Flow, Detailed Step) 의 영어 식별자는 유지** — 메인 에이전트가 정확한 skill 호출에 필요
+- **upstream og-* skill 들 (verbatim)** — 손대지 않음
+- **변경이력 footer 의 entry tag** (`[요구사항-수정]` 등) — schema 매직 키워드라 유지
+
+신규 skill 작성 시도 본 룰 따를 것. 회귀 시 `grep -nE "Invoke .* skill|Gate #|CH-[0-9]" <skill 본문 Checklist>` 로 catch.

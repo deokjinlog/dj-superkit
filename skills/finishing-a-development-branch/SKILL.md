@@ -16,7 +16,7 @@ implementation 완료 + 모든 테스트 통과 시점에 호출. 1인 개발자
 
 ## Process
 
-### Step 1 — Tests pass gate (필수 안전망)
+### Step 1 — 테스트 자동 실행 (필수 안전망)
 
 자동으로 프로젝트 표준 테스트 명령 실행:
 
@@ -32,7 +32,7 @@ source .venv/bin/activate && pytest -v
 
 이 단계는 **유일한 자동 게이트**. 깨진 코드가 main / PR 로 흘러 들어가는 것 방지.
 
-### Step 2 — Termination Message (한 메시지, 게이트 X)
+### Step 2 — 완료 메시지 노출 (한 메시지, 게이트 X)
 
 ```
 ✅ 모든 task 완료 + 테스트 통과.

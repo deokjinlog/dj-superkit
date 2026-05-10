@@ -15,17 +15,17 @@ Both <slug>-requirements.md and <slug>-tech-design.md must exist in the current 
 
 You MUST create a TaskCreate task for each of these items and complete them in order:
 
-1. **Verify inputs** — confirm both <slug>-requirements.md and <slug>-tech-design.md exist (HARD-GATE if either missing)
-2. **Outline file structure** — which files are created/modified, with single-responsibility boundaries
-3. **Decompose into bite-sized tasks** — each task = one TDD cycle (test → fail → impl → pass → commit), 2-5 minutes per step
-4. **Fill 위험 코드 지점 (§2)** — every risk category from <slug>-tech-design.md §6 mapped to a concrete location + mitigation
-5. **Self-review** — spec coverage / placeholder scan / type consistency / 위험 coverage
-6. **Invoke verifying-spec** (with Tolerance for missing skill) — main agent runs A+C verification on the plan
-7. **Invoke code-pretty skill** — pre-review code-block prettify on the draft (Sonnet subagent). Runs AFTER verifying-spec passes and BEFORE docs-pretty. Targets only `**수정 후**`-labeled code blocks. Stops once first change-history entry is logged.
-8. **Invoke docs-pretty skill** — pre-review format pass on the draft (Sonnet subagent). Runs immediately after code-pretty and BEFORE showing the plan to the user. Re-fires together with code-pretty after each revision iteration (per-draft-state).
-9. **User reviews <slug>-implementation-plan.md** — show the prettified plan + verifying-spec report + code-pretty diff summary; get approval (loop until OK; on changes → revise → back to step 6 verifying-spec)
-10. **Invoke change-history skill** — append first `[구현계획서-수정]` entry
-11. **Hand off to /execute-plan** — count tasks first, then offer the choice using the Execution Handoff message below. Upstream `subagent-driven-development` is NOT offered here; only invoke it if the user explicitly asks for the upstream original.
+1. **입력 확인** — confirm both <slug>-requirements.md and <slug>-tech-design.md exist (HARD-GATE if either missing)
+2. **파일 구조 윤곽 잡기** — which files are created/modified, with single-responsibility boundaries
+3. **구현계획서 task 목록 작성** — each task = one TDD cycle (test → fail → impl → pass → commit), 2-5 minutes per step
+4. **위험 코드 지점 (§2) 채우기** — every risk category from <slug>-tech-design.md §6 mapped to a concrete location + mitigation
+5. **자체 점검** — spec coverage / placeholder scan / type consistency / 위험 coverage
+6. **사양 정합성 검증** — main agent runs A+C verification on the plan via `verifying-spec` (Tolerance for missing skill)
+7. **코드 블록 포맷 정리** — pre-review code-block prettify on the draft via `code-pretty` skill (Sonnet subagent). Runs AFTER verifying-spec passes and BEFORE docs-pretty. Targets only `**수정 후**`-labeled code blocks. Stops once first change-history entry is logged.
+8. **문서 포맷 정리 (사용자 리뷰 전)** — pre-review format pass on the draft via `docs-pretty` skill (Sonnet subagent). Runs immediately after code-pretty and BEFORE showing the plan to the user. Re-fires together with code-pretty after each revision iteration (per-draft-state).
+9. **사용자 검토 (구현계획서)** — show the prettified plan + verifying-spec report + code-pretty diff summary; get approval (loop until OK; on changes → revise → back to step 6 verifying-spec)
+10. **변경이력 기록** — append first `[구현계획서-수정]` entry via `change-history` skill
+11. **구현 단계 핸드오프** — count tasks first, then offer the choice using the Execution Handoff message below (`executing-plans` or `js-super-subagent-driven-development`). Upstream `subagent-driven-development` is NOT offered here; only invoke it if the user explicitly asks for the upstream original.
 
 If you find yourself skipping ahead, stop and create the missing task.
 

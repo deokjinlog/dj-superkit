@@ -23,17 +23,17 @@ After <slug>-requirements.md is approved AND change-history is logged, **automat
 You MUST create a TaskCreate task for each of these items and complete them in order:
 
 0. **Entry Router (v1.1.15+, FR-3)** — 사용자 입력에 명시적 small 신호 감지 시 즉시 og-brainstorming auto-invoke + notice 한 줄. 그 외 → AskUserQuestion 게이트 (og- / js-super 양자택일). 자세한 룰은 "Entry Router" 섹션 참조.
-1. **Explore project context** — files, docs, recent commits
-2. **Confirm feature name + slug** — one question, then create `docs/features/YYYY-MM-DD-<slug>/`
-3. **Mode selection gate** — ask user PRD (default) or Socratic. Parse intent (any language). On ambiguous reply, default to PRD with a one-line note. See "Mode Selection" below.
-4. **Run mode-specific dialogue**:
+1. **프로젝트 컨텍스트 탐색** — files, docs, recent commits
+2. **피처 이름/슬러그 확인** — one question, then create `docs/features/YYYY-MM-DD-<slug>/`
+3. **모드 선택** — ask user PRD (default) or Socratic. Parse intent (any language). On ambiguous reply, default to PRD with a one-line note. See "Mode Selection" below.
+4. **모드별 질의응답 진행**:
    - **[PRD mode]** Feature category mini-question → **Visual Companion offer** (if UI/layout/visual feature based on category — own message, mode-aware trigger) → Question plan agreement → Adaptive PRD questions (only the agreed subset). See "PRD Adaptive Planning" below.
    - **[Socratic mode]** **Visual Companion offer** (if visual questions ahead — own message) → Free-form upstream-style dialogue: one question at a time, propose 2-3 approaches with tradeoffs, section-by-section approval. See "Socratic Mode" below.
-5. **Self-review** — mode-specific (PRD: 6-item PRD scan + 4-item abstract scan; Socratic: 4-item abstract scan only)
-6. **Invoke docs-pretty skill (v1.1.15+ pre-review)** — format-only pass (Sonnet subagent) on the RAW draft BEFORE user review. Re-fires on each user-fix iteration (per-draft).
-7. **User reviews <slug>-requirements.md (prettified)** — show the prettified file, get approval (loop until OK; on changes → revise → back to step 6 → re-show prettified). Stops once first change-history entry is logged.
-8. **Invoke change-history skill** — append first `[요구사항-수정]` entry
-9. **Auto-proceed to designing-direction (v1.1.9+ — gate removed)** — Right after the change-history entry is logged, auto-invoke `designing-direction` via the Skill tool with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit cleanly with notice telling the user to run /design later.
+5. **자체 점검** — mode-specific (PRD: 6-item PRD scan + 4-item abstract scan; Socratic: 4-item abstract scan only)
+6. **문서 포맷 정리 (사용자 리뷰 전)** — format-only pass (Sonnet subagent) on the RAW draft BEFORE user review. Re-fires on each user-fix iteration (per-draft). Uses `docs-pretty` skill.
+7. **사용자 검토 (PRD 초안)** — show the prettified file, get approval (loop until OK; on changes → revise → back to step 6 → re-show prettified). Stops once first change-history entry is logged.
+8. **변경이력 기록** — append first `[요구사항-수정]` entry via `change-history` skill
+9. **개발방향 단계 자동 진행** — Right after the change-history entry is logged, auto-invoke `designing-direction` via the Skill tool with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit cleanly with notice telling the user to run /design later.
 
 If you find yourself skipping ahead, stop and create the missing task.
 

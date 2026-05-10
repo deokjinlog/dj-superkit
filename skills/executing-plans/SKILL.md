@@ -19,6 +19,8 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 - Inline (single-session) execution preferred over per-task subagents
 - Each task in the plan follows TDD bite-sized steps
 
+> **Task 이름 가이드 (FR-6 / v1.1.15+):** 구현계획서 §1 의 각 Task 이름은 사용자 친화 한국어로 작성되어야 합니다 (TaskCreate 시 그대로 노출). 내부 용어 (`Invoke ... skill`, `Gate #N`, 영어 식별자) 는 TaskCreate 이름에 노출하지 말 것. CLAUDE.md TaskCreate 명칭 룰 참조.
+
 ## Plan Loading
 
 ### Step 1: Load and Review Plan

@@ -15,15 +15,15 @@ You MUST have an existing <slug>-requirements.md in the current feature folder b
 
 You MUST create a TaskCreate task for each of these items and complete them in order:
 
-1. **Verify input** — confirm <slug>-requirements.md exists (HARD-GATE if not)
-2. **Survey existing code (v1.1.15+ slim)** — `<slug>-requirements.md` §2 (영향 컴포넌트) 먼저 Read. 추가 grep/Read 는 tech-design 결정 (아키텍처 / data flow / pattern) 깊이 부족할 때만.
-3. **Adaptive 7-topic dialogue (v1.1.15+, FR-1)** — `<slug>-requirements.md` 읽고 활성/비활성 토픽 판정 후 한 줄 announce. 항상 활성 4개 (1 아키텍처 / 2 컴포넌트 / 5 결정+대안 / 6 위험), 조건부 3개 (3 데이터 모델 / 4 외부 인터페이스 / 7 테스트 전략). 자세한 룰은 "Adaptive Topics" 섹션 참조.
-4. **Self-review (internal)** — FR mapping coverage, alternatives present, risk categorization (no user prompt yet)
-5. **Run verifying-spec FIRST** (with Tolerance for missing skill) — main agent runs A+C verification, produces 4-axis report internally
-6. **Invoke docs-pretty skill (v1.1.15+ pre-review)** — format pass on the RAW draft BEFORE user review. Re-fires on each user-fix iteration (per-draft).
-7. **Single combined approval gate** — show the full PRETTIFIED `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / no". On `no` → revise → loop back to step 4 (Self-review → re-verify → re-pretty → re-show prettified). Stops once first change-history entry is logged.
-8. **Invoke change-history skill** — append first `[개발방향-수정]` entry
-9. **Ask proceed-to-writing-plans gate (v1.1.12+ — restored)** — change-history 직후 사용자에게 명시적 yes/no 게이트. On `yes` → invoke writing-plans via Skill tool. On `no` → exit with notice telling the user to run /write-plan later.
+1. **입력 확인** — confirm <slug>-requirements.md exists (HARD-GATE if not)
+2. **기존 코드 둘러보기** — `<slug>-requirements.md` §2 (영향 컴포넌트) 먼저 Read. 추가 grep/Read 는 tech-design 결정 (아키텍처 / data flow / pattern) 깊이 부족할 때만. (v1.1.15+ slim)
+3. **적응형 7-토픽 질의응답** — `<slug>-requirements.md` 읽고 활성/비활성 토픽 판정 후 한 줄 announce. 항상 활성 4개 (1 아키텍처 / 2 컴포넌트 / 5 결정+대안 / 6 위험), 조건부 3개 (3 데이터 모델 / 4 외부 인터페이스 / 7 테스트 전략). 자세한 룰은 "Adaptive Topics" 섹션 참조. (v1.1.15+, FR-1)
+4. **자체 점검** — FR mapping coverage, alternatives present, risk categorization (no user prompt yet)
+5. **사양 정합성 검증 (사전)** — main agent runs A+C verification via `verifying-spec`, produces 4-axis report internally (Tolerance for missing skill)
+6. **문서 포맷 정리 (사용자 리뷰 전)** — format pass on the RAW draft BEFORE user review via `docs-pretty` skill. Re-fires on each user-fix iteration (per-draft). (v1.1.15+)
+7. **초안 검토 및 승인** — show the full PRETTIFIED `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / no". On `no` → revise → loop back to step 4 (Self-review → re-verify → re-pretty → re-show prettified). Stops once first change-history entry is logged.
+8. **변경이력 기록** — append first `[개발방향-수정]` entry via `change-history` skill
+9. **다음 단계 진입 확인** — change-history 직후 사용자에게 명시적 yes/no 게이트. On `yes` → invoke `writing-plans` via Skill tool. On `no` → exit with notice telling the user to run /write-plan later. (v1.1.12+ — restored)
 
 If you find yourself skipping ahead, stop and create the missing task.
 
