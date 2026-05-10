@@ -16,17 +16,18 @@ You MUST have an existing <slug>-requirements.md in the current feature folder b
 You MUST create a TaskCreate task for each of these items and complete them in order:
 
 1. **Verify input** — confirm <slug>-requirements.md exists (HARD-GATE if not)
-2. **Survey existing code** — Grep/Read impacted areas for each FR
-3. **Run technical design questions** — architecture (2-3 candidates) → impacted components → data model → external interfaces → key decisions + alternatives → risk candidates → test strategy
+2. **Survey existing code (v1.1.15+ slim)** — `<slug>-requirements.md` §2 (영향 컴포넌트) 먼저 Read. 추가 grep/Read 는 tech-design 결정 (아키텍처 / data flow / pattern) 깊이 부족할 때만.
+3. **Adaptive 7-topic dialogue (v1.1.15+, FR-1)** — `<slug>-requirements.md` 읽고 활성/비활성 토픽 판정 후 한 줄 announce. 항상 활성 4개 (1 아키텍처 / 2 컴포넌트 / 5 결정+대안 / 6 위험), 조건부 3개 (3 데이터 모델 / 4 외부 인터페이스 / 7 테스트 전략). 자세한 룰은 "Adaptive Topics" 섹션 참조.
 4. **Self-review (internal)** — FR mapping coverage, alternatives present, risk categorization (no user prompt yet)
 5. **Run verifying-spec FIRST** (with Tolerance for missing skill) — main agent runs A+C verification, produces 4-axis report internally
 6. **Single combined approval gate** — show the full RAW `<slug>-tech-design.md` AND the verify-spec report in one message; ask once "Approve and proceed? — yes / no". On `no` → revise → loop back to step 4 (Self-review → re-verify → re-show RAW).
 7. **Invoke docs-pretty skill** — format pass on the APPROVED draft (Sonnet subagent). Runs AFTER user approval and BEFORE change-history. Single shot per feature (final-1회). Stops once first change-history entry is logged.
 8. **Invoke change-history skill** — append first `[개발방향-수정]` entry
-9. **Ask proceed-to-writing-plans gate (v1.1.12+ — restored)** — change-history 직후 사용자에게 명시적 yes/no 게이트.
-10. **On approval → invoke writing-plans via Skill tool. On hold → exit with notice telling the user to run /write-plan later.**
+9. **Ask proceed-to-writing-plans gate (v1.1.12+ — restored)** — change-history 직후 사용자에게 명시적 yes/no 게이트. On `yes` → invoke writing-plans via Skill tool. On `no` → exit with notice telling the user to run /write-plan later.
 
 If you find yourself skipping ahead, stop and create the missing task.
+
+**Before invoking the next skill via Skill tool, mark ALL checklist TaskCreate items as completed (in_progress → completed). The Skill tool transition does NOT auto-complete prior tasks. (v1.1.15+, FR-2)**
 
 ## Input
 
@@ -60,7 +61,8 @@ If you find yourself skipping ahead, stop and create the missing task.
 ```dot
 digraph design_flow {
     "Read <slug>-requirements.md" [shape=box];
-    "Survey existing code\n(impacted files via Grep)" [shape=box];
+    "Survey existing code\n(PRD §2 재활용 v1.1.15+)" [shape=box];
+    "Step 0 announce\n활성/비활성 토픽 한 줄" [shape=box];
     "Q: architecture candidates (2-3)?" [shape=box];
     "Q: impacted component mapping?" [shape=box];
     "Q: data model changes?" [shape=box];
@@ -77,8 +79,12 @@ digraph design_flow {
     "Auto-invoke writing-plans skill" [shape=doublecircle];
     "Exit: tell user to run /write-plan later" [shape=oval];
 
-    "Read <slug>-requirements.md" -> "Survey existing code\n(impacted files via Grep)";
-    "Survey existing code\n(impacted files via Grep)" -> "Q: architecture candidates (2-3)?";
+    "Read <slug>-requirements.md" -> "Survey existing code\n(PRD §2 재활용 v1.1.15+)";
+    "Survey existing code\n(PRD §2 재활용 v1.1.15+)" -> "Step 0 announce\n활성/비활성 토픽 한 줄";
+    "Step 0 announce\n활성/비활성 토픽 한 줄" -> "Q: architecture candidates (2-3)?";
+    "Step 0 announce\n활성/비활성 토픽 한 줄" -> "Q: data model changes?\n[활성 시만]" [label="활성"];
+    "Step 0 announce\n활성/비활성 토픽 한 줄" -> "Q: external interfaces?\n[활성 시만]" [label="활성"];
+    "Step 0 announce\n활성/비활성 토픽 한 줄" -> "Q: test strategy?\n[활성 시만]" [label="활성"];
     "Q: architecture candidates (2-3)?" -> "Q: impacted component mapping?";
     "Q: impacted component mapping?" -> "Q: data model changes?";
     "Q: data model changes?" -> "Q: external interfaces?";
@@ -96,6 +102,48 @@ digraph design_flow {
     "Ask: proceed to writing-plans? (Gate #12, v1.1.12+ restored)" -> "Exit: tell user to run /write-plan later" [label="no"];
 }
 ```
+
+## Adaptive Topics (v1.1.15+, FR-1)
+
+Step 3 의 7-topic dialogue 를 사용자 마찰 줄이기 위해 adaptive 진행. 메인 에이전트가 `<slug>-requirements.md` 본문을 읽고 판단.
+
+### 항상 활성 (4개)
+
+- 1 아키텍처
+- 2 영향 컴포넌트
+- 5 결정+대안 비교
+- 6 위험 (preliminary)
+
+### 조건부 활성 (3개) — 메인 판단
+
+- **3 데이터 모델** — DB / 스키마 / 마이그레이션 / 영구 저장 / 외부 시스템 데이터 교환을 implicit/explicit 시사하면 활성. 메타 워크플로우 / 순수 함수 / 산문 처리만이면 비활성.
+- **4 외부 인터페이스** — REST / GraphQL / webhook / 이벤트 발행 / 외부 노출 시사하면 활성. 내부 모듈 간 호출만이면 비활성.
+- **7 테스트 전략** — FR 수가 많거나 (≥3), 위험 카테고리 다수, 다중 파일 영향이면 활성. trivial 변경 / 단일 함수면 비활성.
+
+### Step 0 announce — 항상 노출
+
+판단 직후 사용자에게 한 줄 노출 (case 무관, 전부 활성이든 비활성 있든):
+
+```
+ℹ️ 활성 토픽: 1,2,3,5,6 / 비활성: 4 외부IF, 7 테스트전략 (이유: 내부 모듈 변경, 단일 함수). 추가 활성 필요시 알려주세요.
+```
+
+→ white box / override 시점 일관. 사용자가 즉시 catch + 활성 추가 요청 가능.
+
+### 비활성 토픽 처리
+
+`<slug>-tech-design.md` 의 해당 섹션은 다음 형식으로 한 줄만 박음:
+
+```markdown
+## 3. 데이터 모델/스키마 변경 — N/A: 본 피처는 DB/스키마 무관 (skill 본문 + Python helper 변경)
+## 4. 외부 인터페이스 — N/A: API/event 노출 없음
+```
+
+비활성 토픽은 dialogue 자체를 스킵 — 빈 섹션도 아니고 placeholder 도 아님. N/A 한 줄.
+
+### deterministic Python classifier 도입 X
+
+키워드 hardcode list (예: `테이블 / 마이그레이션 / API / 엔드포인트`) 는 brittle (Postgres 만 있고 DB 없는 경우 등 미스매칭). 메인 에이전트의 컨텍스트 이해가 더 정확. 사용자 override 한 줄로 false negative 즉시 catch.
 
 ## Process (detail)
 
