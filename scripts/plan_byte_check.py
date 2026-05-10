@@ -90,6 +90,9 @@ def verify_plan_block_byte_equal(
                 continue
             actual = "".join(file_lines[start - 1:end])
         else:
+            # RISK: breaking — v2.0.1+ enforces (file:line-range) annotation
+            # for Modify tasks. Pre-v2.0.1 plans without line range previously
+            # silently fell through to whole-file compare; they now fail here.
             mismatches.append(Mismatch(
                 plan_path=plan_path,
                 block_index=idx,
