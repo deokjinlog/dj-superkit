@@ -1,13 +1,13 @@
 ---
-name: js-super-subagent-driven-development
+name: js-super-sub-driven
 description: 서브에이전트 실행 경로 (1인 개발 + 사전 검증 게이트 가정). v1.1.14+ wave-parallel — 메인이 plan 분석으로 DAG 추론 → wave 단위 pair-parallel dispatch (implementer + spec reviewer). 메인이 wave 끝에서 직렬 commit + post-hoc 충돌 검출. quality reviewer는 사전 verifying-spec + TDD + RISK + 변경이력으로 분산 흡수.
 ---
 
-# js-super-subagent-driven-development (v1.1.14 wave-parallel)
+# js-super-sub-driven (v1.1.14 wave-parallel)
 
 js-super 워크플로에 최적화된 서브에이전트 경로. 1인 개발 + 사전 검증 게이트(verifying-spec) 가정. v1.1.14+ 부터 plan task 들이 file-disjoint + dependency-free 조건을 만족하는 그룹은 wave 단위 병렬 dispatch.
 
-**Announce at start:** "I'm using the js-super-subagent-driven-development skill to execute this plan with wave-parallel subagents + main-agent governance."
+**Announce at start:** "I'm using the js-super-sub-driven skill to execute this plan with wave-parallel subagents + main-agent governance."
 
 ## Why this shape
 
@@ -324,7 +324,7 @@ no → 사용자가 직접 정리 또는 삭제.
 ## Example Workflow (Few-Shot, v1.1.14 wave 모드)
 
 ```
-You: I'm using js-super-subagent-driven-development to execute this plan.
+You: I'm using js-super-sub-driven to execute this plan.
 
 [Entry guard: foo-implementation-plan.md exists ✅, commit_policy=per-task ✅]
 [Read plan: 5 tasks. Parse Files/deps/Model.]

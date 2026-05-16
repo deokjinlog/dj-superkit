@@ -1,6 +1,6 @@
 # Implementer Subagent Prompt Template
 
-Use this template when dispatching an implementer subagent under `js-super-subagent-driven-development`. The prompt explicitly tells the subagent that RISK annotation + 변경이력 are post-processed by the main agent — the subagent should NOT touch them.
+Use this template when dispatching an implementer subagent under `js-super-sub-driven`. The prompt explicitly tells the subagent that RISK annotation + 변경이력 are post-processed by the main agent — the subagent should NOT touch them.
 
 ```
 Task tool (general-purpose):

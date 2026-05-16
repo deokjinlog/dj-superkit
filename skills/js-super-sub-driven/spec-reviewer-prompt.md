@@ -1,6 +1,6 @@
 # Spec Compliance Reviewer Prompt Template
 
-Use this template when dispatching a spec compliance reviewer subagent under `js-super-subagent-driven-development`.
+Use this template when dispatching a spec compliance reviewer subagent under `js-super-sub-driven`.
 
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less). No quality reviewer follows — main agent post-processes governance (RISK / 변경이력) instead.
 
