@@ -124,18 +124,18 @@ Before proposing changes to skill design, workflow philosophy, or architecture, 
 
 요약: 이 두 skill의 룰 변경은 atomic하게 묶어 처리할 것.
 
-## writing-plans `**Model**:` 필드 ↔ js-super-subagent-driven-development 결합
+## writing-plans `**Model**:` 필드 ↔ js-super-sub-driven 결합
 
-`writing-plans` 의 task block 신규 `**Model**:` 필드 (v1.1.14+) 는 `js-super-subagent-driven-development` 의 implementer dispatch model 결정에 직접 사용된다 (`skills/js-super-subagent-driven-development/SKILL.md` Plan Analysis & Wave Build 단계). 즉:
+`writing-plans` 의 task block 신규 `**Model**:` 필드 (v1.1.14+) 는 `js-super-sub-driven` 의 implementer dispatch model 결정에 직접 사용된다 (`skills/js-super-sub-driven/SKILL.md` Plan Analysis & Wave Build 단계). 즉:
 
-- writing-plans 의 평가 룰 (haiku/sonnet/opus 분기) 변경 시 `js-super-subagent-driven-development` 의 dispatch 단계도 동시 수정
+- writing-plans 의 평가 룰 (haiku/sonnet/opus 분기) 변경 시 `js-super-sub-driven` 의 dispatch 단계도 동시 수정
 - 한쪽만 건드리면 다음 회귀 발생: plan 작성 시 의도한 모델과 실제 dispatch 모델 불일치
 
 요약: 이 두 skill 의 `**Model**:` 룰 변경은 atomic 하게 묶어 처리할 것.
 
 ## scripts/preflight.py ↔ 4 skill Pre-flight 결합
 
-v1.1.14+ 에서 `scripts/preflight.py` 가 docs-pretty / code-pretty / executing-plans / js-super-subagent-driven-development 4 skill 의 Pre-flight 검사를 deterministic 코드로 통합. 즉:
+v1.1.14+ 에서 `scripts/preflight.py` 가 docs-pretty / code-pretty / executing-plans / js-super-sub-driven 4 skill 의 Pre-flight 검사를 deterministic 코드로 통합. 즉:
 
 - `scripts/preflight.py` 의 함수 시그니처 (반환값 형식 / exit code 룰) 변경 시 4 skill 본문의 bash one-liner 도 동시 수정
 - helper 의 매개변수 추가 시 모든 caller 의 호출 라인 동기화 필요
@@ -178,10 +178,10 @@ js-super 자체 skill 의 Checklist 본문에 박힌 task 명칭은 **사용자 
 
 v2.0.0 메이저에서 subagent dispatch 패턴이 LLM transcription → byte-copy + reorder 3-stage 분담 으로 근본 변경. 다음 4 파일은 atomic 변경 규칙 적용:
 
-1. `skills/js-super-subagent-driven-development/implementer-prompt.md` — STRICT BYTE-COPY 룰 + haiku 고정 + Status enum BLOCKED
-2. `skills/js-super-subagent-driven-development/reorder-prompt.md` — Status NEEDS_USER 형식 + sonnet 고정 + silent overwrite 차단
+1. `skills/js-super-sub-driven/implementer-prompt.md` — STRICT BYTE-COPY 룰 + haiku 고정 + Status enum BLOCKED
+2. `skills/js-super-sub-driven/reorder-prompt.md` — Status NEEDS_USER 형식 + sonnet 고정 + silent overwrite 차단
 3. `scripts/plan_byte_check.py` — `**원본**` 블록 byte-equal 검증 helper (writing-plans + auto-writing-plans 의 Self-Review)
-4. `skills/js-super-subagent-driven-development/SKILL.md` — Per-wave Sequence W-2 의 Stage 1/2/3 분기
+4. `skills/js-super-sub-driven/SKILL.md` — Per-wave Sequence W-2 의 Stage 1/2/3 분기
 
 ### 회귀 패턴 (한쪽만 변경 시)
 
@@ -194,7 +194,7 @@ v2.0.0 메이저에서 subagent dispatch 패턴이 LLM transcription → byte-co
 
 ### Test fixture
 
-`skills/js-super-subagent-driven-development/tests/H11-user-edit-reorder/README.md` — 사용자 mid-flight 수정 시뮬레이션 + reorder dispatch 발화 검증.
+`skills/js-super-sub-driven/tests/H11-user-edit-reorder/README.md` — 사용자 mid-flight 수정 시뮬레이션 + reorder dispatch 발화 검증.
 
 ### 영향 범위
 
@@ -221,6 +221,28 @@ D1 (3 조건 AND — 같은 파일 / test 경계 X / mechanical) 룰 은 두 ski
 
 ### Test fixture
 
-`skills/js-super-subagent-driven-development/tests/H12-same-file-merge/README.md` — 같은 파일 4 mechanical 변경 plan → 1 task multi-step 묶음 검증 (positive + negative).
+`skills/js-super-sub-driven/tests/H12-same-file-merge/README.md` — 같은 파일 4 mechanical 변경 plan → 1 task multi-step 묶음 검증 (positive + negative).
 
 요약: 2 skill + fixture + CLAUDE.md 변경은 묶어서 처리.
+
+## setting-up-worktrees ↔ commands/worktree.md 결합 (v2.0.2+)
+
+v2.0.2+ 에서 `setting-up-worktrees` skill body 의 `.env*` hardcoded glob → "로컬 빌드 환경 파일" LLM-judged Procedure 로 일반화. 즉:
+
+- `skills/setting-up-worktrees/SKILL.md` 의 Step 2 / HARD-GATE / Defaults 표 / Procedure / Anti-Patterns / Acceptance 의 "env 파일" 용어 → "로컬 빌드 환경 파일" 동기
+- `commands/worktree.md` 본문 표현 동기
+
+### 회귀 패턴 (한쪽만 변경 시)
+
+| 누락 | 증상 |
+|---|---|
+| skill body 만 변경 | `/worktree` 슬래시 명령 본문이 옛 표현 유지 → 사용자 혼란 |
+| commands 만 변경 | 메인이 skill body 따라 옛 글롭 적용 → 다른 플랫폼 (Android/iOS/desktop) 미커버 |
+
+### 영향 범위
+
+- worktree 생성 흐름만 영향 — `/worktree` 외 다른 skill 무관
+- og-* skill 영향 0
+- byte-copy 룰 / wave-parallel 영향 0
+
+요약: 2 파일 (skill SKILL.md + commands/worktree.md) + CLAUDE.md 결합 메모 변경은 묶어서 처리.
