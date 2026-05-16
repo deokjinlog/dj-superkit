@@ -5,24 +5,6 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 # Auto Executing Plans → wave-parallel + finishing (auto)
 
-## 사용자 질문 룰 (v2.0.3+) — 항상 AskUserQuestion
-
-이 skill 흐름 안에서 사용자에게 질문할 일이 생기면 **반드시** `AskUserQuestion`
-도구로 호출한다. 산문으로 "~ 할까요?" 한 줄 던지지 마라.
-
-### Why
-
-Notification 훅 (`elicitation_dialog` 매처) 이 알람을 발화하려면 도구 호출이
-실제로 일어나야 함. 산문 질문은 훅이 못 잡아서 사용자가 놓침 (v1.1.8 신고 재발).
-
-### How to apply
-
-- clarifying / Socratic / 모호점 확인 / 게이트 / 모드 선택 — 모두 포함
-- 단답 yes/no 도 prose X → `AskUserQuestion` choices `[yes, no]` 사용
-- 다중 선택은 enum choices 또는 multi-question batching (의미 결합 시 max 4 questions[])
-- **Socratic 자유 응답**: AskUserQuestion 의 question 본문에 "자유롭게 답해주세요. 별도 옵션 선택 불필요" + dummy choice `[알겠음]` 1개 → 트리거만 발화, 응답은 다음 turn prose
-- **예외**: 본문 자체의 알람-friendly 안내문 (`ℹ️ Auto-proceeding ...`) 는 질문 아니라 안내 — 도구 호출 불필요
-
 ## Process
 
 ### Step 1 — Entry Guard
