@@ -266,4 +266,40 @@ boilerplate 가 동기. 변경 시 atomic patch.
 - AskUserQuestion 도구 schema 자체 변경 X (호출 빈도만 ↑)
 - Notification.elicitation_dialog 매처 + repeat-alert.sh — 변경 X (기존 인프라 활용)
 
+## worktree-merge-back skill 결합 (v2.0.4+)
+
+v2.0.4+ 에서 `worktree-merge-back` 신규 skill 추가. 핵심 안전성: **feature
+worktree 안에서만 사용 가능** (main / non-worktree 호출 시 HARD-GATE 차단).
+"Merge down before merging up" 패턴 — 충돌 해결은 feature sandbox 에서만,
+parent 워크트리는 항상 깨끗.
+
+### 회귀 패턴 (안전성 손상 시)
+
+| 안티 패턴 | 증상 |
+|---|---|
+| Guard 검출 우회 (LLM-judged 로 변경) | main 워크트리 진입 → 충돌 시 main 깨질 위험 |
+| 자동 충돌 해결 도입 (`--strategy ours/theirs`) | 데이터 손실 위험 (한쪽 임의 채택) |
+| `git push --force` 추가 | remote main 깨질 위험 |
+| `cd <parent>` 패턴 (`git -C` 대신) | skill 종료 시점 cwd state 모호 |
+| 사후 처리 default yes | destructive 작업 자동 실행 → 자료 손실 |
+
+### 영향 범위
+
+- 신규 skill body + slash command + 3 fixture README. 기존 skill body 변경 0.
+- `setting-up-worktrees` / `finishing-a-development-branch` / auto-* / og-* 영향 0
+- `scripts/preflight.py` / `scripts/auto_flow.py` 영향 0
+- 자동 발동 경로 없음 — 명시 invoke 만
+
+### Regression catch grep
+
+```bash
+# 자동 충돌 해결 / force-push / cd 패턴 catch
+grep -nE "git merge --strategy.*ours|--strategy.*theirs|push.*--force|cd .*MAIN_PATH" \
+  skills/worktree-merge-back/SKILL.md
+# expected: 0 (Anti-Pattern 표 안의 catch 라인만 허용)
+```
+
+요약: 단일 skill body + slash command + 3 fixture + CLAUDE.md 결합 메모 변경은
+묶어서 처리. 5+ 파일 atomic patch.
+
 요약: 8 skill body + CLAUDE.md 결합 메모 변경은 묶어서 처리. 5+ 파일 atomic patch.
