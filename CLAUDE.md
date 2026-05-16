@@ -246,3 +246,24 @@ v2.0.2+ 에서 `setting-up-worktrees` skill body 의 `.env*` hardcoded glob → 
 - byte-copy 룰 / wave-parallel 영향 0
 
 요약: 2 파일 (skill SKILL.md + commands/worktree.md) + CLAUDE.md 결합 메모 변경은 묶어서 처리.
+
+## 8 skill AskUserQuestion 강제 룰 결합 (v2.0.3+)
+
+v2.0.3+ 에서 4 js-super 신규 skill + 4 auto-* 변형 skill 의 사용자 질문 시
+`AskUserQuestion` 도구 호출 강제. 8 skill body 의 "사용자 질문 룰 (v2.0.3+)"
+boilerplate 가 동기. 변경 시 atomic patch.
+
+### 회귀 패턴 (한 곳만 누락 시)
+
+| 누락 | 증상 |
+|---|---|
+| skill body 한 곳 boilerplate 누락 | 그 skill 안 메인이 prose 질문 → 알람 X → 사용자 놓침 |
+| AskUserQuestion 호출 부재 | elicitation_dialog 매처 미발화 |
+
+### 영향 범위
+
+- 8 skill body 변경. og-* / js-super-sub-driven / 보조 skill 영향 0
+- AskUserQuestion 도구 schema 자체 변경 X (호출 빈도만 ↑)
+- Notification.elicitation_dialog 매처 + repeat-alert.sh — 변경 X (기존 인프라 활용)
+
+요약: 8 skill body + CLAUDE.md 결합 메모 변경은 묶어서 처리. 5+ 파일 atomic patch.
