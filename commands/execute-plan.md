@@ -15,14 +15,14 @@ description: <slug>-implementation-plan.md를 task-by-task로 실행합니다. �
 | Option | skill | Recommended for |
 |---|---|---|
 | **1) Inline** | `executing-plans` | Medium plans (≤ 12 tasks) |
-| **2) Subagent** | `js-super-subagent-driven-development` | Large plans (13+ tasks) |
+| **2) Subagent** | `js-super-sub-driven` | Large plans (13+ tasks) |
 
 다음 메시지로 사용자에게 묻습니다:
 
 > "Plan has <N> tasks. Two execution options:
 >
 > 1. **Inline** (recommended for medium plans, ≤ 12 tasks) — main agent edits directly via `executing-plans`; fast, fewer total tokens; main context accumulates with task count
-> 2. **Subagent** (recommended for large plans, 13+ tasks) — implementer + spec reviewer subagents via `js-super-subagent-driven-development`; preserves main context; adds dispatch cost
+> 2. **Subagent** (recommended for large plans, 13+ tasks) — implementer + spec reviewer subagents via `js-super-sub-driven`; preserves main context; adds dispatch cost
 >
 > Which approach?"
 
@@ -36,6 +36,6 @@ upstream 원본 `subagent-driven-development`는 이 양자택일에서 제시�
 
 차이점:
 - **Inline**: 메인이 직접 편집. git-fast / memory-fallback 모드 자동 선택.
-- **Subagent (js-super)**: implementer + spec reviewer 서브에이전트 → 메인이 후처리(RISK / 변경이력 / atomic commit).
+- **Subagent (js-super)**: implementer + spec reviewer 서브에이전트 → 메인이 후처리(RISK / 변경이력 / atomic commit). 호출: `js-super-sub-driven`
 
 다음 단계 (선택): `/api-test`

@@ -12,7 +12,7 @@ description: upstream superpowers 원본 executing-plans 를 호출합니다. /o
 
 | 항목 | `/execute-plan` (js-super 확장) | `/og-execute-plan` (upstream 원본) |
 |---|---|---|
-| 모드 분기 | Inline (executing-plans) / Subagent (js-super-subagent-driven-development) 양자택일 | Inline 단일 (Subagent 원하면 `subagent-driven-development` 직접 호출) |
+| 모드 분기 | Inline (executing-plans) / Subagent (js-super-sub-driven) 양자택일 | Inline 단일 (Subagent 원하면 `subagent-driven-development` 직접 호출) |
 | 실행 모드 | git-fast / memory-fallback (commit_policy 기준) | upstream 단일 모드 — 그냥 plan 따라 실행 |
 | 변경이력 [코드-수정] entry 자동 기록 | 있음 (task당 1번 batched) | 없음 |
 | risk-annotation 3-checklist + RISK 주석 | 자동 | 없음 |
