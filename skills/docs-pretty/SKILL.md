@@ -1,6 +1,6 @@
 ---
 name: docs-pretty
-description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md. Fires before user review on every draft (v1.1.15+ unified timing — pre-review per-draft). Re-fires on each user-fix iteration. STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches a Sonnet subagent that performs a strict format-only pass — improves headers, lists, tables, code blocks, spacing, and visual hierarchy WITHOUT changing any wording, ordering, or semantic content. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
+description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md. Fires before user review on every draft (v1.1.15+ unified timing — pre-review per-draft). Re-fires on each user-fix iteration. STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches TWO Sonnet subagents in parallel (v2.2.0+) — A performs a strict format-only pass on `.md`, B generates a sibling `.html` companion (사람 전용 시각화 사본) with semantic 1:1 preservation. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
 ---
 
 # Docs Pretty (Pre-Review Formatting)
@@ -39,17 +39,19 @@ If you are unsure whether this is still in the "initial creation phase" — STOP
 | `brainstorming` or `designing-direction` user requested fix on draft — revise RAW, re-fire docs-pretty (per-draft loop) | First change-history entry has been logged — doc is now "live", do NOT fire |
 | `writing-plans` user requested revision, plan re-written, verifying-spec re-ran, code-pretty re-ran — fire docs-pretty again | (none for pre-review timing — docs-pretty now fires before every user review) |
 
-## Why a Subagent (and which model)
+## Why Two Subagents in Parallel (v2.2.0+)
 
-Pretty-formatting is a pure transformation task — no domain reasoning, no decisions. Loading the full doc into the main agent context just to reformat is wasteful, and the main agent's reasoning model is overkill.
+Pretty-formatting + HTML companion generation is a pure transformation task — no domain reasoning, no decisions. Loading the full doc into the main agent context is wasteful, and the main agent's reasoning model is overkill.
 
-**Always dispatch a subagent with `model: "sonnet"`.** Reasoning:
+**Always dispatch two subagents in parallel (one message, two Task tool calls), both with `model: "sonnet"`.** Reasoning:
 
 1. The "절대 의미를 잃지 말라" constraint is the user's #1 priority. Sonnet's instruction-following is more reliable than Haiku at honoring negative constraints ("do NOT reword").
-2. Per-feature cost is 3 dispatches max — savings from Haiku are negligible vs. the risk of meaning drift.
-3. Main context stays clean — the doc body never needs to live in main memory for this task.
+2. Per-feature cost is 3 dispatches × 2 subagents max — savings from Haiku are negligible vs. the risk of meaning drift.
+3. Main context stays clean — neither the `.md` body nor the `.html` output lives in main memory.
+4. A (`.md` format-only) and B (`.html` companion) are independent — parallel dispatch minimizes latency.
+5. B (HTML companion) needs LLM-level judgment for visual heuristics (which table → Mermaid?) — Sonnet's reasoning is required.
 
-Do NOT use Opus (overkill) or Haiku (rephrasing risk on Korean prose). Sonnet is the floor and ceiling here.
+Do NOT use Opus (overkill) or Haiku (rephrasing risk on Korean prose). Sonnet is the floor and ceiling for both A and B.
 
 ## Process
 
@@ -84,21 +86,41 @@ sys.exit(0 if result.ok else 1)
 
 자세한 룰은 `scripts/preflight.py:docs_pretty_check`. helper 검사: file 존재 / 변경이력 footer 비어있음 / filename 패턴.
 
-### Step 2 — Dispatch the Sonnet subagent
+### Step 2 — Dispatch TWO subagents in parallel (v2.2.0+)
 
-Use the `Agent` tool with these exact parameters:
+Use TWO `Agent` (or `Task`) tool calls in a single message (parallel). Both with `model: sonnet`.
 
+**Subagent A — `.md` format-only pass (기존)**:
 - `subagent_type`: `general-purpose`
 - `model`: `sonnet`
-- `description`: `Format-only pass on <filename>`
-- `prompt`: see template below
+- `description`: `Format-only pass on <filename>.md`
+- `prompt`: see "Subagent A Prompt Template" below
 
-### Step 3 — Verify and report
+**Subagent B — `.html` companion (신규)**:
+- `subagent_type`: `general-purpose`
+- `model`: `sonnet`
+- `description`: `HTML companion for <filename>.md`
+- `prompt`: load `skills/docs-pretty/html-companion-prompt.md`, fill `<ABSOLUTE_MD_PATH>` + `<ABSOLUTE_HTML_PATH>` (same dir, same basename, `.html` extension)
 
-After the subagent returns:
-1. Read the file back (1 Read)
-2. Spot-check: section headers count unchanged, frontmatter intact, `## 변경이력` footer intact (still empty), no obvious content loss
-3. Yield back to the calling skill, which will now show the prettified doc to the user for review. Do NOT emit a separate "포맷 완료" message — the calling skill's review prompt is the user-facing surface, and a separate notice would just add noise. If sanity-check (Step 3.2) fails, then DO speak up so the calling skill can decide whether to abort or proceed despite the issue.
+A and B are independent — B receives the RAW `.md` path (not prettified). D3 semantic-preservation rule means RAW and prettified are byte-equivalent at the meaning level.
+
+### Step 3 — Verify and report (v2.2.0+ A + B reconcile)
+
+After both subagents return:
+1. Read `.md` back (1 Read for A's output)
+2. Spot-check A: section headers count unchanged, frontmatter intact, `## 변경이력` footer intact (still empty), no obvious content loss
+3. Read `.html` back (1 Read for B's output)
+4. Spot-check B (semantic drift check):
+   - `.html` 의 H1/H2/H3 헤더 개수 == `.md` 의 헤더 개수 (±0, strict)
+   - `.html` 의 `<pre><code>` 개수 == `.md` 의 코드 블록 개수 (±0, strict)
+   - `.html` 외부 URL 참조 0 (`grep -E "https?://" .html` → 0 결과)
+   - sentence-level node 수 차이 5% 이내
+5. Failure matrix (D-T7):
+   - A 성공 / B 실패 → `.md` 만 갱신 + 사용자에게 "`.html` 생성 실패, 수동 retry 가능" 알림
+   - A 실패 / B 성공 → 둘 다 폐기 (`.html` 도 삭제, A 가 single source of truth)
+   - A·B 둘 다 실패 → `docs-pretty` 자체 abort, RAW `.md` 유지
+   - B semantic drift 발견 → B 결과 폐기 (`.html` 삭제), `.md` 만 갱신
+6. Yield back to the calling skill. Do NOT emit a separate "포맷 완료" message. If A sanity-check fails, speak up so caller can decide.
 
 ## Subagent Prompt Template
 
@@ -203,6 +225,10 @@ If any check fails, the main agent reports the failure and asks the user whether
 | Reformat the `## 변경이력` footer "to match the new style" | The footer is an audit trail with byte-identical preservation. |
 | Skip the post-dispatch sanity check | The HARD-GATE on meaning preservation needs verification. |
 | Re-run docs-pretty if the user later complains the doc "still looks rough" | One shot only. Subsequent improvements are normal Edit + change-history entries. |
+| Read or reference the `.html` companion from any AI workflow (v2.2.0+) | NEVER. AI reads `.md` only. `.html` is human-only derived view. |
+| Reference external CDN / URL in the `.html` (v2.2.0+) | NEVER. Self-contained inline only (D4). |
+| Dispatch B serially after A finishes (v2.2.0+) | NEVER. Parallel dispatch in one message (D-T6). |
+| Commit `.html` companion to git (v2.2.0+) | `.gitignore` blocks it. `.html` is derived from `.md`, regenerated on each docs-pretty firing. |
 
 ## Red Flags (STOP if you think these)
 
