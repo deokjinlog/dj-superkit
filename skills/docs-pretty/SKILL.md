@@ -1,6 +1,6 @@
 ---
 name: docs-pretty
-description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md. Fires before user review on every draft (v1.1.15+ unified timing — pre-review per-draft). Re-fires on each user-fix iteration. STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches TWO Sonnet subagents in parallel (v2.2.0+) — A performs a strict format-only pass on `.md`, B generates a sibling `.html` companion (사람 전용 시각화 사본) with semantic 1:1 preservation. NEVER invoked on subsequent edits, change-history appends, change-propagation cascades, or partial revisions.
+description: Use during the initial-creation iteration loop of <slug>-requirements.md / <slug>-tech-design.md / <slug>-implementation-plan.md. Fires before user review on every draft (v1.1.15+ unified timing — pre-review per-draft). Re-fires on each user-fix iteration. STOPS firing once the first change-history entry is logged — that boundary marks "live doc". Dispatches a single Sonnet subagent (B) in fire-and-forget mode (v2.2.1+) — generates a sibling `.html` companion (사람 전용 시각화 사본) with semantic 1:1 preservation. Main does NOT wait for the result. RAW `.md` is shown to user as-is (v2.2.1 removed the v2.2.0 A format-only pass — B alone now handles human readability). NEVER invoked on change-history appends, change-propagation cascades (use `/regen-html` instead), or partial revisions.
 ---
 
 # Docs Pretty (Pre-Review Formatting)
@@ -39,19 +39,19 @@ If you are unsure whether this is still in the "initial creation phase" — STOP
 | `brainstorming` or `designing-direction` user requested fix on draft — revise RAW, re-fire docs-pretty (per-draft loop) | First change-history entry has been logged — doc is now "live", do NOT fire |
 | `writing-plans` user requested revision, plan re-written, verifying-spec re-ran, code-pretty re-ran — fire docs-pretty again | (none for pre-review timing — docs-pretty now fires before every user review) |
 
-## Why Two Subagents in Parallel (v2.2.0+)
+## Why fire-and-forget B (v2.2.1+)
 
-Pretty-formatting + HTML companion generation is a pure transformation task — no domain reasoning, no decisions. Loading the full doc into the main agent context is wasteful, and the main agent's reasoning model is overkill.
+HTML companion generation is a pure transformation task — no domain reasoning, no decisions. Loading the full doc into the main agent context is wasteful, and the main agent's reasoning model is overkill.
 
-**Always dispatch two subagents in parallel (one message, two Task tool calls), both with `model: "sonnet"`.** Reasoning:
+**Dispatch a single B subagent with `model: "sonnet"` and `run_in_background: true`.** Reasoning:
 
-1. The "절대 의미를 잃지 말라" constraint is the user's #1 priority. Sonnet's instruction-following is more reliable than Haiku at honoring negative constraints ("do NOT reword").
-2. Per-feature cost is 3 dispatches × 2 subagents max — savings from Haiku are negligible vs. the risk of meaning drift.
-3. Main context stays clean — neither the `.md` body nor the `.html` output lives in main memory.
-4. A (`.md` format-only) and B (`.html` companion) are independent — parallel dispatch minimizes latency.
-5. B (HTML companion) needs LLM-level judgment for visual heuristics (which table → Mermaid?) — Sonnet's reasoning is required.
+1. **AI 흐름은 `.md` 만 읽음** — A (v2.2.0 의 `.md` format-only pass) 의 가치는 사람 전용. B 의 `.html` 가 사람 가독성을 더 잘 흡수 (Mermaid / 시각화) → A 중복 제거 (v2.2.1).
+2. **fire-and-forget** — 메인 latency 거의 0 (Task dispatch 비용만). 결과는 배경에서 사이드카로 떨어지고, `.js-super/html-regen.log` 에 silent log.
+3. **의미 보존 우선** — Sonnet 의 instruction-following 이 Haiku 보다 negative constraints ("do NOT reword") 에 안정. 비용 대비 안전.
+4. **시각화 휴리스틱 추론** — B 가 "어느 표를 Mermaid 로?" 같은 판단 필요 → Sonnet 추론력 필수.
+5. **디바운스 3초** — 사용자 연속 fix 시 이전 subagent cancel + 새 dispatch. 마지막 fix 만 의미 있음.
 
-Do NOT use Opus (overkill) or Haiku (rephrasing risk on Korean prose). Sonnet is the floor and ceiling for both A and B.
+Do NOT use Opus (overkill) or Haiku (rephrasing risk on Korean prose). Sonnet is the floor and ceiling for B.
 
 ## Process
 
@@ -86,41 +86,34 @@ sys.exit(0 if result.ok else 1)
 
 자세한 룰은 `scripts/preflight.py:docs_pretty_check`. helper 검사: file 존재 / 변경이력 footer 비어있음 / filename 패턴.
 
-### Step 2 — Dispatch TWO subagents in parallel (v2.2.0+)
+### Step 2 — Dispatch single B subagent fire-and-forget (v2.2.1+)
 
-Use TWO `Agent` (or `Task`) tool calls in a single message (parallel). Both with `model: sonnet`.
+Use ONE `Task` tool call with `run_in_background: true`. Main agent does NOT wait.
 
-**Subagent A — `.md` format-only pass (기존)**:
+**Subagent B — `.html` companion**:
 - `subagent_type`: `general-purpose`
 - `model`: `sonnet`
-- `description`: `Format-only pass on <filename>.md`
-- `prompt`: see "Subagent A Prompt Template" below
-
-**Subagent B — `.html` companion (신규)**:
-- `subagent_type`: `general-purpose`
-- `model`: `sonnet`
+- `run_in_background`: `true`
 - `description`: `HTML companion for <filename>.md`
-- `prompt`: load `skills/docs-pretty/html-companion-prompt.md`, fill `<ABSOLUTE_MD_PATH>` + `<ABSOLUTE_HTML_PATH>` (same dir, same basename, `.html` extension)
+- `prompt`: load `skills/docs-pretty/html-companion-prompt.md`, fill `<ABSOLUTE_MD_PATH>` + `<ABSOLUTE_HTML_PATH>` (same dir, same basename, `.html` extension) + CH-id + timestamp (for footer stale marker)
 
-A and B are independent — B receives the RAW `.md` path (not prettified). D3 semantic-preservation rule means RAW and prettified are byte-equivalent at the meaning level.
+**Debounce (3초)**: If a previous B subagent is still running for the same `<slug>`, cancel it before dispatching the new one. Log cancel event to `.js-super/html-regen.log`.
 
-### Step 3 — Verify and report (v2.2.0+ A + B reconcile)
+**A (v2.2.0 `.md` format-only pass) is REMOVED in v2.2.1.** RAW `.md` is shown to user as-is.
 
-After both subagents return:
-1. Read `.md` back (1 Read for A's output)
-2. Spot-check A: section headers count unchanged, frontmatter intact, `## 변경이력` footer intact (still empty), no obvious content loss
-3. Read `.html` back (1 Read for B's output)
-4. Spot-check B (semantic drift check):
-   - `.html` 의 H1/H2/H3 헤더 개수 == `.md` 의 헤더 개수 (±0, strict)
-   - `.html` 의 `<pre><code>` 개수 == `.md` 의 코드 블록 개수 (±0, strict)
-   - `.html` 외부 URL 참조 0 (`grep -E "https?://" .html` → 0 결과)
-   - sentence-level node 수 차이 5% 이내
-5. Failure matrix (D-T7):
-   - A 성공 / B 실패 → `.md` 만 갱신 + 사용자에게 "`.html` 생성 실패, 수동 retry 가능" 알림
-   - A 실패 / B 성공 → 둘 다 폐기 (`.html` 도 삭제, A 가 single source of truth)
-   - A·B 둘 다 실패 → `docs-pretty` 자체 abort, RAW `.md` 유지
-   - B semantic drift 발견 → B 결과 폐기 (`.html` 삭제), `.md` 만 갱신
-6. Yield back to the calling skill. Do NOT emit a separate "포맷 완료" message. If A sanity-check fails, speak up so caller can decide.
+### Step 3 — Yield immediately (v2.2.1+ fire-and-forget)
+
+Main does NOT wait for B subagent completion. Step 2 dispatch 직후:
+
+1. **메인 즉시 return** — caller (brainstorming / designing-direction / writing-plans) 가 다음 turn 진행. RAW `.md` 가 사용자 리뷰 surface.
+2. **B subagent 가 배경에서** `.html` 사이드카 작성. 자체 verification (B prompt 의 "Verification before writing" 룰) 이후 Write.
+3. **silent log** — `.js-super/html-regen.log` 에 dispatch / 완료 / 실패 / cancel 모두 기록 (사용자 push X).
+4. **사용자 push X** — B 결과는 silent. 사용자가 `.html` 부재 인지 시 `/regen-html` 수동 호출.
+
+Failure handling (v2.2.1+ — fire-and-forget):
+- **B 성공** → `.html` 사이드카 + silent log "OK"
+- **B 실패** (Sonnet API 일시 장애 / verification 실패 등) → silent log "ERROR". `.html` 미생성. 사용자 다음에 `.html` 열려고 할 때 부재 인지 → `/regen-html` 수동.
+- **메인 cancel (디바운스)** → 이전 B 작업 폐기, silent log "CANCEL". 새 B dispatch.
 
 ## Subagent Prompt Template
 
@@ -227,8 +220,11 @@ If any check fails, the main agent reports the failure and asks the user whether
 | Re-run docs-pretty if the user later complains the doc "still looks rough" | One shot only. Subsequent improvements are normal Edit + change-history entries. |
 | Read or reference the `.html` companion from any AI workflow (v2.2.0+) | NEVER. AI reads `.md` only. `.html` is human-only derived view. |
 | Reference external CDN / URL in the `.html` (v2.2.0+) | NEVER. Self-contained inline only (D4). |
-| Dispatch B serially after A finishes (v2.2.0+) | NEVER. Parallel dispatch in one message (D-T6). |
 | Commit `.html` companion to git (v2.2.0+) | `.gitignore` blocks it. `.html` is derived from `.md`, regenerated on each docs-pretty firing. |
+| Main waits for B subagent result (v2.2.1+) | NEVER. fire-and-forget — `run_in_background=true` + 즉시 Step 3 return. |
+| Revive A (`.md` format-only pass, v2.2.1+) | NEVER. v2.2.1 에서 A 책임 제거. RAW `.md` 가 사용자 리뷰 surface. |
+| Skip debounce (cancel 룰 누락, v2.2.1+) | 연속 fix 시 매번 dispatch → 비용 누적. 3초 디바운스 + 이전 cancel 강제. |
+| Run docs-pretty for live doc edits without `/regen-html` (v2.2.1+) | live doc 진입 후 `docs-pretty` 자동 X. `change-propagation` 마지막 단계 또는 사용자 수동 `/regen-html` 만. |
 
 ## Red Flags (STOP if you think these)
 
