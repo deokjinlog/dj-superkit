@@ -414,6 +414,20 @@ grep -c "/sync-html" skills/change-propagation/SKILL.md
 
 요약: 5 파일 (generating-html/SKILL.md + html-companion-prompt.md 보존 + change-propagation/SKILL.md + commands/sync-html.md + CLAUDE.md) + H17 patch + H18 신규 + 6 manifest 변경은 atomic patch.
 
+## generating-html Visual heuristics 적극 시각화 (v2.2.3+)
+
+v2.2.3+ 에서 `skills/generating-html/html-companion-prompt.md` 의 Visual heuristics 룰 강화 — 보수적 (typography + color) → 적극 시각화 (비교 카드 / 콘셉트 도식 / 위험 카테고리 색깔 / stepper / 체크박스). `.md` 본문 패턴 ↔ `.html` 시각 표현 매핑 12 항목 표 + Anti-Patterns "typography + color 만 = 회귀" 명시.
+
+영향: html-companion-prompt.md 본문만. AI 흐름 + skill schema / 발동 boundary / fire-and-forget 모드 모두 변경 X.
+
+회귀 catch grep:
+```bash
+grep -c "적극 시각화 v2.2.3" skills/generating-html/html-companion-prompt.md
+# expected: ≥ 1
+```
+
+요약: html-companion-prompt.md 만 변경. atomic patch 1 파일 + CLAUDE.md 결합 메모 + 6 manifest bump.
+
 ## generating-html naming 일관성 결합 (v2.2.2+)
 
 v2.2.2+ 에서 `docs-pretty` → `generating-html` skill 명칭 + `/regen-html` → `/sync-html` slash command 명칭 일괄 교체. 다음 룰 atomic patch:
