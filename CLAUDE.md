@@ -414,6 +414,22 @@ grep -c "/sync-html" skills/change-propagation/SKILL.md
 
 요약: 5 파일 (generating-html/SKILL.md + html-companion-prompt.md 보존 + change-propagation/SKILL.md + commands/sync-html.md + CLAUDE.md) + H17 patch + H18 신규 + 6 manifest 변경은 atomic patch.
 
+## generating-html 디자인 톤 자유 + 인터랙션 허용 (v2.2.4+)
+
+v2.2.4+ 에서 `skills/generating-html/html-companion-prompt.md` 본문 재작성 — "사무 / 회의록 / 보고서 톤 금지" 명시 + 톤 inspiration 6종 (docs portal / dashboard / editorial / playful / brutalist / experimental) 매 호출 자유 선택 + 인터랙션 허용 (기존 "정적 페이지만" 룰 해제). 적극 시각 요소 (hero / glassmorphism / aurora bg / card grid / animated typography) + 인터랙션 (`<details>` / tab / sticky TOC / copy 버튼 / smooth scroll / scroll-spy) 명시.
+
+핵심: **고정 톤 없음, 매번 다르게 = variety as feature**.
+
+보존 룰: self-contained (inline only) / 의미 1:1 / offline 렌더 / 헤더·코드 블록 count 검증. AI 흐름 / skill schema / fire-and-forget 모드 변경 0.
+
+회귀 catch grep:
+```bash
+grep -c "Wow first\|variety = feature\|사무 / 회의록 / 보고서 톤" skills/generating-html/html-companion-prompt.md
+# expected: ≥ 3
+```
+
+요약: html-companion-prompt.md 만 변경. atomic patch 1 파일 + CLAUDE.md 결합 메모 + 6 manifest bump.
+
 ## generating-html Visual heuristics 적극 시각화 (v2.2.3+)
 
 v2.2.3+ 에서 `skills/generating-html/html-companion-prompt.md` 의 Visual heuristics 룰 강화 — 보수적 (typography + color) → 적극 시각화 (비교 카드 / 콘셉트 도식 / 위험 카테고리 색깔 / stepper / 체크박스). `.md` 본문 패턴 ↔ `.html` 시각 표현 매핑 12 항목 표 + Anti-Patterns "typography + color 만 = 회귀" 명시.
