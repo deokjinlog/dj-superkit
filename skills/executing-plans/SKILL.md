@@ -283,3 +283,81 @@ After all tasks complete and verified:
 - `js-super-sub-driven` — recommended subagent path (slim 2-stage + main post-processing)
 - `subagent-driven-development` — upstream original subagent path (3-stage, kept for compatibility)
 - `finishing-a-development-branch` — final wrap-up after all tasks
+
+## Critical / Non-critical 판정 룰 (v2.3.5+)
+
+execute-plan 실행 흐름의 핵심 UX 룰. 사용자가 모드 (inline / subagent) 를 선택한 시점부터 메인은 진행 위임으로 간주하고, **critical 케이스만 재질문** 한다.
+
+### 룰 1: Critical 케이스 — 사용자 재질문 mandatory (AskUserQuestion 강제)
+
+| 케이스 | 이유 |
+|---|---|
+| 사용자가 선택한 모드 자체를 변경 (inline → subagent / 반대) | 약속 위반. 명시 동의 필수. |
+| plan 의 task 범위 확장 (계획 안 된 파일 / 함수 손대야 함) | scope creep — 사용자 의도 모호 |
+| 파괴적 작업 (rm -rf / git reset --hard / force-push / 데이터 손실 위험) | 비가역 |
+| plan 안 task 간 충돌 발견 (task A 수정본이 task B 원본과 불일치) | byte-copy 룰 위반, plan 재작성 필요 |
+| BLOCKED 보고 후 self-correct 도 자동 복구 실패 (최대 3회) | 사용자 직접 개입 필요 |
+| 외부 서비스 호출 (push / PR 생성 / 외부 API 트리거) | blast radius 커짐 |
+| 사용자가 명시 약속 X 한 새 의존성 / 외부 도구 도입 | 약속 외 변경 |
+
+### 룰 2: Non-critical 최적화 — 자율 진행 (게이트 X)
+
+| 케이스 | 자율 결정 방향 |
+|---|---|
+| task 병렬 vs 순차 실행 여부 | plan 의 dependencies 만족 시 병렬 default |
+| task 묶음 (same-file mechanical 3-AND 룰 만족 시) | 묶음 default (v2.0.1+) |
+| task 안 보조 결정 (변수명 / format / order of imports) | plan 의 `**원본**` + `**수정본**` byte-copy 우선, 없으면 LLM 자율 |
+| dispatch model 선택 (haiku / sonnet) | plan 의 `**Model**:` 필드 우선, 없으면 기본 룰 |
+| task 완료 후 다음 task 진입 타이밍 | 자동 진입 (게이트 X) |
+| 중간 결과 보고 빈도 | 매 task X, 매 wave (3-5 task) 단위 OR BLOCKED 시만 |
+
+### 룰 3: 모드 선택 = 사용자 위임 신호
+
+사용자가 inline / subagent 모드를 선택한 시점부터, 그 모드에 내포된 진행 방식 (병렬 / 묶음 / 자동 진입) 은 묵시 동의로 간주한다. 사용자는 모드 선택 후 백그라운드 작업으로 이동할 수 있어야 한다. **모드 진행 중 추가 게이트는 룰 1 (critical) 에 해당하지 않으면 차단**.
+
+### 룰 4: BLOCKED 자가 복구 우선
+
+inline mode 의 task 실행 중 의도 모호 발견 시:
+
+- plan 재독 + self-correct 시도 (최대 3회)
+- 3회 실패 시에만 룰 1 의 마지막 케이스로 사용자 재질문 (AskUserQuestion fire)
+
+→ 안전성은 보존, non-critical 결정 자체를 안 만든다.
+
+## 사용자 질문 = AskUserQuestion 도구 (v2.3.5+)
+
+룰 1 (critical 7 케이스) 재질문은 **반드시 `AskUserQuestion` 도구** 로 호출. prose 자연어 질문 금지.
+
+- yes/no 도 `choices: [yes, no]` AskUserQuestion
+- 다중 옵션은 `choices` enum
+- 자유 응답 필요 시 dummy choice `[알겠음]` + question 본문에 "자유 응답" 명시
+- 알람 시스템 (`repeat-alert.sh` 4-layer) 의 `Notification.elicitation_dialog` 매처 fire — 사용자 백그라운드 작업 시 OS 알람 catch
+
+prose 질문 좁은 예외:
+
+- 자유 텍스트 / 긴 응답 요구 (brainstorming open question)
+- 사용자 응답 직후 확인용 단순 ack (그래도 AskUserQuestion yes/no 권장)
+- 질문 아닌 상태 보고 / 진행 알림
+
+본 룰은 프로젝트 `CLAUDE.md` 의 글로벌 "AskUserQuestion 도구 우선 (v2.3.5+)" 룰의 skill body 측 cross-reference.
+
+## Anti-Patterns (v2.3.5)
+
+| 안티 패턴 | 이유 |
+|---|---|
+| "T3~T5 병렬로 진행해도 될까요?" 류 게이트 | 룰 2 위반. plan dependencies 만족 시 자율 진행. |
+| 매 task 완료 후 "다음 task 진입할까요?" 게이트 | 룰 3 위반. 모드 선택 = 진행 위임. |
+| "같은 파일이라 묶을까요?" 게이트 | 룰 2 위반. 3-AND 룰 (v2.0.1+) 으로 자동 판정. |
+| BLOCKED → 곧장 사용자 재질문 (self-correct skip) | 룰 4 위반. 자가 복구 우선. |
+| dispatch model 변경 시 게이트 | 룰 2 위반. plan 의 `**Model**:` 필드 우선. |
+| 변수명 / format / import 순서 게이트 | 룰 2 위반. plan byte-copy 우선, 없으면 자율. |
+| 사용자 모드 선택 무시하고 inline → subagent 자동 전환 | 룰 1 위반. 모드 변경은 명시 동의 필수. |
+| 모든 mid-flight 결정을 "안전성" 명목으로 게이트 | 과보호. 룰 1 7 케이스 외엔 자율. |
+| "이렇게 진행할까요?" 류 prose 자연어 질문 | AskUserQuestion 룰 위반. (yes/no) 도구 사용 강제. |
+| "옵션 1: ... 옵션 2: ... 어느 쪽?" prose 멀티 옵션 | AskUserQuestion options 사용. |
+| 마크다운 체크박스 / numbered list 로 사용자 선택 유도 (prose) | AskUserQuestion 사용. |
+| critical 재질문을 prose 로 ("force-push 해도 될까요?") | critical 일수록 AskUserQuestion + 알람 fire 필수. |
+| AskUserQuestion 호출 직후 prose 추가 질문 (이중 질문) | 한 turn 한 도구 호출 / 답변 흐름 보존. |
+| "Y/N?" 한 글자 응답 유도 prose | AskUserQuestion (yes/no) 사용. |
+| skill body boilerplate 만 따르고 ad-hoc 결정엔 prose | CLAUDE.md 글로벌 룰 위반. 전역 적용. |
+| AskUserQuestion 호출이 overhead 라며 prose fallback | 일관성 ≫ 호출 비용. |
