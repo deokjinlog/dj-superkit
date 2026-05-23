@@ -630,3 +630,47 @@ grep -c "silent log monitor (v2.4+)" skills/generating-html/SKILL.md
 ```
 
 요약: v2.4 메이저 — A 광범위 (10+ skill + 10+ commands + README + CLAUDE.md) + B 4 룰 (generating-html + auto-* 3 race delay + `/sync-html --check`). atomic 처리.
+
+## --no-ask 플래그 ↔ 8 skill body 결합 (v2.5+)
+
+`--no-ask` 플래그는 8 skill body 의 분기 sub-section 으로 구현. 사용자가 슬래시 명령에 `--no-ask` 토큰 명시 시에만 진입. 메인 자체 판단 활성화 X.
+
+### 적용 범위 (8 skill)
+
+- anchor 본격 4 (brain / design / write / auto-brain): "사용자 질문 룰" 섹션 직후 sub-section
+- anchor 짧은 reference 4 (executing / auto-design / auto-write / auto-execute): body 끝 sub-section
+- og-* / fast-tasks / worktree-merge-back — 비적용 (회귀 catch grep 으로 보장)
+
+### 핵심 룰
+
+- 도구 호출 0 보장 (AskUserQuestion 흐름 전 구간 호출 X)
+- 게이트 자체는 살아 있음 (질문은 그대로, 도구만 우회)
+- skill 진입 시 1회 boilerplate prose (`ℹ️ --no-ask 모드 진입 ...`)
+- 위험 명령 진입 직전 prose 보강 (`⚠️ 위험 명령 진입 — 응답 기다림`)
+- auto-* 4 의 내부 escalation 경로 (BLOCKED 자가복구 / critical 7 재질문 / Other 모호 응답) 도 도구 호출 0 보장
+
+### 회귀 catch grep (release 직전 메인 dogfood)
+
+```bash
+grep -c "--no-ask 플래그 (v2.5+)" \
+  skills/brainstorming/SKILL.md \
+  skills/designing-direction/SKILL.md \
+  skills/writing-plans/SKILL.md \
+  skills/executing-plans/SKILL.md \
+  skills/auto-brainstorming/SKILL.md \
+  skills/auto-designing-direction/SKILL.md \
+  skills/auto-writing-plans/SKILL.md \
+  skills/auto-executing-plans/SKILL.md
+# expected: 각 ≥ 1
+
+grep -l "--no-ask" \
+  skills/og-brainstorming/SKILL.md \
+  skills/og-designing-direction/SKILL.md \
+  skills/og-writing-plans/SKILL.md \
+  skills/og-executing-plans/SKILL.md \
+  commands/fast-tasks.md \
+  skills/worktree-merge-back/SKILL.md 2>/dev/null
+# expected: empty
+```
+
+요약: 8 skill body 분기 + 8 commands 안내 + CLAUDE.md 결합 메모 + 6 manifest bump = 23 파일 atomic patch.
