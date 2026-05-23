@@ -1,6 +1,6 @@
 {
   "name": "js-super",
-  "description": "한국형 spec-driven 워크플로우 (요구사항 → 개발방향 → 구현계획서) + 변경이력 + 위험 주석 + API 자동테스트. superpowers 5.0.7 기반.",
+  "description": "프로덕션 코드를 안전하게 만들고 실용적으로 만드는 에이전틱 플러그인",
   "version": "2.4.0",
   "author": {
     "name": "이진섭",
@@ -11,10 +11,11 @@
   "license": "MIT",
   "keywords": [
     "skills",
-    "korean",
-    "spec-driven",
     "workflow",
-    "api-testing",
+    "production",
+    "safety",
+    "subagent",
+    "wave-parallel",
     "claude-code",
     "claude-code-plugin"
   ],
