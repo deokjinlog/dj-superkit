@@ -476,3 +476,31 @@ The upstream `subagent-driven-development` is NOT offered in this handoff. Invok
 - `change-history` — entry recording on save
 - `executing-plans` / `subagent-driven-development` — downstream execution
 - `risk-annotation` — taxonomy used in §2 위험 코드 지점
+
+## 승인 게이트 / multi-choice 결정 = AskUserQuestion 도구 (v2.3.6+)
+
+산출물 (PRD / tech-design / impl-plan) 작성 완료 후 사용자에게 **승인 / 수정 / 다른 방향** 류 multi-choice 결정을 요청할 때 → **반드시 `AskUserQuestion` 도구로 호출**. prose 자연어 멀티 옵션 금지.
+
+### Why
+
+- `Notification.elicitation_dialog` 매처 fire → OS 알람 (사용자 백그라운드 작업 시 catch)
+- prose multi-choice 는 알람 X → 응답 멈춤
+- "Other" / 자유 응답 / multiSelect / preview 등 도구 기능 활용
+
+### 적용 케이스
+
+- 산출물 ("이대로 진행 / 수정 필요 / 다른 방향") 게이트
+- alternatives 2-3 안 사용자 선택
+- partial 수정 후 재승인
+
+기존 v2.0.3+ Socratic clarifying Q boilerplate + v2.1.1+ Other / 모호 응답 처리 룰 보존 (변경 X). 본 룰은 그 위에 multi-choice 결정 게이트 시점 명시 보강. CLAUDE.md "AskUserQuestion 도구 우선 (v2.3.5+)" 글로벌 룰의 PRD 흐름 측 boilerplate.
+
+### Anti-Patterns
+
+| 안티 패턴 | 이유 |
+|---|---|
+| "승인 / 수정 / 다른 방향 — 어느 쪽이신지 알려주십시오." prose | AskUserQuestion options 사용. |
+| 마크다운 numbered list (`1. ... 2. ... 3. ...`) 로 선택 유도 | AskUserQuestion options 사용. |
+| "Y/N?" / "yes/no?" 한 글자 응답 유도 prose | AskUserQuestion (yes/no) 사용. |
+| "어느 쪽?" / "어떤 안?" prose 멀티 옵션 | AskUserQuestion options 사용. |
+| 산출물 작성 후 prose "검토 부탁" 만 던지고 응답 대기 | multi-choice 있으면 도구. 단순 보고는 OK. |
