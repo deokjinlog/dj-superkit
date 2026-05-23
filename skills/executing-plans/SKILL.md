@@ -341,6 +341,12 @@ prose 질문 좁은 예외:
 
 본 룰은 프로젝트 `CLAUDE.md` 의 글로벌 "AskUserQuestion 도구 우선 (v2.3.5+)" 룰의 skill body 측 cross-reference.
 
+## --no-ask 플래그 (v2.5+) — 짧은 reference
+
+본 skill 흐름은 `AskUserQuestion` 호출이 본문에 명시 X (clarifying Q 자체가 prose default). `--no-ask` 플래그 진입 시 추가 분기 없음 — 본문 그대로 도구 호출 0 보장.
+
+단 내부 escalation (BLOCKED 자가복구 실패 / critical 7 재질문 / Other 모호 응답) 에서도 도구 호출 0 보장. 자세한 룰은 `skills/brainstorming/SKILL.md` 의 `### 예외 — \`--no-ask\` 플래그 (v2.5+)` 답습.
+
 ## Anti-Patterns (v2.3.5)
 
 | 안티 패턴 | 이유 |
