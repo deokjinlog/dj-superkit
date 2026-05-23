@@ -33,6 +33,29 @@ Take <slug>-requirements.md + <slug>-tech-design.md as inputs and produce a comp
 Both <slug>-requirements.md and <slug>-tech-design.md must exist in the current feature folder. If either is missing, instruct the user to run /brainstorm or /design first.
 </HARD-GATE>
 
+### 예외 — `--no-ask` 플래그 (v2.5+)
+
+사용자가 슬래시 명령에 `--no-ask` 토큰을 **명시** 한 경우에만 진입. 메인 자체 판단으로 활성화 X.
+
+- 모든 사용자 질문을 prose (메인 turn 자유 텍스트) 로 처리
+- `AskUserQuestion` 도구 호출 **0 보장**
+- 게이트 자체는 살아 있음 — 사용자 prose 응답 기다림
+- 알람 fire X (사용자가 명시 invoke 했으니 인지 가정)
+
+#### skill 진입 시 1회 boilerplate
+
+skill 진입 직후 다음 한 줄을 prose 로 출력:
+
+> ℹ️ `--no-ask` 모드 진입 — AskUserQuestion 도구 호출 X, 응답 알람 X. 백그라운드 작업 중이면 응답 시점을 직접 체크해주세요.
+
+#### 위험 명령 진입 직전 보강
+
+critical 7 케이스 (파일 삭제 / `git push --force` / DB migration / mass commit / 외부 메시지 등) 실행 직전에는 다음 한 줄을 prose 로 출력:
+
+> ⚠️ 위험 명령 진입 — 응답 기다림. 백그라운드 작업 중이면 직접 catch 해주세요.
+
+`⚠️` 마커 + 별도 줄로 일반 prose 보다 두드러지게.
+
 ## Checklist
 
 You MUST create a TaskCreate task for each of these items and complete them in order:

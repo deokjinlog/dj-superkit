@@ -31,6 +31,33 @@ Notification 훅 (`elicitation_dialog` 매처) 이 알람을 발화하려면 도
 
 사용자가 "Other" 자유 응답 또는 "모르겠음 / 이해 안 됨" 류 답변 catch 시 → **그 질문만 단독 재호출 + prose 설명 추가**. 다음 단계 자동 진행 X (anchor 질문 강제 X 룰은 명확 yes/no 답변에만 적용).
 
+### 예외 — `--no-ask` 플래그 (v2.5+)
+
+사용자가 슬래시 명령에 `--no-ask` 토큰을 **명시** 한 경우에만 진입. 메인 자체 판단으로 활성화 X.
+
+- 모든 사용자 질문을 prose (메인 turn 자유 텍스트) 로 처리
+- `AskUserQuestion` 도구 호출 **0 보장**
+- 게이트 자체는 살아 있음 — 사용자 prose 응답 기다림
+- 알람 fire X (사용자가 명시 invoke 했으니 인지 가정)
+
+#### skill 진입 시 1회 boilerplate
+
+skill 진입 직후 다음 한 줄을 prose 로 출력:
+
+> ℹ️ `--no-ask` 모드 진입 — AskUserQuestion 도구 호출 X, 응답 알람 X. 백그라운드 작업 중이면 응답 시점을 직접 체크해주세요.
+
+#### 위험 명령 진입 직전 보강
+
+critical 7 케이스 (파일 삭제 / `git push --force` / DB migration / mass commit / 외부 메시지 등) 실행 직전에는 다음 한 줄을 prose 로 출력:
+
+> ⚠️ 위험 명령 진입 — 응답 기다림. 백그라운드 작업 중이면 직접 catch 해주세요.
+
+`⚠️` 마커 + 별도 줄로 일반 prose 보다 두드러지게.
+
+#### auto-* 4 skill 추가 룰
+
+내부 escalation 경로 (BLOCKED 자가복구 실패 / critical 7 재질문 / Other 모호 응답 재질문) 에서도 `AskUserQuestion` 호출 **0 보장**. clarifying Q 자체는 그대로 prose 유지.
+
 ## Process
 
 ### Step 1 — Slug 추론 + 폴더 생성
