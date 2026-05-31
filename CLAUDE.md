@@ -977,3 +977,77 @@ grep -cF "## /remove-skill 빌더 결합 (v2.6.1+)" CLAUDE.md
 - `using-superpowers` 본문 변경 X
 
 요약: 1 본문 (`commands/remove-skill.md`) + `commands/new-skill.md` 3 patch + CLAUDE.md 결합 메모 (v2.6.1+ 분기 + 신규 섹션) + 6 manifest = 9 파일 atomic patch (Wave 0~3 + spec + [log] 묶음 commit).
+
+## new-skill-enhanced — 스코프 분기 + 출처 표식 결합 (v2.7+)
+
+v2.7+ 에서 skill 빌더 3종 고도화. `/new-skill` 생성 스코프(프로젝트/전체) 분기 + 출처 표식 마커 도입, `/remove-skill` 출처 한정 삭제, 신규 `/list-skills` 출처 한정 조회. spec: `docs/features/2026-05-31-new-skill-enhanced/`.
+
+### 출처 표식 규약 (핵심 — 3 command 공유)
+
+`/new-skill` 이 생성 시 skill 디렉토리에 `.js-super-skill.json` 마커 파일을 함께 작성한다:
+
+```json
+{"generated_by": "js-super:new-skill", "scope": "<project|global>", "created": "<ISO ts>"}
+```
+
+판별 규칙: **어떤 skill 이 "js-super 가 만든 것" ⇔ 그 디렉토리에 `.js-super-skill.json` 존재.** `/list-skills` 필터 기준 + `/remove-skill` 차단 기준. 이 규약을 바꾸면 3 command 동시 수정 (한쪽만 바꾸면 생성 마커와 조회/삭제 판별이 desync).
+
+### 적용 범위 (3 본문 + 6 manifest = 9 파일)
+
+- `commands/new-skill.md` (수정) — `--project`/`--global` 플래그 + § 2.5 스코프 결정(미지정 시 prose 질문, 조용한 기본값 없음) + `<SKILL_BASE>` 경로 일반화 + § 5 마커 작성
+- `commands/remove-skill.md` (수정) — 프로젝트+전체 양쪽 탐색 + § 4-0 마커 차단 게이트(`--force` 로도 우회 X) + § 4-0' 모호 처리 + § 5-5 차단 보고
+- `commands/list-skills.md` (신규) — 두 스코프 스캔 + 마커 필터 + 스코프 라벨 + 프로젝트 경로 표시
+- `CLAUDE.md` (본 섹션)
+- 6 manifest — 2.6.2 → 2.7.0
+
+### 핵심 룰
+
+- **D-1 마커 = 출처 표식** — frontmatter 필드(로더 호환 리스크) / 중앙 manifest(desync + FR-2 "다른 프로젝트 안 보임" 충돌) 대신 디렉토리 안 마커 파일 채택. `test -f` 만으로 deterministic 판별
+- **D-2 생성 스코프 미지정 시 질문** — 조용한 기본값 없음 (사용자가 매번 프로젝트/전체 선택)
+- **D-3 조회/삭제 범위 = 현재 프로젝트 cwd `.claude/skills` + 전체** — 다른 프로젝트 스캔 X (중앙 레지스트리 없음)
+- **D-4 삭제 차단은 `--force` 로도 우회 X** — 마커 부재 = 무조건 차단 (핵심 안전 게이트)
+- **D-5 빌더 3종 모두 command** — `skills/` 아래 변환 X (자동 발동 사고 방지, META-BUILDER 룰 답습)
+- **D-6 마커는 신뢰 신호일 뿐 보안 경계 아님** — 수동 복사 위조 가능, 낮은 빈도 수용
+
+### 회귀 패턴 (한쪽만 변경 시)
+
+| 누락 | 증상 |
+|---|---|
+| new-skill 마커 작성 누락 | 생성한 skill 이 `/list-skills` 에 안 뜨고 `/remove-skill` 로도 못 지움 |
+| remove-skill § 4-0 차단 게이트 약화 | 비-js-super skill 삭제 가능 → v2.7 핵심 안전성 손상 |
+| `--force` 가 마커 게이트 우회 | 동일 — 안전성 손상 |
+| list-skills 다른 프로젝트 스캔 추가 | FR-2 "다른 프로젝트 안 보임" 위반 + 빌더 단순성 손상 |
+| 마커 규약 키(`generated_by`) 한 command 만 변경 | 생성 마커와 조회/삭제 판별 desync |
+
+### 회귀 catch grep
+
+```bash
+# 3 command 마커 규약 공유
+grep -lF ".js-super-skill.json" commands/new-skill.md commands/remove-skill.md commands/list-skills.md
+# expected: 3 lines
+
+# remove-skill 차단 게이트 존재
+grep -F "4-0. 출처 표식 검사" commands/remove-skill.md
+# expected: >= 1
+
+# new-skill 스코프 결정 단계
+grep -F "2.5. 스코프 결정" commands/new-skill.md
+# expected: >= 1
+
+# list-skills 신규 + 빌더=command 룰
+test -f commands/list-skills.md && test ! -d skills/list-skills && echo OK
+# expected: OK
+
+# 결합 메모 본문 존재
+grep -cF "## new-skill-enhanced — 스코프 분기 + 출처 표식 결합 (v2.7+)" CLAUDE.md
+# expected: >= 1
+```
+
+### 영향 범위
+
+- 3 command 본문 + CLAUDE.md + 6 manifest. 다른 skill / scripts / hooks / settings 영향 0
+- 사용자 환경 출력 — `<project-root>/.claude/skills/` 또는 `~/.claude/skills/` (js-super 저장소 외)
+- `using-superpowers` 본문 변경 X
+- 범위 밖: 비-js-super 강제 삭제 우회 / 옛 마커 없는 skill 마이그레이션 / 다른 프로젝트 조회·삭제
+
+요약: 3 command 본문 + CLAUDE.md 결합 메모 + 6 manifest = 10 파일 atomic patch (Wave 0~5 + spec + [log] 묶음 commit).
