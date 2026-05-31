@@ -178,11 +178,11 @@ js-super 자체 skill 의 Checklist 본문에 박힌 task 명칭은 **사용자 
 
 ## auto-flow ↔ 기존 4 skill mirror 결합 (v1.1.17+)
 
-`auto-flow` 4 신규 skill (skills/auto-{brainstorming,designing-direction,writing-plans,executing-plans}/) 은 기존 4 skill 의 핵심 로직을 mirror 한 패턴 (og-* 와 동일). 다음 룰 적용:
+`auto-flow` 4 신규 skill (skills/auto-{brainstorming,tech-design,writing-plans,executing-plans}/) 은 기존 4 skill 의 핵심 로직을 mirror 한 패턴 (og-* 와 동일). 다음 룰 적용:
 
-- **기존 4 skill body 변경 0** — auto-* 본문은 self-contained mirror. 본 4 skill 어떤 라인도 손대지 않음. 회귀 catch: `git diff HEAD~1 HEAD -- skills/{brainstorming,designing-direction,writing-plans,executing-plans}/SKILL.md` empty 보장.
+- **기존 4 skill body 변경 0** — auto-* 본문은 self-contained mirror. 본 4 skill 어떤 라인도 손대지 않음. 회귀 catch: `git diff HEAD~1 HEAD -- skills/{brainstorming,tech-design,writing-plans,executing-plans}/SKILL.md` empty 보장.
 - **Gate #14 (실행 모드 선택) override 명시** — v1.1.12+ "자동승인 절대 X" 룰을 auto-executing-plans 가 명시 override. 일반 `/execute-plan` 영향 0 (게이트 그대로). auto-* 명시적 invoke 시에만 작동.
-- **generating-html fire-and-forget dispatch** (v2.3.2+, v1.1.17 D9 amend 반전) — auto-brainstorming Step 4.5 / auto-designing-direction Step 4.5 / auto-writing-plans Step 4.6 에서 `run_in_background: true` 로 dispatch. 메인 latency 거의 0 + 사용자가 transition notice 시점에 `.html` 검토 가능 (Type "stop" abort). **auto-executing-plans 는 제외** (코드 실행 단계 — 의미 없음). 동기 호출 (sync wait) 은 여전히 금지. 회귀 catch: 3 skill 본문에 `Step 4.5\|Step 4.6` + `run_in_background: true` 매치 필수.
+- **generating-html fire-and-forget dispatch** (v2.3.2+, v1.1.17 D9 amend 반전) — auto-brainstorming Step 4.5 / auto-tech-design Step 4.5 / auto-writing-plans Step 4.6 에서 `run_in_background: true` 로 dispatch. 메인 latency 거의 0 + 사용자가 transition notice 시점에 `.html` 검토 가능 (Type "stop" abort). **auto-executing-plans 는 제외** (코드 실행 단계 — 의미 없음). 동기 호출 (sync wait) 은 여전히 금지. 회귀 catch: 3 skill 본문에 `Step 4.5\|Step 4.6` + `run_in_background: true` 매치 필수.
 - **AskUserQuestion 호출 부재** — auto-* 본문 어디에도 AskUserQuestion 호출 X. clarifying Q 는 메인 turn 의 일반 prose 질의로 처리.
 - **Visual Companion / 카테고리 미니질문 / question plan 동의 등 PRD-mode 분기 부재** — Socratic only (D3).
 
@@ -334,7 +334,7 @@ v2.1.1+ 에서 6곳 (5 skill + 1 command) 에 "Other / 모호 응답 처리" boi
 ### 적용 6곳
 
 - `skills/brainstorming/SKILL.md`
-- `skills/designing-direction/SKILL.md`
+- `skills/tech-design/SKILL.md`
 - `skills/writing-plans/SKILL.md`
 - `skills/auto-brainstorming/SKILL.md`
 - `skills/worktree-merge-back/SKILL.md`
@@ -358,7 +358,7 @@ v2.1.1+ 에서 6곳 (5 skill + 1 command) 에 "Other / 모호 응답 처리" boi
 ```bash
 grep -c "Other / 모호 응답 처리 (v2.1.1+)" \
   skills/brainstorming/SKILL.md \
-  skills/designing-direction/SKILL.md \
+  skills/tech-design/SKILL.md \
   skills/writing-plans/SKILL.md \
   skills/auto-brainstorming/SKILL.md \
   skills/worktree-merge-back/SKILL.md \
@@ -404,7 +404,7 @@ AI 흐름 영향 0 (v2.2.0 답습 — 모든 skill `.md` 만 읽음).
 ### 영향 범위
 
 - `generating-html` Procedure + `change-propagation` Acceptance + 신규 `/sync-html` command 만 영향
-- `code-pretty` / 4 워크플로 skill (brainstorming/designing-direction/writing-plans/executing-plans) / `change-history` / `auto-*` / `og-*` 영향 0
+- `code-pretty` / 4 워크플로 skill (brainstorming/tech-design/writing-plans/executing-plans) / `change-history` / `auto-*` / `og-*` 영향 0
 - AI 흐름 모든 skill `.md` 만 읽음 (영향 0 보장)
 - `.html` 은 사람 전용 derived view, gitignored
 - silent log (`.js-super/html-regen.log`) — gitignored, debug 용
@@ -419,7 +419,7 @@ grep -nE "https?://.*\.(css|js)|read_file.*\.html|Read.*\.html" \
 
 # Anti-Pattern: 다른 skill 본문에 .html 참조
 grep -rn "\.html" \
-  skills/{brainstorming,designing-direction,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
 # expected: 0 (.html 흐름은 generating-html 전용)
 
 # v2.2.1+ Anti-Pattern: 메인이 결과 대기 (fire-and-forget 위반)
@@ -631,7 +631,7 @@ grep -c "한국어 친화 안내 톤 (v2.4+)" CLAUDE.md
 회귀 catch grep:
 
 ```bash
-grep -c "5초 delay" skills/auto-brainstorming/SKILL.md skills/auto-designing-direction/SKILL.md skills/auto-writing-plans/SKILL.md
+grep -c "5초 delay" skills/auto-brainstorming/SKILL.md skills/auto-tech-design/SKILL.md skills/auto-writing-plans/SKILL.md
 # expected: 각 ≥ 1
 
 grep -c "silent log monitor (v2.4+)" skills/generating-html/SKILL.md
@@ -663,18 +663,18 @@ grep -c "silent log monitor (v2.4+)" skills/generating-html/SKILL.md
 ```bash
 grep -c "--no-ask 플래그 (v2.5+)" \
   skills/brainstorming/SKILL.md \
-  skills/designing-direction/SKILL.md \
+  skills/tech-design/SKILL.md \
   skills/writing-plans/SKILL.md \
   skills/executing-plans/SKILL.md \
   skills/auto-brainstorming/SKILL.md \
-  skills/auto-designing-direction/SKILL.md \
+  skills/auto-tech-design/SKILL.md \
   skills/auto-writing-plans/SKILL.md \
   skills/auto-executing-plans/SKILL.md
 # expected: 각 ≥ 1
 
 grep -l "--no-ask" \
   skills/og-brainstorming/SKILL.md \
-  skills/og-designing-direction/SKILL.md \
+  skills/og-tech-design/SKILL.md \
   skills/og-writing-plans/SKILL.md \
   skills/og-executing-plans/SKILL.md \
   commands/fast-tasks.md \
@@ -760,7 +760,7 @@ v2.5.2+ 에서 9 skill body 에 `## Checklist` 섹션 신규 추가 — `using-s
 
 ### 적용 범위 (9 skill)
 
-- **auto-* 4** — `auto-brainstorming`, `auto-designing-direction`, `auto-writing-plans`, `auto-executing-plans` (auto-flow 4 단계)
+- **auto-* 4** — `auto-brainstorming`, `auto-tech-design`, `auto-writing-plans`, `auto-executing-plans` (auto-flow 4 단계)
 - **반쪽 페어 1** — `executing-plans` (writing-plans 페어, v2.5.1 까지 비대칭이었음)
 - **cascading 1** — `change-propagation` (impact matrix → 갱신 cascading)
 - **subagent 1** — `js-super-sub-driven` (Wave 별 진행)
@@ -793,7 +793,7 @@ v2.5.2+ 에서 9 skill body 에 `## Checklist` 섹션 신규 추가 — `using-s
 
 ```bash
 # 각 skill 의 Step 헤더 ↔ Checklist 항목 매치
-for f in skills/auto-brainstorming/SKILL.md skills/auto-designing-direction/SKILL.md \
+for f in skills/auto-brainstorming/SKILL.md skills/auto-tech-design/SKILL.md \
          skills/auto-writing-plans/SKILL.md skills/auto-executing-plans/SKILL.md \
          skills/executing-plans/SKILL.md skills/change-propagation/SKILL.md \
          skills/js-super-sub-driven/SKILL.md skills/og-writing-plans/SKILL.md \
@@ -812,7 +812,7 @@ done
 # 9 skill 모두 ## Checklist 섹션 존재
 grep -lF "## Checklist" \
   skills/auto-brainstorming/SKILL.md \
-  skills/auto-designing-direction/SKILL.md \
+  skills/auto-tech-design/SKILL.md \
   skills/auto-writing-plans/SKILL.md \
   skills/auto-executing-plans/SKILL.md \
   skills/executing-plans/SKILL.md \

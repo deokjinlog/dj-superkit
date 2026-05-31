@@ -1,6 +1,6 @@
 ---
 name: verifying-spec
-description: Use immediately after writing <slug>-tech-design.md (via designing-direction) or <slug>-implementation-plan.md (via writing-plans), before final user handoff. Performs main-agent self-verification — A) consistency cross-check between target MD and all upstream MDs, plus C) code impact analysis (file existence, callers, side-effect candidates) — and produces a structured 4-axis report for user decision.
+description: Use immediately after writing <slug>-tech-design.md (via tech-design) or <slug>-implementation-plan.md (via writing-plans), before final user handoff. Performs main-agent self-verification — A) consistency cross-check between target MD and all upstream MDs, plus C) code impact analysis (file existence, callers, side-effect candidates) — and produces a structured 4-axis report for user decision.
 ---
 
 # Verifying Spec (Main-Agent Verification Gate)
@@ -16,7 +16,7 @@ EXCEPTION: If code impact analysis requires extensive grep across many files (�
 
 | Phase | Target MD | Upstream MDs |
 |---|---|---|
-| End of `designing-direction` | <slug>-tech-design.md | [<slug>-requirements.md] |
+| End of `tech-design` | <slug>-tech-design.md | [<slug>-requirements.md] |
 | End of `writing-plans` | <slug>-implementation-plan.md | [<slug>-requirements.md, <slug>-tech-design.md] |
 
 <slug>-requirements.md is the source of truth and is therefore not a verification target.
@@ -31,7 +31,7 @@ digraph verify_flow {
     "Compose 4-axis report" [shape=box];
     "Present to user" [shape=diamond];
     "User decision:\nproceed / no" [shape=diamond];
-    "Re-enter prior skill\n(designing-direction or writing-plans)" [shape=box];
+    "Re-enter prior skill\n(tech-design or writing-plans)" [shape=box];
     "Proceed" [shape=doublecircle];
 
     "Read target MD + all upstream MDs" -> "A. Consistency check";
@@ -40,7 +40,7 @@ digraph verify_flow {
     "C. Code impact analysis" -> "Compose 4-axis report";
     "Compose 4-axis report" -> "Present to user";
     "Present to user" -> "User decision:\nproceed / fix";
-    "User decision:\nproceed / no" -> "Re-enter prior skill\n(designing-direction or writing-plans)" [label="no"];
+    "User decision:\nproceed / no" -> "Re-enter prior skill\n(tech-design or writing-plans)" [label="no"];
     "User decision:\nproceed / no" -> "Proceed" [label="proceed"];
 }
 ```
@@ -129,7 +129,7 @@ A verification run is complete when ALL hold:
 
 ## Related Skills
 
-- `designing-direction` — invokes this on save
+- `tech-design` — invokes this on save
 - `writing-plans` — invokes this on save
 - `risk-annotation` — supplies the 3-checklist used in §C
 - `change-history` — captures the verification outcome in the next entry's 영향범위 field

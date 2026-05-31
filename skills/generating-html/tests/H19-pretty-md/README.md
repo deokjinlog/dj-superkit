@@ -49,7 +49,7 @@ awk '/^## 변경이력$/,/^$/' <slug>-requirements.md | sha256sum
 ```bash
 # /pretty-md 가 자동 발동 경로로 박혀 있는지 (의도 외)
 grep -rn "/pretty-md" \
-  skills/{brainstorming,designing-direction,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
 # expected: 0 (자동 발동 경로 없음 — opt-in 호출만)
 
 # subagent prompt 에 footer byte-equal 룰 누락

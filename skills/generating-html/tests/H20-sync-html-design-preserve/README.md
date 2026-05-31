@@ -55,7 +55,7 @@ grep -nE "/sync-html" skills/change-propagation/SKILL.md
 # expected: 안내문 표현만 (자동 호출 X). "필요시 /sync-html" 등 사용자 안내 문구만 허용.
 
 grep -rn "/sync-html" \
-  skills/{brainstorming,designing-direction,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
 # expected: 0 (안내문 외 자동 호출 경로 없음)
 
 # subagent prompt 에 디자인 보존 룰 누락

@@ -84,7 +84,7 @@ flowchart LR
 
     A["/brainstorm"]:::cmd --> B[요구사항.md]:::doc
     B --> G1{확인 게이트}:::gate
-    G1 --> C["/design"]:::cmd
+    G1 --> C["/tech-design"]:::cmd
     C --> D[기술설계.md]:::doc
     D --> G2{확인 게이트}:::gate
     G2 --> E["/write-plan"]:::cmd
@@ -115,7 +115,7 @@ flowchart LR
 
 ```
 /brainstorm 사용자 잔액 출금 기능
-/design
+/tech-design
 /write-plan
 /execute-plan
 ```
@@ -464,7 +464,7 @@ flowchart TD
 | 명령 | 결과물 | 한 줄 설명 |
 |---|---|---|
 | `/brainstorm <주제>` | `요구사항.md` | PRD 또는 자유 모드 선택 → 요구사항 정리 |
-| `/design` | `기술설계.md` | 요구사항 기반 기술 설계 |
+| `/tech-design` | `기술설계.md` | 요구사항 기반 기술 설계 |
 | `/write-plan` | `구현계획.md` | task 단위로 잘게 쪼개기 |
 | `/execute-plan` | 코드 + 흔적 | 인라인 / 서브에이전트 모드 선택 |
 | `/auto-*` 4 개 | 같은 결과물 | 게이트 최소화 자동 진행 |
@@ -545,7 +545,7 @@ PR 리뷰 시 `grep "# RISK"` 한 줄로 catch.
 ```
 docs/features/2026-05-23-잔액-출금/
 ├── 잔액-출금-requirements.md      ← /brainstorm
-├── 잔액-출금-tech-design.md       ← /design
+├── 잔액-출금-tech-design.md       ← /tech-design
 └── 잔액-출금-implementation-plan.md ← /write-plan
 ```
 
@@ -586,11 +586,11 @@ docs/features/2026-05-23-잔액-출금/
 def charge(user_id, amount):
     return payment_gateway.charge(user_id, amount)
 
-# RISK(breaking): API v1 응답 구조 변경, v1 클라이언트 깨짐 — by /design §3
+# RISK(breaking): API v1 응답 구조 변경, v1 클라이언트 깨짐 — by /tech-design §3
 def get_balance_v2(user_id) -> dict:
     ...
 
-# RISK(race): 동시 출금 시 잔액 차감 충돌 가능 — by /design §5
+# RISK(race): 동시 출금 시 잔액 차감 충돌 가능 — by /tech-design §5
 def withdraw(user_id, amount):
     balance = db.get_balance(user_id)
     ...
@@ -712,9 +712,9 @@ flowchart LR
 
 <br/>
 
-**워크플로 코어 (4)** — brainstorming / designing-direction / writing-plans / executing-plans
+**워크플로 코어 (4)** — brainstorming / tech-design / writing-plans / executing-plans
 
-**자동 흐름 (4)** *(v1.1.17+)* — auto-brainstorming / auto-designing-direction / auto-writing-plans / auto-executing-plans
+**자동 흐름 (4)** *(v1.1.17+)* — auto-brainstorming / auto-tech-design / auto-writing-plans / auto-executing-plans
 
 **upstream 원본 (3)** — og-brainstorming / og-writing-plans / og-executing-plans
 

@@ -1,6 +1,6 @@
 ---
 name: auto-brainstorming
-description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-designing-direction 자동 invoke. 사용자 입력은 clarifying Q 답변에만. AskUserQuestion / Visual Companion / generating-html 호출 X.
+description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-tech-design 자동 invoke. 사용자 입력은 clarifying Q 답변에만. AskUserQuestion / Visual Companion / generating-html 호출 X.
 ---
 
 # Auto Brainstorming → <slug>-requirements.md (Socratic auto)
@@ -66,7 +66,7 @@ critical 7 케이스 (파일 삭제 / `git push --force` / DB migration / mass c
 - [ ] Step 4 — 산출물 자동 작성 (<slug>-requirements.md)
 - [ ] Step 4.5 — generating-html fire-and-forget dispatch + 5초 race delay
 - [ ] Step 5 — change-history 자동 (첫 [요구사항-수정] entry)
-- [ ] Step 6 — Transition notice + auto-designing-direction invoke
+- [ ] Step 6 — Transition notice + auto-tech-design invoke
 
 ## Process
 
@@ -117,13 +117,13 @@ mkdir -p docs/features/$(date +%Y-%m-%d)-<slug>/
 
 `change-history` skill invoke → 첫 `[요구사항-수정]` entry append. CH-id 자동 생성.
 
-### Step 6 — Transition notice + auto-designing-direction invoke
+### Step 6 — Transition notice + auto-tech-design invoke
 
 ```
-ℹ️ /design 단계로 자동 넘어갑니다. 멈추려면 "stop" 입력해주세요.
+ℹ️ /tech-design 단계로 자동 넘어갑니다. 멈추려면 "stop" 입력해주세요.
 ```
 
-다음 사용자 turn 의 입력에 `parse_interrupt` (scripts/auto_flow.py) 매치 시 cleanly exit + `ℹ️ 알겠습니다. /design 은 나중에 직접 실행해주세요.` 안내. 매치 X 시 즉시 `js-super:auto-designing-direction` skill invoke.
+다음 사용자 turn 의 입력에 `parse_interrupt` (scripts/auto_flow.py) 매치 시 cleanly exit + `ℹ️ 알겠습니다. /tech-design 은 나중에 직접 실행해주세요.` 안내. 매치 X 시 즉시 `js-super:auto-tech-design` skill invoke.
 
 ## Anti-Patterns
 
@@ -137,6 +137,6 @@ mkdir -p docs/features/$(date +%Y-%m-%d)-<slug>/
 
 ## Related Skills
 
-- `auto-designing-direction` — 다음 단계
+- `auto-tech-design` — 다음 단계
 - `change-history` — 첫 entry append
 - `scripts/auto_flow.parse_interrupt` — interrupt 키워드 catch

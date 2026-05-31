@@ -68,7 +68,7 @@ awk '/<style>/,/<\/style>/' <slug>-requirements.html | sha256sum
 ```bash
 # --rebuild 자동 호출 박힘 (사용자 의도 우회)
 grep -rn -- "--rebuild" \
-  skills/{brainstorming,designing-direction,writing-plans,executing-plans,change-propagation,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,change-propagation,auto-*,og-*}/SKILL.md
 # expected: 0 (사용자 명시 호출만)
 
 # 자동 백업 / 자동 회복 도입 시도

@@ -23,7 +23,7 @@ When you call `TaskCreate` (or any task-creating tool), the task `subject` and `
 - If the user converses in English → write in English
 - If mixed → default to the language of the user's most recent substantive message
 
-This applies to ALL task creation, including tasks created by skills with Checklist sections (brainstorming, designing-direction, writing-plans, executing-plans). Do NOT default to English when the user is clearly working in Korean — the task list is part of the user's reading experience.
+This applies to ALL task creation, including tasks created by skills with Checklist sections (brainstorming, tech-design, writing-plans, executing-plans). Do NOT default to English when the user is clearly working in Korean — the task list is part of the user's reading experience.
 
 The same rule applies to user-facing announcements ("Using X skill to do Y...") and progress notices: mirror the user's language unless the skill explicitly mandates a fixed-language output template.
 
@@ -67,7 +67,7 @@ digraph skill_flow {
     "Invoke Skill tool" [shape=box];
     "Announce: 'Using [skill] to [purpose]'" [shape=box];
     "Has checklist?" [shape=diamond];
-    "Create TodoWrite todo per item" [shape=box];
+    "Create TaskCreate task per item" [shape=box];
     "Follow skill exactly" [shape=box];
     "Respond (including clarifications)" [shape=doublecircle];
 
@@ -81,9 +81,9 @@ digraph skill_flow {
     "Might any skill apply?" -> "Respond (including clarifications)" [label="definitely not"];
     "Invoke Skill tool" -> "Announce: 'Using [skill] to [purpose]'";
     "Announce: 'Using [skill] to [purpose]'" -> "Has checklist?";
-    "Has checklist?" -> "Create TodoWrite todo per item" [label="yes"];
+    "Has checklist?" -> "Create TaskCreate task per item" [label="yes"];
     "Has checklist?" -> "Follow skill exactly" [label="no"];
-    "Create TodoWrite todo per item" -> "Follow skill exactly";
+    "Create TaskCreate task per item" -> "Follow skill exactly";
 }
 ```
 

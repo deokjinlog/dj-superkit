@@ -18,8 +18,8 @@
 4. clarifying Q 1개: "이 피처의 핵심 user story 한 줄?"
    사용자 답변
 5. AI 자동 approach 선택 → 산출물 자동 작성 → change-history 자동
-6. ℹ️ Auto-proceeding to /design. Type "stop" to abort.
-7. auto-designing-direction → auto-writing-plans → auto-executing-plans 자동 chain
+6. ℹ️ Auto-proceeding to /tech-design. Type "stop" to abort.
+7. auto-tech-design → auto-writing-plans → auto-executing-plans 자동 chain
 8. finishing 자동 + commits N
 
 ## 매핑

@@ -5,7 +5,7 @@ description: Use when ANY MD or code is added/modified/deleted in a feature fold
 
 # Change History (Append Structured Entries)
 
-This skill defines the schema and procedure for appending entries to the `## 변경이력` footer of feature MDs. All other workflow skills (`brainstorming`, `designing-direction`, `writing-plans`, `executing-plans`, `change-propagation`, `api-auto-testing`) MUST invoke this skill on every modification.
+This skill defines the schema and procedure for appending entries to the `## 변경이력` footer of feature MDs. All other workflow skills (`brainstorming`, `tech-design`, `writing-plans`, `executing-plans`, `change-propagation`, `api-auto-testing`) MUST invoke this skill on every modification.
 
 <HARD-GATE>
 You MUST append a 변경이력 entry to the affected MD whenever you:

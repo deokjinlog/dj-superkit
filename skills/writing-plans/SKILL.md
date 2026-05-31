@@ -30,7 +30,7 @@ Notification 훅 (`elicitation_dialog` 매처) 이 알람을 발화하려면 도
 Take <slug>-requirements.md + <slug>-tech-design.md as inputs and produce a comprehensive implementation plan (`<slug>-implementation-plan.md`) decomposed into bite-sized TDD tasks. The upstream superpowers patterns (exact file paths, complete code in every step, TDD cycle, no placeholders, frequent commits) are inherited as-is. js-superpowers extends them with: change-history footer, structured "위험 코드 지점" section, and a verification gate after save.
 
 <HARD-GATE>
-Both <slug>-requirements.md and <slug>-tech-design.md must exist in the current feature folder. If either is missing, instruct the user to run /brainstorm or /design first.
+Both <slug>-requirements.md and <slug>-tech-design.md must exist in the current feature folder. If either is missing, instruct the user to run /brainstorm or /tech-design first.
 </HARD-GATE>
 
 ### 예외 — `--no-ask` 플래그 (v2.5+)
@@ -494,7 +494,7 @@ The upstream `subagent-driven-development` is NOT offered in this handoff. Invok
 ## Related Skills
 
 - `brainstorming` — upstream input (<slug>-requirements.md)
-- `designing-direction` — upstream input (<slug>-tech-design.md)
+- `tech-design` — upstream input (<slug>-tech-design.md)
 - `verifying-spec` — verification gate (active from Phase 2)
 - `change-history` — entry recording on save
 - `executing-plans` / `subagent-driven-development` — downstream execution

@@ -10,8 +10,8 @@
 
 1. brainstorming Checklist Step 6 = docs-pretty (사용자 리뷰 전 발화)
 2. brainstorming Checklist Step 7 = User reviews (prettified)
-3. designing-direction Checklist Step 6 = docs-pretty (combined approval gate 전 발화)
-4. designing-direction Checklist Step 7 = combined approval gate (prettified 본문 + verify report)
+3. tech-design Checklist Step 6 = docs-pretty (combined approval gate 전 발화)
+4. tech-design Checklist Step 7 = combined approval gate (prettified 본문 + verify report)
 5. 사용자 fix 시 메인이 raw 갱신 → 다시 Step 6 호출 → 다시 Step 7 노출
 6. change-history 첫 entry 가 logged 되면 docs-pretty STOPS firing (live doc 진입)
 

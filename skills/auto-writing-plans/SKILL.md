@@ -21,7 +21,7 @@ description: auto-flow 3단계 — requirements + tech-design 읽기 + AI 자동
 
 ### Step 1 — 입력 확인 + slug 추론
 
-`<slug>-requirements.md` + `<slug>-tech-design.md` 모두 존재 확인. 누락 시 `ℹ️ 입력이 누락됐습니다 (<누락 파일>). /auto-brainstorm 또는 /auto-design 부터 시작해주세요.` 안내 후 종료.
+`<slug>-requirements.md` + `<slug>-tech-design.md` 모두 존재 확인. 누락 시 `ℹ️ 입력이 누락됐습니다 (<누락 파일>). /auto-brainstorm 또는 /auto-tech-design 부터 시작해주세요.` 안내 후 종료.
 
 ### Step 2 — AI 자동 task 분해
 

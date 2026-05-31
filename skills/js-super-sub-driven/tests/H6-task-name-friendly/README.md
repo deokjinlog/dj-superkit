@@ -2,7 +2,7 @@
 
 ## 시나리오
 
-`/brainstorm`, `/design`, `/write-plan`, `/execute-plan` 진입 시 메인이 TaskCreate 로 만든 Checklist 항목 이름이 사용자 친화 한국어인지 검증.
+`/brainstorm`, `/tech-design`, `/write-plan`, `/execute-plan` 진입 시 메인이 TaskCreate 로 만든 Checklist 항목 이름이 사용자 친화 한국어인지 검증.
 
 ## 기대 동작
 
@@ -21,7 +21,7 @@
 ## 검증 방법
 
 ```bash
-for f in skills/brainstorming/SKILL.md skills/designing-direction/SKILL.md skills/writing-plans/SKILL.md skills/executing-plans/SKILL.md skills/finishing-a-development-branch/SKILL.md; do
+for f in skills/brainstorming/SKILL.md skills/tech-design/SKILL.md skills/writing-plans/SKILL.md skills/executing-plans/SKILL.md skills/finishing-a-development-branch/SKILL.md; do
   awk '/^## Checklist/,/^## /' "$f" | grep -cE "Invoke .* skill|Gate #|CH-[0-9]"
 done
 ```

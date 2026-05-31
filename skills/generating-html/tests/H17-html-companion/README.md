@@ -54,6 +54,6 @@ grep -nE "https?://.*\.(css|js)|read_file.*\.html|Read.*\.html" \
 
 # 다른 skill 본문에 .html 참조
 grep -rn "\.html" \
-  skills/{brainstorming,designing-direction,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
 # expected: 0
 ```

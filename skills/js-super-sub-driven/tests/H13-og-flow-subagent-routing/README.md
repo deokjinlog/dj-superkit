@@ -7,7 +7,7 @@
 가상 외부 피처 dogfood:
 
 1. 사용자: `/og-brainstorm 새-피처-이름`
-2. og-brainstorming → og-designing-direction → `/og-write-plan`
+2. og-brainstorming → og-tech-design → `/og-write-plan`
 3. plan 작성 끝 Execution Handoff 게이트 → 사용자: "1" 또는 "Subagent-Driven"
 4. 메인 에이전트가 매칭하는 skill ID 검증
 

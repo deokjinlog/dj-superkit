@@ -98,7 +98,7 @@ The Korean closing line is intentional — that's what the user reads.
 
 For each approved target:
 
-1. Apply the edit (directly via Edit, or by re-entering the relevant skill — `brainstorming` for 요구사항, `designing-direction` for 개발방향, `writing-plans` for 구현계획서)
+1. Apply the edit (directly via Edit, or by re-entering the relevant skill — `brainstorming` for 요구사항, `tech-design` for 개발방향, `writing-plans` for 구현계획서)
 2. Invoke `change-history` to append the entry
 3. Cross-link: every entry from the same propagation batch shares the **연관 항목** field listing the other CH-ids in the batch
 
@@ -141,7 +141,7 @@ A propagation run is correct when ALL hold:
 ## Related Skills
 
 - `change-history` — entry recording (called for each target)
-- `brainstorming` / `designing-direction` / `writing-plans` — re-entered when an upstream MD edit needs a re-dialogue
+- `brainstorming` / `tech-design` / `writing-plans` — re-entered when an upstream MD edit needs a re-dialogue
 - `verifying-spec` — re-runs after upstream MD changes if scope is non-trivial
 - `risk-annotation` — invoked again if cascading touches code
 - `/sync-html <slug>` (v2.2.2+) — `.html` 동봉본 stale 시 사용자 수동 호출 (자동 호출 X, stale 허용 철학)

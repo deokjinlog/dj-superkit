@@ -35,7 +35,7 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 1. Read `docs/features/<date>-<slug>/<slug>-implementation-plan.md`
 2. Review critically — list any gaps or concerns
 3. If concerns exist: raise them with the user before starting
-4. If clean: create TodoWrite tasks (one per plan task) and proceed
+4. If clean: create TaskCreate tasks (one per plan task) and proceed
 
 ## Code Edit Discipline (REQUIRED — js-superpowers extension)
 
@@ -171,7 +171,7 @@ digraph exec_flow {
     "Critical review,\nraise concerns?" [shape=diamond];
     "Discuss with user" [shape=box];
     "Mode check\n(git-fast vs memory-fallback)" [shape=box];
-    "Create TodoWrite" [shape=box];
+    "Create TaskCreate" [shape=box];
     "Pick next [ ] task" [shape=box];
     "TDD: write failing test" [shape=box];
     "Run test → FAIL" [shape=box];
@@ -194,8 +194,8 @@ digraph exec_flow {
     "Critical review,\nraise concerns?" -> "Discuss with user" [label="yes"];
     "Discuss with user" -> "Mode check\n(git-fast vs memory-fallback)";
     "Critical review,\nraise concerns?" -> "Mode check\n(git-fast vs memory-fallback)" [label="no"];
-    "Mode check\n(git-fast vs memory-fallback)" -> "Create TodoWrite";
-    "Create TodoWrite" -> "Pick next [ ] task";
+    "Mode check\n(git-fast vs memory-fallback)" -> "Create TaskCreate";
+    "Create TaskCreate" -> "Pick next [ ] task";
     "Pick next [ ] task" -> "TDD: write failing test";
     "TDD: write failing test" -> "Run test → FAIL";
     "Run test → FAIL" -> "More edits in task?";

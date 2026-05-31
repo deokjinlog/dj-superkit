@@ -15,7 +15,7 @@ Trigger timing (v1.1.15+ 통일 — pre-review per-draft):
 모든 doc 타입에서 동일하게 발화: 메인이 RAW 작성 → generating-html (사용자 리뷰 직전) → 사용자가 prettified 본문 검토 → 승인 → change-history. 사용자 fix 요청 시 메인이 in-memory raw 갱신 후 generating-html 재발화 (per-draft loop).
 
 - **requirements.md** — brainstorming 흐름 끝, 사용자 리뷰 직전. user-fix 시 재발화.
-- **tech-design.md** — designing-direction 흐름 끝, 사용자 리뷰 직전 (combined approval gate 와 결합). user-fix 시 재발화.
+- **tech-design.md** — tech-design 흐름 끝, 사용자 리뷰 직전 (combined approval gate 와 결합). user-fix 시 재발화.
 - **implementation-plan.md** — writing-plans 흐름 끝, verifying-spec + code-pretty 통과 후, 사용자 리뷰 직전. user-fix 시 재발화 (기존 패턴 유지).
 
 STOPS firing the moment the first `change-history` entry has been logged. That boundary marks the doc as "live" — from then on, no generating-html.
@@ -34,9 +34,9 @@ If you are unsure whether this is still in the "initial creation phase" — STOP
 | Trigger (yes) | Anti-trigger (no) |
 |---|---|
 | `brainstorming` just wrote RAW `<slug>-requirements.md`, about to show to user for review, no entries yet | User asked to update FR-3 wording in an already-live requirements.md (one with change-history entries) |
-| `designing-direction` just wrote RAW `<slug>-tech-design.md`, about to show combined approval gate (doc + verify report), no entries yet | `change-propagation` is cascading edits across MDs |
+| `tech-design` just wrote RAW `<slug>-tech-design.md`, about to show combined approval gate (doc + verify report), no entries yet | `change-propagation` is cascading edits across MDs |
 | `writing-plans` just completed verifying-spec + code-pretty on `<slug>-implementation-plan.md`, about to show prettified plan to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/execute-plan` |
-| `brainstorming` or `designing-direction` user requested fix on draft — revise RAW, re-fire generating-html (per-draft loop) | First change-history entry has been logged — doc is now "live", do NOT fire |
+| `brainstorming` or `tech-design` user requested fix on draft — revise RAW, re-fire generating-html (per-draft loop) | First change-history entry has been logged — doc is now "live", do NOT fire |
 | `writing-plans` user requested revision, plan re-written, verifying-spec re-ran, code-pretty re-ran — fire generating-html again | (none for pre-review timing — generating-html now fires before every user review) |
 
 ## Why fire-and-forget B (v2.2.1+)
@@ -105,7 +105,7 @@ Use ONE `Task` tool call with `run_in_background: true`. Main agent does NOT wai
 
 Main does NOT wait for B subagent completion. Step 2 dispatch 직후:
 
-1. **메인 즉시 return** — caller (brainstorming / designing-direction / writing-plans) 가 다음 turn 진행. RAW `.md` 가 사용자 리뷰 surface.
+1. **메인 즉시 return** — caller (brainstorming / tech-design / writing-plans) 가 다음 turn 진행. RAW `.md` 가 사용자 리뷰 surface.
 2. **B subagent 가 배경에서** `.html` 사이드카 작성. 자체 verification (B prompt 의 "Verification before writing" 룰) 이후 Write.
 3. **silent log** — `.js-super/html-regen.log` 에 dispatch / 완료 / 실패 / cancel 모두 기록 (사용자 push X).
 4. **사용자 push X** — B 결과는 silent. 사용자가 `.html` 부재 인지 시 `/sync-html` 수동 호출.
@@ -172,7 +172,7 @@ You have one job: make it cleaner to read. Nothing else.
 
 ```dot
 digraph generating_html {
-    "Calling skill ready\n(brainstorming/designing-direction/writing-plans)" [shape=box];
+    "Calling skill ready\n(brainstorming/tech-design/writing-plans)" [shape=box];
     "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" [shape=diamond];
     "STOP — log reason, return to caller" [shape=box];
     "Dispatch subagent\n(general-purpose, model=sonnet)" [shape=box];
@@ -182,7 +182,7 @@ digraph generating_html {
     "Report to user, return to caller\n(caller now invokes change-history)" [shape=doublecircle];
     "Roll back: ask user to choose\n(restore from memory or accept)" [shape=box];
 
-    "Calling skill ready\n(brainstorming/designing-direction/writing-plans)" -> "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?";
+    "Calling skill ready\n(brainstorming/tech-design/writing-plans)" -> "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?";
     "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" -> "STOP — log reason, return to caller" [label="any check fails"];
     "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" -> "Dispatch subagent\n(general-purpose, model=sonnet)" [label="all pass"];
     "Dispatch subagent\n(general-purpose, model=sonnet)" -> "Subagent: Read → format-only → Write";
@@ -248,7 +248,7 @@ A generating-html run is correct when ALL hold:
 ## Related Skills
 
 - `brainstorming` — calls this on first save of `<slug>-requirements.md`
-- `designing-direction` — calls this on first save of `<slug>-tech-design.md`
+- `tech-design` — calls this on first save of `<slug>-tech-design.md`
 - `writing-plans` — calls this on first save of `<slug>-implementation-plan.md`
 - `change-history` — invoked by the caller AFTER generating-html returns; logs the first entry on the now-prettified doc
 - `change-propagation` — for any post-init revision; generating-html is NEVER part of that flow
@@ -275,7 +275,7 @@ YYYY-MM-DD HH:MM:SS | FAIL     | <slug>-<type>.md | <reason>
 
 ### B-4 — 메인 응답에 dispatch 결과 명시
 
-호출자 측 (auto-brainstorming / auto-designing-direction / auto-writing-plans / `/sync-html` / `/audit-risk`) 의 transition notice 시점에 결과를 함께 알림:
+호출자 측 (auto-brainstorming / auto-tech-design / auto-writing-plans / `/sync-html` / `/audit-risk`) 의 transition notice 시점에 결과를 함께 알림:
 
 - 완료 시: "백그라운드 호출 완료 (N KB)"
 - 실패 시: "실패 — `/sync-html` 으로 사용자가 직접 재시도 필요"

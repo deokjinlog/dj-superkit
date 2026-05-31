@@ -2,7 +2,7 @@
 
 ## 시나리오
 
-메타 워크플로우 변경 PRD 로 designing-direction 진입. 비활성 토픽 (3 데이터 모델, 4 외부 인터페이스) 는 dialogue 스킵 + N/A 한 줄로 박힘.
+메타 워크플로우 변경 PRD 로 tech-design 진입. 비활성 토픽 (3 데이터 모델, 4 외부 인터페이스) 는 dialogue 스킵 + N/A 한 줄로 박힘.
 
 ## 입력
 
@@ -10,7 +10,7 @@ flow-slim-requirements.md (본 v1.1.15 PRD) — meta 워크플로우, DB/API 무
 
 ## 기대 동작
 
-1. designing-direction Step 0 announce:
+1. tech-design Step 0 announce:
    ```
    ℹ️ 활성 토픽: 1,2,5,6,7 / 비활성: 3 데이터모델, 4 외부IF (이유: skill 본문 + helper script 변경, DB/API 무관). 추가 활성 필요시 알려주세요.
    ```

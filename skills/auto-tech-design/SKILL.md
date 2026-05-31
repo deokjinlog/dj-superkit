@@ -1,5 +1,5 @@
 ---
-name: auto-designing-direction
+name: auto-tech-design
 description: auto-flow 2단계 — requirements.md 읽기 + adaptive 7-topic 자동 판정 + design decision 자동 alternatives 비교 → recommendation 자동 선택 + verifying-spec 4축 보고서 transition 직전 노출 + auto-writing-plans 자동 invoke. AskUserQuestion / generating-html 호출 X.
 ---
 
@@ -80,7 +80,7 @@ description: auto-flow 2단계 — requirements.md 읽기 + adaptive 7-topic 자
 |---|---|
 | AskUserQuestion 호출 | NEVER. |
 | generating-html 동기 호출 (sync wait) | NEVER. v2.3.2+ — Step 4.5 fire-and-forget 만. (v1.1.17 "호출 부재" 룰 v2.3.2 반전.) |
-| 일반 designing-direction skill body 호출 | NEVER. self-contained mirror (D-T1). |
+| 일반 tech-design skill body 호출 | NEVER. self-contained mirror (D-T1). |
 | transition notice 후 wait sleep | NEVER. |
 
 ## Related Skills
