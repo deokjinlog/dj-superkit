@@ -1,14 +1,14 @@
 ---
 name: og-executing-plans
-description: "Upstream-original (superpowers 5.0.7) executing-plans, exposed under js-super. Use when invoked via /og-execute-plan after /og-write-plan. Identical behavior to upstream executing-plans — load plan, review critically, execute task-by-task, follow steps exactly. No 변경이력 / 위험주석 / git-fast mode / batched logging — those are js-super extensions, intentionally absent here."
+description: "Upstream-original (superpowers 5.0.7) executing-plans, exposed under dj-superkit. Use when invoked via /og-execute-plan after /og-write-plan. Identical behavior to upstream executing-plans — load plan, review critically, execute task-by-task, follow steps exactly. No 변경이력 / 위험주석 / git-fast mode / batched logging — those are dj-superkit extensions, intentionally absent here."
 ---
 
 # Executing Plans (og — upstream original)
 
-This is the **upstream-original superpowers `executing-plans` skill**, preserved verbatim under the `og-` prefix so users of js-super can opt back into the original behavior without uninstalling js-super and reinstalling upstream. It is identical to upstream except:
+This is the **upstream-original superpowers `executing-plans` skill**, preserved verbatim under the `og-` prefix so users of dj-superkit can opt back into the original behavior without uninstalling dj-superkit and reinstalling upstream. It is identical to upstream except:
 
-1. `name` is `og-executing-plans` (avoids collision with js-super's modified `executing-plans`)
-2. The note about subagent path points to the untouched-upstream `subagent-driven-development` (which js-super did not modify, so no og-* sibling is needed)
+1. `name` is `og-executing-plans` (avoids collision with dj-superkit's modified `executing-plans`)
+2. The note about subagent path points to the untouched-upstream `subagent-driven-development` (which dj-superkit did not modify, so no og-* sibling is needed)
 
 ## Overview
 
@@ -16,7 +16,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the og-executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill (untouched-upstream, no og- variant needed — js-super did not modify it).
+**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill (untouched-upstream, no og- variant needed — dj-superkit did not modify it).
 
 ## Checklist
 
@@ -77,5 +77,5 @@ After all tasks complete and verified:
 
 **Required workflow skills:**
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **js-super:og-writing-plans** - Creates the plan this skill executes
+- **dj-superkit:og-writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks

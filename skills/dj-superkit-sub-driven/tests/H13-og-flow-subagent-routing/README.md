@@ -14,7 +14,7 @@
 ## 기대 결과 (rename 후)
 
 - 매칭된 skill ID: **`superpowers:subagent-driven-development`** (upstream-untouched)
-- NOT `js-super:js-super-sub-driven` (js-super 확장)
+- NOT `dj-superkit:dj-superkit-sub-driven` (dj-superkit 확장)
 - og-writing-plans Anti-Pattern 표 + bold prefix 가 LLM 매칭 catch
 
 ## 검증 (수동 dogfood)
@@ -22,13 +22,13 @@
 `/og-write-plan` 끝 게이트에서 메인이 다음 중 어느 skill 을 invoke 하는지 확인:
 
 - ✅ `superpowers:subagent-driven-development` — 정상
-- ❌ `js-super:js-super-sub-driven` — 회귀 (A rename 했는데도 매칭 충돌 잔존 → B handoff 강화 추가 필요 catch)
+- ❌ `dj-superkit:dj-superkit-sub-driven` — 회귀 (A rename 했는데도 매칭 충돌 잔존 → B handoff 강화 추가 필요 catch)
 
-## 시나리오 (negative — js-super 정식 흐름)
+## 시나리오 (negative — dj-superkit 정식 흐름)
 
-대조군 — `/brainstorm` (js-super 정식) → `/write-plan` → Subagent 선택 시:
+대조군 — `/brainstorm` (dj-superkit 정식) → `/write-plan` → Subagent 선택 시:
 
-- 매칭된 skill ID: **`js-super:js-super-sub-driven`** (정상)
+- 매칭된 skill ID: **`dj-superkit:dj-superkit-sub-driven`** (정상)
 - NOT `superpowers:subagent-driven-development`
 
 ## 연결 위험

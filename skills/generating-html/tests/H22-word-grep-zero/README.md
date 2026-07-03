@@ -8,9 +8,9 @@
 2. **회귀 catch grep** — 신규 skill / command / CLAUDE.md / README.md 본문에 옛 단어 (`docs-pretty`, `regen-html`) 재발 시 즉시 catch
 3. **제외 경로 룰** — 다음 경로는 fixture history / upstream mirror 라 grep 대상 제외:
    - `og-*` 디렉토리 (upstream superpowers verbatim mirror)
-   - `js-super-sub-driven/tests/H4-preflight-fail/` (fixture history)
-   - `js-super-sub-driven/tests/H5-docs-pretty-pre-review/` (fixture history — 디렉토리명 자체에 옛 단어 포함, 보존)
-   - `js-super-sub-driven/tests/H6-task-name-friendly/` (fixture history — 본문에 옛 단어 메타 언급)
+   - `dj-superkit-sub-driven/tests/H4-preflight-fail/` (fixture history)
+   - `dj-superkit-sub-driven/tests/H5-docs-pretty-pre-review/` (fixture history — 디렉토리명 자체에 옛 단어 포함, 보존)
+   - `dj-superkit-sub-driven/tests/H6-task-name-friendly/` (fixture history — 본문에 옛 단어 메타 언급)
 4. **변경이력 footer 안의 옛 단어** — 변경이력 (`docs/features/**/*.md` 의 `## 변경이력` footer) 안의 옛 단어는 audit chain 의 일부라 보존. grep 대상 제외 (`docs/features/` 디렉토리 자체는 grep 대상 X — skill / command / 최상위 CLAUDE.md / README.md 만).
 
 ## 회귀 catch grep 명령
@@ -29,7 +29,7 @@ grep -rn "docs-pretty\|regen-html" \
 
 - [ ] 위 grep 명령 결과 0 (회귀 없음)
 - [ ] `og-*` 디렉토리 내부 단어 매치 grep 대상 제외 정상 동작 (upstream verbatim 보존)
-- [ ] `js-super-sub-driven/tests/H4-6` fixture history 제외 정상 동작
+- [ ] `dj-superkit-sub-driven/tests/H4-6` fixture history 제외 정상 동작
 - [ ] `docs/features/**` 안 변경이력 footer 보존 (grep 대상 자체에서 제외)
 - [ ] 신규 skill / command 추가 시 본 grep 명령 PR check 통과
 - [ ] CLAUDE.md 결합 메모 갱신 시 옛 단어 (`docs-pretty`, `regen-html`) 사용 X — 신규 단어 (`generating-html`, `sync-html`, `pretty-md`) 사용
@@ -38,10 +38,10 @@ grep -rn "docs-pretty\|regen-html" \
 
 | 경로 | 이유 |
 |---|---|
-| `skills/og-*/` | upstream superpowers 5.0.7 verbatim mirror. js-super rename 영향 0. |
-| `skills/js-super-sub-driven/tests/H4-preflight-fail/` | v1.1.14 fixture history. 옛 4 skill (`docs-pretty` 포함) 의 preflight 통합 동작 검증. 디렉토리명 / 본문에 옛 단어 보존. |
-| `skills/js-super-sub-driven/tests/H5-docs-pretty-pre-review/` | v1.1.15+ fixture history. 디렉토리명 자체에 `docs-pretty` 포함. 옛 시점의 사전-리뷰 동작 검증 — 보존. |
-| `skills/js-super-sub-driven/tests/H6-task-name-friendly/` | v1.1.15+ TaskCreate 명칭 룰 (FR-6) fixture. 본문에 옛 4 skill 의 친화 명칭 예시 포함. 보존. |
+| `skills/og-*/` | upstream superpowers 5.0.7 verbatim mirror. dj-superkit rename 영향 0. |
+| `skills/dj-superkit-sub-driven/tests/H4-preflight-fail/` | v1.1.14 fixture history. 옛 4 skill (`docs-pretty` 포함) 의 preflight 통합 동작 검증. 디렉토리명 / 본문에 옛 단어 보존. |
+| `skills/dj-superkit-sub-driven/tests/H5-docs-pretty-pre-review/` | v1.1.15+ fixture history. 디렉토리명 자체에 `docs-pretty` 포함. 옛 시점의 사전-리뷰 동작 검증 — 보존. |
+| `skills/dj-superkit-sub-driven/tests/H6-task-name-friendly/` | v1.1.15+ TaskCreate 명칭 룰 (FR-6) fixture. 본문에 옛 4 skill 의 친화 명칭 예시 포함. 보존. |
 | `docs/features/**` 변경이력 footer | audit chain 의 일부. `## 변경이력` entry 안의 옛 단어는 그 시점의 record 라 영구 보존. |
 
 ## 실패 모드 검증

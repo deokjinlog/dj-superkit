@@ -27,7 +27,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ### Step 3 — wave-parallel subagent 강제 invoke
 
-무조건 `js-super:js-super-sub-driven` skill invoke (D5, Gate #14 override). plan 의 task 수 무관 — 1개 task plan 도 subagent 패턴.
+무조건 `dj-superkit:dj-superkit-sub-driven` skill invoke (D5, Gate #14 override). plan 의 task 수 무관 — 1개 task plan 도 subagent 패턴.
 
 ### Step 4 — failure isolation 그대로 (D6)
 
@@ -43,7 +43,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ### Step 6 — finishing-a-development-branch 자동 호출
 
-`js-super:finishing-a-development-branch` skill invoke. 슬림 75줄 본문이 테스트 게이트 + 종료 메시지 자동 노출 (D-T10).
+`dj-superkit:finishing-a-development-branch` skill invoke. 슬림 75줄 본문이 테스트 게이트 + 종료 메시지 자동 노출 (D-T10).
 
 ### Step 7 — auto-flow 완료 메시지
 
@@ -74,7 +74,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ## Related Skills
 
-- `js-super-sub-driven` — wave-parallel 본 skill (호출 대상)
+- `dj-superkit-sub-driven` — wave-parallel 본 skill (호출 대상)
 - `finishing-a-development-branch` — 끝에 자동 호출
 - `scripts/preflight.subagent_task_entry_check` — Entry Guard
 - `scripts/auto_flow.find_latest_slug` — slug 추론

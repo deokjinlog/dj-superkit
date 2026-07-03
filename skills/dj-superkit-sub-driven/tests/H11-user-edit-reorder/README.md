@@ -31,9 +31,9 @@
 
 ## 의존
 
-- `skills/js-super-sub-driven/implementer-prompt.md` — STRICT BYTE-COPY rule
-- `skills/js-super-sub-driven/reorder-prompt.md` — Status: NEEDS_USER 형식
-- `skills/js-super-sub-driven/SKILL.md` — Per-wave Sequence W-2 분기
+- `skills/dj-superkit-sub-driven/implementer-prompt.md` — STRICT BYTE-COPY rule
+- `skills/dj-superkit-sub-driven/reorder-prompt.md` — Status: NEEDS_USER 형식
+- `skills/dj-superkit-sub-driven/SKILL.md` — Per-wave Sequence W-2 분기
 - `scripts/plan_byte_check.py` — 작성 단계 차단
 
 ## 다음 단계

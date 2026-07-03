@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan (<slug>-implementation-plan.md) to execute in a separate session with review checkpoints. js-superpowers extension — picks git-fast mode (default, uses `git diff HEAD` against working tree pre-commit for before/after extraction so per-edit Read snapshot is skipped; commits code + plan log atomically per task) or memory-fallback mode (when no git or commits forbidden). Per-edit: risk-annotation 3-checklist + RISK comments. Per-task: ONE consolidated change-history [코드-수정] entry, drastically reducing 구현계획서.md Read/Edit cost.
+description: Use when you have a written implementation plan (<slug>-implementation-plan.md) to execute in a separate session with review checkpoints. dj-superkit extension — picks git-fast mode (default, uses `git diff HEAD` against working tree pre-commit for before/after extraction so per-edit Read snapshot is skipped; commits code + plan log atomically per task) or memory-fallback mode (when no git or commits forbidden). Per-edit: risk-annotation 3-checklist + RISK comments. Per-task: ONE consolidated change-history [코드-수정] entry, drastically reducing 구현계획서.md Read/Edit cost.
 ---
 
 # Executing Plans
@@ -11,7 +11,7 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 
 **Announce at start:** "executing-plans skill 로 본 계획을 task-by-task 실행하겠습니다."
 
-**Note (subagent path):** This skill is the **inline** execution mode. If subagents are available (Claude Code, Codex) AND the user wants to preserve main context for large features, the recommended subagent path is `js-super-sub-driven` (slim 2-stage: implementer + spec reviewer + main post-processing for RISK / 변경이력 / atomic commit). The original upstream `subagent-driven-development` (3-stage: + quality reviewer) is also available for compatibility but duplicates governance js-super already provides via `verifying-spec` + TDD + RISK + 변경이력.
+**Note (subagent path):** This skill is the **inline** execution mode. If subagents are available (Claude Code, Codex) AND the user wants to preserve main context for large features, the recommended subagent path is `dj-superkit-sub-driven` (slim 2-stage: implementer + spec reviewer + main post-processing for RISK / 변경이력 / atomic commit). The original upstream `subagent-driven-development` (3-stage: + quality reviewer) is also available for compatibility but duplicates governance dj-superkit already provides via `verifying-spec` + TDD + RISK + 변경이력.
 
 ## When to Use
 
@@ -37,7 +37,7 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 3. If concerns exist: raise them with the user before starting
 4. If clean: create TaskCreate tasks (one per plan task) and proceed
 
-## Code Edit Discipline (REQUIRED — js-superpowers extension)
+## Code Edit Discipline (REQUIRED — dj-superkit extension)
 
 ### Two execution modes
 
@@ -110,9 +110,9 @@ Per task: code-only commit (plan.md untouched). Footer entry is deferred to end-
 5. **Render "구현 요약" message** to the user: planned tasks vs actual commits (incl. follow-ups), RISK triggers by category, 누락/초과 list, code-zero-change tasks (→ separate `[검증]` entry).
 6. **Build consolidated batch entry**: from in-memory accumulator → ONE `[코드-수정] (batch: tasks N..M)` entry per change-history slim schema (코드 블록 생략, 연관 commit SHA 참조). For any code-zero-change task, build a separate `[검증]` entry.
 7. **Single footer append + log commit**: Read <slug>-implementation-plan.md once → Edit (append batch entry + 검증 entries) → `git add <slug>-implementation-plan.md` → `git commit -m "[log] all tasks: <one-line summary>"`.
-8. **Cleanup**: nothing for inline mode (no buffer dir). Subagent path cleans `.js-super/changelog-buffer/<slug>/` separately — see `js-super-sub-driven` skill §2-4.
+8. **Cleanup**: nothing for inline mode (no buffer dir). Subagent path cleans `.dj-superkit/changelog-buffer/<slug>/` separately — see `dj-superkit-sub-driven` skill §2-4.
 
-This Phase 3 ordering is the **single source of truth for inline mode**. Subagent mode uses the same Phase 3 logic but reads manifests from the buffer directory instead of in-memory accumulator (per `js-super-sub-driven` §2).
+This Phase 3 ordering is the **single source of truth for inline mode**. Subagent mode uses the same Phase 3 logic but reads manifests from the buffer directory instead of in-memory accumulator (per `dj-superkit-sub-driven` §2).
 
 ### memory-fallback mode
 
@@ -288,7 +288,7 @@ After all tasks complete and verified:
 - `risk-annotation` — invoked on every code edit for the 3-checklist
 - `change-history` — invoked on every code edit for the [코드-수정] entry
 - `change-propagation` — invoked when an in-flight insight requires plan/spec edits
-- `js-super-sub-driven` — recommended subagent path (slim 2-stage + main post-processing)
+- `dj-superkit-sub-driven` — recommended subagent path (slim 2-stage + main post-processing)
 - `subagent-driven-development` — upstream original subagent path (3-stage, kept for compatibility)
 - `finishing-a-development-branch` — final wrap-up after all tasks
 

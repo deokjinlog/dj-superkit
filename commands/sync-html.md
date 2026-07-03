@@ -41,7 +41,7 @@
 
 ## `--check` 옵션 (v2.4+)
 
-`--check` 플래그 명시 시 silent log (`.js-super/html-regen.log`) 의 마지막 N entry (default 10) 출력. `.html` 생성 dispatch / success / fail 결과를 사용자가 직접 확인.
+`--check` 플래그 명시 시 silent log (`.dj-superkit/html-regen.log`) 의 마지막 N entry (default 10) 출력. `.html` 생성 dispatch / success / fail 결과를 사용자가 직접 확인.
 
 ### 사용
 

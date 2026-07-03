@@ -17,7 +17,7 @@ auto-brainstorming 끝 → transition notice → 사용자가 "stop" 입력 → 
 ## 기대 동작
 
 1. 메인이 다음 turn 시작 시 `parse_interrupt("stop")` → True
-2. `js-super:auto-tech-design` invoke 안 함
+2. `dj-superkit:auto-tech-design` invoke 안 함
 3. 종료 메시지: ℹ️ OK. /tech-design 나중에 직접 실행.
 4. requirements.md + change-history 첫 entry 는 이미 commit 됨 → 보존
 

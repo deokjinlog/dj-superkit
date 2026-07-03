@@ -16,7 +16,7 @@ main 워크트리에서 `/worktree-merge-back` 호출.
 
 ```
 ❌ 이 skill 은 worktree 안에서만 사용 가능합니다.
-   현재: /Users/.../js-super (main 워크트리)
+   현재: /Users/.../dj-superkit (main 워크트리)
    먼저 /worktree <feature-name> 으로 워크트리 진입 후 재호출하세요.
 ```
 

@@ -1,25 +1,9 @@
-.worktrees/
-.private-journal/
-.claude/
-.DS_Store
-node_modules/
-inspo
-triage/
-HANDOFF.md
-
-# js-superpowers dev env
-.venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-*.upstream
-
-# v1.1.7 — subagent changelog buffer (interrupt recovery)
-.js-super/
-
-# v2.2.0 — docs-pretty .html companion (사람 전용 derived view)
+# generating-html 이 만드는 파생 뷰 (.md 가 원본 — .html 은 사람용 derived view)
 docs/features/**/*.html
 
-# v2.3.0 — /audit-risk 보고서 폴더 (개인 도구 산출물, repo 노이즈 방지)
-docs/audit/
+# dj-superkit silent log / cache
+.dj-superkit/
 
+# OS / 에디터 잡파일
+.DS_Store
+*.swp

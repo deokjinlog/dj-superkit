@@ -17,14 +17,14 @@
 4. **3초 이내 사용자가 fix #2 입력** → `.md` 갱신 + B subagent #3 dispatch
 5. 메인이 #2 cancel + #3 dispatch
 6. 사용자 fix 멈춤 → 3초 후 #3 완료 → `.html` 사이드카
-7. `.js-super/html-regen.log` 에 cancel 2건 + 완료 1건 기록
+7. `.dj-superkit/html-regen.log` 에 cancel 2건 + 완료 1건 기록
 
 ## 시나리오 3 — 실패 silent log
 
 1. `.md` 작성 → B subagent dispatch
 2. **B 실패** (예: Sonnet API 일시 장애, semantic drift verification 실패 등)
 3. 메인은 결과 대기 X (fire-and-forget) → 사용자에게 푸시 X
-4. `.js-super/html-regen.log` 에 실패 기록
+4. `.dj-superkit/html-regen.log` 에 실패 기록
 5. 사용자가 `.html` 부재 인지 시 → `/sync-html` 수동 호출
 
 ## 시나리오 4 — `change-propagation` 자동 호출
@@ -46,8 +46,8 @@
 ## 검증 체크리스트
 
 - [ ] 시나리오 1: `.html` 부재 시 사용자 인지 가능 (푸터 stale 표시 또는 brower 404)
-- [ ] 시나리오 2: 디바운스 3초 동작 (`grep "cancel" .js-super/html-regen.log` ≥ 1)
-- [ ] 시나리오 3: 실패 시 silent log 기록 (`grep "ERROR" .js-super/html-regen.log` ≥ 1)
+- [ ] 시나리오 2: 디바운스 3초 동작 (`grep "cancel" .dj-superkit/html-regen.log` ≥ 1)
+- [ ] 시나리오 3: 실패 시 silent log 기록 (`grep "ERROR" .dj-superkit/html-regen.log` ≥ 1)
 - [ ] 시나리오 4: `change-propagation` 마지막 단계에서 `/sync-html` 자동 발화 확인
 - [ ] 시나리오 5: 사용자 수동 `/sync-html` 명시 호출 시 `.html` 갱신 + 푸터 새 CH-id
 

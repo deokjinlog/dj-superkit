@@ -1,4 +1,4 @@
-"""DAG builder for js-super-sub-driven wave scheduling.
+"""DAG builder for dj-superkit-sub-driven wave scheduling.
 
 Reads a plan's task list (with files + deps) and produces wave groupings
 where tasks within a wave can run in parallel without file conflicts or

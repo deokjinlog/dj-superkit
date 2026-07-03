@@ -1,15 +1,15 @@
 ---
 name: og-writing-plans
-description: "Upstream-original (superpowers 5.0.7) writing-plans, exposed under js-super. Use when invoked via /og-write-plan after /og-brainstorm. Identical behavior to upstream writing-plans except for the og- naming and downstream pointer (handoff goes to og-executing-plans / subagent-driven-development). Use this when the js-super extended workflow (변경이력 / 위험주석 / verifying-spec / docs-pretty) feels heavy and you want the original superpowers experience."
+description: "Upstream-original (superpowers 5.0.7) writing-plans, exposed under dj-superkit. Use when invoked via /og-write-plan after /og-brainstorm. Identical behavior to upstream writing-plans except for the og- naming and downstream pointer (handoff goes to og-executing-plans / subagent-driven-development). Use this when the dj-superkit extended workflow (변경이력 / 위험주석 / verifying-spec / docs-pretty) feels heavy and you want the original superpowers experience."
 ---
 
 # Writing Plans (og — upstream original)
 
-This is the **upstream-original superpowers `writing-plans` skill**, preserved verbatim under the `og-` prefix so users of js-super can opt back into the original behavior without uninstalling js-super and reinstalling upstream. It is identical to upstream except:
+This is the **upstream-original superpowers `writing-plans` skill**, preserved verbatim under the `og-` prefix so users of dj-superkit can opt back into the original behavior without uninstalling dj-superkit and reinstalling upstream. It is identical to upstream except:
 
-1. `name` is `og-writing-plans` (avoids collision with js-super's modified `writing-plans`)
-2. Execution Handoff offers `og-executing-plans` for inline execution; subagent-driven path still points to the untouched-upstream `subagent-driven-development` (which js-super did not modify, so no og-* sibling is needed)
-3. Supporting file `plan-document-reviewer-prompt.md` was a vendored orphan even in upstream and has been removed during js-super cleanup — this skill never referenced it
+1. `name` is `og-writing-plans` (avoids collision with dj-superkit's modified `writing-plans`)
+2. Execution Handoff offers `og-executing-plans` for inline execution; subagent-driven path still points to the untouched-upstream `subagent-driven-development` (which dj-superkit did not modify, so no og-* sibling is needed)
+3. Supporting file `plan-document-reviewer-prompt.md` was a vendored orphan even in upstream and has been removed during dj-superkit cleanup — this skill never referenced it
 
 ## Overview
 
@@ -65,7 +65,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or js-super:og-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or dj-superkit:og-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -160,15 +160,15 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use **`superpowers:subagent-driven-development`** (upstream-untouched). ⚠️ NOT `js-super-sub-driven` — that's the js-super extended variant with wave-parallel + RISK + 변경이력. og 흐름은 upstream 원본만 사용.
+- **REQUIRED SUB-SKILL:** Use **`superpowers:subagent-driven-development`** (upstream-untouched). ⚠️ NOT `dj-superkit-sub-driven` — that's the dj-superkit extended variant with wave-parallel + RISK + 변경이력. og 흐름은 upstream 원본만 사용.
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use js-super:og-executing-plans
+- **REQUIRED SUB-SKILL:** Use dj-superkit:og-executing-plans
 - Batch execution with checkpoints for review
 
 ## Anti-Patterns (v2.0.2+ — og-flow subagent path 강화)
 
 | Wrong | Right |
 |---|---|
-| `js-super-sub-driven` 매치 — js-super 확장 wave-parallel 발화 | `superpowers:subagent-driven-development` upstream 원본만 사용. og 흐름은 단순 fresh subagent + 2-stage review 유지. |
+| `dj-superkit-sub-driven` 매치 — dj-superkit 확장 wave-parallel 발화 | `superpowers:subagent-driven-development` upstream 원본만 사용. og 흐름은 단순 fresh subagent + 2-stage review 유지. |

@@ -22,7 +22,7 @@
 - [ ] 정형 전/후 `## 변경이력` footer SHA256 일치 (`sha256sum` 비교)
 - [ ] 의미 보존 검증 — sentence 수 / 헤더 수 / 코드 블록 수 정형 전/후 동일
 - [ ] `git diff` 출력에 의역 / 본문 재구조화 / 요약 없음 (표면 포맷만)
-- [ ] subagent 실패 시 silent log 만 (`.js-super/html-regen.log` 또는 동등 채널) — 사용자에게 push X
+- [ ] subagent 실패 시 silent log 만 (`.dj-superkit/html-regen.log` 또는 동등 채널) — 사용자에게 push X
 
 ## footer byte-equal 검증 룰
 

@@ -1,7 +1,7 @@
 """Subagent changelog buffer helpers (v1.1.7).
 
 Implementer subagents write Changes Manifest as YAML frontmatter to
-.js-super/changelog-buffer/<slug>/task-NN.md. The main agent reads
+.dj-superkit/changelog-buffer/<slug>/task-NN.md. The main agent reads
 these at end-of-run to consolidate into a single 변경이력 entry.
 """
 from pathlib import Path

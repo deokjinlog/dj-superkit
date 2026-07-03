@@ -66,7 +66,7 @@ description: auto-flow 2단계 — requirements.md 읽기 + adaptive 7-topic 자
 ℹ️ /write-plan 단계로 자동 넘어갑니다. 멈추려면 "stop" 입력해주세요.
 ```
 
-`parse_interrupt` 매치 시 exit + `ℹ️ 알겠습니다. /write-plan 은 나중에 직접 실행해주세요.` 안내. 매치 X → `js-super:auto-writing-plans` invoke.
+`parse_interrupt` 매치 시 exit + `ℹ️ 알겠습니다. /write-plan 은 나중에 직접 실행해주세요.` 안내. 매치 X → `dj-superkit:auto-writing-plans` invoke.
 
 ## --no-ask 플래그 (v2.5+) — 짧은 reference
 

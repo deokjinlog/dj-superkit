@@ -1,5 +1,5 @@
 {
-  "name": "js-super",
+  "name": "dj-superkit",
   "version": "2.7.0",
   "type": "module",
   "main": ".opencode/plugins/superpowers.js"

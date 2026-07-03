@@ -28,7 +28,7 @@
 
 | 시나리오 | 기대 동작 |
 |---|---|
-| B subagent 성공 | `.html` 사이드카 생성 + silent log (`.js-super/html-regen.log`) |
+| B subagent 성공 | `.html` 사이드카 생성 + silent log (`.dj-superkit/html-regen.log`) |
 | B subagent 실패 | silent log 만, 사용자에게 push X. 사용자가 `.html` 부재 인지 시 `/sync-html` 수동 호출 |
 | semantic drift (헤더 count mismatch) | B 가 자체 verification 후 write 안 함 (B prompt 룰). `.html` 미생성 → silent log |
 | 메인이 결과 대기 (fire-and-forget 위반) | Anti-Pattern — 즉시 회귀 catch (디바운스 cancel 룰 + Task `run_in_background=true` 강제) |

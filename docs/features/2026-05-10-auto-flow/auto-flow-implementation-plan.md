@@ -4,13 +4,13 @@ commit_policy: per-task
 
 # auto-flow 구현계획서
 
-> **For agentic workers:** REQUIRED SUB-SKILL: `js-super-subagent-driven-development` (recommended for 14+ tasks) 또는 `executing-plans`. Steps use checkbox (`- [ ]`) syntax for tracking. Plan has 14 tasks total.
+> **For agentic workers:** REQUIRED SUB-SKILL: `dj-superkit-subagent-driven-development` (recommended for 14+ tasks) 또는 `executing-plans`. Steps use checkbox (`- [ ]`) syntax for tracking. Plan has 14 tasks total.
 
 > **Bootstrap notice:** 본 plan 자체는 v1.1.15 의 정상 흐름 (manual /brainstorm → /design → /write-plan → /execute-plan) 으로 실행. 자기 자신 (auto-flow) 적용은 다음 dogfood 에서 (`/auto-brainstorm <new feature>`).
 
 > **버전 결정:** auto-flow 는 **v1.1.17** 단독 release. v1.1.16 = backlog 2건 (DAG ordering bug + preflight regex false positive) micro-patch 우선. v1.1.16 fix 후 auto-flow 의 wave-parallel 더 안전.
 
-**Goal:** js-super 4 단계 spec-driven 워크플로우를 자동 chain 으로 진행하는 4 신규 auto-* skill + 4 신규 slash command + CLAUDE.md 결합 메모.
+**Goal:** dj-superkit 4 단계 spec-driven 워크플로우를 자동 chain 으로 진행하는 4 신규 auto-* skill + 4 신규 slash command + CLAUDE.md 결합 메모.
 
 **Architecture:** Layer 1 (slash command 4 entry) / Layer 2 (auto-* skill 4 본문 — og-* mirror 패턴, 게이트 자동 yes / clarifying Q only / verify 노출 후 chain) / Layer 3 (CLAUDE.md 결합 메모).
 
@@ -162,7 +162,7 @@ description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 
 
 # Auto Brainstorming → <slug>-requirements.md (Socratic auto)
 
-js-super:auto-brainstorming 은 명시적 사용자 invoke (`/auto-brainstorm <피처명>`) 시에만 작동. PRD `auto-flow-requirements.md` D1~D12 (D9 amend) + tech-design D-T1~D-T12 의 자동 흐름 본문.
+dj-superkit:auto-brainstorming 은 명시적 사용자 invoke (`/auto-brainstorm <피처명>`) 시에만 작동. PRD `auto-flow-requirements.md` D1~D12 (D9 amend) + tech-design D-T1~D-T12 의 자동 흐름 본문.
 
 **Announce at start:** "I'm using the auto-brainstorming skill — Socratic clarifying Q + 자동 진행."
 
@@ -209,7 +209,7 @@ mkdir -p docs/features/$(date +%Y-%m-%d)-<slug>/
 ℹ️ Auto-proceeding to /design. Type "stop" to abort.
 ```
 
-다음 사용자 turn 의 입력에 `parse_interrupt` (scripts/auto_flow.py) 매치 시 cleanly exit + `ℹ️ OK. /design 나중에 직접 실행.` 안내. 매치 X 시 즉시 `js-super:auto-designing-direction` skill invoke.
+다음 사용자 turn 의 입력에 `parse_interrupt` (scripts/auto_flow.py) 매치 시 cleanly exit + `ℹ️ OK. /design 나중에 직접 실행.` 안내. 매치 X 시 즉시 `dj-superkit:auto-designing-direction` skill invoke.
 
 ## Anti-Patterns
 
@@ -303,7 +303,7 @@ description: auto-flow 2단계 — requirements.md 읽기 + adaptive 7-topic 자
 ℹ️ Auto-proceeding to /write-plan. Type "stop" to abort.
 ```
 
-`parse_interrupt` 매치 시 exit + `ℹ️ OK. /write-plan 나중에 직접 실행.` 안내. 매치 X → `js-super:auto-writing-plans` invoke.
+`parse_interrupt` 매치 시 exit + `ℹ️ OK. /write-plan 나중에 직접 실행.` 안내. 매치 X → `dj-superkit:auto-writing-plans` invoke.
 
 ## Anti-Patterns
 
@@ -384,7 +384,7 @@ tech-design §6 R-N → file:line + mitigation 매핑. 모든 R-N 이 §2 에 en
 ℹ️ Auto-proceeding to /execute-plan (subagent wave-parallel, Gate #14 override). Type "stop" to abort.
 ```
 
-`parse_interrupt` 매치 시 exit. 매치 X → `js-super:auto-executing-plans` invoke.
+`parse_interrupt` 매치 시 exit. 매치 X → `dj-superkit:auto-executing-plans` invoke.
 
 ## Anti-Patterns
 
@@ -440,7 +440,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ### Step 3 — wave-parallel subagent 강제 invoke
 
-무조건 `js-super:js-super-subagent-driven-development` skill invoke (D5, Gate #14 override). plan 의 task 수 무관 — 1개 task plan 도 subagent 패턴.
+무조건 `dj-superkit:dj-superkit-subagent-driven-development` skill invoke (D5, Gate #14 override). plan 의 task 수 무관 — 1개 task plan 도 subagent 패턴.
 
 ### Step 4 — failure isolation 그대로 (D6)
 
@@ -456,7 +456,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ### Step 6 — finishing-a-development-branch 자동 호출
 
-`js-super:finishing-a-development-branch` skill invoke. 슬림 75줄 본문이 테스트 게이트 + 종료 메시지 자동 노출 (D-T10).
+`dj-superkit:finishing-a-development-branch` skill invoke. 슬림 75줄 본문이 테스트 게이트 + 종료 메시지 자동 노출 (D-T10).
 
 ### Step 7 — auto-flow 완료 메시지
 
@@ -478,7 +478,7 @@ description: auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + E
 
 ## Related Skills
 
-- `js-super-subagent-driven-development` — wave-parallel 본 skill (호출 대상)
+- `dj-superkit-subagent-driven-development` — wave-parallel 본 skill (호출 대상)
 - `finishing-a-development-branch` — 끝에 자동 호출
 - `scripts/preflight.subagent_task_entry_check` — Entry Guard
 - `scripts/auto_flow.find_latest_slug` — slug 추론
@@ -609,7 +609,7 @@ description: auto-flow 4단계 진입 (마지막) — implementation-plan.md 있
 
 `<slug>` 인자 optional. 인자 누락 시 latest implementation-plan.md 자동. 이 커맨드는 `auto-executing-plans` skill 을 invoke 합니다.
 
-동작: 무조건 wave-parallel `js-super-subagent-driven-development` 호출 (Gate #14 자동승인 명시 override). failure isolation + end-of-run consolidator + finishing 자동.
+동작: 무조건 wave-parallel `dj-superkit-subagent-driven-development` 호출 (Gate #14 자동승인 명시 override). failure isolation + end-of-run consolidator + finishing 자동.
 
 종료 메시지: commit 수 + RISK 카운트 + blocked tasks list.
 ```
@@ -661,15 +661,15 @@ description: auto-flow 4단계 진입 (마지막) — implementation-plan.md 있
 ### Task 11: H7~H10 dogfood fixtures — auto-flow 시나리오
 
 **Files:**
-- Create: `skills/js-super-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md`
-- Create: `skills/js-super-subagent-driven-development/tests/H8-auto-design-from-existing/README.md`
-- Create: `skills/js-super-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md`
-- Create: `skills/js-super-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md`
-- Modify: `skills/js-super-subagent-driven-development/tests/README.md` (색인 H7~H10 추가)
+- Create: `skills/dj-superkit-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md`
+- Create: `skills/dj-superkit-subagent-driven-development/tests/H8-auto-design-from-existing/README.md`
+- Create: `skills/dj-superkit-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md`
+- Create: `skills/dj-superkit-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md`
+- Modify: `skills/dj-superkit-subagent-driven-development/tests/README.md` (색인 H7~H10 추가)
 
 **Model**: sonnet
 
-- [ ] **Step 1: failing 검증** — `ls skills/js-super-subagent-driven-development/tests/H{7,8,9,10}*` → 0건.
+- [ ] **Step 1: failing 검증** — `ls skills/dj-superkit-subagent-driven-development/tests/H{7,8,9,10}*` → 0건.
 
 - [ ] **Step 2: H7 fixture 작성** — `/auto-brainstorm` small 피처 시나리오: 1 clarifying Q + AI 자동 + chain 끝까지.
 
@@ -681,9 +681,9 @@ description: auto-flow 4단계 진입 (마지막) — implementation-plan.md 있
 
 - [ ] **Step 6: tests/README.md 색인 갱신** — `## v1.1.17+ — auto-flow dogfood fixtures` 섹션 추가, H7~H10 4 줄 색인.
 
-- [ ] **Step 7: 검증** — `ls skills/js-super-subagent-driven-development/tests/H{7,8,9,10}*/README.md` → 4건. `grep -c "^- H[7-9]\|^- H10" tests/README.md` ≥ 4.
+- [ ] **Step 7: 검증** — `ls skills/dj-superkit-subagent-driven-development/tests/H{7,8,9,10}*/README.md` → 4건. `grep -c "^- H[7-9]\|^- H10" tests/README.md` ≥ 4.
 
-- [ ] **Step 8: Commit** — `git add skills/js-super-subagent-driven-development/tests/H{7,8,9,10}*/ skills/js-super-subagent-driven-development/tests/README.md && git commit -m "test(subagent-dd): H7~H10 dogfood fixtures (auto-flow v1.1.17)"`
+- [ ] **Step 8: Commit** — `git add skills/dj-superkit-subagent-driven-development/tests/H{7,8,9,10}*/ skills/dj-superkit-subagent-driven-development/tests/README.md && git commit -m "test(subagent-dd): H7~H10 dogfood fixtures (auto-flow v1.1.17)"`
 
 ---
 
@@ -771,7 +771,7 @@ tech-design §6 R1~R11 → 구체 위치 + mitigation 매핑:
 ### [2026-05-10 21:00] [코드-수정] (batch: tasks 1..11)
 - **id**: CH-20260510-006
 - **이유**: 서브에이전트 모드 task batch 종합 (end-of-run consolidation)
-- **무엇이**: CLAUDE.md, commands/auto-brainstorm.md, commands/auto-design.md, commands/auto-execute-plan.md, commands/auto-write-plan.md, scripts/auto_flow.py, scripts/tests/test_auto_flow.py, skills/auto-brainstorming/SKILL.md, skills/auto-designing-direction/SKILL.md, skills/auto-executing-plans/SKILL.md, skills/auto-writing-plans/SKILL.md, skills/js-super-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md, skills/js-super-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md, skills/js-super-subagent-driven-development/tests/H8-auto-design-from-existing/README.md, skills/js-super-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md, skills/js-super-subagent-driven-development/tests/README.md
+- **무엇이**: CLAUDE.md, commands/auto-brainstorm.md, commands/auto-design.md, commands/auto-execute-plan.md, commands/auto-write-plan.md, scripts/auto_flow.py, scripts/tests/test_auto_flow.py, skills/auto-brainstorming/SKILL.md, skills/auto-designing-direction/SKILL.md, skills/auto-executing-plans/SKILL.md, skills/auto-writing-plans/SKILL.md, skills/dj-superkit-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md, skills/dj-superkit-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md, skills/dj-superkit-subagent-driven-development/tests/H8-auto-design-from-existing/README.md, skills/dj-superkit-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md, skills/dj-superkit-subagent-driven-development/tests/README.md
 - **영향범위**: 누적 (task별 세부 참조)
 - **위험 카테고리**: breaking
 - **task별 세부 (11건)**:
@@ -786,11 +786,11 @@ tech-design §6 R1~R11 → 구체 위치 + mitigation 매핑:
   - Task 8: `commands/auto-write-plan.md:1-12` — slash entry for auto-writing-plans (`none`) — commits: 
   - Task 9: `commands/auto-execute-plan.md:1-13` — slash entry for auto-executing-plans (`none`) — commits: 
   - Task 10: `CLAUDE.md:165-180` — auto-flow mirror 결합 메모 + Gate #14 override + docs-pretty 부재 (`none`) — commits: 
-  - Task 11: `skills/js-super-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md:1-30` — auto-brainstorm small fixture (`none`) — commits: 
-  - Task 11: `skills/js-super-subagent-driven-development/tests/H8-auto-design-from-existing/README.md:1-30` — auto-design from existing fixture (`none`) — commits: 
-  - Task 11: `skills/js-super-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md:1-30` — stop interrupt fixture (`none`) — commits: 
-  - Task 11: `skills/js-super-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md:1-35` — BLOCKED failure isolation fixture (`none`) — commits: 
-  - Task 11: `skills/js-super-subagent-driven-development/tests/README.md:<actual>` — 색인 v1.1.17+ 섹션 + H7~H10 4 줄 (`none`) — commits: 
+  - Task 11: `skills/dj-superkit-subagent-driven-development/tests/H7-auto-brainstorm-small/README.md:1-30` — auto-brainstorm small fixture (`none`) — commits: 
+  - Task 11: `skills/dj-superkit-subagent-driven-development/tests/H8-auto-design-from-existing/README.md:1-30` — auto-design from existing fixture (`none`) — commits: 
+  - Task 11: `skills/dj-superkit-subagent-driven-development/tests/H9-auto-flow-stop-interrupt/README.md:1-30` — stop interrupt fixture (`none`) — commits: 
+  - Task 11: `skills/dj-superkit-subagent-driven-development/tests/H10-auto-execute-blocked-task/README.md:1-35` — BLOCKED failure isolation fixture (`none`) — commits: 
+  - Task 11: `skills/dj-superkit-subagent-driven-development/tests/README.md:<actual>` — 색인 v1.1.17+ 섹션 + H7~H10 4 줄 (`none`) — commits: 
 - **연관 commits**: 
 - **변경 전/후 코드**: 생략 — `git show <SHA>` 로 조회
 

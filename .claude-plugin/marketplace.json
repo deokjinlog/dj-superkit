@@ -1,22 +1,22 @@
 {
-  "name": "js-super",
-  "description": "프로덕션 코드를 안전하게 만들고 실용적으로 만드는 에이전틱 플러그인",
+  "name": "dj-superkit",
+  "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인",
   "owner": {
-    "name": "이진섭",
-    "email": "dlwlstjq410@gmail.com"
+    "name": "djchoi",
+    "email": "deokpaltech@users.noreply.github.com"
   },
-  "homepage": "https://github.com/LonerStayle/js-super",
+  "homepage": "https://github.com/deokpaltech/dj-superkit",
   "plugins": [
     {
-      "name": "js-super",
-      "description": "프로덕션 코드를 안전하게 만들고 실용적으로 만드는 에이전틱 플러그인",
-      "version": "2.7.0",
+      "name": "dj-superkit",
+      "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인",
+      "version": "0.1.0",
       "source": "./",
-      "homepage": "https://github.com/LonerStayle/js-super",
-      "repository": "https://github.com/LonerStayle/js-super",
+      "homepage": "https://github.com/deokpaltech/dj-superkit",
+      "repository": "https://github.com/deokpaltech/dj-superkit",
       "author": {
-        "name": "이진섭",
-        "email": "dlwlstjq410@gmail.com"
+        "name": "djchoi",
+        "email": "deokpaltech@users.noreply.github.com"
       }
     }
   ]

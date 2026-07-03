@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PostToolUse hook for js-super: when the main agent runs `git worktree add`
+# PostToolUse hook for dj-superkit: when the main agent runs `git worktree add`
 # via the Bash tool, set up Claude Code memory-folder symlinks for the new
 # worktree(s) by invoking setup-memory-symlinks.sh.
 #

@@ -44,15 +44,15 @@ def test_list_buffer_files_sorted_by_task_id(tmp_path: Path):
 
 
 def test_detect_stale_buffer_returns_path_when_present(tmp_path: Path):
-    base = tmp_path / ".js-super" / "changelog-buffer" / "feature-a"
+    base = tmp_path / ".dj-superkit" / "changelog-buffer" / "feature-a"
     _write(base / "task-01.md", {"task_id": 1, "task_name": "A", "status": "DONE"})
-    stale = detect_stale_buffer(tmp_path / ".js-super" / "changelog-buffer", "feature-a")
+    stale = detect_stale_buffer(tmp_path / ".dj-superkit" / "changelog-buffer", "feature-a")
     assert stale is not None
     assert stale.name == "feature-a"
 
 
 def test_detect_stale_buffer_returns_none_when_absent(tmp_path: Path):
-    stale = detect_stale_buffer(tmp_path / ".js-super" / "changelog-buffer", "feature-a")
+    stale = detect_stale_buffer(tmp_path / ".dj-superkit" / "changelog-buffer", "feature-a")
     assert stale is None
 
 
@@ -86,7 +86,7 @@ def test_consolidate_two_tasks_into_single_entry(tmp_path: Path):
 
 
 def test_F1_basic_batch_fixture():
-    fixtures = Path("skills/js-super-sub-driven/tests/F1-basic-batch")
+    fixtures = Path("skills/dj-superkit-sub-driven/tests/F1-basic-batch")
     out = consolidate_to_entry(
         manifests_dir=fixtures / "manifests",
         ch_id="CH-FIXTURE-100",

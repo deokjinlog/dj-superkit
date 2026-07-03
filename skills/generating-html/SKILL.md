@@ -46,7 +46,7 @@ HTML companion generation is a pure transformation task — no domain reasoning,
 **Dispatch a single B subagent with `model: "sonnet"` and `run_in_background: true`.** Reasoning:
 
 1. **AI 흐름은 `.md` 만 읽음** — A (v2.2.0 의 `.md` format-only pass) 의 가치는 사람 전용. B 의 `.html` 가 사람 가독성을 더 잘 흡수 (Mermaid / 시각화) → A 중복 제거 (v2.2.1).
-2. **fire-and-forget** — 메인 latency 거의 0 (Task dispatch 비용만). 결과는 배경에서 사이드카로 떨어지고, `.js-super/html-regen.log` 에 silent log.
+2. **fire-and-forget** — 메인 latency 거의 0 (Task dispatch 비용만). 결과는 배경에서 사이드카로 떨어지고, `.dj-superkit/html-regen.log` 에 silent log.
 3. **의미 보존 우선** — Sonnet 의 instruction-following 이 Haiku 보다 negative constraints ("do NOT reword") 에 안정. 비용 대비 안전.
 4. **시각화 휴리스틱 추론** — B 가 "어느 표를 Mermaid 로?" 같은 판단 필요 → Sonnet 추론력 필수.
 5. **디바운스 3초** — 사용자 연속 fix 시 이전 subagent cancel + 새 dispatch. 마지막 fix 만 의미 있음.
@@ -97,7 +97,7 @@ Use ONE `Task` tool call with `run_in_background: true`. Main agent does NOT wai
 - `description`: `HTML companion for <filename>.md`
 - `prompt`: load `skills/generating-html/html-companion-prompt.md`, fill `<ABSOLUTE_MD_PATH>` + `<ABSOLUTE_HTML_PATH>` (same dir, same basename, `.html` extension) + CH-id + timestamp (for footer stale marker)
 
-**Debounce (3초)**: If a previous B subagent is still running for the same `<slug>`, cancel it before dispatching the new one. Log cancel event to `.js-super/html-regen.log`.
+**Debounce (3초)**: If a previous B subagent is still running for the same `<slug>`, cancel it before dispatching the new one. Log cancel event to `.dj-superkit/html-regen.log`.
 
 **A (v2.2.0 `.md` format-only pass) is REMOVED in v2.2.1.** RAW `.md` is shown to user as-is.
 
@@ -107,7 +107,7 @@ Main does NOT wait for B subagent completion. Step 2 dispatch 직후:
 
 1. **메인 즉시 return** — caller (brainstorming / tech-design / writing-plans) 가 다음 turn 진행. RAW `.md` 가 사용자 리뷰 surface.
 2. **B subagent 가 배경에서** `.html` 사이드카 작성. 자체 verification (B prompt 의 "Verification before writing" 룰) 이후 Write.
-3. **silent log** — `.js-super/html-regen.log` 에 dispatch / 완료 / 실패 / cancel 모두 기록 (사용자 push X).
+3. **silent log** — `.dj-superkit/html-regen.log` 에 dispatch / 완료 / 실패 / cancel 모두 기록 (사용자 push X).
 4. **사용자 push X** — B 결과는 silent. 사용자가 `.html` 부재 인지 시 `/sync-html` 수동 호출.
 
 Failure handling (v2.2.1+ — fire-and-forget):
@@ -263,7 +263,7 @@ A generating-html run is correct when ALL hold:
 
 ### B-3 — silent log monitor
 
-호출 시 `.js-super/html-regen.log` 에 entry 자동 append:
+호출 시 `.dj-superkit/html-regen.log` 에 entry 자동 append:
 
 ```
 YYYY-MM-DD HH:MM:SS | DISPATCH | <slug>-<type>.md | agent_id=<id>

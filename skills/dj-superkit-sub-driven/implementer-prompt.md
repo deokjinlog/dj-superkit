@@ -1,6 +1,6 @@
 # Implementer Subagent Prompt Template
 
-Use this template when dispatching an implementer subagent under `js-super-sub-driven`. The prompt explicitly tells the subagent that RISK annotation + 변경이력 are post-processed by the main agent — the subagent should NOT touch them.
+Use this template when dispatching an implementer subagent under `dj-superkit-sub-driven`. The prompt explicitly tells the subagent that RISK annotation + 변경이력 are post-processed by the main agent — the subagent should NOT touch them.
 
 ```
 Task tool (general-purpose):
@@ -180,7 +180,7 @@ Task tool (general-purpose):
     per-task append step is gone (the controller no longer touches the footer
     until everything is finished).
 
-    Path: `.js-super/changelog-buffer/<slug>/task-NN.md`
+    Path: `.dj-superkit/changelog-buffer/<slug>/task-NN.md`
     (replace `<slug>` with the feature folder slug from the plan path; NN is your
     zero-padded task id, e.g. `task-05.md`).
 
@@ -190,7 +190,7 @@ Task tool (general-purpose):
     python -c "
     from pathlib import Path
     from scripts.changelog_buffer import write_manifest
-    write_manifest(Path('.js-super/changelog-buffer/<slug>/task-NN.md'), {
+    write_manifest(Path('.dj-superkit/changelog-buffer/<slug>/task-NN.md'), {
         'task_id': N,
         'task_name': '<task title>',
         'status': 'DONE',

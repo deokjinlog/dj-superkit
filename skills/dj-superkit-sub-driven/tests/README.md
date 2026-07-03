@@ -64,4 +64,4 @@
 
 ## v2.0.2+ — og-flow rename + 핸드오프 강화 fixtures
 
-- `H13-og-flow-subagent-routing/` — og-flow Subagent path 매칭 검증 (upstream 원본 매칭 / js-super-sub-driven 미매칭)
+- `H13-og-flow-subagent-routing/` — og-flow Subagent path 매칭 검증 (upstream 원본 매칭 / dj-superkit-sub-driven 미매칭)

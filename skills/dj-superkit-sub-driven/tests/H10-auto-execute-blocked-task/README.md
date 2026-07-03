@@ -14,7 +14,7 @@ auto-executing-plans 진입 → wave 2 실행 중 1 task 가 spec-reviewer ❌ r
 
 ## 기대 동작
 
-1. auto-executing-plans Entry Guard ✅ → js-super-sub-driven invoke
+1. auto-executing-plans Entry Guard ✅ → dj-superkit-sub-driven invoke
 2. Wave 1 정상 진행
 3. Wave 2 실행 중 task X spec-reviewer ❌:
    - implementer 재dispatch + reviewer ❌

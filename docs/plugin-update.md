@@ -37,14 +37,14 @@ grep -n '"version"' .claude-plugin/plugin.json .claude-plugin/marketplace.json p
 
 ```
 # 1) 마켓플레이스 메타데이터 새로 읽기
-/plugin marketplace update js-super
+/plugin marketplace update dj-superkit
 
 # 2) 플러그인 자체 업데이트 (옵션 A: 한 번에)
-/plugin update js-super@js-super
+/plugin update dj-superkit@dj-superkit
 
 # 또는 옵션 B: 깨끗하게 재설치 (manifest 변경이 클 때 권장)
-/plugin uninstall js-super@js-super
-/plugin install js-super@js-super
+/plugin uninstall dj-superkit@dj-superkit
+/plugin install dj-superkit@dj-superkit
 ```
 
 ---
@@ -105,7 +105,7 @@ git checkout HEAD~1 -- .claude-plugin/ package.json
 | 슬래시 자동완성에 변경된 description 안 보임 | 세션 재시작 안 함 | 세션 종료 + 재시작 |
 | `/plugin marketplace update` 가 "no changes" | 세 manifest 중 일부만 bump됨 | 셋 다 동일 버전으로 통일 |
 | 새 skill 추가했는데 invoke 안 됨 | install 안 됨 (marketplace update만 함) | `/plugin update` 또는 uninstall+install |
-| 기존 conversation history 못 찾음 | 디렉터리 rename 시 `.claude/projects/` 인코딩 폴더 안 옮김 | [docs/migrations/2026-05-02-rename-to-js-super.md](migrations/2026-05-02-rename-to-js-super.md) 참고 |
+| 기존 conversation history 못 찾음 | 디렉터리 rename 시 `.claude/projects/` 인코딩 폴더 안 옮김 | [docs/migrations/2026-05-02-rename-to-dj-superkit.md](migrations/2026-05-02-rename-to-dj-superkit.md) 참고 |
 
 ---
 
@@ -113,7 +113,7 @@ git checkout HEAD~1 -- .claude-plugin/ package.json
 
 ```
 manifest 3파일 버전 동시 bump
-→ /plugin marketplace update js-super
+→ /plugin marketplace update dj-superkit
 → /plugin uninstall + install (또는 /plugin update)
 → 세션 재시작
 → 자동완성으로 검증

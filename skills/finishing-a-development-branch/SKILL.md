@@ -11,7 +11,7 @@ implementation 완료 + 모든 테스트 통과 시점에 호출. 1인 개발자
 
 ## When to Use
 
-- `executing-plans` / `js-super-sub-driven` 가 모든 task 완료 후 자동 호출
+- `executing-plans` / `dj-superkit-sub-driven` 가 모든 task 완료 후 자동 호출
 - 사용자가 명시적으로 마무리 단계 진입 시 호출
 
 ## Process
@@ -71,5 +71,5 @@ git worktree remove <path>
 ## Related Skills
 
 - `executing-plans` — 인라인 모드 종료 시 호출
-- `js-super-sub-driven` — 서브에이전트 모드 End-of-Run consolidator 끝 호출
+- `dj-superkit-sub-driven` — 서브에이전트 모드 End-of-Run consolidator 끝 호출
 - `setting-up-worktrees` — 워크트리 생성 페어 (cleanup 은 manual)

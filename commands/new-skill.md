@@ -1,11 +1,11 @@
 ---
-description: "사용자가 /new-skill 슬래시를 명시 호출했을 때만 발동. 자유 텍스트 한 줄을 받아 프로젝트 또는 전체(글로벌) <slug>/SKILL.md 1 파일로 자동 생성 + js-super 출처 표식 부여."
+description: "사용자가 /new-skill 슬래시를 명시 호출했을 때만 발동. 자유 텍스트 한 줄을 받아 프로젝트 또는 전체(글로벌) <slug>/SKILL.md 1 파일로 자동 생성 + dj-superkit 출처 표식 부여."
 argument-hint: "[<slug>] [--project|--global] [--force] [--dry-run] <자유 텍스트 설명>"
 ---
 
 # New Skill 빌더 (프로젝트 / 전체 skill 자동 생성)
 
-사용자가 `$ARGUMENTS` 로 던진 자유 텍스트를 읽고, **자동 발동 트리거** + **수행 동작** 으로 분해한 뒤 `<SKILL_BASE>/<slug>/SKILL.md` 1 파일을 생성합니다. `<SKILL_BASE>` 는 스코프에 따라 결정됩니다 — 프로젝트면 `<project-root>/.claude/skills`, 전체면 `~/.claude/skills`. 생성 시 js-super 출처 표식 파일 `.js-super-skill.json` 도 함께 작성합니다. skill hot-reload 덕분에 저장 즉시 사용 가능합니다.
+사용자가 `$ARGUMENTS` 로 던진 자유 텍스트를 읽고, **자동 발동 트리거** + **수행 동작** 으로 분해한 뒤 `<SKILL_BASE>/<slug>/SKILL.md` 1 파일을 생성합니다. `<SKILL_BASE>` 는 스코프에 따라 결정됩니다 — 프로젝트면 `<project-root>/.claude/skills`, 전체면 `~/.claude/skills`. 생성 시 dj-superkit 출처 표식 파일 `.dj-superkit-skill.json` 도 함께 작성합니다. skill hot-reload 덕분에 저장 즉시 사용 가능합니다.
 
 ## 1. 사전 검증
 
@@ -106,7 +106,7 @@ step 폭주 catch 시 다음 한 줄을 사용자에게:
 - 존재 Y + `--force` 명시 X → § 5 의 abort 분기로
 - 존재 Y + `--force` 명시 Y → § 5 의 백업 + 덮어쓰기 분기로
 
-**확정한 스코프 위치만 검증 X**. 반대 스코프(`--project` 면 글로벌, `--global` 이면 프로젝트) 또는 js-super 의 `<plugin>/skills/` cache 의 동일 이름 skill 은 사용자 catch 영역 (§ 6 보고 메시지 끝에 안내).
+**확정한 스코프 위치만 검증 X**. 반대 스코프(`--project` 면 글로벌, `--global` 이면 프로젝트) 또는 dj-superkit 의 `<plugin>/skills/` cache 의 동일 이름 skill 은 사용자 catch 영역 (§ 6 보고 메시지 끝에 안내).
 
 ## 4. 사전 검증 룰 (Write 직전)
 
@@ -156,11 +156,11 @@ abort 메시지:
 
 ### 마커 파일 규약 (출처 표식)
 
-신규 / 덮어쓰기 Write 시 SKILL.md 와 같은 디렉토리에 `.js-super-skill.json` 을 함께 작성합니다. 이 파일이 `/list-skills` 조회·`/remove-skill` 삭제의 js-super 출처 판별 기준입니다.
+신규 / 덮어쓰기 Write 시 SKILL.md 와 같은 디렉토리에 `.dj-superkit-skill.json` 을 함께 작성합니다. 이 파일이 `/list-skills` 조회·`/remove-skill` 삭제의 dj-superkit 출처 판별 기준입니다.
 
 ```json
 {
-  "generated_by": "js-super:new-skill",
+  "generated_by": "dj-superkit:new-skill",
   "scope": "<project|global>",
   "created": "<YYYY-MM-DDTHH:MM:SS>"
 }
@@ -174,7 +174,7 @@ frontmatter + 본문 instruction 미리보기만 메인 응답으로 출력:
 ℹ️ /<slug> skill 미리보기 (--dry-run, Write X)
 
 저장 위치 (예정): <SKILL_BASE>/<slug>/SKILL.md  (스코프: <project|global>)
-함께 생성: <SKILL_BASE>/<slug>/.js-super-skill.json (출처 표식)
+함께 생성: <SKILL_BASE>/<slug>/.dj-superkit-skill.json (출처 표식)
 
 ---
 <frontmatter + 본문 preview>
@@ -202,14 +202,14 @@ frontmatter + 본문 instruction 미리보기만 메인 응답으로 출력:
 1. Read 도구로 기존 `<SKILL_BASE>/<slug>/SKILL.md` 읽기
 2. Write 도구로 `<SKILL_BASE>/<slug>/SKILL.md.bak-<YYYYMMDDHHMMSS>` 에 1번에서 읽은 내용 그대로 저장
 3. Write 도구로 `<SKILL_BASE>/<slug>/SKILL.md` 덮어쓰기 (새 본문)
-4. Write 도구로 `<SKILL_BASE>/<slug>/.js-super-skill.json` 작성 (위 마커 규약, 이미 있으면 갱신)
+4. Write 도구로 `<SKILL_BASE>/<slug>/.dj-superkit-skill.json` 작성 (위 마커 규약, 이미 있으면 갱신)
 5. § 6 의 성공 보고 + 백업 경로 한 줄 추가
 
 ### 5-4. 신규 (정상 Write)
 
 1. `<SKILL_BASE>/<slug>/` 디렉토리 생성 (필요 시)
 2. `<SKILL_BASE>/<slug>/SKILL.md` 작성
-3. Write 도구로 `<SKILL_BASE>/<slug>/.js-super-skill.json` 작성 (위 마커 규약)
+3. Write 도구로 `<SKILL_BASE>/<slug>/.dj-superkit-skill.json` 작성 (위 마커 규약)
 4. § 6 의 성공 보고
 
 ## 6. 보고 양식
@@ -220,7 +220,7 @@ frontmatter + 본문 instruction 미리보기만 메인 응답으로 출력:
 ✅ /<slug> skill 이 <SKILL_BASE>/<slug>/SKILL.md 에 생성되었습니다. (스코프: <project|global>)
 
 발동 조건: <description 1줄 요약>
-출처 표식: <SKILL_BASE>/<slug>/.js-super-skill.json (이 파일이 있어야 /list-skills 조회·/remove-skill 삭제 대상이 됩니다)
+출처 표식: <SKILL_BASE>/<slug>/.dj-superkit-skill.json (이 파일이 있어야 /list-skills 조회·/remove-skill 삭제 대상이 됩니다)
 
 저장 즉시 사용 가능합니다 (skill hot-reload).
 - 사용자 명시 호출: /<slug>
@@ -249,7 +249,7 @@ frontmatter + 본문 instruction 미리보기만 메인 응답으로 출력:
 - **동일 이름 skill 덮어쓰기 (`--force` 없이) 금지** — § 5-2 abort
 - **skill 본문에 비밀값 / 토큰 / 하드코딩 경로 박기 금지** — § 4-4 catch
 - **확정 스코프 외 위치 (반대 스코프 / `<plugin>/skills/`) 자동 검증 금지** — D-T4 단순성. 사용자 catch 영역
-- **출처 표식(`.js-super-skill.json`) 작성 누락 금지** — 신규/덮어쓰기 Write 시 반드시 함께 작성 (§ 5). 누락 시 `/list-skills` 조회·`/remove-skill` 삭제 대상에서 빠짐
+- **출처 표식(`.dj-superkit-skill.json`) 작성 누락 금지** — 신규/덮어쓰기 Write 시 반드시 함께 작성 (§ 5). 누락 시 `/list-skills` 조회·`/remove-skill` 삭제 대상에서 빠짐
 - **`commands/<slug>.md` 자동 생성 금지** — commands 는 hot-reload 미지원이라 빌더 의미 ↓ (META-BUILDER §2). skill 만 생성
 
 ## 8. dogfood 시나리오 (사용자 검증용)

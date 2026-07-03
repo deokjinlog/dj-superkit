@@ -1,6 +1,6 @@
 # Spec Compliance Reviewer Prompt Template
 
-Use this template when dispatching a spec compliance reviewer subagent under `js-super-sub-driven`.
+Use this template when dispatching a spec compliance reviewer subagent under `dj-superkit-sub-driven`.
 
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less). No quality reviewer follows — main agent post-processes governance (RISK / 변경이력) instead.
 
@@ -67,7 +67,7 @@ Task tool (general-purpose):
     Skip these — they are out of scope for spec compliance review:
     - Risk annotations (`# ⚠️ RISK(...)` comments) — main agent adds these post-review
     - 변경이력 footer entries — main agent appends these post-review
-    - Code style / quality polish — js-super relies on TDD + main-agent governance for that
+    - Code style / quality polish — dj-superkit relies on TDD + main-agent governance for that
 
     Focus only on: did the code do what the task said to do?
 

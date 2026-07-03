@@ -22,7 +22,7 @@ Layer 1 — Skill body (Markdown)
   │    └─ FR-2: Checklist 끝 transition reminder
   ├─ skills/writing-plans/SKILL.md
   │    └─ FR-2: Checklist 끝 transition reminder
-  └─ skills/{docs-pretty,code-pretty,executing-plans,js-super-subagent-driven-development}/SKILL.md
+  └─ skills/{docs-pretty,code-pretty,executing-plans,dj-superkit-subagent-driven-development}/SKILL.md
        └─ FR-4: Pre-flight 섹션 통일 boilerplate (exit 1 / exit ≠0,1 분기)
 
 Layer 2 — Helper script (Python)
@@ -38,11 +38,11 @@ Layer 3 — Coupling memo (CLAUDE.md)
 ```text
 User → /brainstorm OR 자연어 ("…를 만들어")
   ↓
-js-super:brainstorming Step 0 (NEW, FR-3)
+dj-superkit:brainstorming Step 0 (NEW, FR-3)
   ├─ small 신호 감지 → og-brainstorming auto-invoke + notice
-  └─ 그 외 → AskUserQuestion 게이트 (og- / js-super)
-       ↓ (js-super 선택)
-       js-super:brainstorming 본 흐름 (Checklist 1~9)
+  └─ 그 외 → AskUserQuestion 게이트 (og- / dj-superkit)
+       ↓ (dj-superkit 선택)
+       dj-superkit:brainstorming 본 흐름 (Checklist 1~9)
          └─ Checklist 끝 reminder (FR-2): invoke 직전 모든 task completed
               ↓
               designing-direction Step 0 (announce, FR-1)
@@ -80,11 +80,11 @@ exit code 분기:
 | FR-4     | `skills/docs-pretty/SKILL.md`                                                 | Step 1 Pre-flight 섹션 — exit ≠ 0 분기 boilerplate 통일                            |
 | FR-4     | `skills/code-pretty/SKILL.md`                                                 | 동일                                                                                |
 | FR-4     | `skills/executing-plans/SKILL.md`                                             | 동일 (mode-check 부)                                                                |
-| FR-4     | `skills/js-super-subagent-driven-development/SKILL.md`                        | 동일 (Entry Guard 부)                                                               |
+| FR-4     | `skills/dj-superkit-subagent-driven-development/SKILL.md`                        | 동일 (Entry Guard 부)                                                               |
 | FR-4     | `scripts/preflight.py`                                                        | `PreflightResult` 에 `human_reason: str` 필드 추가 (NamedTuple → 3-field). 기존 호출자 호환 (default value). |
 | FR-4     | `scripts/tests/test_preflight.py`                                             | 9 unit test 의 `human_reason` 검증 추가                                             |
 | (결합)   | `CLAUDE.md`                                                                   | "FR-4 preflight schema ↔ 4 skill boilerplate" 결합 메모 추가                       |
-| (테스트) | `skills/js-super-subagent-driven-development/tests/H1~H6/` (신규)            | dogfood fixture (H1 라우터 small / H2 라우터 ambiguous / H3 adaptive N/A / H4 preflight fail / H5 docs-pretty pre-review / H6 task name friendly) |
+| (테스트) | `skills/dj-superkit-subagent-driven-development/tests/H1~H6/` (신규)            | dogfood fixture (H1 라우터 small / H2 라우터 ambiguous / H3 adaptive N/A / H4 preflight fail / H5 docs-pretty pre-review / H6 task name friendly) |
 | FR-5 | `skills/docs-pretty/SKILL.md` | frontmatter description 갱신 + Trigger timing 섹션 단일화 (모든 doc 타입 pre-review per-draft) + Anti-Trigger 일부 룰 제거 |
 | FR-5 | `skills/brainstorming/SKILL.md` | Checklist Step 6 (사용자 리뷰) ↔ Step 7 (docs-pretty) 순서 swap. user-fix 시 re-pretty loop. |
 | FR-5 | `skills/designing-direction/SKILL.md` | 동일 swap (combined approval gate ↔ docs-pretty) + per-draft loop 명시 |
@@ -176,7 +176,7 @@ exit code 분기:
 - (b) CLAUDE.md global rule — 신뢰성 낮음, 매 세션 LLM 해석 의존
 - (c) skill body Step 0 ✅ **선택**
 
-**이유**: js-super:brainstorming 진입 시 1순위로 발화. /brainstorm 과 자연어 진입 모두 동일 path. CLAUDE.md 보다 결정적.
+**이유**: dj-superkit:brainstorming 진입 시 1순위로 발화. /brainstorm 과 자연어 진입 모두 동일 path. CLAUDE.md 보다 결정적.
 
 ### D-T7 — FR-3 small 신호 감지: keyword list vs AI semantic vs hybrid
 
@@ -244,7 +244,7 @@ risk-annotation taxonomy: `side-effect | breaking | race`
 | ------- | ----------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **R1**  | side-effect | `skills/designing-direction/SKILL.md` Step 0 (FR-1)              | AI 가 DB/API 시사 토픽 놓치면 tech-design 비어있음                                           | 진입 announce 한 줄 + 사용자 즉시 override                                               |
 | **R2**  | breaking    | 3 skill Checklist 끝 (FR-2)                                       | LLM 행동 강제력 100% X — reminder 무시 가능                                                  | 명시 vs 미명시 차이 큼. dogfood 1회로 잔존 0건 검증                                     |
-| **R3**  | side-effect | `skills/brainstorming/SKILL.md` Step 0 (FR-3)                    | small 키워드 false positive ("이건 간단하지 않아")                                           | notice + "js-super 라고 답하세요" override                                               |
+| **R3**  | side-effect | `skills/brainstorming/SKILL.md` Step 0 (FR-3)                    | small 키워드 false positive ("이건 간단하지 않아")                                           | notice + "dj-superkit 라고 답하세요" override                                               |
 | **R4**  | breaking    | 4 skill Pre-flight 섹션 (FR-4)                                    | boilerplate 4곳 동시 변경. 한 군데만 누락 시 동작 불일치                                     | CLAUDE.md 결합 메모 + dogfood 4 skill 케이스                                             |
 | **R5**  | side-effect | FR-4 게이트 "강제 진행 (위험)" 옵션                               | 사용자 매번 강제진행 누르면 게이트 무력화                                                    | "(위험)" 라벨 + "⚠️ preflight 우회. <reason> 무시" 한 줄 안내                           |
 | **R6**  | breaking    | `scripts/preflight.py` `PreflightResult` (FR-4)                  | 필드 추가가 기존 caller 깨뜨림 가능성                                                        | NamedTuple default value 사용. 9 unit test 호환 검증                                    |
@@ -277,7 +277,7 @@ skill 본문 grep 으로 룰 박힘 확인:
 - `test_docs_pretty_check_human_reason_korean` — 실패 케이스에서 `human_reason` 한국어 1줄 존재 (e.g. `file_not_found: 대상 파일이 존재하지 않습니다`)
 - 동일 패턴 4 helper × 3 fail 케이스 = ~9 추가 test
 
-### 통합 dogfood fixture (G1~G4, `skills/js-super-subagent-driven-development/tests/`)
+### 통합 dogfood fixture (G1~G4, `skills/dj-superkit-subagent-driven-development/tests/`)
 
 | ID      | 시나리오                                          | 기대 동작                                                                                               | 매핑 AC |
 | ------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------- |
@@ -286,7 +286,7 @@ skill 본문 grep 으로 룰 박힘 확인:
 | **G3**  | 본 PRD 같은 메타 피처로 /design 호출              | adaptive announce 한 줄 + tech-design.md §3/§4 가 N/A 한 줄로 박힘                                     | AC-8    |
 | **G4**  | requirements.md 에 가짜 변경이력 entry 박은 채 docs-pretty 호출 | preflight exit 1 → AskUserQuestion 게이트 발화 + 사용자 "수정 후 재시도" → entry 제거 후 재호출 → 정상 진행 | AC-11   |
 | **H5**  | `/brainstorm` 새 피처 → 첫 RAW 가 prettified 인지 + fix 시 재발화 / `/design` 동일 패턴 | brainstorming/designing-direction 모두 docs-pretty → 사용자 prettified 리뷰 → 승인 → change-history. fix 요청 시 메인 revise → docs-pretty 재발화 (per-draft loop) | AC-14   |
-| **H6**  | js-super 자체 skill 진입 시 TaskCreate 목록 검사 | `Invoke`, `Gate #`, `skill`, `CH-id` 같은 내부 용어 미노출. 한국어 사용자 친화 표현만 | AC-15, AC-17 |
+| **H6**  | dj-superkit 자체 skill 진입 시 TaskCreate 목록 검사 | `Invoke`, `Gate #`, `skill`, `CH-id` 같은 내부 용어 미노출. 한국어 사용자 친화 표현만 | AC-15, AC-17 |
 
 ### 런타임 검증
 

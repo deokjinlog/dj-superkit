@@ -133,7 +133,7 @@ For version bumps, manifest sync, git tag operations.
 
 ## End-of-Run Consolidated Batch Entry (v1.1.7+, git-fast mode only)
 
-When `executing-plans` or `js-super-sub-driven` finishes ALL tasks under `commit_policy: per-task` (git-fast mode), the main agent appends ONE consolidated entry covering every task's code edits — instead of N per-task entries. Code blocks are omitted because `git show <commit-SHA>` is the audit trail; the entry references SHAs only.
+When `executing-plans` or `dj-superkit-sub-driven` finishes ALL tasks under `commit_policy: per-task` (git-fast mode), the main agent appends ONE consolidated entry covering every task's code edits — instead of N per-task entries. Code blocks are omitted because `git show <commit-SHA>` is the audit trail; the entry references SHAs only.
 
 ```markdown
 ### [YYYY-MM-DD HH:MM] [코드-수정] (batch: tasks N..M)

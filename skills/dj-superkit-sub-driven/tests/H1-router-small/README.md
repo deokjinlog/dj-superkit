@@ -12,11 +12,11 @@ README.md 의 v1.1.13 → v1.1.15 한 줄 간단히 수정해줘
 
 ## 기대 동작
 
-1. js-super:brainstorming Step 0 라우터 발화
+1. dj-superkit:brainstorming Step 0 라우터 발화
 2. small 신호 감지 (키워드: `간단`, 단일 파일/한 줄 변경)
 3. 한 줄 notice 노출:
    ```
-   ℹ️ Auto-routing to og-brainstorming ('간단', 단일 파일 변경). Switch back? "js-super" 라고 답하세요.
+   ℹ️ Auto-routing to og-brainstorming ('간단', 단일 파일 변경). Switch back? "dj-superkit" 라고 답하세요.
    ```
 4. og-brainstorming Skill tool 호출
 
