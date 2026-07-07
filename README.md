@@ -347,86 +347,6 @@ flowchart LR
 
 <br/>
 
-### `/worktree` — 한 줄로 작업 공간 격리
-
-> *"PR 리뷰하면서, 진행 중인 티켓도 보고, 가끔 긴급 hotfix 도 끼어들어요"*
-
-한 코드베이스에서 여러 작업을 동시에 들고 있을 때. raw `git worktree add` 는 매번 `.env` 복사 / 빌드 / Claude 메모리 처리를 손으로 해야 합니다.
-**`/worktree` 는 그걸 한 줄로**, 그리고 **Claude 메모리까지 자동으로 연결**해 줍니다.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**이렇게 쓰세요**
-
-```bash
-# 단수
-/worktree GNG-432-캔버스첨부오류
-
-# 복수
-/worktree feature-a feature-b feature-c
-
-# 자연어
-/worktree
-워크트리 3 개 만들어줘.
-브랜치는 결제 / 정산 / 환불.
-```
-
-</td>
-<td width="50%" valign="top">
-
-**그래서 뭐가 좋아요?**
-
-- `.env*` 파일을 **묻지 않고 자동 복사** → 빌드 / 서버 바로 실행 가능
-- Claude 메모리가 **메인 ↔ 워크트리 양방향** 으로 연결됨 → 새 워크트리 첫 세션부터 컨텍스트 그대로
-- `.gitignore` 도 알아서 처리
-- 자연어로 "3 개 만들어줘" 한 줄도 OK
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-### `/worktree-merge-back` — main 더럽히지 않고 머지 준비
-
-> *"feature 작업 1 주 했더니 main 이 멀리 갔어요. 머지하려니 충돌 무서워요"*
-
-feature 브랜치가 오래 살면 main 이 앞으로 갑니다. 보통은 main 워크트리에서 `git merge feature` 하다가 거기서 충돌 나서 main 이 더러워지죠.
-**`/worktree-merge-back` 은 거꾸로**, **feature 워크트리 안에서 main 을 당겨와 충돌을 거기서 해결**합니다.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**이렇게 쓰세요**
-
-```bash
-# feature 워크트리로 들어가서
-cd .worktrees/GNG-432-캔버스첨부오류
-/worktree-merge-back
-```
-
-이걸 하면 main 의 최신 변경을 이 워크트리로 당겨 옵니다. 충돌은 여기서만 일어나요.
-
-</td>
-<td width="50%" valign="top">
-
-**그래서 뭐가 안전해요?**
-
-- **main 워크트리는 손도 안 댑니다** — 충돌이 터져도 거긴 깨끗
-- main 워크트리에 진입한 상태에서는 **호출 자체가 차단**됩니다
-- 위험한 자동 해결 옵션 (`--strategy ours/theirs`) 은 **안 씁니다** — 한쪽 변경을 임의로 버리지 않음
-- `git push --force` **금지** — remote main 도 안전
-- 정리 (워크트리 삭제 / 브랜치 삭제) 는 **물어보고 진행**
-
-</td>
-</tr>
-</table>
-
-<br/>
-
 ### `/audit-risk` — 배포 직전 한 번 더 훑기
 
 > *"배포 전에 보안 / 비용 한 번 점검하고 싶은데 시간이 없어요"*
@@ -458,46 +378,6 @@ flowchart TD
 
 <br/>
 
-### `/new-skill` · `/list-skills` · `/remove-skill` — 나만의 skill 만들고 관리하기 *(v2.7+)*
-
-> *"자주 반복하는 작업을 슬래시 명령 하나로 만들어 두고 싶어요"*
-
-자유 텍스트 한 줄이면 `/new-skill` 이 `SKILL.md` 한 장을 자동으로 만들어 줍니다. 만들 위치는 **이 프로젝트만** 쓸지 **전체(글로벌)** 로 쓸지 매번 물어봐요.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**이렇게 쓰세요**
-
-```
-/new-skill PR 설명을 한국어로 요약해줘
-/list-skills
-/remove-skill pr-요약
-```
-
-→ `/new-skill` 은 프로젝트 / 전체 어디에 만들지 먼저 물어봅니다.
-
-</td>
-<td width="50%" valign="top">
-
-**그래서 뭐가 좋아요?**
-
-- `/new-skill` — 설명 한 줄 → skill 자동 생성, **스코프(프로젝트 / 전체) 선택**
-- `/list-skills` — **dj-superkit 가 만든 skill 만** 모아 보기 (현재 프로젝트 + 전체)
-- `/remove-skill` — 기본은 안전한 rename 정리, **dj-superkit 가 만든 것만** 대상
-- 출처 표식이 있어 **다른 플러그인 / 직접 만든 skill 은 못 건드려요**
-
-</td>
-</tr>
-</table>
-
-<br/>
-
----
-
-## 슬래시 명령 목록
-
 ### 워크플로
 
 | 명령 | 결과물 | 한 줄 설명 |
@@ -515,14 +395,10 @@ flowchart TD
 | 명령 | 한 줄 설명 |
 |---|---|
 | `/audit-risk` | 5+1 AI 가 보안·거버넌스 동시 점검 → HTML 보고서 |
-| `/worktree <브랜치>` | 격리 작업 공간 + `.env*` + Claude 메모리 자동 |
-| `/worktree-merge-back` | feature 워크트리 안에서 안전한 main 머지 |
-| `/worktree-remove` | 현재 워크트리 + 브랜치 안전 정리 |
-| `/new-skill <설명>` | 자유 텍스트 한 줄 → skill 자동 생성 (프로젝트 / 전체 선택) |
-| `/list-skills` | dj-superkit 가 만든 skill 만 조회 (프로젝트 + 전체) |
-| `/remove-skill <이름>` | dj-superkit 가 만든 skill 안전 정리 |
 | `/pretty-md` | `.md` 본문 다듬기 (의미는 안 바꿈) |
 | `/sync-html` | `.html` 보기 좋은 사본 다시 생성 |
+
+> 워크트리는 Claude Code 내장 `--worktree` 를 사용하세요 (별도 명령 제거됨).
 
 <br/>
 
@@ -766,8 +642,6 @@ flowchart LR
 **검증·거버넌스 (4)** — verifying-spec / verification-before-completion / change-propagation / risk-annotation
 
 **서브에이전트 (3)** — dj-superkit-sub-driven / subagent-driven-development / dispatching-parallel-agents
-
-**워크트리 (3)** — setting-up-worktrees / using-git-worktrees / worktree-merge-back
 
 **테스트·디버깅 (2)** — test-driven-development / systematic-debugging
 

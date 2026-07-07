@@ -72,4 +72,3 @@ git worktree remove <path>
 
 - `executing-plans` — 인라인 모드 종료 시 호출
 - `dj-superkit-sub-driven` — 서브에이전트 모드 End-of-Run consolidator 끝 호출
-- `setting-up-worktrees` — 워크트리 생성 페어 (cleanup 은 manual)
