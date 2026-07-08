@@ -7,3 +7,4 @@ docs/features/**/*.html
 # OS / 에디터 잡파일
 .DS_Store
 *.swp
+docs/learning/
