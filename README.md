@@ -594,61 +594,16 @@ def withdraw(user_id, amount):
 </details>
 
 <details>
-<summary><b>문서 하나 바꾸면 아래도 같이 검토</b></summary>
+<summary><b>학습노트 — 배운 걸 durable 하게 남기기</b></summary>
 
 <br/>
 
-요구사항의 FR-3 가 수정되면, 자동으로 아래로 영향을 확인합니다.
+개발 워크플로와 별개로, **대화나 자료(코드·문서·URL)에서 배운 내용을 학습노트로** 남길 수 있어요. `"이거 학습 정리해줘"` 한마디면 됩니다.
 
-```mermaid
-flowchart LR
-    A[요구사항 FR-3 수정] --> B[연쇄 영향 분석]
-    B --> C{기술설계 영향?}
-    B --> D{구현계획 영향?}
-    B --> E{코드 영향?}
-    C -->|YES| F[§4 갱신 제안]
-    D -->|YES| G[T7~T9 갱신 제안]
-    E -->|YES| H[해당 코드 위치 표시]
-    F --> I[사용자 확인]
-    G --> I
-    H --> I
-    I --> J["/sync-html 안내"]
-```
-
-`.html` 사본은 자동으로 stale 표시 → `/sync-html` 한 줄로 재생성.
-
-</details>
-
-<details>
-<summary><b>서브에이전트 모드 — task 가 많을 때</b></summary>
-
-<br/>
-
-구현계획의 task 가 5 개 넘고 서로 독립적이면, **AI 여러 개가 병렬로** task 를 처리할 수 있어요.
-
-```mermaid
-flowchart LR
-    classDef main fill:#7c3aed,stroke:#a78bfa,color:#fff
-    classDef sub fill:#1e293b,stroke:#06b6d4,color:#e2e8f0
-    classDef block fill:#dc2626,stroke:#fca5a5,color:#fff
-
-    M[메인 AI]:::main
-    P[구현계획.md]:::sub
-    I["일꾼 (haiku)<br/>계획 그대로 실행"]:::sub
-    R["조정자 (sonnet)<br/>막히면 복구 시도"]:::sub
-    B((막힘)):::block
-
-    M --> P --> I
-    I -->|성공| M
-    I -.-> B
-    B -.->|자동 호출| R
-    R -.->|복구| I
-    R -.->|실패| M
-```
-
-- **일꾼 (haiku, 빠르고 저렴)** — 계획 그대로 실행. 의심스러우면 즉시 멈춥니다.
-- **조정자 (sonnet, 똑똑)** — 일꾼이 막히면 자동으로 복구 시도. 그래도 안 되면 사람에게.
-- 일반 `/executing-plans` (인라인) 은 영향 0 — 평소처럼 LLM 자율로 진행됩니다.
+- **자유 구조** — 내용이 이끄는 형식 + "한 줄 요약" · "헷갈렸던 점"만 챙김
+- **주제당 하나로 성장** — 같은 챕터 후속 학습은 새 파일 대신 **기존 노트에 이어붙임**
+- **HTML 사본 자동** — `docs/learning/<날짜>-<주제>/` 에 `.md` + 보기 좋은 `.html`
+- 순수 **개인 지식 관리** — 기능 개발(brainstorming)과는 별개
 
 </details>
 
