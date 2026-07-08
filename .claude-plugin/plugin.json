@@ -1,7 +1,7 @@
 {
   "name": "dj-superkit",
   "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인 — 확인 게이트 / 변경이력 / 위험 주석 / wave-parallel",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": {
     "name": "djchoi",
     "email": "deokpaltech@users.noreply.github.com"
