@@ -1,6 +1,6 @@
 ---
 name: learning-notes
-description: Use when the user asks to capture, organize, extend, or prune what they learned as a durable study note — natural-language triggers like "이거 학습 정리해줘", "방금 배운 거 학습노트로 남겨줘", "이 노트에 이어줘", "그 부분 빼줘". Turns a conversation OR a pointed source (code/doc/URL) into a Korean study doc whose structure follows the content — free-form, keeping only light anchors (한 줄 요약 for review + 헷갈렸던/막힌 점 for active recall, nudged not forced) — under docs/learning/<date>-<주요내용-슬러그>/, plus a readable HTML companion. Same-chapter follow-ups APPEND to the existing note (one growing doc per topic, not fragments); supports partial/whole deletion. PERSONAL KNOWLEDGE CAPTURE — NOT feature-development requirements (that is brainstorming). Do NOT trigger on plain summarization where the user did not ask to save a note.
+description: Use when the user asks to capture, organize, extend, or prune what they learned as a durable study note — natural-language triggers like "이거 학습 정리해줘", "방금 배운 거 학습노트로 남겨줘", "이 노트에 이어줘", "그 부분 빼줘". Turns a conversation OR a pointed source (code/doc/URL) into a Korean study doc organized for future RETRIEVAL (not just recording) — free-form structure with light anchors (한 줄 요약=compression / 헷갈렸던 점=active recall / 연결=elaboration, nudged not forced) — under docs/learning/<date>-<주요내용-슬러그>/, plus a readable HTML companion. Same-chapter follow-ups APPEND to the existing note (one growing doc per topic, not fragments); supports partial/whole deletion. PERSONAL KNOWLEDGE CAPTURE — NOT feature-development requirements (that is brainstorming). Do NOT trigger on plain summarization where the user did not ask to save a note.
 ---
 
 # 학습노트 (learning-notes)
@@ -57,14 +57,17 @@ description: Use when the user asks to capture, organize, extend, or prune what 
 
 **형식은 내용에 맞춰 자유롭게.** 매번 같은 틀을 채우지 말고, 그 주제에 가장 잘 맞는 구조로 정리한다. 개념 설명이 중심이면 개념 위주로, 시간순 흐름이면 타임라인으로, 비교가 핵심이면 비교표로 — **내용이 형식을 정한다**. 개요·도식·비유·단계·비교·오답노트 등 필요한 것만 골라 쓰고, 안 맞는 섹션은 억지로 만들지 않는다.
 
-**단, 두 가지 "느슨한 앵커"만 가능하면 챙긴다** (고정 섹션 강제 아님 — 자연스럽게 유도):
+**정리 기준 = "기록"이 아니라 "미래의 내가 다시 꺼내 쓰기".** 노트는 회상 장치다. 아래 재료가 살아있으면 나중에 잘 떠오르고, 없으면 죽은 노트가 된다. **고정 섹션 강제가 아니라, 내용에 맞게 자연스럽게 챙기는 느슨한 앵커:**
 
-1. **한 줄 요약** — 복습용 핵심 한 줄. 나중에 다시 열었을 때 3초 만에 "아 이거였지" 하게. (누적 시 갱신)
-2. **헷갈렸던 / 막혔던 점** — 어디서 막혔고 어떻게 풀렸는지. 학습노트에서 제일 가치 있는 부분 (능동 회상). 있으면 `### Q. ... / A. ...` 블록으로 남기면 나중에 개별 추가·삭제가 쉽다. **없으면 억지로 만들지 않는다.**
+1. **한 줄 요약** *(내 말로 압축)* — 복습용 핵심 한 줄. 다시 열었을 때 3초 만에 "아 이거였지". 노트 **맨 위**에 두면 훑기 좋다. (누적 시 갱신)
+2. **헷갈렸던 / 막혔던 점** *(능동 회상)* — 어디서 막혔고 어떻게 풀렸는지. 학습노트에서 제일 값진 부분. 있으면 `### Q. ... / A. ...` 블록으로 (개별 추가·삭제 쉬움). **없으면 억지로 X.**
+3. **연결** *(정교화)* — 이 개념이 **어디서 왔고 어디로 이어지나**, 또는 **이미 아는 것에 어떻게 붙나**(비유·다른 분야 대응). 한 줄이라도 좋다. 고립된 사실은 나중에 안 꺼내진다. 없으면 X.
+
+**깊이 층** *(훑기 가능하게)* — 긴 노트는 **훑기 → 자세히 → 출처** 순으로 재진입되게: 핵심 문구는 **굵게**, 섹션마다 첫 줄에 결론을 두면 스크롤만으로 파악된다.
 
 (선택) 출처 `파일:라인`·링크는 검증 가능한 학습이면 붙인다.
 
-> 핵심: 틀을 채우는 게 아니라 **배운 걸 자연스럽게 흐르게** 쓰되, "요약"과 "막힌 지점"만 놓치지 않게. 나머지 구조는 전부 내용이 이끄는 대로. Q&A 를 쓸 땐 블록 단위로 (추가·삭제 용이).
+> 핵심: 틀을 채우는 게 아니라 **"미래의 내가 다시 꺼내 쓸 수 있게"** 쓰는 것. **회상(막힌 점) · 압축(요약) · 연결 · 깊이** 이 넷이 살아있으면 좋은 노트. 나머지 구조는 내용이 이끄는 대로. Q&A 는 블록 단위로.
 
 ### 3. HTML 사본 (재)생성
 
@@ -98,7 +101,9 @@ description: Use when the user asks to capture, organize, extend, or prune what 
 | 같은 챕터 후속인데 새 파일 생성 (조각남) | 기존 노트에 **append** |
 | 주제를 "Claude Code 전체" 로 너무 넓게 | 챕터 레벨 ("도구 파이프라인") |
 | 주제를 "validateInput 하나" 로 너무 좁게 | 챕터 레벨 (그 안에 누적) |
-| 안 맞는데 6칸(개요·개념·Q&A·도식·요약) 억지로 채움 | 내용이 이끄는 자유 구조 — "한 줄 요약"·"막힌 점"만 챙김 |
+| 안 맞는데 6칸(개요·개념·Q&A·도식·요약) 억지로 채움 | 내용이 이끄는 자유 구조 — "요약·막힌 점·연결"만 챙김 |
+| 순수 필사·요약만 (회상 표면 0 = 죽은 노트) | "다시 꺼내 쓰기" 기준 — 회상·연결 살리기 |
+| 고립된 사실 나열 (연결 없음) | "어디서 왔고 어디로 이어지나" 한 줄 |
 | Q&A 를 한 덩어리 산문으로 (쓸 때) | `### Q./A.` **블록 단위** (개별 삭제 위해) |
 | `.md` 만 고치고 HTML 그대로 둠 | 변경 시 HTML **재생성** |
 | 기능 개발 요구사항인데 발동 | 그건 `brainstorming`. 학습노트는 지식 캡처 |
