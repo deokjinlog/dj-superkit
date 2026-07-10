@@ -3,20 +3,20 @@
   "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인",
   "owner": {
     "name": "djchoi",
-    "email": "deokpaltech@users.noreply.github.com"
+    "email": "deokjinlog@users.noreply.github.com"
   },
-  "homepage": "https://github.com/deokpaltech/dj-superkit",
+  "homepage": "https://github.com/deokjinlog/dj-superkit",
   "plugins": [
     {
       "name": "dj-superkit",
       "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인",
       "version": "0.18.0",
       "source": "./",
-      "homepage": "https://github.com/deokpaltech/dj-superkit",
-      "repository": "https://github.com/deokpaltech/dj-superkit",
+      "homepage": "https://github.com/deokjinlog/dj-superkit",
+      "repository": "https://github.com/deokjinlog/dj-superkit",
       "author": {
         "name": "djchoi",
-        "email": "deokpaltech@users.noreply.github.com"
+        "email": "deokjinlog@users.noreply.github.com"
       }
     }
   ]

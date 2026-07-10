@@ -117,7 +117,7 @@ flowchart LR
 **1. 설치** — Claude Code 안에서:
 
 ```
-/plugin marketplace add deokpaltech/dj-superkit
+/plugin marketplace add deokjinlog/dj-superkit
 /plugin install dj-superkit@dj-superkit
 ```
 
@@ -727,7 +727,7 @@ og-* 흐름은 변경이력 / 위험 주석 / `.html` 사본 / 검증 게이트�
 
 <br/>
 
-<sub>버그 / 제안: <a href="https://github.com/deokpaltech/dj-superkit/issues">GitHub Issues</a></sub>
+<sub>버그 / 제안: <a href="https://github.com/deokjinlog/dj-superkit/issues">GitHub Issues</a></sub>
 
 <br/>
 
