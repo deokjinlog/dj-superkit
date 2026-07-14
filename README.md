@@ -10,7 +10,7 @@
 <br/>
 
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.2.1-7c3aed?style=for-the-badge&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.2.2-7c3aed?style=for-the-badge&labelColor=0d1117">
   <img alt="Upstream" src="https://img.shields.io/badge/upstream-superpowers%205.0.7-f97316?style=for-the-badge&labelColor=0d1117">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge&labelColor=0d1117">
   <img alt="Language" src="https://img.shields.io/badge/lang-한국어-3b82f6?style=for-the-badge&labelColor=0d1117">
@@ -525,7 +525,7 @@ def withdraw(user_id, amount):
 
 ## 버전 마일스톤
 
-버전은 `plugin.json` 의 semver 하나로 관리해요 — 마켓플레이스 배포 버전 · git 태그 · 아래 마일스톤이 모두 같은 축입니다. 지금은 **v1.2.0**.
+버전은 `plugin.json` 의 semver 하나로 관리해요 — 마켓플레이스 배포 버전 · git 태그 · 아래 마일스톤이 모두 같은 축입니다. 지금은 **v1.2.2**.
 
 <details open>
 <summary><b>최근 릴리즈</b></summary>
@@ -534,7 +534,8 @@ def withdraw(user_id, amount):
 
 | 버전 | 무엇이 바뀌었나요 |
 |---|---|
-| **v1.2.0** | `design-style-explorer` → 별도 플러그인 **[design-kit](https://github.com/deokjinlog/design-kit)** 으로 분리. dj-superkit 은 프로덕션 코드 워크플로에 집중 |
+| **v1.2.2** | 헤드라인 **"AI는 빠르게, 코드는 안전하게"** 확정 + 디자인 도구 리브랜딩([design-explosion-30-styles](https://github.com/deokjinlog/design-explosion-30-styles)) 반영 |
+| **v1.2.0** | `design-style-explorer` → 별도 플러그인 **[design-explosion-30-styles](https://github.com/deokjinlog/design-explosion-30-styles)** 으로 분리. dj-superkit 은 프로덕션 코드 워크플로에 집중 |
 | **v1.1.0** | `devlog` 스킬 제거 + README 재구성(핵심 4단계 루프 우선) + **버전 축 통일** — semver 하나로 정리, 옛 태그 정돈 |
 | **v1.0.0** | **정식 버전** — 안정 릴리즈 |
 | **v0.26.0** | `design-style-explorer` README 쇼케이스 섹션 |
@@ -582,7 +583,7 @@ def withdraw(user_id, amount):
 
 <br/>
 
-<sub>🎨 디자인 방향 탐색이 필요하면 → <a href="https://github.com/deokjinlog/design-kit">design-kit</a></sub>
+<sub>🎨 디자인 방향 탐색이 필요하면 → <a href="https://github.com/deokjinlog/design-explosion-30-styles">design-explosion-30-styles</a></sub>
 
 <br/>
 

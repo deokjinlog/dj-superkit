@@ -1,7 +1,7 @@
 {
   "name": "dj-superkit",
-  "description": "AI는 빠르게, 코드는 안전하게 — 아이디어→코드 4단계 확인 워크플로 (게이트 / 변경이력 / 위험 주석 / wave-parallel)",
-  "version": "1.2.1",
+  "description": "superpowers 5.0.7 계승 — AI는 빠르게, 코드는 안전하게: 아이디어→코드 4단계 확인 워크플로 (게이트 / 변경이력 / 위험 주석 / wave-parallel)",
+  "version": "1.2.2",
   "author": {
     "name": "djchoi",
     "email": "deokjinlog@users.noreply.github.com"
