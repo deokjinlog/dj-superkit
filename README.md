@@ -147,7 +147,7 @@ Claude Code 안에서:
 
 ## 라이선스 · 기여
 
-MIT — [LICENSE](LICENSE) · [쉬운 설명](LICENSE_NOTES.md)
+MIT — [LICENSE](LICENSE)
 기여 · 버그 제보 — [CONTRIBUTING](CONTRIBUTING.md) · [Issues](https://github.com/deokjinlog/intent-locked-workflow/issues)
 
 ---
