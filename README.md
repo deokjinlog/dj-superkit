@@ -156,6 +156,7 @@ intent-locked-workflow/
 (Jesse Vincent) 표기를 유지하며, 그 위의 확장분에 대한 저작권을 함께 둡니다. 자세한 내용은 [LICENSE](LICENSE).
 
 버그 제보 · 제안 · 기여는 [GitHub Issues](https://github.com/deokjinlog/intent-locked-workflow/issues) 로 받습니다.
+기여 방법과 원칙은 [CONTRIBUTING](CONTRIBUTING.md) 을 봐 주세요.
 스킬은 사람의 행동을 바꾸는 코드라서, 스킬 본문을 고칠 때는 그 변경이 실제로 더 나은지 근거를 함께 주세요.
 
 <br/>
