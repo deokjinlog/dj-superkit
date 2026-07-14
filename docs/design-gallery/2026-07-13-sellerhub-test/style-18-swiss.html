@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>셀러허브 — 이커머스 셀러 통합 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== 스위스 인터내셔널 — 4색 예산제 ===== */
+  :root{
+    --bg:#FFFFFF;      /* 순백 */
+    --ink:#111111;     /* 잉크 (거의 검정) */
+    --red:#E2231A;     /* 빨강 — 화면에 딱 1곳 (품절 상태) */
+    --grid:#E4E4E4;    /* 헤어라인 / 모듈 경계 */
+    --gray:#6B6B6B;    /* 라벨·캡션·축 눈금 전용 */
+    --hover:#FAFAFA;   /* 행 hover 배경 */
+    --gutter:24px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter','Pretendard',system-ui,sans-serif;
+    font-weight:400;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"tnum" 1;
+  }
+
+  /* radius 0 — 예외 없음 */
+  a,button,input,th,td,div,section{border-radius:0;}
+
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 var(--gutter);}
+
+  /* 섹션 라벨 — 작고 넓게 대문자 */
+  .eyebrow{
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    display:block;
+    margin:0 0 8px;
+  }
+
+  /* ===== 헤더 ===== */
+  header{border-bottom:1px solid var(--ink);}
+  .topbar{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:var(--gutter);padding:24px 0 16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;}
+  .logo{
+    font-family:'Inter',sans-serif;font-weight:700;
+    font-size:28px;letter-spacing:-0.02em;line-height:0.95;
+    color:var(--ink);
+  }
+  .updated{font-size:11px;letter-spacing:0.04em;color:var(--gray);}
+  .updated .num{color:var(--ink);}
+
+  .actions{display:flex;gap:8px;align-items:center;}
+  .btn{
+    font-family:'Inter','Pretendard',sans-serif;font-weight:500;font-size:13px;
+    letter-spacing:0.01em;padding:9px 16px;cursor:pointer;
+    border:1px solid var(--ink);background:var(--bg);color:var(--ink);
+    line-height:1;transition:background .12s ease,color .12s ease;
+  }
+  .btn--primary{background:var(--ink);color:var(--bg);}
+  .btn--primary:hover{background:#000;}
+  .btn--ghost:hover{background:var(--hover);}
+
+  /* ===== 기간 탭 ===== */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--grid);margin-top:0;}
+  .tab{
+    font-family:'Inter','Pretendard',sans-serif;font-weight:500;font-size:13px;
+    letter-spacing:0.01em;color:var(--gray);
+    padding:14px 18px 12px;background:none;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:700;}
+
+  /* ===== 12컬럼 모듈 그리드 ===== */
+  .grid12{
+    display:grid;grid-template-columns:repeat(12,1fr);
+    gap:var(--gutter);position:relative;
+  }
+
+  /* KPI 밴드 + 눈에 보이는 컬럼 가이드 */
+  .kpi-band{position:relative;padding:32px 0 40px;border-bottom:1px solid var(--grid);}
+  .col-guides{
+    position:absolute;inset:32px 0 40px 0;
+    display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gutter);
+    pointer-events:none;z-index:0;
+    animation:reveal-cols 240ms ease-out .2s both;
+  }
+  .col-guides span{border-left:1px solid var(--grid);}
+  .col-guides span:last-child{border-right:1px solid var(--grid);}
+  @keyframes reveal-cols{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
+
+  .kpi{position:relative;z-index:1;padding-left:0;}
+  .kpi--rev-5{grid-column:span 5;}
+  .kpi--rev-3{grid-column:span 3;}
+  .kpi--rev-2{grid-column:span 2;}
+  .kpi + .kpi{border-left:1px solid var(--grid);padding-left:20px;}
+
+  .kpi-label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin:0 0 12px;}
+  .kpi-value{
+    font-family:'Inter',sans-serif;font-weight:700;
+    letter-spacing:-0.02em;line-height:0.95;color:var(--ink);
+    display:block;
+    animation:kpi-in 320ms ease-out both;
+  }
+  .kpi--rev-5 .kpi-value{font-size:clamp(28px,3.4vw,44px);}
+  .kpi--rev-3 .kpi-value{font-size:clamp(26px,2.8vw,38px);}
+  .kpi--rev-2 .kpi-value{font-size:clamp(22px,2.2vw,32px);}
+  .kpi-unit{font-size:0.55em;font-weight:500;color:var(--gray);margin-left:2px;letter-spacing:0;}
+
+  .kpi:nth-child(1) .kpi-value{animation-delay:.50s;}
+  .kpi:nth-child(2) .kpi-value{animation-delay:.56s;}
+  .kpi:nth-child(3) .kpi-value{animation-delay:.62s;}
+  .kpi:nth-child(4) .kpi-value{animation-delay:.68s;}
+  @keyframes kpi-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .kpi-delta{margin-top:10px;font-size:13px;letter-spacing:0.01em;color:var(--ink);display:flex;align-items:baseline;gap:6px;}
+  .kpi-delta .arrow{font-size:11px;line-height:1;color:var(--ink);}
+  .kpi-delta .caption{color:var(--gray);font-size:12px;}
+
+  /* KPI 셀 hover: 하단 헤어라인 굵어짐 */
+  .kpi::after{content:"";position:absolute;left:0;right:0;bottom:-40px;height:1px;background:transparent;transition:background .12s ease,height .12s ease;}
+  .kpi:hover::after{height:2px;background:var(--ink);}
+
+  /* ===== 본문 레이아웃 ===== */
+  .board{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gutter);padding:40px 0;}
+  .panel{grid-column:span 12;}
+  .panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .panel-title{font-family:'Inter','Pretendard',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:var(--ink);margin:0;}
+
+  /* ===== 차트 (축 0부터, 왜곡 금지) ===== */
+  .chart-panel{grid-column:span 12;}
+  .chart{
+    position:relative;display:grid;
+    grid-template-columns:44px 1fr;gap:12px;
+    border-top:1px solid var(--grid);padding-top:0;
+  }
+  .y-axis{position:relative;height:300px;}
+  .y-axis .tick{
+    position:absolute;right:0;transform:translateY(-50%);
+    font-size:11px;color:var(--gray);letter-spacing:0.02em;text-align:right;width:100%;padding-right:6px;
+  }
+  .plot{position:relative;height:300px;}
+  .gridlines{position:absolute;inset:0;pointer-events:none;}
+  .gridlines .line{position:absolute;left:0;right:0;height:1px;background:var(--grid);}
+  .gridlines .line.baseline{background:var(--ink);}
+
+  .bars{position:absolute;inset:0;display:flex;align-items:flex-end;gap:2%;}
+  .bar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;position:relative;}
+  .bar-val{
+    font-family:'Inter',sans-serif;font-weight:500;font-size:12px;color:var(--ink);
+    text-align:center;margin-bottom:6px;letter-spacing:-0.01em;
+  }
+  .bar-col.peak .bar-val{font-weight:700;}
+  .bar-col.peak .bar-val::after{content:" 피크";font-size:10px;font-weight:500;color:var(--gray);letter-spacing:0.04em;}
+  .bar{
+    background:var(--ink);width:100%;flex-shrink:0;
+    transform-origin:bottom center;
+    animation:bar-grow 500ms ease-out both;
+  }
+  .bar-col:nth-child(1) .bar{animation-delay:.30s;}
+  .bar-col:nth-child(2) .bar{animation-delay:.36s;}
+  .bar-col:nth-child(3) .bar{animation-delay:.42s;}
+  .bar-col:nth-child(4) .bar{animation-delay:.48s;}
+  .bar-col:nth-child(5) .bar{animation-delay:.54s;}
+  .bar-col:nth-child(6) .bar{animation-delay:.60s;}
+  .bar-col:nth-child(7) .bar{animation-delay:.66s;}
+  .bar-col:nth-child(8) .bar{animation-delay:.72s;}
+  @keyframes bar-grow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+
+  .x-axis{display:grid;grid-template-columns:44px 1fr;gap:12px;margin-top:8px;}
+  .x-labels{display:flex;gap:2%;}
+  .x-labels span{flex:1;text-align:center;font-size:11px;color:var(--gray);letter-spacing:0.02em;}
+  .chart-note{font-size:11px;color:var(--gray);margin-top:14px;letter-spacing:0.02em;}
+
+  /* crosshair + 툴팁 (JS 강화, 실패해도 값 라벨로 완전) */
+  .crosshair{position:absolute;top:0;bottom:0;width:1px;background:var(--gray);display:none;pointer-events:none;}
+  .tooltip{
+    position:absolute;top:0;transform:translate(-50%,-100%);
+    background:var(--ink);color:var(--bg);font-size:11px;font-weight:500;
+    padding:5px 8px;white-space:nowrap;display:none;pointer-events:none;letter-spacing:0.02em;
+  }
+
+  /* ===== 테이블 ===== */
+  .table-panel{grid-column:span 12;}
+  .table-scroll{overflow-x:auto;border-top:1px solid var(--ink);}
+  table{width:100%;border-collapse:collapse;min-width:720px;}
+  thead th{
+    font-family:'Inter','Pretendard',sans-serif;font-weight:500;font-size:11px;
+    letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);text-align:left;
+    padding:12px 14px;border-bottom:1px solid var(--grid);white-space:nowrap;vertical-align:bottom;
+  }
+  thead th.sortable{cursor:pointer;user-select:none;}
+  thead th.sortable:hover{color:var(--ink);}
+  thead th .tri{color:var(--gray);font-size:9px;margin-left:5px;transition:color .1s ease;}
+  thead th[aria-sort="ascending"] .tri,
+  thead th[aria-sort="descending"] .tri{color:var(--ink);}
+  th.col-num,td.col-num{text-align:right;}
+
+  tbody tr{position:relative;transition:background .08s ease;}
+  tbody td{
+    padding:14px;border-bottom:1px solid var(--grid);font-size:14px;color:var(--ink);
+    vertical-align:middle;
+  }
+  /* 좌측 빨강 인디케이터 (hover 순간만 — 예산 예외) */
+  tbody tr td:first-child{position:relative;}
+  tbody tr td:first-child::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--red);
+    transform:scaleX(0);transform-origin:left;transition:transform .1s ease;
+  }
+  tbody tr:hover{background:var(--hover);}
+  tbody tr:hover td:first-child::before,
+  tbody tr:focus-within td:first-child::before{transform:scaleX(1);}
+
+  .prod-name{max-width:340px;word-break:keep-all;overflow-wrap:anywhere;line-height:1.35;font-weight:500;}
+  .missing{color:var(--gray);}
+
+  /* 상태 — 색+텍스트+형태 3중 (색맹 대비) */
+  .status{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;letter-spacing:0.01em;white-space:nowrap;}
+  .status .mark{width:12px;text-align:center;font-size:11px;line-height:1;display:inline-block;}
+  .status .sub{color:var(--gray);font-size:11px;font-weight:400;}
+  .st-active{color:var(--ink);}
+  .st-active .mark{color:var(--ink);}
+  .st-settled{color:var(--gray);}
+  .st-settled .mark{color:var(--ink);}
+  .st-ready{color:var(--gray);}
+  .st-ready .mark{color:var(--gray);}
+  /* 유일한 빨강 — 품절(문제). 로드 시 잉크→빨강 점등 */
+  .st-out{color:var(--red);animation:red-light 200ms ease-out .8s both;}
+  .st-out .mark{color:var(--red);}
+  @keyframes red-light{from{color:var(--ink);}to{color:var(--red);}}
+
+  /* 행 hover [상세] 버튼 노출 */
+  .row-action{text-align:right;white-space:nowrap;}
+  .detail-btn{
+    font-family:'Inter','Pretendard',sans-serif;font-weight:500;font-size:12px;
+    border:1px solid var(--ink);background:var(--bg);color:var(--ink);
+    padding:6px 12px;cursor:pointer;line-height:1;
+    opacity:0;transform:translateX(4px);
+    transition:opacity .1s ease,transform .1s ease,background .12s ease;
+  }
+  tbody tr:hover .detail-btn,
+  tbody tr:focus-within .detail-btn{opacity:1;transform:translateX(0);}
+  .detail-btn:hover{background:var(--ink);color:var(--bg);}
+  .detail-btn:focus-visible{opacity:1;transform:none;}
+
+  /* ===== 푸터 ===== */
+  footer{border-top:1px solid var(--ink);padding:20px 0 40px;margin-top:20px;}
+  .foot{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);}
+  .foot b{color:var(--ink);font-weight:700;}
+
+  /* ===== 포커스 (빨강 예산 유일 예외) ===== */
+  a:focus-visible,button:focus-visible,th.sortable:focus-visible,[tabindex]:focus-visible{
+    outline:2px solid var(--red);outline-offset:2px;
+  }
+
+  /* ===== 반응형 900px↓ ===== */
+  @media (max-width:900px){
+    .kpi--rev-5,.kpi--rev-3,.kpi--rev-2{grid-column:span 6;}
+    .kpi + .kpi{border-left:none;padding-left:0;}
+    .kpi:nth-child(odd){border-right:1px solid var(--grid);padding-right:16px;}
+    .col-guides{display:none;}
+    .kpi-band{padding-bottom:24px;}
+    .kpi{padding-bottom:20px;}
+    .kpi::after{display:none;}
+    .prod-name{max-width:200px;}
+  }
+  @media (max-width:560px){
+    .kpi--rev-5,.kpi--rev-3,.kpi--rev-2{grid-column:span 12;}
+    .kpi:nth-child(odd){border-right:none;}
+    .kpi{border-bottom:1px solid var(--grid);padding-bottom:18px;}
+    .logo{font-size:24px;}
+  }
+
+  /* ===== 모션 최소화 ===== */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+    .col-guides{clip-path:none;}
+    .bar{transform:scaleY(1);}
+    .kpi-value{opacity:1;transform:none;}
+    .st-out{color:var(--red);}
+    /* hover 색 전환만 유지 (즉시) */
+    tbody tr:hover{background:var(--hover);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <span class="logo">셀러허브</span>
+        <span class="updated">갱신 <span class="num">2026-07-13 14:00</span></span>
+      </div>
+      <div class="actions">
+        <button class="btn btn--ghost" type="button" id="refreshBtn">새로고침</button>
+        <button class="btn btn--primary" type="button" id="exportBtn">리포트 내보내기</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="조회 기간">
+      <button class="tab" role="tab" type="button" aria-selected="false">오늘</button>
+      <button class="tab" role="tab" type="button" aria-selected="false">이번 주</button>
+      <button class="tab" role="tab" type="button" aria-selected="true">이번 달</button>
+      <button class="tab" role="tab" type="button" aria-selected="false">올해</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ===== KPI 밴드 ===== -->
+  <section class="kpi-band" aria-label="핵심 지표">
+    <div class="wrap">
+      <span class="eyebrow">이번 달 개요 · 2026년 7월</span>
+      <div class="grid12" style="position:relative;">
+        <div class="col-guides" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="kpi kpi--rev-5">
+          <p class="kpi-label">이번 달 총 매출</p>
+          <span class="kpi-value num">12,840,500,000<span class="kpi-unit">원</span></span>
+          <div class="kpi-delta"><span class="arrow">▲</span><span class="num">+8.2%</span><span class="caption">전월 대비</span></div>
+        </div>
+
+        <div class="kpi kpi--rev-3">
+          <p class="kpi-label">신규 주문</p>
+          <span class="kpi-value num">3,472<span class="kpi-unit">건</span></span>
+          <div class="kpi-delta"><span class="arrow">▲</span><span class="num">+12%</span><span class="caption">전월 대비</span></div>
+        </div>
+
+        <div class="kpi kpi--rev-2">
+          <p class="kpi-label">전환율</p>
+          <span class="kpi-value num">3.8<span class="kpi-unit">%</span></span>
+          <div class="kpi-delta"><span class="arrow">▼</span><span class="num">−0.4%p</span><span class="caption">감소</span></div>
+        </div>
+
+        <div class="kpi kpi--rev-2">
+          <p class="kpi-label">정산 대기</p>
+          <span class="kpi-value num">284,000,000<span class="kpi-unit">원</span></span>
+          <div class="kpi-delta"><span class="caption">지연 <span class="num">0</span>건</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="board">
+
+      <!-- ===== 차트 ===== -->
+      <section class="panel chart-panel" aria-label="최근 8주 매출 추이">
+        <div class="panel-head">
+          <h2 class="panel-title">최근 8주 매출 추이</h2>
+          <span class="eyebrow" style="margin:0;">단위 · 백만원 · 세로축 0 기준</span>
+        </div>
+
+        <div class="chart">
+          <div class="y-axis" aria-hidden="true">
+            <div class="tick num" style="top:0%">1,600</div>
+            <div class="tick num" style="top:25%">1,200</div>
+            <div class="tick num" style="top:50%">800</div>
+            <div class="tick num" style="top:75%">400</div>
+            <div class="tick num" style="top:100%">0</div>
+          </div>
+
+          <div class="plot">
+            <div class="gridlines" aria-hidden="true">
+              <div class="line" style="top:0%"></div>
+              <div class="line" style="top:25%"></div>
+              <div class="line" style="top:50%"></div>
+              <div class="line" style="top:75%"></div>
+              <div class="line baseline" style="top:100%"></div>
+            </div>
+
+            <div class="bars" id="bars" role="img"
+                 aria-label="최근 8주 매출: 1주 820, 2주 910, 3주 1050, 4주 970, 5주 1180, 6주 1340 피크, 7주 1220, 8주 1284 백만원">
+              <div class="bar-col" data-week="1주" data-val="820">
+                <span class="bar-val num">820</span><div class="bar" style="height:51.25%"></div>
+              </div>
+              <div class="bar-col" data-week="2주" data-val="910">
+                <span class="bar-val num">910</span><div class="bar" style="height:56.88%"></div>
+              </div>
+              <div class="bar-col" data-week="3주" data-val="1050">
+                <span class="bar-val num">1,050</span><div class="bar" style="height:65.63%"></div>
+              </div>
+              <div class="bar-col" data-week="4주" data-val="970">
+                <span class="bar-val num">970</span><div class="bar" style="height:60.63%"></div>
+              </div>
+              <div class="bar-col" data-week="5주" data-val="1180">
+                <span class="bar-val num">1,180</span><div class="bar" style="height:73.75%"></div>
+              </div>
+              <div class="bar-col peak" data-week="6주" data-val="1340">
+                <span class="bar-val num">1,340</span><div class="bar" style="height:83.75%"></div>
+              </div>
+              <div class="bar-col" data-week="7주" data-val="1220">
+                <span class="bar-val num">1,220</span><div class="bar" style="height:76.25%"></div>
+              </div>
+              <div class="bar-col" data-week="8주" data-val="1284">
+                <span class="bar-val num">1,284</span><div class="bar" style="height:80.25%"></div>
+              </div>
+
+              <div class="crosshair" id="crosshair"></div>
+              <div class="tooltip" id="tooltip"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="x-axis" aria-hidden="true">
+          <div></div>
+          <div class="x-labels">
+            <span>1주</span><span>2주</span><span>3주</span><span>4주</span>
+            <span>5주</span><span>6주</span><span>7주</span><span>8주</span>
+          </div>
+        </div>
+        <p class="chart-note">세로축은 0에서 시작합니다. 6주가 1,340백만원으로 피크입니다.</p>
+      </section>
+
+      <!-- ===== 테이블 ===== -->
+      <section class="panel table-panel" aria-label="상품별 현황">
+        <div class="panel-head">
+          <h2 class="panel-title">상품별 현황</h2>
+          <span class="eyebrow" style="margin:0;">6개 상품</span>
+        </div>
+
+        <div class="table-scroll">
+          <table id="prodTable">
+            <thead>
+              <tr>
+                <th scope="col">상품명</th>
+                <th scope="col">카테고리</th>
+                <th scope="col" class="col-num sortable" tabindex="0" data-key="stock" data-type="num" aria-sort="none">재고<span class="tri">▲▼</span></th>
+                <th scope="col" class="col-num sortable" tabindex="0" data-key="sold" data-type="num" aria-sort="none">판매<span class="tri">▲▼</span></th>
+                <th scope="col">상태</th>
+                <th scope="col"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">작업</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="prod-name" title="[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</div></td>
+                <td>의류</td>
+                <td class="col-num num" data-val="1240">1,240</td>
+                <td class="col-num num" data-val="856">856</td>
+                <td><span class="status st-active"><span class="mark">●</span>판매중<span class="sub">진행</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+              <tr>
+                <td><div class="prod-name">무선 블루투스 이어폰 Pro</div></td>
+                <td>전자</td>
+                <td class="col-num num" data-val="0">0</td>
+                <td class="col-num num" data-val="2103">2,103</td>
+                <td><span class="status st-out"><span class="mark">■</span>품절<span class="sub" style="color:var(--red);">문제</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+              <tr>
+                <td><div class="prod-name">스테인리스 텀블러 500ml</div></td>
+                <td>리빙</td>
+                <td class="col-num num" data-val="340">340</td>
+                <td class="col-num num missing" data-val="">—</td>
+                <td><span class="status st-ready"><span class="mark">○</span>준비중<span class="sub">대기</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+              <tr>
+                <td><div class="prod-name">친환경 대나무 칫솔 4개입</div></td>
+                <td>생활</td>
+                <td class="col-num num" data-val="5820">5,820</td>
+                <td class="col-num num" data-val="1472">1,472</td>
+                <td><span class="status st-active"><span class="mark">●</span>판매중<span class="sub">진행</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+              <tr>
+                <td><div class="prod-name">아로마 캔들 세트</div></td>
+                <td>리빙</td>
+                <td class="col-num num" data-val="88">88</td>
+                <td class="col-num num" data-val="640">640</td>
+                <td><span class="status st-settled"><span class="mark">✓</span>정산완료<span class="sub">완료</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+              <tr>
+                <td><div class="prod-name">요가 매트 6mm 논슬립</div></td>
+                <td>스포츠</td>
+                <td class="col-num num" data-val="210">210</td>
+                <td class="col-num num" data-val="95">95</td>
+                <td><span class="status st-ready"><span class="mark">○</span>준비중<span class="sub">대기</span></span></td>
+                <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="foot">STYLE <b>18</b> · 스위스 인터내셔널</p>
+  </div>
+</footer>
+
+<script>
+  /* 모든 JS 는 강화용 — 실패해도 화면·데이터 완전 */
+  (function(){
+    "use strict";
+    try{
+      /* ---- 기간 탭 언더라인 ---- */
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+      tabs.forEach(function(t){
+        t.addEventListener('click', function(){
+          tabs.forEach(function(x){ x.setAttribute('aria-selected','false'); });
+          t.setAttribute('aria-selected','true');
+        });
+      });
+
+      /* ---- 차트 crosshair + 툴팁 ---- */
+      var barsEl = document.getElementById('bars');
+      var cross  = document.getElementById('crosshair');
+      var tip    = document.getElementById('tooltip');
+      if(barsEl && cross && tip){
+        var cols = Array.prototype.slice.call(barsEl.querySelectorAll('.bar-col'));
+        cols.forEach(function(col){
+          col.addEventListener('mouseenter', function(){
+            var r = col.getBoundingClientRect();
+            var pr = barsEl.getBoundingClientRect();
+            var cx = (r.left - pr.left) + r.width/2;
+            cross.style.left = cx + 'px';
+            cross.style.display = 'block';
+            tip.style.left = cx + 'px';
+            tip.style.top  = '0px';
+            tip.textContent = col.getAttribute('data-week') + ' · ' +
+              Number(col.getAttribute('data-val')).toLocaleString('ko-KR') + '백만원';
+            tip.style.display = 'block';
+          });
+          col.addEventListener('mouseleave', function(){
+            cross.style.display = 'none';
+            tip.style.display = 'none';
+          });
+        });
+      }
+
+      /* ---- 테이블 정렬 (재고 / 판매) ---- */
+      var table = document.getElementById('prodTable');
+      if(table){
+        var tbody = table.querySelector('tbody');
+        var origRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+        var heads = Array.prototype.slice.call(table.querySelectorAll('th.sortable'));
+
+        function colIndex(key){ return key === 'stock' ? 2 : 3; }
+
+        heads.forEach(function(th){
+          function doSort(){
+            var key = th.getAttribute('data-key');
+            var idx = colIndex(key);
+            var cur = th.getAttribute('aria-sort');
+            var dir = (cur === 'ascending') ? 'descending' : 'ascending';
+
+            heads.forEach(function(h){ h.setAttribute('aria-sort','none'); });
+            th.setAttribute('aria-sort', dir);
+
+            var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+            rows.sort(function(a,b){
+              var av = a.cells[idx].getAttribute('data-val');
+              var bv = b.cells[idx].getAttribute('data-val');
+              var an = (av === '' || av == null) ? NaN : Number(av);
+              var bn = (bv === '' || bv == null) ? NaN : Number(bv);
+              /* 결측(—)은 항상 아래로 */
+              var aMiss = isNaN(an), bMiss = isNaN(bn);
+              if(aMiss && bMiss) return 0;
+              if(aMiss) return 1;
+              if(bMiss) return -1;
+              return dir === 'ascending' ? an - bn : bn - an;
+            });
+            rows.forEach(function(r){ tbody.appendChild(r); });
+          }
+          th.addEventListener('click', doSort);
+          th.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); doSort(); }
+          });
+        });
+      }
+
+      /* ---- 버튼 피드백 (데모) ---- */
+      var ex = document.getElementById('exportBtn');
+      if(ex){ ex.addEventListener('click', function(){ ex.textContent='리포트 준비 중…'; setTimeout(function(){ ex.textContent='리포트 내보내기'; },1200); }); }
+      var rf = document.getElementById('refreshBtn');
+      if(rf){ rf.addEventListener('click', function(){ rf.textContent='새로고침 중…'; setTimeout(function(){ rf.textContent='새로고침'; },900); }); }
+    }catch(err){ /* 실패해도 정적 화면 완전 */ }
+  })();
+</script>
+</body>
+</html>

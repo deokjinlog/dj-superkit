@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 통계 리포트 · 머티리얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Material 3 tone palette — purple primary + surface tones */
+    --primary: #6750A4;
+    --on-primary: #FFFFFF;
+    --primary-container: #EADDFF;
+    --on-primary-container: #21005D;
+
+    --surface: #FEF7FF;
+    --surface-container-lowest: #FFFFFF;
+    --surface-container-low: #F7F2FA;
+    --surface-container: #F3EDF7;
+    --surface-container-high: #ECE6F0;
+    --surface-container-highest: #E6E0E9;
+
+    --on-surface: #1D1B20;
+    --on-surface-variant: #49454F;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --on-secondary-container: #1D192B;
+
+    --error: #B3261E;
+    --error-container: #F9DEDC;
+    --on-error-container: #410E0B;
+    --success: #386A20;
+    --success-container: #DCF3D0;
+    --on-success-container: #0F3300;
+
+    /* elevation shadows (dp) */
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    /* state-layer opacities */
+    --state-hover: 0.08;
+    --state-focus: 0.12;
+    --state-pressed: 0.12;
+
+    --radius-card: 12px;
+    --radius-button: 8px;
+    --radius-fab: 16px;
+    --radius-pill: 999px;
+
+    --sidebar-w: 264px;
+    --topbar-h: 64px;
+
+    --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: "Pretendard", "Roboto", system-ui, sans-serif;
+    background: var(--surface);
+    color: var(--on-surface);
+    line-height: 1.5;
+    letter-spacing: 0.15px;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .tnum { font-family: "Roboto", "Pretendard", sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+  .label { font-family: "Roboto", "Pretendard", sans-serif; font-weight: 500; letter-spacing: 0.1px; }
+
+  /* ---------- App shell (Grid = page structure) ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-rows: var(--topbar-h) 1fr;
+    grid-template-areas:
+      "sidebar topbar"
+      "sidebar main";
+    min-height: 100vh;
+  }
+
+  /* ---------- Top app bar ---------- */
+  .topbar {
+    grid-area: topbar;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 24px;
+    background: var(--surface-container);
+    box-shadow: var(--dp1);
+    animation: dropIn 240ms var(--easing-standard) both;
+  }
+  @keyframes dropIn { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .topbar__title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    margin-right: auto;
+  }
+  .topbar__title h1 { font-size: 22px; font-weight: 700; letter-spacing: 0; }
+  .topbar__title span { font-size: 12px; color: var(--on-surface-variant); font-weight: 500; letter-spacing: 0.4px; }
+
+  .topbar__actions { display: flex; align-items: center; gap: 8px; }
+
+  /* ---------- Sidebar (nav drawer) ---------- */
+  .sidebar {
+    grid-area: sidebar;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    background: var(--surface-container-low);
+    border-right: 1px solid var(--outline-variant);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 20px;
+  }
+  .brand__mark {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #8A72C9);
+    display: grid; place-items: center;
+    color: var(--on-primary);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    box-shadow: var(--dp1);
+    flex-shrink: 0;
+  }
+  .brand__meta { line-height: 1.25; }
+  .brand__meta strong { font-size: 16px; font-weight: 700; display: block; }
+  .brand__meta small { font-size: 12px; color: var(--on-surface-variant); }
+
+  .nav-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    padding: 12px 16px 6px;
+  }
+
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: var(--radius-pill);
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    overflow: hidden;
+    transition: background-color 120ms var(--easing-standard), color 120ms var(--easing-standard);
+  }
+  .nav-item .ic { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-item::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: currentColor; opacity: 0;
+    transition: opacity 120ms;
+    pointer-events: none;
+  }
+  .nav-item:hover::before { opacity: var(--state-hover); }
+  .nav-item:active::before { opacity: var(--state-pressed); }
+  .nav-item:focus-visible { outline: 3px solid var(--primary); outline-offset: -3px; }
+  .nav-item .badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .nav-item[aria-current="page"] {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+    font-weight: 700;
+  }
+  .nav-item[aria-current="page"] .ic { color: var(--primary); }
+  .nav-item[aria-current="page"] .badge { background: var(--primary); color: var(--on-primary); }
+
+  .sidebar__footer {
+    margin-top: auto;
+    padding: 16px 16px 4px;
+    border-top: 1px solid var(--outline-variant);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .sidebar__footer .who { line-height: 1.3; }
+  .sidebar__footer .who strong { font-size: 13px; display: block; }
+  .sidebar__footer .who small { font-size: 11px; color: var(--on-surface-variant); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: var(--radius-button);
+    font-family: "Roboto", "Pretendard", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    border: none;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: box-shadow 150ms var(--easing-standard), background-color 120ms;
+  }
+  .btn .ic { width: 18px; height: 18px; }
+  .btn::before {
+    content: ""; position: absolute; inset: 0;
+    background: currentColor; opacity: 0;
+    transition: opacity 120ms; pointer-events: none;
+  }
+  .btn:hover::before { opacity: var(--state-hover); }
+  .btn:active::before { opacity: var(--state-pressed); }
+  .btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  .btn--filled { background: var(--primary); color: var(--on-primary); box-shadow: var(--dp1); }
+  .btn--filled:hover { box-shadow: var(--dp2); }
+
+  .btn--tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
+  .btn--tonal:hover { box-shadow: var(--dp1); }
+
+  .btn--outlined { background: transparent; color: var(--primary); border: 1px solid var(--outline); }
+  .btn--outlined:hover { background: transparent; }
+
+  .btn--text { background: transparent; color: var(--primary); padding: 0 12px; }
+
+  .btn:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+  .btn:disabled::before { display: none; }
+
+  /* segmented / dropdown chips */
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-button);
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    border: 1px solid var(--outline-variant);
+    font-family: "Roboto", "Pretendard", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: box-shadow 150ms;
+  }
+  .chip::before { content: ""; position: absolute; inset: 0; background: var(--on-surface); opacity: 0; transition: opacity 120ms; pointer-events: none; }
+  .chip:hover::before { opacity: var(--state-hover); }
+  .chip:active::before { opacity: var(--state-pressed); }
+  .chip:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .chip .caret { width: 18px; height: 18px; color: var(--on-surface-variant); }
+
+  /* icon button (48x48 hit target) */
+  .iconbtn {
+    position: relative;
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--on-surface-variant);
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .iconbtn::after { content: ""; position: absolute; width: 48px; height: 48px; }
+  .iconbtn::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; transition: opacity 120ms; pointer-events: none; }
+  .iconbtn:hover::before { opacity: var(--state-hover); }
+  .iconbtn:active::before { opacity: var(--state-pressed); }
+  .iconbtn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .iconbtn .ic { width: 22px; height: 22px; }
+
+  /* ---------- Main region ---------- */
+  .main {
+    grid-area: main;
+    padding: 24px;
+    max-width: 1280px;
+    width: 100%;
+  }
+
+  .page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .page-head h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  .page-head p { font-size: 14px; color: var(--on-surface-variant); margin-top: 4px; }
+  .filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* Card base */
+  .card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-card);
+    box-shadow: var(--dp1);
+    transition: box-shadow 150ms var(--easing-standard);
+  }
+  .card--interactive:hover { box-shadow: var(--dp2); }
+
+  /* ---------- KPI grid ---------- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    position: relative;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .kpi__top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .kpi__icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .kpi__icon .ic { width: 20px; height: 20px; }
+  .kpi__icon--rev { background: var(--primary-container); color: var(--on-primary-container); }
+  .kpi__icon--ord { background: var(--secondary-container); color: var(--on-secondary-container); }
+  .kpi__icon--aov { background: #FDE7C9; color: #6B4A00; }
+  .kpi__icon--ref { background: var(--error-container); color: var(--on-error-container); }
+  .kpi__label { font-size: 13px; font-weight: 500; color: var(--on-surface-variant); letter-spacing: 0.1px; }
+  .kpi__value { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+  .kpi__value small { font-size: 16px; font-weight: 500; color: var(--on-surface-variant); margin-left: 2px; letter-spacing: 0; }
+  .kpi__sub { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; }
+
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 700;
+    padding: 2px 8px 2px 6px;
+    border-radius: var(--radius-pill);
+    font-family: "Roboto", "Pretendard", sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .delta .ic { width: 14px; height: 14px; }
+  .delta--up { background: var(--success-container); color: var(--on-success-container); }
+  .delta--down { background: var(--error-container); color: var(--on-error-container); }
+  /* semantic: for 환불율 a down is good — use neutral-good tone with explicit text */
+  .delta--good-down { background: var(--success-container); color: var(--on-success-container); }
+  .kpi__compare { color: var(--on-surface-variant); }
+
+  /* mini sparkline strip on KPI */
+  .spark { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: 14px; }
+  .spark span { flex: 1; background: var(--primary-container); border-radius: 2px 2px 0 0; min-height: 3px; }
+  .spark span:last-child { background: var(--primary); }
+
+  /* ---------- Charts row ---------- */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 20px 8px;
+  }
+  .card__head h3 { font-size: 16px; font-weight: 700; letter-spacing: 0; }
+  .card__head p { font-size: 12px; color: var(--on-surface-variant); }
+  .card__body { padding: 8px 20px 20px; }
+
+  .legend { display: flex; gap: 16px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--on-surface-variant); }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Line chart (hand-drawn SVG, no library) */
+  .linechart { width: 100%; }
+  .linechart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .grid-line { stroke: var(--outline-variant); stroke-width: 1; }
+  .axis-label { font-family: "Roboto", sans-serif; font-size: 11px; fill: var(--on-surface-variant); }
+  .area-fill { fill: url(#areaGrad); }
+  .line-path {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 900;
+    stroke-dashoffset: 0;
+    animation: draw 900ms var(--easing-standard) both;
+  }
+  @keyframes draw { from { stroke-dashoffset: 900; } to { stroke-dashoffset: 0; } }
+  .dot-node { fill: var(--surface-container-lowest); stroke: var(--primary); stroke-width: 2.5; }
+  .dot-peak { fill: var(--primary); stroke: var(--surface-container-lowest); stroke-width: 3; }
+  .peak-flag {
+    fill: var(--on-primary);
+    font-family: "Roboto", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .peak-pill { fill: var(--primary); }
+
+  /* Category bars */
+  .bars { display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
+  .bar-row { display: grid; grid-template-columns: 96px 1fr auto; align-items: center; gap: 12px; }
+  .bar-row .cat { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+  .bar-track {
+    position: relative;
+    height: 20px;
+    background: var(--surface-container-high);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+  .bar-fill {
+    position: absolute; inset: 0 auto 0 0;
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+    animation: grow 500ms var(--easing-standard) both;
+    transform-origin: left;
+  }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .bar-row:nth-child(1) .bar-fill { background: var(--primary); }
+  .bar-row:nth-child(2) .bar-fill { background: #7D5EC0; }
+  .bar-row:nth-child(3) .bar-fill { background: #9A80D4; }
+  .bar-row:nth-child(4) .bar-fill { background: var(--secondary); }
+  .bar-row:nth-child(5) .bar-fill { background: #8E8799; }
+  .bar-row .val { font-size: 13px; font-weight: 700; color: var(--on-surface); min-width: 68px; text-align: right; }
+
+  /* ---------- Table ---------- */
+  .table-card { margin-bottom: 96px; overflow: hidden; }
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--outline-variant);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th .sortcaret { color: var(--primary); font-size: 11px; margin-left: 4px; }
+  thead th.num, tbody td.num { text-align: right; }
+  tbody tr {
+    position: relative;
+    transition: background-color 120ms;
+  }
+  tbody tr:hover { background: var(--surface-container-low); }
+  tbody td {
+    padding: 0 16px;
+    height: 56px;
+    border-bottom: 1px solid var(--surface-container-high);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .rank {
+    display: inline-grid;
+    place-items: center;
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+  .rank--1 { background: var(--primary); color: var(--on-primary); }
+  .rank--2 { background: var(--primary-container); color: var(--on-primary-container); }
+  .rank--3 { background: var(--secondary-container); color: var(--on-secondary-container); }
+
+  .prod { display: flex; align-items: center; gap: 12px; }
+  .thumb {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: var(--dp1);
+  }
+  .thumb--a { background: linear-gradient(135deg, #6750A4, #9A80D4); }
+  .thumb--b { background: linear-gradient(135deg, #386A20, #6FAE4E); }
+  .thumb--c { background: linear-gradient(135deg, #B3261E, #E06B63); }
+  .thumb--d { background: linear-gradient(135deg, #7A5A00, #C99B2E); }
+  .thumb--e { background: linear-gradient(135deg, #1F5673, #4E93B8); }
+  .thumb--f { background: linear-gradient(135deg, #625B71, #938BA6); }
+  .prod .pmeta { line-height: 1.35; }
+  .prod .pmeta strong { font-size: 14px; font-weight: 700; display: block; }
+  .prod .pmeta small { font-size: 12px; color: var(--on-surface-variant); }
+
+  .cellnum { font-family: "Roboto", sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; }
+
+  /* share bar in table */
+  .share { display: inline-flex; align-items: center; gap: 10px; justify-content: flex-end; }
+  .share .track { width: 72px; height: 6px; border-radius: var(--radius-pill); background: var(--surface-container-high); overflow: hidden; }
+  .share .fill { height: 100%; background: var(--primary); border-radius: var(--radius-pill); }
+  .share .pct { min-width: 44px; text-align: right; font-weight: 700; }
+
+  .trend-badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 12px; font-weight: 700;
+    font-family: "Roboto", sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .trend-badge.up { color: var(--success); }
+  .trend-badge.down { color: var(--error); }
+  .trend-badge .ic { width: 13px; height: 13px; }
+
+  /* ---------- FAB ---------- */
+  .fab {
+    position: fixed;
+    right: 32px; bottom: 32px;
+    z-index: 40;
+    width: 56px; height: 56px;
+    border-radius: var(--radius-fab);
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    display: grid; place-items: center;
+    cursor: pointer;
+    box-shadow: var(--dp4);
+    overflow: hidden;
+    animation: fabPop 250ms var(--easing-emphasized) 400ms both;
+    transition: box-shadow 150ms, transform 150ms;
+  }
+  @keyframes fabPop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .fab::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; transition: opacity 120ms; pointer-events: none; }
+  .fab:hover { box-shadow: var(--dp8); transform: scale(1.03); }
+  .fab:hover::before { opacity: var(--state-hover); }
+  .fab:active { transform: scale(0.97); }
+  .fab:active::before { opacity: var(--state-pressed); }
+  .fab:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+  .fab .ic { width: 24px; height: 24px; }
+
+  /* Ripple */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.24;
+    transform: scale(0);
+    animation: rippleExpand 400ms var(--easing-standard);
+    pointer-events: none;
+  }
+  @keyframes rippleExpand { to { transform: scale(2.4); opacity: 0; } }
+
+  /* Footer */
+  .footer {
+    grid-column: 1 / -1;
+    padding: 20px 24px 28px;
+    font-size: 12px;
+    color: var(--on-surface-variant);
+    text-align: center;
+    letter-spacing: 0.2px;
+  }
+  .footer .sep { color: var(--outline-variant); margin: 0 8px; }
+
+  /* Stagger entrance */
+  .stagger { animation: riseIn 220ms var(--easing-standard) both; }
+  .kpi-grid .stagger:nth-child(1) { animation-delay: 150ms; }
+  .kpi-grid .stagger:nth-child(2) { animation-delay: 190ms; }
+  .kpi-grid .stagger:nth-child(3) { animation-delay: 230ms; }
+  .kpi-grid .stagger:nth-child(4) { animation-delay: 270ms; }
+  @keyframes riseIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    :root { --sidebar-w: 0px; }
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-areas: "topbar" "main";
+    }
+    .sidebar { display: none; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .main { padding: 16px; }
+    .topbar { padding: 0 16px; }
+    .topbar__actions .btn-label { display: none; }
+    .btn--outlined, .btn--tonal { padding: 0 12px; }
+  }
+  @media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .page-head h2 { font-size: 24px; }
+    .fab { right: 20px; bottom: 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .line-path { stroke-dashoffset: 0 !important; }
+    .ripple { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" aria-label="통계 메뉴">
+    <div class="brand">
+      <div class="brand__mark" aria-hidden="true">MJ</div>
+      <div class="brand__meta">
+        <strong>MUJINE</strong>
+        <small>셀러 어드민</small>
+      </div>
+    </div>
+
+    <div class="nav-section-label">통계</div>
+    <nav>
+      <button class="nav-item" aria-current="page">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+        매출 통계
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        주문 분석
+        <span class="badge">NEW</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+        상품 성과
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        고객 세그먼트
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        환불 · 취소
+      </button>
+    </nav>
+
+    <div class="nav-section-label">리포트</div>
+    <nav>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+        정기 리포트
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        설정
+      </button>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="avatar" aria-hidden="true">GP</div>
+      <div class="who">
+        <strong>GP 스토어</strong>
+        <small>셀러 · 프리미엄</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ TOP APP BAR ============ -->
+  <header class="topbar">
+    <div class="topbar__title">
+      <h1>통계 리포트</h1>
+      <span class="label">SELLER ADMIN · ANALYTICS</span>
+    </div>
+    <div class="topbar__actions">
+      <button class="iconbtn" aria-label="새로고침">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+      </button>
+      <button class="iconbtn" aria-label="알림">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+      <div class="avatar" style="width:40px;height:40px" aria-label="계정 GP">GP</div>
+    </div>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h2>매출 통계</h2>
+        <p>2026-06-15 – 2026-07-14 · 전기 대비</p>
+      </div>
+      <div class="filters" role="group" aria-label="기간 및 내보내기">
+        <button class="chip" aria-haspopup="listbox">
+          <svg class="ic" style="width:18px;height:18px;color:var(--on-surface-variant)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          최근 30일
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <button class="btn btn--tonal">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/><path d="M21 21l-7-7"/><path d="M3 21l7-7"/></svg>
+          <span class="btn-label">비교</span>
+        </button>
+        <button class="btn btn--outlined">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          <span class="btn-label">내보내기</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <section class="kpi-grid" aria-label="핵심 지표">
+      <article class="card card--interactive kpi stagger">
+        <div class="kpi__top">
+          <span class="kpi__icon kpi__icon--rev" aria-hidden="true">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <span class="kpi__label">총매출</span>
+        </div>
+        <div class="kpi__value tnum">₩ 3.42<small>억</small></div>
+        <div class="kpi__sub">
+          <span class="delta delta--up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>12.4%</span>
+          <span class="kpi__compare">전기 대비 상승</span>
+        </div>
+        <div class="spark" aria-hidden="true">
+          <span style="height:38%"></span><span style="height:52%"></span><span style="height:44%"></span><span style="height:61%"></span><span style="height:57%"></span><span style="height:72%"></span><span style="height:83%"></span><span style="height:100%"></span>
+        </div>
+      </article>
+
+      <article class="card card--interactive kpi stagger">
+        <div class="kpi__top">
+          <span class="kpi__icon kpi__icon--ord" aria-hidden="true">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          </span>
+          <span class="kpi__label">주문 건수</span>
+        </div>
+        <div class="kpi__value tnum">9,214<small>건</small></div>
+        <div class="kpi__sub">
+          <span class="delta delta--up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>8.1%</span>
+          <span class="kpi__compare">전기 대비 상승</span>
+        </div>
+        <div class="spark" aria-hidden="true">
+          <span style="height:48%"></span><span style="height:56%"></span><span style="height:50%"></span><span style="height:64%"></span><span style="height:60%"></span><span style="height:70%"></span><span style="height:66%"></span><span style="height:100%"></span>
+        </div>
+      </article>
+
+      <article class="card card--interactive kpi stagger">
+        <div class="kpi__top">
+          <span class="kpi__icon kpi__icon--aov" aria-hidden="true">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </span>
+          <span class="kpi__label">객단가</span>
+        </div>
+        <div class="kpi__value tnum">₩ 37.1<small>만</small></div>
+        <div class="kpi__sub">
+          <span class="delta delta--up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>3.9%</span>
+          <span class="kpi__compare">전기 대비 상승</span>
+        </div>
+        <div class="spark" aria-hidden="true">
+          <span style="height:60%"></span><span style="height:58%"></span><span style="height:64%"></span><span style="height:62%"></span><span style="height:70%"></span><span style="height:68%"></span><span style="height:78%"></span><span style="height:100%"></span>
+        </div>
+      </article>
+
+      <article class="card card--interactive kpi stagger">
+        <div class="kpi__top">
+          <span class="kpi__icon kpi__icon--ref" aria-hidden="true">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+          </span>
+          <span class="kpi__label">환불율</span>
+        </div>
+        <div class="kpi__value tnum">1.2<small>%</small></div>
+        <div class="kpi__sub">
+          <span class="delta delta--good-down"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7 17 17M15 17h-8v-8"/></svg>0.3%p</span>
+          <span class="kpi__compare">전기 대비 개선</span>
+        </div>
+        <div class="spark" aria-hidden="true">
+          <span style="height:100%;background:var(--error-container)"></span><span style="height:86%;background:var(--error-container)"></span><span style="height:90%;background:var(--error-container)"></span><span style="height:72%;background:var(--error-container)"></span><span style="height:68%;background:var(--error-container)"></span><span style="height:60%;background:var(--error-container)"></span><span style="height:52%;background:var(--error-container)"></span><span style="height:44%;background:var(--error)"></span>
+        </div>
+      </article>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-row">
+      <!-- Line: sales trend -->
+      <article class="card card--interactive">
+        <div class="card__head">
+          <div>
+            <h3>매출 추이</h3>
+            <p>주간 · 최근 8주</p>
+          </div>
+          <div class="legend">
+            <span><span class="dot" style="background:var(--primary)"></span>매출</span>
+            <span><span class="dot" style="background:var(--outline-variant)"></span>전기</span>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="linechart">
+            <!-- 8 weeks; y-axis starts at 0; peak highlighted at W6 -->
+            <svg viewBox="0 0 640 260" role="img" aria-label="최근 8주 주간 매출 추이. 피크는 6주차 약 5천2백만원.">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#6750A4" stop-opacity="0.22"/>
+                  <stop offset="100%" stop-color="#6750A4" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- gridlines + y labels (axis at 0) -->
+              <g>
+                <line class="grid-line" x1="52" y1="30"  x2="620" y2="30"/>
+                <line class="grid-line" x1="52" y1="80"  x2="620" y2="80"/>
+                <line class="grid-line" x1="52" y1="130" x2="620" y2="130"/>
+                <line class="grid-line" x1="52" y1="180" x2="620" y2="180"/>
+                <line class="grid-line" x1="52" y1="220" x2="620" y2="220" stroke="#79747E"/>
+                <text class="axis-label" x="44" y="34"  text-anchor="end">6천</text>
+                <text class="axis-label" x="44" y="84"  text-anchor="end">4.5천</text>
+                <text class="axis-label" x="44" y="134" text-anchor="end">3천</text>
+                <text class="axis-label" x="44" y="184" text-anchor="end">1.5천</text>
+                <text class="axis-label" x="44" y="224" text-anchor="end">0</text>
+              </g>
+
+              <!-- prior-period faint line -->
+              <polyline fill="none" stroke="#CAC4D0" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round" stroke-linejoin="round"
+                points="76,168 154,150 232,158 310,132 388,120 466,104 544,126 620,110"/>
+
+              <!-- area under current -->
+              <path class="area-fill" d="M76,158 L154,140 L232,150 L310,118 L388,96 L466,64 L544,100 L620,86 L620,220 L76,220 Z"/>
+              <!-- current line -->
+              <path class="line-path" d="M76,158 L154,140 L232,150 L310,118 L388,96 L466,64 L544,100 L620,86"/>
+
+              <!-- data nodes -->
+              <circle class="dot-node" cx="76"  cy="158" r="4"/>
+              <circle class="dot-node" cx="154" cy="140" r="4"/>
+              <circle class="dot-node" cx="232" cy="150" r="4"/>
+              <circle class="dot-node" cx="310" cy="118" r="4"/>
+              <circle class="dot-node" cx="388" cy="96"  r="4"/>
+              <circle class="dot-peak" cx="466" cy="64"  r="6"/>
+              <circle class="dot-node" cx="544" cy="100" r="4"/>
+              <circle class="dot-node" cx="620" cy="86"  r="4"/>
+
+              <!-- peak flag -->
+              <g>
+                <rect class="peak-pill" x="430" y="34" width="72" height="20" rx="10"/>
+                <text class="peak-flag" x="466" y="48" text-anchor="middle">₩ 5,240만</text>
+              </g>
+
+              <!-- x labels -->
+              <g>
+                <text class="axis-label" x="76"  y="244" text-anchor="middle">1주</text>
+                <text class="axis-label" x="154" y="244" text-anchor="middle">2주</text>
+                <text class="axis-label" x="232" y="244" text-anchor="middle">3주</text>
+                <text class="axis-label" x="310" y="244" text-anchor="middle">4주</text>
+                <text class="axis-label" x="388" y="244" text-anchor="middle">5주</text>
+                <text class="axis-label" x="466" y="244" text-anchor="middle">6주</text>
+                <text class="axis-label" x="544" y="244" text-anchor="middle">7주</text>
+                <text class="axis-label" x="620" y="244" text-anchor="middle">8주</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <!-- Bars: category -->
+      <article class="card card--interactive">
+        <div class="card__head">
+          <div>
+            <h3>카테고리별 매출</h3>
+            <p>상위 5개 · 비중</p>
+          </div>
+        </div>
+        <div class="card__body">
+          <div class="bars">
+            <div class="bar-row">
+              <span class="cat">가전·디지털</span>
+              <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+              <span class="val tnum">32.4%</span>
+            </div>
+            <div class="bar-row">
+              <span class="cat">패션·잡화</span>
+              <div class="bar-track"><div class="bar-fill" style="width:76%"></div></div>
+              <span class="val tnum">24.6%</span>
+            </div>
+            <div class="bar-row">
+              <span class="cat">뷰티·헬스</span>
+              <div class="bar-track"><div class="bar-fill" style="width:58%"></div></div>
+              <span class="val tnum">18.7%</span>
+            </div>
+            <div class="bar-row">
+              <span class="cat">리빙·주방</span>
+              <div class="bar-track"><div class="bar-fill" style="width:44%"></div></div>
+              <span class="val tnum">14.1%</span>
+            </div>
+            <div class="bar-row">
+              <span class="cat">식품·생필품</span>
+              <div class="bar-track"><div class="bar-fill" style="width:31%"></div></div>
+              <span class="val tnum">10.2%</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Top products table -->
+    <article class="card table-card">
+      <div class="card__head">
+        <div>
+          <h3>상위 상품</h3>
+          <p>판매량 기준 · 상위 6개</p>
+        </div>
+        <button class="btn btn--text">
+          전체 보기
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col" style="width:64px">순위</th>
+              <th scope="col">상품</th>
+              <th scope="col" class="num">판매량 <span class="sortcaret">▼</span></th>
+              <th scope="col" class="num">매출</th>
+              <th scope="col" class="num" style="width:200px">비중</th>
+              <th scope="col" class="num" style="width:96px">증감</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="rank rank--1">1</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--a" aria-hidden="true">A</span>
+                  <span class="pmeta"><strong>무선 노이즈캔슬링 이어버드</strong><small>가전·디지털 · SKU A-2041</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">1,842</td>
+              <td class="num cellnum">₩ 68,340,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:100%"></span></span><span class="pct tnum">20.0%</span></span></td>
+              <td class="num"><span class="trend-badge up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>14%</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank rank--2">2</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--b" aria-hidden="true">B</span>
+                  <span class="pmeta"><strong>오버핏 코튼 후디 (4color)</strong><small>패션·잡화 · SKU B-1177</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">1,514</td>
+              <td class="num cellnum">₩ 43,906,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:82%"></span></span><span class="pct tnum">12.8%</span></span></td>
+              <td class="num"><span class="trend-badge up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>9%</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank rank--3">3</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--c" aria-hidden="true">C</span>
+                  <span class="pmeta"><strong>비타민C 브라이트닝 앰플</strong><small>뷰티·헬스 · SKU C-0930</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">1,268</td>
+              <td class="num cellnum">₩ 38,802,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:70%"></span></span><span class="pct tnum">11.4%</span></span></td>
+              <td class="num"><span class="trend-badge down"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7 17 17M15 17h-8v-8"/></svg>3%</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank">4</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--d" aria-hidden="true">D</span>
+                  <span class="pmeta"><strong>스테인리스 진공 텀블러 500ml</strong><small>리빙·주방 · SKU D-3388</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">1,091</td>
+              <td class="num cellnum">₩ 22,911,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:52%"></span></span><span class="pct tnum">6.7%</span></span></td>
+              <td class="num"><span class="trend-badge up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>6%</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank">5</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--e" aria-hidden="true">E</span>
+                  <span class="pmeta"><strong>휴대용 고속 충전기 65W</strong><small>가전·디지털 · SKU E-5521</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">964</td>
+              <td class="num cellnum">₩ 20,244,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:46%"></span></span><span class="pct tnum">5.9%</span></span></td>
+              <td class="num"><span class="trend-badge up"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>4%</span></td>
+            </tr>
+            <tr>
+              <td><span class="rank">6</span></td>
+              <td>
+                <div class="prod">
+                  <span class="thumb thumb--f" aria-hidden="true">F</span>
+                  <span class="pmeta"><strong>유기농 그래놀라 1kg 세트</strong><small>식품·생필품 · SKU F-7702</small></span>
+                </div>
+              </td>
+              <td class="num cellnum">877</td>
+              <td class="num cellnum">₩ 15,786,000</td>
+              <td class="num"><span class="share"><span class="track"><span class="fill" style="width:36%"></span></span><span class="pct tnum">4.6%</span></span></td>
+              <td class="num"><span class="trend-badge down"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7 17 17M15 17h-8v-8"/></svg>2%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <div class="footer">
+      MUJINE <span class="sep">·</span> 통계 리포트(어드민) <span class="sep">·</span> 머티리얼
+    </div>
+  </main>
+
+</div>
+
+<!-- FAB: 새 리포트 -->
+<button class="fab" aria-label="새 리포트 만들기" title="새 리포트">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<script>
+  // Material ripple — progressive enhancement; CSS state-layers work without JS.
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    var selector = '.btn, .chip, .iconbtn, .nav-item, .fab, tbody tr, .kpi';
+    document.addEventListener('pointerdown', function (e) {
+      var host = e.target.closest(selector);
+      if (!host) return;
+      var cs = getComputedStyle(host);
+      if (cs.position === 'static') host.style.position = 'relative';
+      var rect = host.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var r = document.createElement('span');
+      r.className = 'ripple';
+      r.style.width = r.style.height = size + 'px';
+      r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      host.appendChild(r);
+      r.addEventListener('animationend', function () { r.remove(); });
+      window.setTimeout(function () { if (r.parentNode) r.remove(); }, 500);
+    }, { passive: true });
+  })();
+</script>
+</body>
+</html>

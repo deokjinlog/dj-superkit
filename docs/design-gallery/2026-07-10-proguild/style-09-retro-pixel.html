@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProGuild — e스포츠 팀 관제 대시보드</title>
+
+<!-- 한글 Pretendard (필수) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<!-- 디스플레이 픽셀 폰트 (Google Fonts) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+/* ── 한글 픽셀 폰트: DungGeunMo (CDN 로드 가능 시), 실패 시 Pretendard ── */
+@font-face{
+  font-family:'DungGeunMo';
+  src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/DungGeunMo.woff') format('woff');
+  font-display:swap;
+}
+
+:root{
+  /* Sweetie-16 계열 저채도 레트로 팔레트 (유채색 6색 이하) */
+  --bg:#1A1C2C;        /* 배경 */
+  --panel:#29366F;     /* 패널 */
+  --green:#38B764;     /* 완료 계열 */
+  --yellow:#FFCD75;    /* 대기 계열 */
+  --red:#B13E53;       /* 문제 계열 */
+  --blue:#3B5DC9;      /* 진행 계열 */
+  --edge:#94B0C2;      /* 보더/보조(저채도) */
+  --ink:#F4F4F4;       /* 텍스트 */
+  --ink-dim:#94B0C2;   /* 보조 텍스트 */
+  --void:#101122;      /* 패널보다 어두운 바닥 */
+  --slot:#1F2647;      /* 빈 게이지 슬롯 */
+
+  --en:'Press Start 2P', monospace;               /* 영어/수치 소량 액센트 (≤16px) */
+  --kr:'DungGeunMo','Pretendard',sans-serif;      /* 한글/문장/값 전부 */
+
+  --grid:4px;
+  --notch:8px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+html,body{background:var(--bg);}
+
+body{
+  font-family:var(--kr);
+  color:var(--ink);
+  min-height:100vh;
+  line-height:1.55;
+  /* 디더링 패턴 배경 (하드 스톱 반복 — 그라디언트 금지 예외) */
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(148,176,194,0.020) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(0deg,  rgba(0,0,0,0.22) 0 3px,        transparent 3px 6px);
+  -webkit-font-smoothing:none;
+  image-rendering:pixelated;
+}
+
+/* 전역 CRT 스캔라인 오버레이 (하드 스톱 — 디더링) */
+body::after{
+  content:"";
+  position:fixed; inset:0; z-index:60; pointer-events:none;
+  background-image:repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px);
+  mix-blend-mode:multiply;
+}
+
+/* ── 픽셀 패널 (계단식 노치 코너 + 다중 box-shadow 베벨) ── */
+.px{
+  background:var(--panel);
+  clip-path:polygon(
+    0 var(--notch), var(--notch) var(--notch), var(--notch) 0,
+    calc(100% - var(--notch)) 0, calc(100% - var(--notch)) var(--notch), 100% var(--notch),
+    100% calc(100% - var(--notch)), calc(100% - var(--notch)) calc(100% - var(--notch)), calc(100% - var(--notch)) 100%,
+    var(--notch) 100%, var(--notch) calc(100% - var(--notch)), 0 calc(100% - var(--notch))
+  );
+  box-shadow:
+    inset 0 0 0 4px var(--edge),                       /* 픽셀 보더 링 */
+    inset 4px 4px 0 4px rgba(244,244,244,0.10),         /* 좌상 하이라이트 베벨 */
+    inset -4px -4px 0 4px rgba(0,0,0,0.42);             /* 우하 그림자 베벨 */
+}
+
+/* ── 레이아웃 ── */
+.stage{
+  max-width:1120px;
+  margin:0 auto;
+  padding:calc(var(--grid)*6) calc(var(--grid)*5) calc(var(--grid)*10);
+}
+
+/* ── 헤더 ── */
+.hdr{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:calc(var(--grid)*4); flex-wrap:wrap;
+  padding:calc(var(--grid)*5) calc(var(--grid)*6);
+  margin-bottom:calc(var(--grid)*6);
+}
+.brand{display:flex; align-items:center; gap:calc(var(--grid)*3);}
+.brand .coin{
+  width:20px; height:20px; background:var(--yellow);
+  box-shadow:inset 0 0 0 3px var(--void), 0 0 0 3px var(--bg), 0 0 0 6px var(--yellow);
+}
+.wordmark{
+  font-family:var(--en); font-size:14px; letter-spacing:1px;
+  color:var(--yellow);
+  text-shadow:2px 2px 0 var(--void);
+}
+.hdr-right{display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
+.tag-en{font-family:var(--en); font-size:8px; color:var(--green); letter-spacing:1px;}
+.stamp{font-family:var(--kr); font-size:15px; color:var(--ink); font-variant-numeric:tabular-nums;}
+
+/* ── 섹션 라벨 ── */
+.sec-lab{display:flex; align-items:baseline; gap:calc(var(--grid)*3); margin:0 0 calc(var(--grid)*3) 2px;}
+.sec-lab .en{font-family:var(--en); font-size:9px; color:var(--green); letter-spacing:1px;}
+.sec-lab .kr{font-family:var(--kr); font-size:14px; color:var(--ink-dim);}
+
+/* ── KPI 그리드 ── */
+.kpi-grid{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:calc(var(--grid)*4); margin-bottom:calc(var(--grid)*8);
+}
+.kpi{
+  padding:calc(var(--grid)*5) calc(var(--grid)*5) calc(var(--grid)*4);
+  display:flex; flex-direction:column; gap:calc(var(--grid)*2);
+  cursor:default;
+}
+.kpi .k-lab{font-family:var(--kr); font-size:14px; color:var(--ink-dim);}
+.kpi .k-tag{font-family:var(--en); font-size:7px; color:var(--edge); letter-spacing:1px;}
+.kpi .k-val{
+  font-family:var(--kr); font-size:26px; line-height:1.15; color:var(--ink);
+  font-variant-numeric:tabular-nums; letter-spacing:0.5px;
+  text-shadow:2px 2px 0 var(--void);
+}
+.kpi .k-delta{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--kr); font-size:14px; font-variant-numeric:tabular-nums;
+  padding:2px 8px; width:fit-content;
+  background:var(--void);
+  box-shadow:inset 0 0 0 2px currentColor;
+}
+.k-delta.pos{color:var(--green);}
+.k-delta.warn{color:var(--yellow);}
+.k-delta .arw{font-family:var(--kr); font-size:12px;}
+
+/* 카드 hover: 보더 색 반전 (안쪽↔바깥쪽) — 스냅 */
+.kpi:hover{
+  box-shadow:
+    inset 0 0 0 4px var(--yellow),
+    inset 4px 4px 0 4px rgba(0,0,0,0.42),
+    inset -4px -4px 0 4px rgba(244,244,244,0.10);
+}
+
+/* ── 차트 ── */
+.chart-panel{padding:calc(var(--grid)*6) calc(var(--grid)*6) calc(var(--grid)*5); margin-bottom:calc(var(--grid)*8);}
+.chart-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:calc(var(--grid)*6);}
+.chart-cap{font-family:var(--kr); font-size:15px; color:var(--ink);}
+.peak-note{
+  font-family:var(--kr); font-size:13px; color:var(--bg);
+  background:var(--green); padding:2px 10px;
+  box-shadow:inset -3px -3px 0 0 rgba(0,0,0,0.30), inset 3px 3px 0 0 rgba(244,244,244,0.30);
+  font-variant-numeric:tabular-nums;
+}
+.chart{
+  display:grid; grid-template-columns:repeat(8,1fr);
+  gap:calc(var(--grid)*2); align-items:end;
+  height:230px;
+  padding:0 calc(var(--grid)*1);
+  border-bottom:4px solid var(--edge);
+}
+.col{height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; position:relative;}
+.val{font-family:var(--kr); font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums;}
+.bar{
+  width:100%;
+  height:var(--h);
+  background-color:var(--blue);
+  /* 블록 단위 계단 텍스처 (하드 스톱) */
+  background-image:repeating-linear-gradient(to top, transparent 0 10px, rgba(0,0,0,0.30) 10px 12px);
+  box-shadow:inset -3px 0 0 0 rgba(0,0,0,0.35), inset 3px 0 0 0 rgba(244,244,244,0.14);
+  transform-origin:bottom center;
+}
+.col.peak .bar{background-color:var(--green);}
+/* 피크 커서 ▶ */
+.cursor{
+  position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+  font-family:var(--kr); font-size:18px; color:var(--yellow);
+  text-shadow:2px 2px 0 var(--void);
+}
+.wk{
+  margin-top:6px; font-family:var(--kr); font-size:12px; color:var(--ink-dim);
+  font-variant-numeric:tabular-nums;
+}
+.wk.peak-wk{color:var(--green);}
+
+/* ── 테이블 ── */
+.table-panel{padding:calc(var(--grid)*5) calc(var(--grid)*5);}
+.tbl-scroll{overflow-x:auto;}
+table{width:100%; border-collapse:collapse; min-width:640px;}
+thead th{
+  font-family:var(--en); font-size:8px; letter-spacing:1px; color:var(--yellow);
+  text-align:left; padding:calc(var(--grid)*3) calc(var(--grid)*3);
+  background:var(--void);
+  border-bottom:4px solid var(--edge);
+}
+thead th .kr{display:block; font-family:var(--kr); font-size:13px; color:var(--ink-dim); letter-spacing:0; margin-top:4px;}
+tbody td{
+  font-family:var(--kr); font-size:15px; color:var(--ink);
+  padding:calc(var(--grid)*3) calc(var(--grid)*3);
+  border-bottom:2px solid rgba(148,176,194,0.18);
+  vertical-align:middle;
+}
+tbody tr{position:relative;}
+tbody td.name{position:relative; padding-left:calc(var(--grid)*6);}
+/* 행 hover: 좌측 ▶ 선택 커서 (게임 메뉴 문법) — 스냅 */
+tbody td.name::before{
+  content:"\25B6"; position:absolute; left:calc(var(--grid)*2); top:50%;
+  transform:translateY(-50%);
+  color:var(--yellow); font-size:12px; opacity:0;
+}
+tbody tr:hover td{background:rgba(59,93,201,0.16);}
+tbody tr:hover td.name::before{opacity:1;}
+td.num{font-variant-numeric:tabular-nums; letter-spacing:0.5px;}
+
+.form{display:inline-flex; align-items:center; gap:6px; font-family:var(--kr); font-size:14px;}
+.form .fa{font-size:12px;}
+.form.up{color:var(--green);}
+.form.keep{color:var(--ink-dim);}
+.form.down{color:var(--red);}
+
+/* ── 상태 뱃지 = HP바 블록 게이지 ── */
+.badge{display:inline-flex; align-items:center; gap:8px;}
+.glabel{font-family:var(--kr); font-size:13px;}
+.gauge{display:inline-flex; gap:2px;}
+.gauge i{width:7px; height:14px; display:inline-block; background:var(--slot);
+  box-shadow:inset -2px -2px 0 0 rgba(0,0,0,0.35), inset 2px 2px 0 0 rgba(244,244,244,0.10);}
+.s-green .glabel{color:var(--green);}   .s-green  i.on{background:var(--green);}
+.s-blue  .glabel{color:var(--blue);}    .s-blue   i.on{background:var(--blue);}
+.s-yellow .glabel{color:var(--yellow);} .s-yellow i.on{background:var(--yellow);}
+.s-red   .glabel{color:var(--red);}     .s-red    i.on{background:var(--red);}
+
+/* ── 푸터 ── */
+.foot{
+  margin-top:calc(var(--grid)*8); padding:calc(var(--grid)*4) calc(var(--grid)*5);
+  display:flex; align-items:center; gap:calc(var(--grid)*3); flex-wrap:wrap;
+  border-top:4px solid rgba(148,176,194,0.30);
+}
+.foot .en{font-family:var(--en); font-size:9px; color:var(--edge); letter-spacing:1px;}
+.foot .kr{font-family:var(--kr); font-size:14px; color:var(--ink-dim);}
+.foot .dot{color:var(--yellow); font-family:var(--en); font-size:9px;}
+
+/* ── READY? 오프닝 오버레이 (기본은 숨김 — 무모션/무JS 완전 렌더 보장) ── */
+.ready{display:none;}
+
+/* ── 반응형 ── */
+@media (max-width:900px){
+  :root{--notch:6px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .kpi .k-val{font-size:22px;}
+  .chart{height:190px;}
+}
+@media (max-width:560px){
+  .kpi-grid{grid-template-columns:1fr;}
+  .stage{padding:calc(var(--grid)*4) calc(var(--grid)*3) calc(var(--grid)*8);}
+}
+
+/* ── 모션 허용 시에만 스테이지 시작 연출 (총 1.5초) ── */
+@media (prefers-reduced-motion: no-preference){
+  .ready{
+    display:grid; place-items:center;
+    position:fixed; inset:0; z-index:100; background:var(--bg);
+    background-image:repeating-linear-gradient(0deg, rgba(0,0,0,0.30) 0 2px, transparent 2px 4px);
+    animation:readyGone 0.6s steps(1) forwards;
+  }
+  .ready b{
+    font-family:var(--en); font-size:16px; color:var(--yellow); letter-spacing:2px;
+    text-shadow:3px 3px 0 var(--void);
+    animation:readyBlink 0.6s steps(1) 1 forwards;   /* 2회 점멸 */
+  }
+  @keyframes readyBlink{0%{opacity:1}25%{opacity:0}50%{opacity:1}75%{opacity:0}100%{opacity:1}}
+  @keyframes readyGone{0%,99%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden}}
+
+  /* 패널 즉시 스냅 등장 (페이드 아님) — 0.6s */
+  .snap{animation:snapIn 0.001s steps(1) 0.6s both;}
+  @keyframes snapIn{from{opacity:0}to{opacity:1}}
+
+  /* 차트: 픽셀 블록 계단식 스택 — 0.8s~ */
+  .bar{animation:stack 0.5s steps(7) 0.8s both;}
+  @keyframes stack{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+  /* 피크 커서: 1.4s 등장 후 점멸 */
+  .cursor{animation:curIn 0.001s steps(1) 1.4s both, curBlink 0.6s steps(1) 1.4s infinite;}
+  @keyframes curIn{from{opacity:0}to{opacity:1}}
+  @keyframes curBlink{0%,60%{opacity:1}61%,100%{opacity:0}}
+
+  /* 문제 상태(폼저하) 빨간 블록 점멸 */
+  .s-red.blink i.on{animation:hpBlink 0.7s steps(1) infinite;}
+  @keyframes hpBlink{0%,55%{opacity:1}56%,100%{opacity:0.15}}
+}
+</style>
+</head>
+<body>
+
+<!-- 스테이지 시작 오버레이 (모션 허용 시에만 표시) -->
+<div class="ready" id="ready" aria-hidden="true"><b>READY?</b></div>
+
+<main class="stage">
+
+  <!-- 헤더 -->
+  <header class="hdr px snap">
+    <div class="brand">
+      <span class="coin" aria-hidden="true"></span>
+      <span class="wordmark">ProGuild</span>
+    </div>
+    <div class="hdr-right">
+      <span class="tag-en">LAST SYNC</span>
+      <span class="stamp">갱신 시각 2026-07-10 16:00</span>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <div class="sec-lab"><span class="en">STATS</span><span class="kr">시즌 핵심 지표</span></div>
+  <section class="kpi-grid">
+    <div class="kpi px snap">
+      <span class="k-tag">WIN RATE</span>
+      <span class="k-lab">시즌 승률</span>
+      <span class="k-val">68.4%</span>
+      <span class="k-delta pos"><span class="arw">&#9650;</span>전주 대비 +3.2%p</span>
+    </div>
+    <div class="kpi px snap">
+      <span class="k-tag">RANK</span>
+      <span class="k-lab">리그 순위</span>
+      <span class="k-val">2위</span>
+      <span class="k-delta pos"><span class="arw">&#9650;</span>1계단</span>
+    </div>
+    <div class="kpi px snap">
+      <span class="k-tag">PRIZE</span>
+      <span class="k-lab">누적 상금</span>
+      <span class="k-val">1억 8,400만원</span>
+      <span class="k-delta pos"><span class="arw">&#9650;</span>+2,300만원</span>
+    </div>
+    <div class="kpi px snap">
+      <span class="k-tag">NEXT</span>
+      <span class="k-lab">다음 경기</span>
+      <span class="k-val">D-2</span>
+      <span class="k-delta warn"><span class="arw">&#9654;</span>vs 팀 이클립스</span>
+    </div>
+  </section>
+
+  <!-- 차트 -->
+  <div class="sec-lab"><span class="en">TREND</span><span class="kr">최근 8주 승률 추이</span></div>
+  <section class="chart-panel px snap">
+    <div class="chart-head">
+      <span class="chart-cap">최근 8주 승률 (%)</span>
+      <span class="peak-note">PEAK &#9654; 6주 71%</span>
+    </div>
+    <div class="chart" role="img" aria-label="최근 8주 승률 막대차트, 6주차 71%로 피크">
+      <div class="col"><span class="val">52</span><div class="bar" style="--h:69.3%"></div><span class="wk">1주</span></div>
+      <div class="col"><span class="val">58</span><div class="bar" style="--h:77.3%"></div><span class="wk">2주</span></div>
+      <div class="col"><span class="val">61</span><div class="bar" style="--h:81.3%"></div><span class="wk">3주</span></div>
+      <div class="col"><span class="val">55</span><div class="bar" style="--h:73.3%"></div><span class="wk">4주</span></div>
+      <div class="col"><span class="val">64</span><div class="bar" style="--h:85.3%"></div><span class="wk">5주</span></div>
+      <div class="col peak"><span class="cursor" aria-hidden="true">&#9654;</span><span class="val">71</span><div class="bar" style="--h:94.7%"></div><span class="wk peak-wk">6주</span></div>
+      <div class="col"><span class="val">67</span><div class="bar" style="--h:89.3%"></div><span class="wk">7주</span></div>
+      <div class="col"><span class="val">68</span><div class="bar" style="--h:90.7%"></div><span class="wk">8주</span></div>
+    </div>
+  </section>
+
+  <!-- 로스터 테이블 -->
+  <div class="sec-lab"><span class="en">ROSTER</span><span class="kr">선수 상태 보드</span></div>
+  <section class="table-panel px snap">
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>PLAYER<span class="kr">선수</span></th>
+            <th>ROLE<span class="kr">포지션</span></th>
+            <th>KDA<span class="kr">KDA</span></th>
+            <th>FORM<span class="kr">폼</span></th>
+            <th>STATUS<span class="kr">상태</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">블레이즈</td>
+            <td>엔트리</td>
+            <td class="num">1.42</td>
+            <td><span class="form up"><span class="fa">&#9650;</span>상승</span></td>
+            <td><span class="badge s-green"><span class="glabel">주전확정</span><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></td>
+          </tr>
+          <tr>
+            <td class="name">프로스트</td>
+            <td>서포터</td>
+            <td class="num">0.98</td>
+            <td><span class="form keep"><span class="fa">&#9552;</span>유지</span></td>
+            <td><span class="badge s-blue"><span class="glabel">활성</span><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></td>
+          </tr>
+          <tr>
+            <td class="name">레이븐</td>
+            <td>스나이퍼</td>
+            <td class="num">1.67</td>
+            <td><span class="form up"><span class="fa">&#9650;</span>상승</span></td>
+            <td><span class="badge s-green"><span class="glabel">주전확정</span><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span></td>
+          </tr>
+          <tr>
+            <td class="name">노바</td>
+            <td>리퍼</td>
+            <td class="num">0.71</td>
+            <td><span class="form down"><span class="fa">&#9660;</span>하락</span></td>
+            <td><span class="badge s-red blink"><span class="glabel">폼저하</span><span class="gauge"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></span></td>
+          </tr>
+          <tr>
+            <td class="name">쿼츠</td>
+            <td>인게이저</td>
+            <td class="num">1.15</td>
+            <td><span class="form keep"><span class="fa">&#9552;</span>유지</span></td>
+            <td><span class="badge s-blue"><span class="glabel">활성</span><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></td>
+          </tr>
+          <tr>
+            <td class="name">에코</td>
+            <td>플렉스</td>
+            <td class="num">1.03</td>
+            <td><span class="form keep"><span class="fa">&#9552;</span>유지</span></td>
+            <td><span class="badge s-yellow"><span class="glabel">로테이션대기</span><span class="gauge"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 푸터 -->
+  <footer class="foot">
+    <span class="en">STYLE 09</span>
+    <span class="dot">&#183;</span>
+    <span class="kr">레트로 픽셀</span>
+  </footer>
+
+</main>
+
+<script>
+/* 순수 장식 — 실패해도 화면은 위에서 이미 완전. 오버레이 정리만 담당. */
+(function(){
+  try{
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ready = document.getElementById('ready');
+    if(ready){
+      if(reduce){ ready.parentNode.removeChild(ready); }
+      else{ setTimeout(function(){ if(ready && ready.parentNode){ ready.parentNode.removeChild(ready); } }, 700); }
+    }
+  }catch(e){ /* no-op: 화면은 그대로 완전 */ }
+})();
+</script>
+
+</body>
+</html>

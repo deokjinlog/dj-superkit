@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>핏펄스 · 오늘의 활동 리포트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050810;
+    --panel-bg:#080d18;
+    --cyan:#00E5FF;
+    --magenta:#FF2D78;
+    --amber:#FFB62E;
+    --text:#C9EEF7;
+    --dim:#5D8FA3;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html{ background:#050810; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:#050810;
+    background-image:radial-gradient(ellipse 900px 500px at 50% -10%, rgba(0,229,255,.07), transparent 60%);
+    color:var(--text);
+    font-family:'Pretendard', -apple-system, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .mono{ font-family:'Share Tech Mono','Pretendard',monospace; }
+
+  /* ============ 스캔라인 + 스캔빔 (앰비언트) ============ */
+  .scanlines{
+    position:fixed; inset:0; z-index:60; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(200,240,255,.9) 0px, rgba(200,240,255,.9) 1px, transparent 1px, transparent 3px);
+    opacity:.025;
+    mix-blend-mode:screen;
+  }
+  .scan-beam{
+    position:fixed; left:0; right:0; top:-140px; height:140px; z-index:61; pointer-events:none;
+    background:linear-gradient(to bottom, transparent, rgba(0,229,255,.06), transparent);
+    animation:scanSweep 8s linear infinite;
+  }
+  @keyframes scanSweep{
+    0%{ transform:translateY(0); }
+    100%{ transform:translateY(calc(100vh + 140px)); }
+  }
+
+  /* ============ 부팅 오버레이 ============ */
+  .boot-overlay{
+    position:fixed; top:38%; left:50%; transform:translate(-50%,-50%);
+    z-index:100; pointer-events:none; text-align:center;
+    animation:bootHold .8s steps(1,end) .55s forwards;
+  }
+  @keyframes bootHold{ to{ visibility:hidden; } }
+  .boot-line{
+    display:inline-block; overflow:hidden; white-space:nowrap;
+    border-right:2px solid var(--cyan);
+    font-size:14px; letter-spacing:.16em; color:var(--cyan);
+    width:22ch;
+    animation:bootType .3s steps(22,end) forwards;
+  }
+  @keyframes bootType{ from{ width:0ch; } to{ width:22ch; } }
+
+  /* ============ 레이아웃 ============ */
+  .hud{
+    max-width:1320px; margin:0 auto; padding:28px 32px 60px;
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; gap:20px;
+  }
+
+  .topbar{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+    flex-wrap:wrap;
+    padding-bottom:20px; margin-bottom:6px;
+    border-bottom:1px solid rgba(0,229,255,.18);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .brand-mark{
+    width:9px; height:9px; background:var(--cyan);
+    clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+  }
+  .brand-name{ font-size:11px; letter-spacing:.22em; color:var(--dim); text-transform:uppercase; }
+  .brand-name .accent{ color:var(--cyan); }
+
+  .title{
+    margin:0; font-family:'Orbitron','Pretendard',sans-serif; font-weight:900;
+    text-transform:uppercase; letter-spacing:.14em;
+    font-size:clamp(22px,3.4vw,34px);
+    color:var(--cyan);
+    text-shadow:0 0 10px rgba(0,229,255,.5), 0 0 24px rgba(0,229,255,.22);
+    animation:titleGlitch .16s steps(2,end) .3s both;
+  }
+  @keyframes titleGlitch{
+    0%{ transform:translate(0,0); }
+    20%{ transform:translate(-3px,1px); }
+    40%{ transform:translate(3px,-1px); }
+    60%{ transform:translate(-2px,0); }
+    100%{ transform:translate(0,0); }
+  }
+
+  .meta{ text-align:right; }
+  .user-line{
+    font-size:14px; font-weight:600; color:var(--text); margin-bottom:8px;
+    display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;
+  }
+  .user-line .sep{ color:var(--dim); opacity:.6; font-weight:400; }
+  .user-line .streak strong{ color:var(--cyan); }
+  .status-line{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px; color:var(--dim);
+    display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;
+  }
+  .status-line .sep{ opacity:.5; }
+  .clock{ color:var(--cyan); }
+  .sync-ok::before{ content:"● "; color:var(--cyan); }
+
+  /* ============ 패널 공통 ============ */
+  .panel, .kpi-panel, .badge-card{
+    position:relative;
+    background:var(--panel-bg);
+    border:1px solid var(--cyan);
+    clip-path:polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    padding:20px 22px;
+  }
+  .corner-mark{
+    position:absolute; top:8px; left:8px; width:6px; height:6px; background:var(--cyan);
+  }
+  .corner-bracket{
+    position:absolute; right:6px; bottom:6px; width:14px; height:14px;
+    border-right:2px solid var(--cyan); border-bottom:2px solid var(--cyan);
+    transition:right .15s ease-out, bottom .15s ease-out, filter .15s ease-out;
+  }
+  .panel:hover .corner-bracket, .kpi-panel:hover .corner-bracket, .badge-card:hover .corner-bracket{
+    right:4px; bottom:4px;
+    filter:drop-shadow(0 0 6px rgba(0,229,255,.7));
+  }
+  .panel:hover, .kpi-panel:hover, .badge-card:hover{
+    box-shadow:0 0 14px rgba(0,229,255,.18);
+  }
+
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid rgba(0,229,255,.14);
+    flex-wrap:wrap;
+  }
+  .panel-head h2{
+    margin:0; font-family:'Orbitron','Pretendard',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--text);
+  }
+  .panel-head .tag{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; color:var(--dim);
+    letter-spacing:.1em;
+  }
+
+  /* ============ 부팅 진입 페이드 (패널 공통) ============ */
+  .boot-fade{ animation:panelFadeIn .35s ease-out both; }
+  @keyframes panelFadeIn{
+    0%{ opacity:0; transform:translateY(6px); }
+    100%{ opacity:1; transform:translateY(0); }
+  }
+
+  /* ============ 히어로 요약 밴드 ============ */
+  .hero-panel{
+    display:flex; align-items:center; gap:36px; flex-wrap:wrap;
+  }
+  .hero-score{ flex:0 0 auto; min-width:150px; }
+  .hero-score .label{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; letter-spacing:.14em;
+    color:var(--dim); text-transform:uppercase; margin-bottom:8px;
+  }
+  .hero-score .value{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-weight:700; font-size:56px;
+    color:var(--cyan); line-height:1;
+  }
+  .hero-score .value .unit{ font-size:18px; color:var(--dim); margin-left:6px; }
+  .hero-score .delta{
+    margin-top:10px; font-family:'Share Tech Mono','Pretendard',monospace; font-size:13px; color:var(--cyan);
+  }
+
+  .hero-rings{ display:flex; gap:22px; flex:0 0 auto; }
+  .ring-item{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .ring-wrap{ position:relative; width:82px; height:82px; }
+  .ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .ring-track{ fill:none; stroke:rgba(93,143,163,.25); stroke-width:6; }
+  .ring-fill{
+    fill:none; stroke:var(--cyan); stroke-width:6; stroke-linecap:butt;
+    stroke-dasharray:213.6;
+    stroke-dashoffset:var(--ring-offset);
+    animation:ringFill .6s cubic-bezier(.2,.9,.3,1.1) both;
+  }
+  @keyframes ringFill{
+    0%{ stroke-dashoffset:213.6; }
+    70%{ stroke-dashoffset:calc(var(--ring-offset) - 9); }
+    100%{ stroke-dashoffset:var(--ring-offset); }
+  }
+  .ring-pct{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:15px; font-weight:700; color:var(--text);
+  }
+  .ring-label{ font-size:12px; color:var(--dim); letter-spacing:.05em; }
+
+  .hero-coach{
+    flex:1 1 260px; border-left:1px solid rgba(0,229,255,.2); padding-left:24px;
+  }
+  .coach-label{
+    font-size:11px; letter-spacing:.18em; color:var(--dim); text-transform:uppercase; margin-bottom:8px;
+  }
+  .coach-msg{
+    margin:0; font-size:15px; line-height:1.55; color:var(--text);
+  }
+  .coach-msg .cur{ color:var(--cyan); animation:cursorBlink 1s steps(1,end) infinite; }
+
+  /* ============ KPI 그리드 ============ */
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  .kpi-panel{
+    border:1px solid var(--cyan);
+    animation:panelPowerOn .3s ease-out both;
+  }
+  .kpi-panel:nth-of-type(1){ animation-delay:.50s; }
+  .kpi-panel:nth-of-type(2){ animation-delay:.57s; }
+  .kpi-panel:nth-of-type(3){ animation-delay:.64s; }
+  .kpi-panel:nth-of-type(4){ animation-delay:.71s; }
+  .kpi-panel:nth-of-type(5){ animation-delay:.78s; }
+  .kpi-panel:nth-of-type(6){ animation-delay:.85s; }
+  @keyframes panelPowerOn{
+    0%{ border-color:transparent; box-shadow:none; }
+    55%{ border-color:var(--cyan); box-shadow:0 0 10px rgba(0,229,255,.4); }
+    100%{ border-color:var(--cyan); box-shadow:none; }
+  }
+  .kpi-inner{ animation:kpiContentIn .25s ease-out both; }
+  .kpi-panel:nth-of-type(1) .kpi-inner{ animation-delay:.58s; }
+  .kpi-panel:nth-of-type(2) .kpi-inner{ animation-delay:.65s; }
+  .kpi-panel:nth-of-type(3) .kpi-inner{ animation-delay:.72s; }
+  .kpi-panel:nth-of-type(4) .kpi-inner{ animation-delay:.79s; }
+  .kpi-panel:nth-of-type(5) .kpi-inner{ animation-delay:.86s; }
+  .kpi-panel:nth-of-type(6) .kpi-inner{ animation-delay:.93s; }
+  @keyframes kpiContentIn{ 0%{ opacity:0; } 100%{ opacity:1; } }
+
+  .kpi-label{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; letter-spacing:.12em;
+    color:var(--dim); text-transform:uppercase; margin-bottom:10px;
+  }
+  .kpi-value{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-weight:700;
+    font-size:32px; color:var(--cyan); line-height:1;
+  }
+  .kpi-unit{
+    font-size:13px; color:var(--dim); margin-left:6px; letter-spacing:.05em;
+  }
+  .kpi-trend{
+    margin-top:10px; font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px;
+  }
+  .trend-up{ color:var(--cyan); }
+  .trend-down{ color:var(--amber); }
+  .kpi-sub{ margin-top:6px; font-size:12px; color:var(--dim); }
+
+  /* ============ KPI 미니 스파크라인 (고도화) ============ */
+  .kpi-spark{ margin-top:9px; }
+  .kpi-spark svg{ width:100%; height:18px; display:block; overflow:visible; }
+  .kpi-spark polyline{ fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+  .kpi-spark.trend-up polyline{ stroke:var(--cyan); opacity:.85; }
+  .kpi-spark.trend-down polyline{ stroke:var(--amber); opacity:.85; }
+  .kpi-spark circle{ fill:var(--amber); }
+
+  /* ============ 차트 2열 ============ */
+  .charts-grid{
+    display:grid; grid-template-columns:1.55fr 1fr; gap:16px;
+  }
+  .chart-panel .panel-fade{ animation-delay:.90s; }
+  .chart-panel.hr-panel .panel-fade{ animation-delay:.98s; }
+
+  .chart-svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .bar{
+    fill:var(--cyan);
+    transform-box:fill-box; transform-origin:bottom;
+    animation:barGrow .5s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  .bar.peak{
+    fill:var(--magenta);
+    filter:drop-shadow(0 0 6px rgba(255,45,120,.75));
+  }
+  @keyframes barGrow{
+    0%{ transform:scaleY(0); }
+    70%{ transform:scaleY(1.04); }
+    100%{ transform:scaleY(1); }
+  }
+  .bar-hit{ fill:transparent; cursor:pointer; }
+  .bar-crosshair{ opacity:0; transition:opacity .12s ease-out; pointer-events:none; }
+  .bar-crosshair line{ stroke:var(--cyan); stroke-width:1; stroke-dasharray:2 3; }
+  .bar-crosshair text{ font-family:'Share Tech Mono','Pretendard',monospace; }
+  .bar-group:hover .bar-crosshair{ opacity:1; }
+  .bar-group:hover .bar{ filter:drop-shadow(0 0 6px rgba(0,229,255,.6)); }
+  .bar-group.is-peak:hover .bar{ filter:drop-shadow(0 0 10px rgba(255,45,120,.9)); }
+  .axis-label{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; fill:var(--dim);
+    text-anchor:middle;
+  }
+  .peak-tag{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; fill:var(--magenta);
+    text-anchor:middle; font-weight:700;
+  }
+  .peak-tag tspan{ fill:var(--dim); font-weight:400; }
+
+  /* ============ 텔레메트리 그리드 + 기준선 (고도화) ============ */
+  .grid-line{ stroke:rgba(0,229,255,.08); stroke-width:1; }
+  .baseline-line{ stroke:rgba(0,229,255,.5); stroke-width:1.2; stroke-dasharray:4 3; }
+  .baseline-label{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:10px; fill:var(--cyan);
+    opacity:.75; letter-spacing:.05em;
+  }
+
+  /* ============ 심박존 분포 (가로 누적 막대) ============ */
+  .hr-zone-bar{
+    display:flex; width:100%; height:26px; overflow:hidden;
+    border:1px solid rgba(0,229,255,.25); margin-bottom:18px;
+    background:rgba(93,143,163,.06);
+  }
+  .hr-seg{
+    height:100%; transform:scaleX(0); transform-origin:left;
+    animation:segGrow .45s cubic-bezier(.2,.9,.3,1.1) both;
+    border-right:1px solid rgba(5,8,16,.7);
+  }
+  .hr-seg:last-child{ border-right:none; }
+  @keyframes segGrow{
+    0%{ transform:scaleX(0); }
+    70%{ transform:scaleX(1.03); }
+    100%{ transform:scaleX(1); }
+  }
+  .hr-seg.z1{ background:rgba(93,143,163,.4); }
+  .hr-seg.z2{ background:rgba(0,229,255,.22); }
+  .hr-seg.z3{ background:rgba(0,229,255,.5); }
+  .hr-seg.z4{ background:var(--magenta); }
+  .hr-seg.z5{ background:var(--amber); }
+
+  .hr-legend{ display:flex; flex-direction:column; gap:9px; }
+  .hr-row{
+    display:flex; align-items:center; gap:10px; font-size:13px;
+    padding:5px 6px; border-left:2px solid transparent;
+  }
+  .hr-row .dot{ width:9px; height:9px; flex:0 0 auto; }
+  .hr-row .dot.z1{ background:rgba(93,143,163,.7); }
+  .hr-row .dot.z2{ background:rgba(0,229,255,.35); }
+  .hr-row .dot.z3{ background:rgba(0,229,255,.75); }
+  .hr-row .dot.z4{ background:var(--magenta); }
+  .hr-row .dot.z5{ background:var(--amber); }
+  .hr-row .zone-name{ min-width:60px; color:var(--text); }
+  .hr-row .zone-range{ font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; color:var(--dim); flex:1; }
+  .hr-row .zone-min{ font-family:'Share Tech Mono','Pretendard',monospace; font-size:13px; color:var(--text); }
+  .hr-row.highlight{
+    border-left-color:var(--magenta); background:rgba(255,45,120,.06);
+  }
+  .hr-row.highlight .zone-min{ color:var(--magenta); font-weight:700; }
+  .hr-tag{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:10px; color:var(--magenta);
+    border:1px solid var(--magenta); padding:1px 6px; margin-left:8px; letter-spacing:.05em;
+  }
+
+  /* ============ 최근 7일 걸음 스트립 ============ */
+  .week-strip{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+  }
+  .week-item{
+    flex:1 1 76px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    min-width:76px;
+  }
+  .week-track{
+    width:100%; height:96px; display:flex; align-items:flex-end;
+    border-bottom:1px solid rgba(0,229,255,.2);
+  }
+  .week-bar{
+    width:100%; background:rgba(0,229,255,.35);
+    transform:scaleY(0); transform-origin:bottom;
+    animation:segGrowV .45s cubic-bezier(.2,.9,.3,1.1) both;
+  }
+  @keyframes segGrowV{
+    0%{ transform:scaleY(0); }
+    70%{ transform:scaleY(1.04); }
+    100%{ transform:scaleY(1); }
+  }
+  .week-item.is-best .week-bar{ background:var(--amber); }
+  .week-item.is-today .week-bar{
+    background:var(--cyan);
+  }
+  .week-date{ font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px; color:var(--dim); }
+  .week-item.is-today .week-date{ color:var(--cyan); font-weight:700; }
+  .week-value{ font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px; color:var(--text); }
+  .week-tag{
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:9px; letter-spacing:.05em;
+    padding:1px 5px; border:1px solid currentColor;
+  }
+  .week-tag.best{ color:var(--amber); }
+  .week-tag.today{ color:var(--cyan); }
+
+  /* ============ 미션 테이블 ============ */
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:720px; }
+  thead th{
+    text-align:left; font-family:'Share Tech Mono','Pretendard',monospace; font-size:11px;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:400;
+    padding:0 12px 10px; border-bottom:1px solid rgba(0,229,255,.18);
+  }
+  tbody td{
+    padding:13px 12px; border-bottom:1px solid rgba(93,143,163,.14);
+    font-size:14px; position:relative;
+  }
+  tbody tr{ position:relative; transition:background-color .12s ease-out; }
+  tbody tr::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--cyan); opacity:0; transition:opacity .12s ease-out;
+  }
+  tbody tr:hover::before{ opacity:1; }
+  tbody tr:hover{ background:rgba(0,229,255,.05); }
+  tbody td:first-child{ font-family:'Share Tech Mono','Pretendard',monospace; color:var(--dim); }
+  tbody td:nth-child(2){ font-weight:500; }
+  .mono-num{ font-family:'Share Tech Mono','Pretendard',monospace; }
+
+  .gauge{ display:flex; align-items:center; gap:10px; }
+  .gauge-track{
+    position:relative; flex:1; height:6px; max-width:110px;
+    background:rgba(93,143,163,.18);
+  }
+  .gauge-fill{ position:absolute; inset:0 auto 0 0; }
+  .gauge-fill.c-cyan{ background:var(--cyan); }
+  .gauge-fill.c-amber{ background:var(--amber); }
+  .gauge-fill.c-dim{ background:var(--dim); }
+  .gauge-fill.c-magenta{ background:var(--magenta); }
+  .gauge-fill.is-over::after{
+    content:""; position:absolute; right:-5px; top:50%; transform:translateY(-50%);
+    width:0; height:0; border-style:solid; border-width:4px 0 4px 5px;
+    border-color:transparent transparent transparent var(--cyan);
+  }
+  .gauge-pct{ font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px; min-width:34px; text-align:right; }
+
+  .status-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px; letter-spacing:.04em;
+    padding:4px 9px; border:1px solid currentColor;
+  }
+  .status-progress{ color:var(--cyan); }
+  .status-progress .cur{ animation:cursorBlink 1s steps(1,end) infinite; }
+  @keyframes cursorBlink{ 0%,49%{ opacity:1; } 50%,100%{ opacity:0; } }
+
+  .status-done{ color:var(--dim); }
+  .status-wait{ color:var(--amber); }
+  .status-warn{
+    color:var(--magenta);
+    box-shadow:0 0 8px rgba(255,45,120,.5);
+    animation:warnPulse 1.4s ease-in-out infinite;
+    background-image:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.3) 45%, transparent 60%);
+    background-size:260% 100%;
+    background-position:200% 0;
+  }
+  @keyframes warnPulse{
+    0%,100%{ box-shadow:0 0 6px rgba(255,45,120,.35); background-position:200% 0; }
+    50%{ box-shadow:0 0 13px rgba(255,45,120,.85); background-position:-100% 0; }
+  }
+  .warn-beacon{
+    display:inline-block;
+    animation:beaconPing 1.4s ease-in-out infinite;
+  }
+  @keyframes beaconPing{
+    0%,100%{ opacity:1; text-shadow:0 0 3px rgba(255,45,120,.6); }
+    50%{ opacity:.4; text-shadow:0 0 9px rgba(255,45,120,1); }
+  }
+
+  /* ============ 주의 미션 행 강조 (고도화) ============ */
+  tbody tr.mission-alert::before{
+    opacity:1; background:var(--magenta);
+    box-shadow:0 0 7px rgba(255,45,120,.55);
+  }
+  tbody tr.mission-alert{ background:rgba(255,45,120,.045); }
+  tbody tr.mission-alert:hover{ background:rgba(255,45,120,.09); }
+
+  /* ============ 업적 배지 ============ */
+  .badges-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .badge-card{
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;
+    padding:26px 18px 20px;
+  }
+  .badge-icon{
+    width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+    color:var(--cyan);
+  }
+  .badge-icon svg{ width:26px; height:26px; }
+  .badge-title{
+    font-family:'Orbitron','Pretendard',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:.05em; color:var(--text);
+  }
+  .badge-desc{ font-size:12px; color:var(--dim); line-height:1.5; }
+
+  /* ============ 상태바 / 푸터 ============ */
+  .statusbar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    margin-top:6px; padding-top:16px; border-top:1px solid rgba(0,229,255,.18);
+    font-family:'Share Tech Mono','Pretendard',monospace; font-size:12px; color:var(--dim);
+  }
+  .statusbar .blip{
+    color:var(--cyan); margin-right:6px;
+    animation:blipPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes blipPulse{ 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+  .statusbar .online{ color:var(--text); letter-spacing:.08em; }
+  .footer-style{ opacity:.65; }
+
+  /* ============ 반응형 ============ */
+  @media (max-width:900px){
+    .hud{ padding:20px 16px 40px; }
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .charts-grid{ grid-template-columns:1fr; }
+    .badges-grid{ grid-template-columns:1fr; }
+    .topbar{ align-items:flex-start; }
+    .meta{ text-align:left; }
+    .user-line, .status-line{ justify-content:flex-start; }
+    .hero-panel{ gap:24px; }
+    .hero-coach{ border-left:none; padding-left:0; border-top:1px solid rgba(0,229,255,.2); padding-top:16px; }
+    table{ min-width:640px; }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .hero-rings{ gap:14px; }
+    .ring-wrap{ width:66px; height:66px; }
+  }
+
+  /* ============ 감소된 모션 ============ */
+  @media (prefers-reduced-motion:reduce){
+    .boot-overlay, .scanlines, .scan-beam{ display:none !important; }
+    .status-warn{ box-shadow:0 0 0 rgba(0,0,0,0) !important; }
+    *, *::before, *::after{
+      animation:none !important;
+      transition:none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="scan-beam" aria-hidden="true"></div>
+  <div class="boot-overlay" aria-hidden="true">
+    <span class="boot-line mono">SYSTEM INITIALIZING...</span>
+  </div>
+
+  <div class="hud">
+
+    <!-- 1. 헤더 바 -->
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name mono">핏펄스 <span class="accent">(FITPULSE)</span></span>
+        </div>
+        <h1 class="title">오늘의 활동 리포트</h1>
+      </div>
+      <div class="meta">
+        <div class="user-line">
+          <span class="user-name">핏메이트</span>
+          <span class="sep">·</span>
+          <span class="streak">연속 기록 <strong class="mono">12일</strong></span>
+        </div>
+        <div class="status-line">
+          <span class="clock mono" id="clock">08:42:00</span>
+          <span class="sep">·</span>
+          <span>갱신 2026-07-10 08:42</span>
+          <span class="sep">·</span>
+          <span class="sync-ok">동기화 완료</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. 히어로 요약 밴드 -->
+    <section class="panel hero-panel boot-fade" style="animation-delay:.38s">
+      <span class="corner-mark" aria-hidden="true"></span>
+
+      <div class="hero-score">
+        <div class="label mono">종합 활동 점수</div>
+        <div class="value">87<span class="unit">점</span></div>
+        <div class="delta">▲ 전일 대비 +6점</div>
+      </div>
+
+      <div class="hero-rings" role="img" aria-label="활동 링. 걷기 84%, 운동 94%, 스탠드 75%">
+        <div class="ring-item">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 82 82" aria-hidden="true">
+              <circle class="ring-track" cx="41" cy="41" r="34"></circle>
+              <circle class="ring-fill" cx="41" cy="41" r="34" style="--ring-offset:34.2; animation-delay:.55s"></circle>
+            </svg>
+            <span class="ring-pct mono">84%</span>
+          </div>
+          <span class="ring-label">걷기</span>
+        </div>
+        <div class="ring-item">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 82 82" aria-hidden="true">
+              <circle class="ring-track" cx="41" cy="41" r="34"></circle>
+              <circle class="ring-fill" cx="41" cy="41" r="34" style="--ring-offset:12.8; animation-delay:.60s"></circle>
+            </svg>
+            <span class="ring-pct mono">94%</span>
+          </div>
+          <span class="ring-label">운동</span>
+        </div>
+        <div class="ring-item">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 82 82" aria-hidden="true">
+              <circle class="ring-track" cx="41" cy="41" r="34"></circle>
+              <circle class="ring-fill" cx="41" cy="41" r="34" style="--ring-offset:53.4; animation-delay:.65s"></circle>
+            </svg>
+            <span class="ring-pct mono">75%</span>
+          </div>
+          <span class="ring-label">스탠드</span>
+        </div>
+      </div>
+
+      <div class="hero-coach">
+        <div class="coach-label mono">AI COACH</div>
+        <p class="coach-msg">"목표까지 1,568걸음 남았어요. 저녁 산책이면 충분해요."<span class="cur">_</span></p>
+      </div>
+
+      <span class="corner-bracket" aria-hidden="true"></span>
+    </section>
+
+    <!-- 3. KPI 카드 6장 -->
+    <section class="kpi-grid">
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">걸음 수</div>
+          <div class="kpi-value">8,432<span class="kpi-unit">걸음</span></div>
+          <div class="kpi-trend trend-up">▲ 전일 +12.3%</div>
+          <div class="kpi-spark trend-up" role="img" aria-label="최근 7일 걸음 추이. 7/7 9,120 최고, 오늘 8,432">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,19.0 10.7,7.6 21.3,11.0 32.0,1.0 42.7,8.7 53.3,6.1 64.0,4.2"></polyline>
+              <circle cx="32.0" cy="1.0" r="1.6"></circle>
+            </svg>
+          </div>
+          <div class="kpi-sub">목표 10,000보의 84%</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">활동 칼로리</div>
+          <div class="kpi-value">512<span class="kpi-unit">kcal</span></div>
+          <div class="kpi-trend trend-up">▲ 전일 +8.1%</div>
+          <div class="kpi-spark trend-up" aria-hidden="true">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none">
+              <polyline points="0,16 13,14 26,15 38,9 51,10 64,3"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-sub">목표 700kcal의 73%</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">운동 시간</div>
+          <div class="kpi-value">47<span class="kpi-unit">분</span></div>
+          <div class="kpi-trend trend-up">▲ 전일 +15.2%</div>
+          <div class="kpi-spark trend-up" aria-hidden="true">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none">
+              <polyline points="0,17 13,15 26,10 38,11 51,5 64,2"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-sub">목표 50분의 94%</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">평균 심박수</div>
+          <div class="kpi-value">72<span class="kpi-unit">bpm</span></div>
+          <div class="kpi-trend trend-down">▼ 전일 −2.7%</div>
+          <div class="kpi-spark trend-down" aria-hidden="true">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none">
+              <polyline points="0,8 13,9 26,6 38,10 51,11 64,10"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-sub">안정 범위</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">수면 점수</div>
+          <div class="kpi-value">82<span class="kpi-unit">점</span></div>
+          <div class="kpi-trend trend-up">▲ 전주 +4.0%</div>
+          <div class="kpi-spark trend-up" aria-hidden="true">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none">
+              <polyline points="0,12 13,11 26,13 38,10 51,9 64,7"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-sub">6시간 48분</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+
+      <article class="kpi-panel">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="kpi-inner">
+          <div class="kpi-label">스트레스 지수</div>
+          <div class="kpi-value">34<span class="kpi-unit">—</span></div>
+          <div class="kpi-trend trend-down">▼ 전일 −11.0%</div>
+          <div class="kpi-spark trend-down" aria-hidden="true">
+            <svg viewBox="0 0 64 20" preserveAspectRatio="none">
+              <polyline points="0,3 13,5 26,7 38,10 51,13 64,15"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-sub">낮음 (양호)</div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </article>
+    </section>
+
+    <!-- 4. 차트 2개 -->
+    <div class="charts-grid">
+      <section class="panel chart-panel boot-fade" style="animation-delay:.90s">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="panel-head">
+          <h2>시간대별 걸음 수 · 오늘</h2>
+          <span class="tag mono">TELEMETRY / STEP-RATE</span>
+        </div>
+
+        <svg class="chart-svg" viewBox="0 0 640 250" role="img" aria-label="시간대별 걸음 수 차트. 06시 320, 08시 1240, 10시 680, 12시 1520, 14시 540, 16시 890, 18시 2140 피크, 20시 780, 22시 322">
+          <line x1="32" y1="62.5" x2="608" y2="62.5" class="grid-line"></line>
+          <line x1="32" y1="105" x2="608" y2="105" class="grid-line"></line>
+          <line x1="32" y1="147.5" x2="608" y2="147.5" class="grid-line"></line>
+          <line x1="32" y1="190" x2="608" y2="190" stroke="rgba(0,229,255,.25)" stroke-width="1"></line>
+
+          <line x1="32" y1="124.3" x2="608" y2="124.3" class="baseline-line"></line>
+          <text x="40" y="120" class="baseline-label">평균 937</text>
+
+          <g class="bar-group">
+            <rect class="bar" x="49" y="168" width="30" height="22" style="animation-delay:.95s"></rect>
+            <rect class="bar-hit" x="49" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="64" y1="20" x2="64" y2="190"></line>
+              <text x="64" y="14" class="axis-label" fill="var(--cyan)">320</text>
+            </g>
+            <text x="64" y="206" class="axis-label">06시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="113" y="103" width="30" height="87" style="animation-delay:.98s"></rect>
+            <rect class="bar-hit" x="113" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="128" y1="20" x2="128" y2="190"></line>
+              <text x="128" y="14" class="axis-label" fill="var(--cyan)">1,240</text>
+            </g>
+            <text x="128" y="206" class="axis-label">08시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="177" y="142" width="30" height="48" style="animation-delay:1.01s"></rect>
+            <rect class="bar-hit" x="177" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="192" y1="20" x2="192" y2="190"></line>
+              <text x="192" y="14" class="axis-label" fill="var(--cyan)">680</text>
+            </g>
+            <text x="192" y="206" class="axis-label">10시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="241" y="83" width="30" height="107" style="animation-delay:1.04s"></rect>
+            <rect class="bar-hit" x="241" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="256" y1="20" x2="256" y2="190"></line>
+              <text x="256" y="14" class="axis-label" fill="var(--cyan)">1,520</text>
+            </g>
+            <text x="256" y="206" class="axis-label">12시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="305" y="152" width="30" height="38" style="animation-delay:1.07s"></rect>
+            <rect class="bar-hit" x="305" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="320" y1="20" x2="320" y2="190"></line>
+              <text x="320" y="14" class="axis-label" fill="var(--cyan)">540</text>
+            </g>
+            <text x="320" y="206" class="axis-label">14시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="369" y="128" width="30" height="62" style="animation-delay:1.10s"></rect>
+            <rect class="bar-hit" x="369" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="384" y1="20" x2="384" y2="190"></line>
+              <text x="384" y="14" class="axis-label" fill="var(--cyan)">890</text>
+            </g>
+            <text x="384" y="206" class="axis-label">16시</text>
+          </g>
+
+          <g class="bar-group is-peak">
+            <rect class="bar peak" x="433" y="40" width="30" height="150" style="animation-delay:1.13s"></rect>
+            <rect class="bar-hit" x="433" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="448" y1="20" x2="448" y2="190"></line>
+            </g>
+            <text x="448" y="32" class="peak-tag">2,140<tspan> · 피크</tspan></text>
+            <text x="448" y="206" class="axis-label" fill="var(--magenta)">18시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="497" y="136" width="30" height="54" style="animation-delay:1.16s"></rect>
+            <rect class="bar-hit" x="497" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="512" y1="20" x2="512" y2="190"></line>
+              <text x="512" y="14" class="axis-label" fill="var(--cyan)">780</text>
+            </g>
+            <text x="512" y="206" class="axis-label">20시</text>
+          </g>
+
+          <g class="bar-group">
+            <rect class="bar" x="561" y="167" width="30" height="23" style="animation-delay:1.19s"></rect>
+            <rect class="bar-hit" x="561" y="20" width="30" height="170"></rect>
+            <g class="bar-crosshair">
+              <line x1="576" y1="20" x2="576" y2="190"></line>
+              <text x="576" y="14" class="axis-label" fill="var(--cyan)">322</text>
+            </g>
+            <text x="576" y="206" class="axis-label">22시</text>
+          </g>
+        </svg>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </section>
+
+      <section class="panel chart-panel hr-panel boot-fade" style="animation-delay:.98s">
+        <span class="corner-mark" aria-hidden="true"></span>
+        <div class="panel-head">
+          <h2>심박존 분포 · 오늘</h2>
+          <span class="tag mono">TELEMETRY / HR-ZONE</span>
+        </div>
+
+        <div class="hr-zone-bar" role="img" aria-label="심박존 분포. 휴식 612분, 워밍업 174분, 지방연소 92분, 유산소 41분 목표 초과, 최대 8분">
+          <div class="hr-seg z1" style="width:66.0%; animation-delay:1.05s"></div>
+          <div class="hr-seg z2" style="width:18.8%; animation-delay:1.09s"></div>
+          <div class="hr-seg z3" style="width:9.9%; animation-delay:1.13s"></div>
+          <div class="hr-seg z4" style="width:4.4%; animation-delay:1.17s"></div>
+          <div class="hr-seg z5" style="width:0.9%; animation-delay:1.21s"></div>
+        </div>
+
+        <div class="hr-legend">
+          <div class="hr-row"><span class="dot z1"></span><span class="zone-name">휴식</span><span class="zone-range mono">&lt;90 bpm</span><span class="zone-min mono">612분</span></div>
+          <div class="hr-row"><span class="dot z2"></span><span class="zone-name">워밍업</span><span class="zone-range mono">90–108</span><span class="zone-min mono">174분</span></div>
+          <div class="hr-row"><span class="dot z3"></span><span class="zone-name">지방연소</span><span class="zone-range mono">108–126</span><span class="zone-min mono">92분</span></div>
+          <div class="hr-row highlight"><span class="dot z4"></span><span class="zone-name">유산소</span><span class="zone-range mono">126–144</span><span class="zone-min mono">41분<span class="hr-tag">목표 초과</span></span></div>
+          <div class="hr-row"><span class="dot z5"></span><span class="zone-name">최대</span><span class="zone-range mono">144+</span><span class="zone-min mono">8분</span></div>
+        </div>
+        <span class="corner-bracket" aria-hidden="true"></span>
+      </section>
+    </div>
+
+    <!-- 5. 최근 7일 걸음 스트립 -->
+    <section class="panel week-panel boot-fade" style="animation-delay:1.10s">
+      <span class="corner-mark" aria-hidden="true"></span>
+      <div class="panel-head">
+        <h2>최근 7일 걸음</h2>
+        <span class="tag mono">LOG / 7-DAY TREND</span>
+      </div>
+
+      <div class="week-strip" role="img" aria-label="최근 7일 걸음 수. 7/4 5210, 7/5 7680, 7/6 6940, 7/7 9120 주간 최고, 7/8 7450, 7/9 8010, 7/10 8432 오늘">
+        <div class="week-item">
+          <div class="week-track"><div class="week-bar" style="height:57%; animation-delay:1.15s"></div></div>
+          <span class="week-value mono">5,210</span>
+          <span class="week-date mono">7/4</span>
+        </div>
+        <div class="week-item">
+          <div class="week-track"><div class="week-bar" style="height:84%; animation-delay:1.18s"></div></div>
+          <span class="week-value mono">7,680</span>
+          <span class="week-date mono">7/5</span>
+        </div>
+        <div class="week-item">
+          <div class="week-track"><div class="week-bar" style="height:76%; animation-delay:1.21s"></div></div>
+          <span class="week-value mono">6,940</span>
+          <span class="week-date mono">7/6</span>
+        </div>
+        <div class="week-item is-best">
+          <div class="week-track"><div class="week-bar" style="height:100%; animation-delay:1.24s"></div></div>
+          <span class="week-value mono">9,120</span>
+          <span class="week-date mono">7/7</span>
+          <span class="week-tag best">최고</span>
+        </div>
+        <div class="week-item">
+          <div class="week-track"><div class="week-bar" style="height:82%; animation-delay:1.27s"></div></div>
+          <span class="week-value mono">7,450</span>
+          <span class="week-date mono">7/8</span>
+        </div>
+        <div class="week-item">
+          <div class="week-track"><div class="week-bar" style="height:88%; animation-delay:1.30s"></div></div>
+          <span class="week-value mono">8,010</span>
+          <span class="week-date mono">7/9</span>
+        </div>
+        <div class="week-item is-today">
+          <div class="week-track"><div class="week-bar" style="height:92%; animation-delay:1.33s"></div></div>
+          <span class="week-value mono">8,432</span>
+          <span class="week-date mono">7/10</span>
+          <span class="week-tag today">오늘</span>
+        </div>
+      </div>
+      <span class="corner-bracket" aria-hidden="true"></span>
+    </section>
+
+    <!-- 6. 오늘의 건강 미션 테이블 -->
+    <section class="panel mission-panel boot-fade" style="animation-delay:1.20s">
+      <span class="corner-mark" aria-hidden="true"></span>
+      <div class="panel-head">
+        <h2>오늘의 건강 미션</h2>
+        <span class="tag mono">MISSION LOG / 8 ENTRIES</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>시각</th>
+              <th>활동</th>
+              <th>목표</th>
+              <th>현재</th>
+              <th>달성률</th>
+              <th>소비</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>07:10</td>
+              <td>모닝 스트레칭</td>
+              <td class="mono-num">15분</td>
+              <td class="mono-num">15분</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-dim" style="width:100%"></div></div>
+                  <span class="gauge-pct mono-num">100%</span>
+                </div>
+              </td>
+              <td class="mono-num">38 kcal</td>
+              <td><span class="status-chip status-done">✓ 완료</span></td>
+            </tr>
+            <tr>
+              <td>08:30</td>
+              <td>출근 걷기</td>
+              <td class="mono-num">3,000보</td>
+              <td class="mono-num">3,240보</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-dim is-over" style="width:100%"></div></div>
+                  <span class="gauge-pct mono-num">108%</span>
+                </div>
+              </td>
+              <td class="mono-num">96 kcal</td>
+              <td><span class="status-chip status-done">✓ 완료</span></td>
+            </tr>
+            <tr>
+              <td>12:20</td>
+              <td>점심 산책</td>
+              <td class="mono-num">2,000보</td>
+              <td class="mono-num">1,520보</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-cyan" style="width:76%"></div></div>
+                  <span class="gauge-pct mono-num">76%</span>
+                </div>
+              </td>
+              <td class="mono-num">54 kcal</td>
+              <td><span class="status-chip status-progress">진행중<span class="cur">_</span></span></td>
+            </tr>
+            <tr>
+              <td>14:00</td>
+              <td>수분 섭취</td>
+              <td class="mono-num">2.0 L</td>
+              <td class="mono-num">1.2 L</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-cyan" style="width:60%"></div></div>
+                  <span class="gauge-pct mono-num">60%</span>
+                </div>
+              </td>
+              <td class="mono-num">—</td>
+              <td><span class="status-chip status-progress">진행중<span class="cur">_</span></span></td>
+            </tr>
+            <tr>
+              <td>16:30</td>
+              <td>근력 운동</td>
+              <td class="mono-num">3 세트</td>
+              <td class="mono-num">0 세트</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-amber" style="width:0%"></div></div>
+                  <span class="gauge-pct mono-num">0%</span>
+                </div>
+              </td>
+              <td class="mono-num">—</td>
+              <td><span class="status-chip status-wait">대기</span></td>
+            </tr>
+            <tr>
+              <td>18:00</td>
+              <td>저녁 러닝</td>
+              <td class="mono-num">5.0 km</td>
+              <td class="mono-num">4.2 km</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-cyan" style="width:84%"></div></div>
+                  <span class="gauge-pct mono-num">84%</span>
+                </div>
+              </td>
+              <td class="mono-num">312 kcal</td>
+              <td><span class="status-chip status-progress">진행중<span class="cur">_</span></span></td>
+            </tr>
+            <tr>
+              <td>21:00</td>
+              <td>명상</td>
+              <td class="mono-num">10분</td>
+              <td class="mono-num">10분</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-dim" style="width:100%"></div></div>
+                  <span class="gauge-pct mono-num">100%</span>
+                </div>
+              </td>
+              <td class="mono-num">8 kcal</td>
+              <td><span class="status-chip status-done">✓ 완료</span></td>
+            </tr>
+            <tr class="mission-alert">
+              <td>22:30</td>
+              <td>심박존 유지</td>
+              <td class="mono-num">20분</td>
+              <td class="mono-num">6분</td>
+              <td>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill c-magenta" style="width:30%"></div></div>
+                  <span class="gauge-pct mono-num">30%</span>
+                </div>
+              </td>
+              <td class="mono-num">—</td>
+              <td><span class="status-chip status-warn"><span class="warn-beacon" aria-hidden="true">●</span>주의</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <span class="corner-bracket" aria-hidden="true"></span>
+    </section>
+
+    <!-- 7. 업적 배지 3종 -->
+    <section class="panel badges-panel boot-fade" style="animation-delay:1.28s">
+      <span class="corner-mark" aria-hidden="true"></span>
+      <div class="panel-head">
+        <h2>업적 배지</h2>
+        <span class="tag mono">ACHIEVEMENT / VERIFIED ×3</span>
+      </div>
+
+      <div class="badges-grid">
+        <div class="badge-card">
+          <span class="corner-mark" aria-hidden="true"></span>
+          <div class="badge-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21c-4 0-7-2.7-7-6.5 0-3 1.8-4.8 3-6.7.5 1.4.2 2.6 1 3.2.2-2.7 1-5 3-7 1 2 1 3.6 2 4.7 1-.6 1.3-1.7 1.3-2.7 1.7 1.8 3.7 4 3.7 8.5 0 3.8-3 6.5-7 6.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="badge-title">연속 12일 목표 달성</div>
+          <div class="badge-desc">12일째 데일리 골 완료</div>
+          <span class="corner-bracket" aria-hidden="true"></span>
+        </div>
+
+        <div class="badge-card">
+          <span class="corner-mark" aria-hidden="true"></span>
+          <div class="badge-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="4" y="13" width="3" height="7" fill="currentColor"/><rect x="10" y="8" width="3" height="12" fill="currentColor"/><rect x="16" y="3" width="3" height="17" fill="currentColor"/></svg>
+          </div>
+          <div class="badge-title">이번 주 최고 걸음</div>
+          <div class="badge-desc">7/7 9,120걸음 기록</div>
+          <span class="corner-bracket" aria-hidden="true"></span>
+        </div>
+
+        <div class="badge-card">
+          <span class="corner-mark" aria-hidden="true"></span>
+          <div class="badge-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="2,12 7,12 9,6 12,18 14,10 16,12 22,12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="badge-title">유산소 존 목표 3회</div>
+          <div class="badge-desc">이번 주 유산소 목표 3회 달성</div>
+          <span class="corner-bracket" aria-hidden="true"></span>
+        </div>
+      </div>
+      <span class="corner-bracket" aria-hidden="true"></span>
+    </section>
+
+    <!-- 8. 푸터 -->
+    <footer class="statusbar">
+      <span><span class="blip">●</span><span class="online">ALL SYSTEMS ONLINE</span></span>
+      <span class="footer-style">STYLE 01 · SF HUD</span>
+    </footer>
+
+  </div>
+
+<script>
+(function(){
+  var clockEl = document.getElementById('clock');
+  if (!clockEl) return;
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tick(){
+    try{
+      var d = new Date();
+      clockEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }catch(e){ /* JS 실패 시 정적 표시(08:42:00) 유지 */ }
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

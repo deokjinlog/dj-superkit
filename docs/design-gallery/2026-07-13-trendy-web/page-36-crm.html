@@ -1,0 +1,1222 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opswise · 머티리얼</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+  /* ============================================================
+     Opswise CRM — Material Design 3
+     프로덕션 그라운딩: 8px 그리드 · 제한된 타이포 스케일 ·
+     상태 전수 표현(hover/focus/active) · CSS 변수 · 절제된 디테일
+     ============================================================ */
+
+  :root {
+    /* ---- Material 톤 팔레트 ---- */
+    --primary: #6750A4;
+    --on-primary: #FFFFFF;
+    --primary-container: #EADDFF;
+    --on-primary-container: #21005D;
+
+    --surface: #FEF7FF;
+    --surface-container-lowest: #FFFFFF;
+    --surface-container-low: #F7F2FA;
+    --surface-container: #F3EDF7;
+    --surface-container-high: #ECE6F0;
+    --surface-container-highest: #E6E0E9;
+
+    --on-surface: #1D1B20;
+    --on-surface-variant: #49454F;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --on-secondary-container: #1D192B;
+
+    --error: #B3261E;
+    --error-container: #F9DEDC;
+    --on-error-container: #410E0B;
+    --success: #386A20;
+    --success-container: #DDEBCF;
+    --on-success-container: #102000;
+    --warning: #7A5900;
+    --warning-container: #FCE9B6;
+    --on-warning-container: #241A00;
+
+    /* ---- Deal-stage 액센트 (톤 팔레트 내부에서 파생) ---- */
+    --stage-lead: #6750A4;
+    --stage-lead-container: #EADDFF;
+    --stage-contact: #4A6572;
+    --stage-contact-container: #CDE5F0;
+    --stage-proposal: #7A5900;
+    --stage-proposal-container: #FCE9B6;
+    --stage-won: #386A20;
+    --stage-won-container: #DDEBCF;
+
+    /* ---- elevation dp 그림자 ---- */
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    /* ---- 형태 토큰 ---- */
+    --r-card: 12px;
+    --r-btn: 8px;
+    --r-pill: 999px;
+    --r-fab: 16px;
+    --r-dialog: 28px;
+
+    /* ---- state layer 불투명도 ---- */
+    --state-hover: .08;
+    --state-focus: .12;
+    --state-press: .12;
+
+    --easing-standard: cubic-bezier(.2,0,0,1);
+    --easing-emphasized: cubic-bezier(.2,0,0,1);
+
+    --sidebar-w: 264px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: "Pretendard Variable", Pretendard, "Roboto", system-ui, sans-serif;
+    background: var(--surface);
+    color: var(--on-surface);
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: .1px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 숫자/라벨은 Roboto tabular */
+  .num { font-family: "Roboto", "Pretendard Variable", sans-serif; font-variant-numeric: tabular-nums; }
+
+  h1,h2,h3,h4,p { margin: 0; }
+
+  a { color: inherit; text-decoration: none; }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ============================================================
+     App shell — CSS Grid = 페이지 구조
+     ============================================================ */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ---------- 사이드바 (navigation drawer) ---------- */
+  .sidebar {
+    grid-column: 1;
+    background: var(--surface-container-low);
+    border-right: 1px solid var(--outline-variant);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 20px;
+  }
+  .brand-mark {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #8E7CC3);
+    box-shadow: var(--dp1);
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+  }
+  .brand-mark::before {
+    content: "";
+    width: 16px; height: 16px;
+    border-radius: 5px;
+    background: var(--on-primary);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.25) inset;
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+  .brand-sub {
+    font-size: 12px;
+    color: var(--on-surface-variant);
+    letter-spacing: .1px;
+  }
+
+  .nav-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    padding: 16px 16px 8px;
+  }
+
+  /* navigation item — pill 형태 활성 인디케이터 */
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 48px;               /* 큰 터치 타겟 */
+    padding: 0 16px;
+    border-radius: var(--r-pill);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    letter-spacing: .1px;
+    overflow: hidden;
+    transition: color .15s var(--easing-standard);
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item .ic { color: var(--on-surface-variant); flex: 0 0 auto; }
+  .nav-item::before {                 /* state layer */
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--on-surface);
+    opacity: 0;
+    transition: opacity .15s var(--easing-standard);
+    pointer-events: none;
+  }
+  .nav-item:hover::before { opacity: var(--state-hover); }
+  .nav-item:active::before { opacity: var(--state-press); }
+  .nav-item.is-active {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+  .nav-item.is-active .ic { color: var(--on-secondary-container); }
+  .nav-item.is-active::before { background: var(--primary); }
+  .nav-item.is-active:hover::before { opacity: var(--state-hover); }
+  .nav-item .badge {
+    margin-left: auto;
+    font-family: "Roboto", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--primary);
+    color: var(--on-primary);
+    border-radius: var(--r-pill);
+    min-width: 20px; height: 20px;
+    padding: 0 6px;
+    display: grid; place-items: center;
+  }
+
+  .sidebar-spacer { flex: 1 1 auto; min-height: 16px; }
+
+  /* 사용자 카드 (역할만 — 실명 금지) */
+  .me-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--r-card);
+    background: var(--surface-container);
+    margin-top: 8px;
+  }
+  .me-avatar {
+    width: 36px; height: 36px; flex: 0 0 auto;
+    border-radius: var(--r-pill);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    display: grid; place-items: center;
+    font-family: "Roboto", sans-serif;
+    font-weight: 500; font-size: 14px;
+    letter-spacing: .1px;
+  }
+  .me-role { font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .me-org { font-size: 12px; color: var(--on-surface-variant); }
+
+  /* ---------- 메인 컬럼 ---------- */
+  .main {
+    grid-column: 2;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+  }
+
+  /* Top app bar — 로드 시 위에서 내려앉음 */
+  .appbar {
+    position: sticky; top: 0; z-index: 20;
+    height: 64px;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px;
+    background: var(--surface-container-low);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .appbar-title { display: flex; flex-direction: column; }
+  .appbar-title h1 {
+    font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2;
+  }
+  .appbar-title .crumb {
+    font-size: 12px; color: var(--on-surface-variant); letter-spacing: .3px;
+  }
+
+  /* 검색 인풋 — border + focus ring + placeholder */
+  .search {
+    margin-left: auto;
+    position: relative;
+    width: min(340px, 38vw);
+  }
+  .search input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid var(--outline);
+    background: var(--surface-container-high);
+    border-radius: var(--r-pill);
+    padding: 0 16px 0 44px;
+    font-size: 14px;
+    color: var(--on-surface);
+    letter-spacing: .1px;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .search input::placeholder { color: var(--on-surface-variant); }
+  .search input:hover { background: var(--surface-container-highest); }
+  .search input:focus {
+    outline: none;
+    border-color: var(--primary);
+    border-width: 2px;
+    padding-left: 43px;
+    background: var(--surface-container-lowest);
+    box-shadow: 0 0 0 4px rgba(103,80,164,.12);
+  }
+  .search .ic {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--on-surface-variant); pointer-events: none;
+  }
+  .search kbd {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    font-family: "Roboto", sans-serif; font-size: 11px;
+    color: var(--on-surface-variant);
+    border: 1px solid var(--outline-variant);
+    border-radius: 6px; padding: 2px 6px;
+    background: var(--surface-container-lowest);
+  }
+
+  /* icon button — 48×48 히트영역 */
+  .icon-btn {
+    position: relative;
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    border-radius: var(--r-pill);
+    color: var(--on-surface-variant);
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+  .icon-btn::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--on-surface); opacity: 0;
+    transition: opacity .15s; pointer-events: none;
+  }
+  .icon-btn:hover::before { opacity: var(--state-hover); }
+  .icon-btn:active::before { opacity: var(--state-press); }
+  .icon-btn .dot {
+    position: absolute; top: 12px; right: 13px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--error);
+    border: 2px solid var(--surface-container-low);
+  }
+
+  /* content scroll region */
+  .content {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  /* ---------- KPI row ---------- */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .kpi {
+    background: var(--surface-container-low);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: box-shadow .15s var(--easing-standard), transform .15s var(--easing-standard);
+  }
+  .kpi:hover { box-shadow: var(--dp2); transform: translateY(-1px); }
+  .kpi-head { display: flex; align-items: center; gap: 12px; }
+  .kpi-ic {
+    width: 40px; height: 40px; flex: 0 0 auto;
+    border-radius: 12px;
+    display: grid; place-items: center;
+  }
+  .kpi-ic svg { width: 22px; height: 22px; }
+  .kpi--a .kpi-ic { background: var(--primary-container); color: var(--on-primary-container); }
+  .kpi--b .kpi-ic { background: var(--stage-contact-container); color: var(--stage-contact); }
+  .kpi--c .kpi-ic { background: var(--warning-container); color: var(--on-warning-container); }
+  .kpi--d .kpi-ic { background: var(--success-container); color: var(--on-success-container); }
+  .kpi-label { font-size: 14px; color: var(--on-surface-variant); font-weight: 500; letter-spacing: .1px; }
+  .kpi-value {
+    font-size: 32px; font-weight: 700; line-height: 1.1;
+    letter-spacing: -.02em;
+  }
+  .kpi-value small { font-size: 16px; font-weight: 500; color: var(--on-surface-variant); }
+  .kpi-foot { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .trend {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-family: "Roboto", sans-serif; font-weight: 500;
+    padding: 2px 8px; border-radius: var(--r-pill);
+  }
+  .trend--up { background: var(--success-container); color: var(--on-success-container); }
+  .trend--down { background: var(--error-container); color: var(--on-error-container); }
+  .kpi-foot .muted { color: var(--on-surface-variant); }
+  /* 미니 스파크바 (CSS 도형 — 차트 라이브러리 X) */
+  .spark { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: 2px; }
+  .spark i { flex: 1; background: var(--primary-container); border-radius: 3px 3px 0 0; }
+  .spark i:last-child { background: var(--primary); }
+
+  /* ---------- 하단 2열: 파이프라인 + 활동 ---------- */
+  .board-wrap {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* 파이프라인 보드 */
+  .pipeline-panel {
+    background: var(--surface-container-low);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    padding: 20px;
+    min-width: 0;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .panel-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+  .panel-head .sub { font-size: 12px; color: var(--on-surface-variant); }
+
+  /* segmented / filter chips */
+  .chips { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+  .chip {
+    position: relative;
+    height: 32px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0 12px;
+    border: 1px solid var(--outline);
+    border-radius: var(--r-btn);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    color: var(--on-surface-variant);
+    background: transparent;
+    overflow: hidden;
+    transition: color .15s;
+  }
+  .chip::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--on-surface); opacity: 0; transition: opacity .15s;
+  }
+  .chip:hover::before { opacity: var(--state-hover); }
+  .chip:active::before { opacity: var(--state-press); }
+  .chip.is-on {
+    background: var(--secondary-container);
+    border-color: transparent;
+    color: var(--on-secondary-container);
+  }
+  .chip.is-on .check { width: 16px; height: 16px; }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 12px;
+  }
+  .col { display: flex; flex-direction: column; min-width: 0; }
+  .col-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 4px 12px;
+  }
+  .col-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+  .col--lead    .col-dot { background: var(--stage-lead); }
+  .col--contact .col-dot { background: var(--stage-contact); }
+  .col--proposal .col-dot { background: var(--stage-proposal); }
+  .col--won     .col-dot { background: var(--stage-won); }
+  .col-title { font-size: 14px; font-weight: 700; letter-spacing: .1px; }
+  .col-count {
+    font-family: "Roboto", sans-serif; font-size: 12px; font-weight: 500;
+    color: var(--on-surface-variant);
+    background: var(--surface-container-high);
+    border-radius: var(--r-pill);
+    min-width: 22px; height: 20px; padding: 0 7px;
+    display: grid; place-items: center;
+  }
+  .col-sum { margin-left: auto; font-family: "Roboto", sans-serif; font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+
+  .col-body {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--surface-container);
+    min-height: 120px;
+  }
+
+  /* deal card — elevation dp1 → hover dp2 */
+  .deal {
+    position: relative;
+    background: var(--surface-container-lowest);
+    border-radius: 10px;
+    box-shadow: var(--dp1);
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 10px;
+    overflow: hidden;
+    transition: box-shadow .15s var(--easing-standard), transform .15s var(--easing-standard);
+    text-align: left; width: 100%;
+  }
+  .deal::before {                     /* state layer */
+    content: ""; position: absolute; inset: 0;
+    background: var(--primary); opacity: 0; transition: opacity .15s;
+    pointer-events: none;
+  }
+  .deal:hover { box-shadow: var(--dp2); transform: translateY(-2px); }
+  .deal:hover::before { opacity: var(--state-hover); }
+  .deal:active::before { opacity: var(--state-press); }
+  .deal:active { transform: translateY(0) scale(.995); }
+  .deal-topline { display: flex; align-items: flex-start; gap: 8px; }
+  .deal-logo {
+    width: 28px; height: 28px; flex: 0 0 auto;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: "Roboto", sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--on-primary-container);
+    background: var(--primary-container);
+  }
+  .deal-company { font-size: 14px; font-weight: 700; line-height: 1.3; letter-spacing: -.01em; }
+  .deal-meta { font-size: 12px; color: var(--on-surface-variant); }
+  .deal-amount {
+    font-family: "Roboto", sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+    line-height: 1.2;
+  }
+  .deal-amount small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+  .deal-foot { display: flex; align-items: center; gap: 8px; }
+  .tag {
+    font-family: "Roboto", sans-serif;
+    font-size: 11px; font-weight: 500; letter-spacing: .3px;
+    padding: 2px 8px; border-radius: var(--r-pill);
+  }
+  .tag--hot { background: var(--error-container); color: var(--on-error-container); }
+  .tag--warm { background: var(--warning-container); color: var(--on-warning-container); }
+  .tag--new { background: var(--primary-container); color: var(--on-primary-container); }
+  .tag--due { background: var(--stage-contact-container); color: var(--stage-contact); }
+  .tag--won { background: var(--success-container); color: var(--on-success-container); }
+  /* 담당 이니셜 아바타 */
+  .assignee {
+    margin-left: auto;
+    width: 26px; height: 26px; flex: 0 0 auto;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Roboto", sans-serif; font-weight: 500; font-size: 11px;
+    color: var(--on-surface);
+    border: 1.5px solid var(--surface-container-lowest);
+    box-shadow: var(--dp1);
+  }
+  .assignee[data-c="a"] { background: #D0BCFF; color: #21005D; }
+  .assignee[data-c="b"] { background: #B8E0D2; color: #0B3B2E; }
+  .assignee[data-c="c"] { background: #FBD9A0; color: #3A2A00; }
+  .assignee[data-c="d"] { background: #F5B7C4; color: #4A0E1E; }
+  .assignee[data-c="e"] { background: #B4D4F0; color: #0A2E4A; }
+
+  /* progress meter (제안 단계 확률) */
+  .meter { height: 4px; border-radius: var(--r-pill); background: var(--surface-container-high); overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--stage-proposal); }
+
+  /* add-deal ghost button (컬럼 하단) */
+  .add-deal {
+    position: relative;
+    height: 40px;
+    border: 1px dashed var(--outline);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+    letter-spacing: .1px;
+    overflow: hidden;
+    transition: color .15s, border-color .15s;
+  }
+  .add-deal::before { content:""; position:absolute; inset:0; background: var(--primary); opacity:0; transition: opacity .15s; }
+  .add-deal:hover { color: var(--primary); border-color: var(--primary); }
+  .add-deal:hover::before { opacity: var(--state-hover); }
+  .add-deal:active::before { opacity: var(--state-press); }
+
+  /* ---------- 최근 활동 ---------- */
+  .activity {
+    background: var(--surface-container-low);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    padding: 20px;
+    position: sticky; top: 88px;
+  }
+  .activity h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px; }
+  .activity .sub { font-size: 12px; color: var(--on-surface-variant); margin-bottom: 16px; }
+
+  .feed { list-style: none; margin: 0; padding: 0; position: relative; }
+  .feed::before {
+    content: ""; position: absolute; left: 17px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--outline-variant);
+  }
+  .feed li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .feed-ic {
+    z-index: 1;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    box-shadow: var(--dp1);
+  }
+  .feed-ic svg { width: 18px; height: 18px; }
+  .feed--won  .feed-ic { background: var(--success-container); color: var(--on-success-container); }
+  .feed--call .feed-ic { background: var(--stage-contact-container); color: var(--stage-contact); }
+  .feed--doc  .feed-ic { background: var(--warning-container); color: var(--on-warning-container); }
+  .feed--new  .feed-ic { background: var(--primary-container); color: var(--on-primary-container); }
+  .feed-body { min-width: 0; }
+  .feed-text { font-size: 14px; line-height: 1.45; }
+  .feed-text b { font-weight: 700; }
+  .feed-text .co { color: var(--primary); font-weight: 700; }
+  .feed-time {
+    font-family: "Roboto", sans-serif;
+    font-size: 12px; color: var(--on-surface-variant);
+    margin-top: 3px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .feed-mini {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Roboto", sans-serif; font-size: 10px; font-weight: 500;
+    background: var(--surface-container-high); color: var(--on-surface-variant);
+  }
+
+  .activity-foot {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--outline-variant);
+  }
+  /* text button (전체 보기) */
+  .text-btn {
+    position: relative;
+    height: 40px; width: 100%;
+    border-radius: var(--r-btn);
+    color: var(--primary); font-weight: 500; font-size: 14px; letter-spacing: .1px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    overflow: hidden;
+  }
+  .text-btn::before { content:""; position:absolute; inset:0; background: var(--primary); opacity:0; transition: opacity .15s; }
+  .text-btn:hover::before { opacity: var(--state-hover); }
+  .text-btn:active::before { opacity: var(--state-press); }
+
+  /* ---------- FAB — 우하단, 시그니처 ---------- */
+  .fab {
+    position: fixed;
+    right: 28px; bottom: 28px;
+    z-index: 40;
+    height: 56px;
+    padding: 0 20px 0 18px;
+    border-radius: var(--r-fab);
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--dp4);
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    overflow: hidden;
+    transition: box-shadow .2s var(--easing-emphasized), transform .2s var(--easing-emphasized);
+  }
+  .fab::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--on-primary); opacity: 0; transition: opacity .15s;
+    pointer-events: none;
+  }
+  .fab:hover { box-shadow: var(--dp8); transform: scale(1.03); }
+  .fab:hover::before { opacity: var(--state-hover); }
+  .fab:active { transform: scale(.97); }
+  .fab:active::before { opacity: var(--state-press); }
+  .fab svg { width: 24px; height: 24px; }
+
+  /* ---------- 리플 ---------- */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    background: currentColor;
+    opacity: .18;
+    pointer-events: none;
+    animation: ripple .4s var(--easing-standard) forwards;
+  }
+  @keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
+
+  /* ---------- 로드 시퀀스 ---------- */
+  @keyframes bar-drop { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+  @keyframes card-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fab-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+
+  .appbar { animation: bar-drop .24s var(--easing-standard) both; }
+  .kpi { opacity: 0; animation: card-rise .22s var(--easing-standard) forwards; }
+  .kpi--a { animation-delay: .15s; }
+  .kpi--b { animation-delay: .19s; }
+  .kpi--c { animation-delay: .23s; }
+  .kpi--d { animation-delay: .27s; }
+  .pipeline-panel { opacity: 0; animation: card-rise .3s var(--easing-standard) .32s forwards; }
+  .activity { opacity: 0; animation: card-rise .3s var(--easing-standard) .42s forwards; }
+  .fab { opacity: 0; animation: fab-pop .25s var(--easing-emphasized) .9s forwards; }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 1180px) {
+    .board-wrap { grid-template-columns: 1fr; }
+    .activity { position: static; }
+  }
+  @media (max-width: 1024px) {
+    :root { --sidebar-w: 76px; }
+    .brand-text, .nav-label, .nav-item span.txt, .me-role, .me-org, .nav-item .badge { display: none; }
+    .nav-item { justify-content: center; padding: 0; }
+    .brand { justify-content: center; padding: 12px 0 20px; }
+    .me-card { justify-content: center; padding: 10px 0; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 860px) {
+    .board { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .chips { display: none; }
+  }
+  @media (max-width: 640px) {
+    .content { padding: 16px; gap: 16px; }
+    .appbar { padding: 0 16px; }
+    .search { width: 44px; }
+    .search input { padding: 0; color: transparent; }
+    .search kbd { display: none; }
+    .kpi-row { grid-template-columns: 1fr; }
+    .board { grid-template-columns: 1fr; }
+    .fab { right: 16px; bottom: 16px; }
+  }
+
+  /* ---------- 접근성 ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    .kpi, .pipeline-panel, .activity, .fab { opacity: 1 !important; }
+    .ripple { display: none !important; }
+  }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* footer */
+  .foot {
+    padding: 12px 24px 28px;
+    font-size: 12px; color: var(--on-surface-variant);
+    letter-spacing: .2px;
+  }
+</style>
+
+<div class="app">
+  <!-- ============ 사이드바 ============ -->
+  <aside class="sidebar" aria-label="주 메뉴">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div class="brand-text">
+        <div class="brand-name">Opswise</div>
+        <div class="brand-sub">Sales CRM</div>
+      </div>
+    </div>
+
+    <div class="nav-label">워크스페이스</div>
+    <button class="nav-item is-active" aria-current="page">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span class="txt">파이프라인</span>
+    </button>
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-6"/></svg>
+      <span class="txt">대시보드</span>
+    </button>
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      <span class="txt">고객</span>
+      <span class="badge num">248</span>
+    </button>
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v4"/></svg>
+      <span class="txt">일정</span>
+    </button>
+
+    <div class="nav-label">인사이트</div>
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="txt">리포트</span>
+    </button>
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+      <span class="txt">타겟 관리</span>
+    </button>
+
+    <div class="sidebar-spacer"></div>
+
+    <button class="nav-item">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="txt">설정</span>
+    </button>
+
+    <div class="me-card">
+      <div class="me-avatar num">SL</div>
+      <div>
+        <div class="me-role">세일즈 리드</div>
+        <div class="me-org">엔터프라이즈 팀</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 메인 ============ -->
+  <div class="main">
+    <header class="appbar">
+      <div class="appbar-title">
+        <div class="crumb">워크스페이스 · Q3</div>
+        <h1>영업 파이프라인</h1>
+      </div>
+
+      <div class="search">
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="회사·딜·담당자 검색" aria-label="검색">
+        <kbd>⌘K</kbd>
+      </div>
+
+      <button class="icon-btn" aria-label="필터">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="알림 3건">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <div class="content">
+      <!-- ===== KPI 4 ===== -->
+      <section class="kpi-row" aria-label="핵심 지표">
+        <article class="kpi kpi--a">
+          <div class="kpi-head">
+            <div class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="kpi-label">이번 분기 파이프라인</div>
+          </div>
+          <div class="kpi-value num">₩<span>12.4</span><small>억</small></div>
+          <div class="kpi-foot">
+            <span class="trend trend--up num">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>18.2%
+            </span>
+            <span class="muted">지난 분기 대비</span>
+          </div>
+        </article>
+
+        <article class="kpi kpi--b">
+          <div class="kpi-head">
+            <div class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
+            <div class="kpi-label">진행 중 딜</div>
+          </div>
+          <div class="kpi-value num">64<small>건</small></div>
+          <div class="kpi-foot">
+            <span class="trend trend--up num">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>9
+            </span>
+            <span class="muted">신규 이번 주</span>
+          </div>
+        </article>
+
+        <article class="kpi kpi--c">
+          <div class="kpi-head">
+            <div class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></div>
+            <div class="kpi-label">성사율</div>
+          </div>
+          <div class="kpi-value num">32<small>%</small></div>
+          <div class="spark" aria-hidden="true">
+            <i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:85%"></i><i style="height:100%"></i>
+          </div>
+        </article>
+
+        <article class="kpi kpi--d">
+          <div class="kpi-head">
+            <div class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="kpi-label">이번 달 성사</div>
+          </div>
+          <div class="kpi-value num">₩<span>3.8</span><small>억</small></div>
+          <div class="kpi-foot">
+            <span class="trend trend--down num">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>4.1%
+            </span>
+            <span class="muted">목표 대비 92%</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- ===== 파이프라인 + 활동 ===== -->
+      <div class="board-wrap">
+        <!-- 파이프라인 보드 -->
+        <section class="pipeline-panel" aria-label="영업 파이프라인 보드">
+          <div class="panel-head">
+            <div>
+              <h2>딜 파이프라인</h2>
+              <div class="sub">전체 64건 · 가중 예상매출 ₩7.2억</div>
+            </div>
+            <div class="chips" role="group" aria-label="보기 필터">
+              <button class="chip is-on">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>내 담당
+              </button>
+              <button class="chip">전체 팀</button>
+              <button class="chip">이번 주 마감</button>
+            </div>
+          </div>
+
+          <div class="board">
+            <!-- 리드 -->
+            <div class="col col--lead">
+              <div class="col-head">
+                <span class="col-dot" aria-hidden="true"></span>
+                <span class="col-title">리드</span>
+                <span class="col-count num">18</span>
+                <span class="col-sum">₩3.1억</span>
+              </div>
+              <div class="col-body">
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">NX</div>
+                    <div>
+                      <div class="deal-company">넥사 로지스틱스</div>
+                      <div class="deal-meta">물류 · 신규 인바운드</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 4,200<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--new">신규</span>
+                    <span class="assignee num" data-c="a" title="담당 JK">JK</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">VR</div>
+                    <div>
+                      <div class="deal-company">베리타스 리테일</div>
+                      <div class="deal-meta">유통 · 웹 문의</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 2,750<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--warm">관심</span>
+                    <span class="assignee num" data-c="b" title="담당 SM">SM</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">HB</div>
+                    <div>
+                      <div class="deal-company">하버 핀테크</div>
+                      <div class="deal-meta">금융 · 세미나</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 6,000<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--new">신규</span>
+                    <span class="assignee num" data-c="c" title="담당 DW">DW</span>
+                  </div>
+                </button>
+                <button class="add-deal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>딜 추가
+                </button>
+              </div>
+            </div>
+
+            <!-- 상담 -->
+            <div class="col col--contact">
+              <div class="col-head">
+                <span class="col-dot" aria-hidden="true"></span>
+                <span class="col-title">상담</span>
+                <span class="col-count num">15</span>
+                <span class="col-sum">₩3.4억</span>
+              </div>
+              <div class="col-body">
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">MT</div>
+                    <div>
+                      <div class="deal-company">메리디안 테크</div>
+                      <div class="deal-meta">SaaS · 데모 예약</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 8,900<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--hot">핫</span>
+                    <span class="assignee num" data-c="a" title="담당 JK">JK</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">OA</div>
+                    <div>
+                      <div class="deal-company">오로라 제약</div>
+                      <div class="deal-meta">헬스케어 · 2차 미팅</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 5,400<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--due">D-3</span>
+                    <span class="assignee num" data-c="d" title="담당 HY">HY</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">KP</div>
+                    <div>
+                      <div class="deal-company">코스모 파트너스</div>
+                      <div class="deal-meta">컨설팅 · 니즈 파악</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 3,200<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--warm">관심</span>
+                    <span class="assignee num" data-c="e" title="담당 TG">TG</span>
+                  </div>
+                </button>
+                <button class="add-deal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>딜 추가
+                </button>
+              </div>
+            </div>
+
+            <!-- 제안 -->
+            <div class="col col--proposal">
+              <div class="col-head">
+                <span class="col-dot" aria-hidden="true"></span>
+                <span class="col-title">제안</span>
+                <span class="col-count num">11</span>
+                <span class="col-sum">₩3.6억</span>
+              </div>
+              <div class="col-body">
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">ZN</div>
+                    <div>
+                      <div class="deal-company">제니스 네트웍스</div>
+                      <div class="deal-meta">통신 · 견적 발송</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 1.2<small>억</small></div>
+                  <div class="meter" aria-label="성사 확률 75%"><i style="width:75%"></i></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--hot">핫</span>
+                    <span class="assignee num" data-c="a" title="담당 JK">JK</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">LM</div>
+                    <div>
+                      <div class="deal-company">루멘 미디어</div>
+                      <div class="deal-meta">미디어 · 계약 협의</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 7,800<small>만</small></div>
+                  <div class="meter" aria-label="성사 확률 60%"><i style="width:60%"></i></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--due">D-5</span>
+                    <span class="assignee num" data-c="b" title="담당 SM">SM</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">AT</div>
+                    <div>
+                      <div class="deal-company">아틀라스 제조</div>
+                      <div class="deal-meta">제조 · 단가 조율</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 9,500<small>만</small></div>
+                  <div class="meter" aria-label="성사 확률 45%"><i style="width:45%"></i></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--warm">관심</span>
+                    <span class="assignee num" data-c="c" title="담당 DW">DW</span>
+                  </div>
+                </button>
+                <button class="add-deal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>딜 추가
+                </button>
+              </div>
+            </div>
+
+            <!-- 성사 -->
+            <div class="col col--won">
+              <div class="col-head">
+                <span class="col-dot" aria-hidden="true"></span>
+                <span class="col-title">성사</span>
+                <span class="col-count num">20</span>
+                <span class="col-sum">₩3.8억</span>
+              </div>
+              <div class="col-body">
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">PN</div>
+                    <div>
+                      <div class="deal-company">폴라리스 뱅크</div>
+                      <div class="deal-meta">금융 · 계약 완료</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 1.4<small>억</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--won">성사</span>
+                    <span class="assignee num" data-c="a" title="담당 JK">JK</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">EV</div>
+                    <div>
+                      <div class="deal-company">에버그린 에너지</div>
+                      <div class="deal-meta">에너지 · 온보딩</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 8,600<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--won">성사</span>
+                    <span class="assignee num" data-c="d" title="담당 HY">HY</span>
+                  </div>
+                </button>
+                <button class="deal">
+                  <div class="deal-topline">
+                    <div class="deal-logo">SG</div>
+                    <div>
+                      <div class="deal-company">시그마 헬스</div>
+                      <div class="deal-meta">헬스케어 · 착수</div>
+                    </div>
+                  </div>
+                  <div class="deal-amount num">₩ 5,200<small>만</small></div>
+                  <div class="deal-foot">
+                    <span class="tag tag--won">성사</span>
+                    <span class="assignee num" data-c="e" title="담당 TG">TG</span>
+                  </div>
+                </button>
+                <button class="add-deal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>딜 추가
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 최근 활동 -->
+        <aside class="activity" aria-label="최근 활동">
+          <h2>최근 활동</h2>
+          <div class="sub">팀 전체 · 오늘</div>
+          <ul class="feed">
+            <li class="feed--won">
+              <div class="feed-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="feed-body">
+                <div class="feed-text"><span class="co">폴라리스 뱅크</span> 딜이 <b>성사</b>로 이동 · ₩1.4억</div>
+                <div class="feed-time"><span class="feed-mini num" data-c="a">JK</span>32분 전</div>
+              </div>
+            </li>
+            <li class="feed--call">
+              <div class="feed-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+              <div class="feed-body">
+                <div class="feed-text"><span class="co">메리디안 테크</span>와 <b>데모 콜</b> 완료 · 후속 견적 요청</div>
+                <div class="feed-time"><span class="feed-mini num" data-c="a">JK</span>1시간 전</div>
+              </div>
+            </li>
+            <li class="feed--doc">
+              <div class="feed-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+              <div class="feed-body">
+                <div class="feed-text"><span class="co">제니스 네트웍스</span>에 <b>견적서 발송</b> · ₩1.2억</div>
+                <div class="feed-time"><span class="feed-mini num" data-c="c">DW</span>2시간 전</div>
+              </div>
+            </li>
+            <li class="feed--new">
+              <div class="feed-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
+              <div class="feed-body">
+                <div class="feed-text"><span class="co">하버 핀테크</span> 신규 리드 <b>등록</b> · 세미나 유입</div>
+                <div class="feed-time"><span class="feed-mini num" data-c="c">DW</span>3시간 전</div>
+              </div>
+            </li>
+            <li class="feed--call">
+              <div class="feed-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <div class="feed-body">
+                <div class="feed-text"><span class="co">오로라 제약</span> 2차 미팅 <b>일정 확정</b> · 목요일</div>
+                <div class="feed-time"><span class="feed-mini num" data-c="d">HY</span>5시간 전</div>
+              </div>
+            </li>
+          </ul>
+          <div class="activity-foot">
+            <button class="text-btn">
+              전체 활동 보기
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="foot">CRM 고객 관리 · 머티리얼</footer>
+    </div>
+  </div>
+</div>
+
+<!-- FAB — 우하단 시그니처 -->
+<button class="fab" aria-label="새 딜 추가">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  새 딜
+</button>
+
+<script>
+  // 리플 — 모든 클릭 가능 요소. JS 실패 시 CSS state-layer 폴백.
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    var sel = '.nav-item, .icon-btn, .chip, .deal, .add-deal, .text-btn, .fab';
+    document.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest(sel);
+      if (!el) return;
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var span = document.createElement('span');
+      span.className = 'ripple';
+      span.style.width = span.style.height = size + 'px';
+      span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      span.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      el.appendChild(span);
+      span.addEventListener('animationend', function () { span.remove(); });
+    }, { passive: true });
+
+    // 필터 칩 토글 (상태 표현)
+    document.querySelectorAll('.chip').forEach(function (c) {
+      c.addEventListener('click', function () {
+        document.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('is-on'); });
+        c.classList.add('is-on');
+      });
+    });
+  })();
+</script>

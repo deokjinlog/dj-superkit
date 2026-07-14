@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Layerframe — 여러 겹의 데이터를 한 판에</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      /* 색 — CSS 변수 (팔레트: 밝은 그레이 배경 + 흰 카드 + 인디고 포인트) */
+      --bg: #f4f4f5;
+      --card: #ffffff;
+      --card-tint: #fafafa;
+      --fg: #18181b;
+      --muted: #71717a;
+      --muted-2: #a1a1aa;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --point: #6366f1;
+      --point-weak: #eef2ff;
+      --point-strong: #4f46e5;
+      --danger: #ef4444;
+      --danger-weak: #fef2f2;
+      --success: #10b981;
+      --success-weak: #ecfdf5;
+
+      /* elevation — 얕게, 배경에 얹힌 느낌 */
+      --shadow-card: 0 1px 3px rgba(24, 24, 27, 0.06), 0 1px 2px rgba(24, 24, 27, 0.04);
+      --shadow-hover: 0 8px 24px rgba(24, 24, 27, 0.10), 0 2px 6px rgba(24, 24, 27, 0.06);
+
+      /* 반지름 */
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 20px;
+
+      --maxw: 1200px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      /* 배경에 은은한 격자 — 벤토 gap 이 격자처럼 드러나는 무드 보강 */
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(24, 24, 27, 0.035) 1px, transparent 0);
+      background-size: 32px 32px;
+      color: var(--fg);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wrap {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    :focus-visible {
+      outline: 2px solid var(--point);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ============ 네비게이션 ============ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background-color: rgba(244, 244, 245, 0.82);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      height: 64px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+    .brand-mark {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      flex: none;
+    }
+    /* 로고 마크 — 겹친 레이어 (CSS 도형) */
+    .brand-mark span {
+      position: absolute;
+      inset: 0;
+      border-radius: 7px;
+    }
+    .brand-mark span:nth-child(1) {
+      background: linear-gradient(135deg, #a5b4fc, #6366f1);
+      transform: translate(4px, 4px);
+      opacity: 0.55;
+    }
+    .brand-mark span:nth-child(2) {
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+      transform: translate(2px, 2px);
+      opacity: 0.8;
+    }
+    .brand-mark span:nth-child(3) {
+      background: linear-gradient(135deg, #6366f1, #4338ca);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-link {
+      padding: 8px 12px;
+      border-radius: var(--r-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 160ms ease, background-color 160ms ease;
+    }
+    .nav-link:hover { color: var(--fg); background-color: rgba(24, 24, 27, 0.04); }
+    .nav-link:active { background-color: rgba(24, 24, 27, 0.07); }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ============ 버튼 (primary / secondary / ghost) ============ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 16px;
+      border-radius: var(--r-sm);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 160ms ease, border-color 160ms ease,
+        color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+      white-space: nowrap;
+    }
+    .btn:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+    .btn-sm { height: 36px; padding: 0 12px; }
+
+    .btn-primary {
+      background-color: var(--point);
+      color: #ffffff;
+      box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+    .btn-primary:hover { background-color: var(--point-strong); }
+    .btn-primary:active { background-color: #4338ca; transform: translateY(1px); }
+
+    .btn-secondary {
+      background-color: var(--card);
+      color: var(--fg);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-card);
+    }
+    .btn-secondary:hover { border-color: var(--muted-2); background-color: #ffffff; }
+    .btn-secondary:active { background-color: #f4f4f5; transform: translateY(1px); }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--fg);
+    }
+    .btn-ghost:hover { background-color: rgba(24, 24, 27, 0.05); }
+    .btn-ghost:active { background-color: rgba(24, 24, 27, 0.09); }
+
+    .btn-block { width: 100%; }
+
+    .btn svg { width: 16px; height: 16px; }
+    .btn-arrow { transition: transform 160ms ease; }
+    .btn:hover .btn-arrow { transform: translateX(3px); }
+
+    /* ============ 히어로 (한 줄) ============ */
+    .hero {
+      padding: 56px 0 32px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 28px;
+      padding: 0 12px 0 8px;
+      border-radius: 999px;
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--success);
+      box-shadow: 0 0 0 3px var(--success-weak);
+    }
+    .eyebrow b { color: var(--fg); font-weight: 600; }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 48px;
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      max-width: 820px;
+    }
+    .hero h1 .accent {
+      background: linear-gradient(120deg, var(--point), #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-sub {
+      margin: 16px 0 24px;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 560px;
+    }
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-note {
+      font-size: 13px;
+      color: var(--muted-2);
+    }
+
+    /* ============ 벤토 그리드 ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 148px;
+      gap: 16px;
+      grid-template-areas:
+        "preview preview stat  kpi"
+        "preview preview chart kpi"
+        "quote   integ   integ cta";
+      padding-bottom: 8px;
+    }
+
+    .card {
+      background-color: var(--card);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+    }
+    /* hover — 판에서 그 칸만 살짝 떠오름 (시그니처) */
+    .card.hoverable:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .card:focus-within { box-shadow: var(--shadow-hover); }
+
+    .card-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 4px;
+    }
+
+    /* grid area 배정 */
+    .c-preview { grid-area: preview; }
+    .c-stat    { grid-area: stat; }
+    .c-chart   { grid-area: chart; }
+    .c-kpi     { grid-area: kpi; }
+    .c-quote   { grid-area: quote; }
+    .c-integ   { grid-area: integ; }
+    .c-cta     { grid-area: cta; }
+
+    /* ---- 큰 카드: 제품 미리보기 ---- */
+    .c-preview {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      flex: none;
+    }
+    .traffic { display: flex; gap: 6px; }
+    .traffic i {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border-strong);
+    }
+    .traffic i:nth-child(1) { background: #f87171; }
+    .traffic i:nth-child(2) { background: #fbbf24; }
+    .traffic i:nth-child(3) { background: #34d399; }
+    .preview-url {
+      margin-left: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: var(--r-sm);
+      padding: 4px 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .preview-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      min-height: 0;
+    }
+    .preview-side {
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--card-tint);
+    }
+    .side-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: var(--r-sm);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .side-item .glyph {
+      width: 16px; height: 16px; border-radius: 5px;
+      background: var(--border-strong);
+      flex: none;
+    }
+    .side-item.active {
+      background: var(--point-weak);
+      color: var(--point-strong);
+      font-weight: 600;
+    }
+    .side-item.active .glyph { background: var(--point); }
+    .preview-main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+    }
+    .pm-row { display: flex; gap: 12px; }
+    .pm-tile {
+      flex: 1;
+      background: var(--bg);
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+    }
+    .pm-tile .k { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.03em; }
+    .pm-tile .v { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .pm-tile .v small { font-size: 12px; color: var(--success); font-weight: 600; margin-left: 4px; }
+    /* 미리보기 안 라인 차트 (SVG, 정적) */
+    .pm-chart {
+      flex: 1;
+      background: linear-gradient(180deg, var(--point-weak), rgba(238, 242, 255, 0));
+      border-radius: var(--r-md);
+      padding: 12px 14px 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .pm-chart .k { font-size: 11px; color: var(--point-strong); font-weight: 600; letter-spacing: 0.03em; }
+    .pm-chart svg { width: 100%; flex: 1; min-height: 0; }
+
+    /* ---- 통계 카드 (count-up + 추세) ---- */
+    .c-stat { display: flex; flex-direction: column; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .trend.up { color: var(--success); background: var(--success-weak); }
+    .trend.down { color: var(--danger); background: var(--danger-weak); }
+    .trend svg { width: 12px; height: 12px; }
+    .stat-num {
+      margin-top: auto;
+      font-size: 40px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-num .unit { font-size: 20px; font-weight: 700; color: var(--muted); }
+    .stat-foot { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+    /* ---- 미니 차트 카드 (막대) ---- */
+    .c-chart { display: flex; flex-direction: column; }
+    .bars {
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 56px;
+    }
+    .bars .bar {
+      flex: 1;
+      border-radius: 4px 4px 2px 2px;
+      background: var(--border-strong);
+      height: var(--h);
+      transition: height 520ms cubic-bezier(0.22, 1, 0.36, 1), background-color 160ms ease;
+      position: relative;
+    }
+    .bars .bar.hi { background: var(--point); }
+    .c-chart:hover .bar { background: #c7cbd1; }
+    .c-chart:hover .bar.hi { background: var(--point-strong); }
+    .chart-foot {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted-2);
+      margin-top: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ---- KPI 세로 긴 카드 (라인 스파크 + 리스트) ---- */
+    .c-kpi { display: flex; flex-direction: column; gap: 12px; }
+    .kpi-num {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-num .unit { font-size: 16px; color: var(--muted); font-weight: 700; }
+    .spark { width: 100%; height: 44px; }
+    .spark path.line {
+      fill: none;
+      stroke: var(--point);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .spark path.area { fill: url(#kpiFill); stroke: none; }
+    .kpi-list { display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
+    .kpi-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 8px;
+      margin: 0 -8px;
+      border-radius: var(--r-sm);
+      font-size: 13px;
+      transition: background-color 160ms ease;
+    }
+    .kpi-row:hover { background: var(--bg); }
+    .kpi-row .lab { color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .kpi-row .lab i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+    .kpi-row .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* ---- 인용 카드 ---- */
+    .c-quote { display: flex; flex-direction: column; }
+    .c-quote blockquote {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.5;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .quote-mark { font-size: 32px; line-height: 0.6; color: var(--point); font-weight: 800; height: 16px; }
+    .quote-by {
+      margin-top: auto;
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+      flex: none;
+    }
+    .quote-by .who { font-size: 12px; }
+    .quote-by .who b { display: block; font-weight: 600; color: var(--fg); }
+    .quote-by .who span { color: var(--muted); }
+
+    /* ---- 통합 카드 ---- */
+    .c-integ { display: flex; flex-direction: column; }
+    .integ-head { display: flex; align-items: center; justify-content: space-between; }
+    .integ-grid {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 12px 0 8px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+      transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--border-strong); background: #fff; transform: translateY(-1px); }
+    .chip:active { transform: translateY(0); background: var(--bg); }
+    .chip:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+    .chip .ico {
+      width: 20px; height: 20px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff;
+      flex: none;
+    }
+    .integ-more {
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--point-strong);
+      background: var(--point-weak);
+      transition: background-color 160ms ease;
+      cursor: pointer;
+    }
+    .integ-more:hover { background: #e0e7ff; }
+    .integ-more:active { background: #c7d2fe; }
+
+    /* ---- CTA 카드 ---- */
+    .c-cta {
+      background: linear-gradient(150deg, #4f46e5, #6366f1 55%, #7c3aed);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .c-cta::after {
+      content: "";
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 70%);
+      pointer-events: none;
+    }
+    .c-cta .card-label { color: rgba(255, 255, 255, 0.72); }
+    .c-cta h3 {
+      margin: 4px 0 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      position: relative;
+    }
+    .btn-oncta {
+      background: #fff;
+      color: var(--point-strong);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .btn-oncta:hover { background: #f4f4f5; }
+    .btn-oncta:active { background: #e4e4e7; transform: translateY(1px); }
+
+    /* ============ 로고 바 ============ */
+    .logobar {
+      padding: 48px 0 8px;
+      text-align: center;
+    }
+    .logobar p {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      margin: 0 0 24px;
+    }
+    .logos {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px 40px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+      opacity: 0.72;
+      transition: opacity 200ms ease, color 200ms ease;
+    }
+    .logo:hover { opacity: 1; color: var(--fg); }
+    .logo .lm { width: 18px; height: 18px; flex: none; border-radius: 5px; background: currentColor; opacity: 0.85; }
+    .logo .lm.round { border-radius: 50%; }
+    .logo .lm.diamond { border-radius: 4px; transform: rotate(45deg); }
+    .logo .lm.pill { border-radius: 999px; width: 22px; }
+
+    /* ============ 푸터 ============ */
+    footer {
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .foot-inner {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 32px;
+      padding: 48px 24px 32px;
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+    .foot-brand .brand { margin-bottom: 12px; }
+    .foot-brand p { font-size: 13px; color: var(--muted); margin: 0; max-width: 240px; line-height: 1.6; }
+    .foot-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      margin: 0 0 12px;
+    }
+    .foot-col a {
+      display: block;
+      font-size: 14px;
+      color: var(--muted);
+      padding: 5px 0;
+      transition: color 160ms ease;
+      width: fit-content;
+    }
+    .foot-col a:hover { color: var(--fg); }
+    .foot-bottom {
+      border-top: 1px solid var(--border);
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted-2);
+    }
+    .foot-bottom .signature { font-weight: 600; color: var(--muted); }
+    .foot-social { display: flex; gap: 8px; }
+    .foot-social a {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: var(--card);
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    .foot-social a:hover { color: var(--fg); border-color: var(--border-strong); }
+    .foot-social a:active { background: var(--bg); }
+    .foot-social svg { width: 16px; height: 16px; }
+
+    /* ============ 등장 애니메이션 (stagger) ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .bento .card {
+      opacity: 0;
+      animation: fadeUp 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    /* 좌상단 → 우하단 읽는 순서 (60ms 간격) */
+    .c-preview { animation-delay: 60ms; }
+    .c-stat    { animation-delay: 120ms; }
+    .c-kpi     { animation-delay: 180ms; }
+    .c-chart   { animation-delay: 240ms; }
+    .c-quote   { animation-delay: 300ms; }
+    .c-integ   { animation-delay: 360ms; }
+    .c-cta     { animation-delay: 420ms; }
+
+    /* ============ 반응형 ============ */
+    @media (max-width: 1024px) {
+      .hero h1 { font-size: 40px; }
+      .bento { grid-auto-rows: 140px; }
+    }
+    @media (max-width: 860px) {
+      /* 벤토 해제 대신 2열 유지 — 큰 카드만 전폭 */
+      .bento {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+          "preview preview"
+          "preview preview"
+          "stat    kpi"
+          "chart   kpi"
+          "quote   cta"
+          "integ   integ";
+      }
+      .foot-inner { grid-template-columns: 1fr 1fr; }
+      .foot-brand { grid-column: 1 / -1; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 0 16px; }
+      .nav-links { display: none; }
+      .hero { padding: 40px 0 24px; }
+      .hero h1 { font-size: 32px; }
+      .hero-sub { font-size: 16px; }
+      .bento { grid-auto-rows: 132px; gap: 12px; }
+      .card { padding: 16px; }
+      .preview-body { grid-template-columns: 1fr; }
+      .preview-side { display: none; }
+      .foot-inner { grid-template-columns: 1fr 1fr; padding: 32px 16px 24px; }
+    }
+    @media (max-width: 420px) {
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { width: 100%; }
+    }
+
+    /* ============ 모션 최소화 ============ */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+      .bento .card { opacity: 1; animation: none; }
+      .bars .bar { transition: none; }
+      .card.hoverable:hover { transform: none; box-shadow: var(--shadow-hover); }
+      .btn:active, .chip:active { transform: none; }
+      .spark path.line { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ============ 네비게이션 ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#" aria-label="Layerframe 홈">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        Layerframe
+      </a>
+      <nav class="nav-links" aria-label="주요 메뉴">
+        <a class="nav-link" href="#">제품</a>
+        <a class="nav-link" href="#">솔루션</a>
+        <a class="nav-link" href="#">요금</a>
+        <a class="nav-link" href="#">문서</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn btn-ghost btn-sm" href="#">로그인</a>
+        <a class="btn btn-primary btn-sm" href="#">무료로 시작</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ 히어로 ============ -->
+    <section class="wrap hero">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>새 릴리스 · <b>Layerframe 2.0</b> 지금 배포</span>
+      <h1>여러 겹의 데이터를 <span class="accent">한 판에</span>.</h1>
+      <p class="hero-sub">흩어진 지표·리포트·워크플로를 하나의 벤토 보드로 묶어, 팀 전체가 같은 화면을 봅니다.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#">
+          무료로 시작하기
+          <svg class="btn-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-secondary" href="#">데모 예약</a>
+        <span class="hero-note">카드 등록 없이 14일 · 언제든 해지</span>
+      </div>
+    </section>
+
+    <!-- ============ 벤토 그리드 ============ -->
+    <section class="wrap" aria-label="제품 하이라이트">
+      <div class="bento">
+
+        <!-- 큰 카드: 제품 미리보기 -->
+        <article class="card hoverable c-preview" aria-label="제품 대시보드 미리보기">
+          <div class="preview-head">
+            <div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span class="preview-url">app.layerframe.io/board</span>
+          </div>
+          <div class="preview-body">
+            <nav class="preview-side" aria-hidden="true">
+              <div class="side-item active"><span class="glyph"></span>개요</div>
+              <div class="side-item"><span class="glyph"></span>지표</div>
+              <div class="side-item"><span class="glyph"></span>리포트</div>
+              <div class="side-item"><span class="glyph"></span>워크플로</div>
+              <div class="side-item"><span class="glyph"></span>설정</div>
+            </nav>
+            <div class="preview-main">
+              <div class="pm-row">
+                <div class="pm-tile"><div class="k">활성 보드</div><div class="v">248<small>▲ 12%</small></div></div>
+                <div class="pm-tile"><div class="k">주간 처리</div><div class="v">31.4k</div></div>
+              </div>
+              <div class="pm-chart">
+                <div class="k">최근 30일 추이</div>
+                <svg viewBox="0 0 320 90" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="pmFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.28"/>
+                      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,70 L40,58 L80,62 L120,44 L160,50 L200,30 L240,36 L280,18 L320,24 L320,90 L0,90 Z" fill="url(#pmFill)"/>
+                  <path d="M0,70 L40,58 L80,62 L120,44 L160,50 L200,30 L240,36 L280,18 L320,24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 통계 카드: count-up + 추세 -->
+        <article class="card hoverable c-stat">
+          <div class="stat-top">
+            <h3 class="card-label">활성 워크스페이스</h3>
+            <span class="trend up">
+              <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 7.5L6 4.5L9 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              18%
+            </span>
+          </div>
+          <div class="stat-num"><span class="count" data-target="12480">12,480</span></div>
+          <div class="stat-foot">지난 분기 대비 성장</div>
+        </article>
+
+        <!-- 미니 차트 카드: 막대 -->
+        <article class="card hoverable c-chart" aria-label="주간 활성 사용자">
+          <h3 class="card-label">주간 활성 사용자</h3>
+          <div class="bars" role="img" aria-label="최근 7주 활성 사용자 막대 그래프, 우상향 추세">
+            <span class="bar" style="--h:40%"></span>
+            <span class="bar" style="--h:55%"></span>
+            <span class="bar" style="--h:48%"></span>
+            <span class="bar" style="--h:70%"></span>
+            <span class="bar" style="--h:62%"></span>
+            <span class="bar" style="--h:82%"></span>
+            <span class="bar hi" style="--h:96%"></span>
+          </div>
+          <div class="chart-foot"><span>W-6</span><span>W-1</span></div>
+        </article>
+
+        <!-- KPI 세로 긴 카드 -->
+        <article class="card hoverable c-kpi" aria-label="처리량 요약">
+          <div>
+            <h3 class="card-label">월간 처리량</h3>
+            <div class="kpi-num"><span class="count" data-target="984">984</span><span class="unit">K</span></div>
+          </div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="kpiFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6366f1" stop-opacity="0.24"/>
+                <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="area" d="M0,34 L28,30 L56,32 L84,22 L112,26 L140,14 L168,18 L200,8 L200,44 L0,44 Z"/>
+            <path class="line" d="M0,34 L28,30 L56,32 L84,22 L112,26 L140,14 L168,18 L200,8"/>
+          </svg>
+          <div class="kpi-list">
+            <div class="kpi-row"><span class="lab"><i style="background:var(--point)"></i>API 호출</span><span class="val">62%</span></div>
+            <div class="kpi-row"><span class="lab"><i style="background:var(--success)"></i>자동화</span><span class="val">27%</span></div>
+            <div class="kpi-row"><span class="lab"><i style="background:var(--muted-2)"></i>수동</span><span class="val">11%</span></div>
+          </div>
+        </article>
+
+        <!-- 인용 카드 -->
+        <article class="card hoverable c-quote">
+          <div class="quote-mark" aria-hidden="true">&ldquo;</div>
+          <blockquote>도입 첫 주에 흩어진 대시보드 9개를 하나로 접었습니다. 회의가 절반으로 줄었어요.</blockquote>
+          <div class="quote-by">
+            <span class="avatar" aria-hidden="true">NV</span>
+            <span class="who"><b>플랫폼 리드</b><span>Northvale 팀</span></span>
+          </div>
+        </article>
+
+        <!-- 통합 카드 -->
+        <article class="card hoverable c-integ" aria-label="통합">
+          <div class="integ-head">
+            <h3 class="card-label">100+ 통합</h3>
+            <button class="integ-more" type="button">전체 보기</button>
+          </div>
+          <div class="integ-grid">
+            <button class="chip" type="button"><span class="ico" style="background:#0ea5e9">S</span>Slate</button>
+            <button class="chip" type="button"><span class="ico" style="background:#16a34a">G</span>Grove</button>
+            <button class="chip" type="button"><span class="ico" style="background:#f59e0b">P</span>Pulse</button>
+            <button class="chip" type="button"><span class="ico" style="background:#ef4444">F</span>Forge</button>
+            <button class="chip" type="button"><span class="ico" style="background:#8b5cf6">M</span>Meld</button>
+            <button class="chip" type="button"><span class="ico" style="background:#0f172a">Q</span>Quill</button>
+          </div>
+        </article>
+
+        <!-- CTA 카드 -->
+        <article class="card hoverable c-cta">
+          <div>
+            <h3 class="card-label">지금 시작</h3>
+            <h3>팀 보드를<br />5분 안에.</h3>
+          </div>
+          <a class="btn btn-oncta btn-block" href="#">
+            시작하기
+            <svg class="btn-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============ 로고 바 ============ -->
+    <section class="wrap logobar" aria-label="사용 팀">
+      <p>성장하는 팀들이 Layerframe 위에서 움직입니다</p>
+      <div class="logos">
+        <span class="logo"><span class="lm" aria-hidden="true"></span>Northvale</span>
+        <span class="logo"><span class="lm round" aria-hidden="true"></span>Cobalt</span>
+        <span class="logo"><span class="lm diamond" aria-hidden="true"></span>Meridian</span>
+        <span class="logo"><span class="lm pill" aria-hidden="true"></span>Onyx Labs</span>
+        <span class="logo"><span class="lm" aria-hidden="true"></span>Fernweh</span>
+        <span class="logo"><span class="lm round" aria-hidden="true"></span>Vantage</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 푸터 ============ -->
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <a class="brand" href="#" aria-label="Layerframe 홈">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          Layerframe
+        </a>
+        <p>흩어진 지표를 하나의 벤토 보드로. 팀 전체가 같은 화면을 봅니다.</p>
+      </div>
+      <div class="foot-col">
+        <h4>제품</h4>
+        <a href="#">기능</a>
+        <a href="#">통합</a>
+        <a href="#">요금</a>
+        <a href="#">변경 로그</a>
+      </div>
+      <div class="foot-col">
+        <h4>회사</h4>
+        <a href="#">소개</a>
+        <a href="#">블로그</a>
+        <a href="#">채용</a>
+        <a href="#">고객사</a>
+      </div>
+      <div class="foot-col">
+        <h4>리소스</h4>
+        <a href="#">문서</a>
+        <a href="#">API 레퍼런스</a>
+        <a href="#">커뮤니티</a>
+        <a href="#">상태</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="signature">스타트업 홈 · 벤토 그리드</span>
+      <span>&copy; 2026 Layerframe. All rights reserved.</span>
+      <div class="foot-social">
+        <a href="#" aria-label="X (트위터)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M12.6 1.5h2.2l-4.8 5.5 5.6 7.5h-4.4l-3.4-4.5-3.9 4.5H1.3l5.1-5.9L1 1.5h4.5l3.1 4.1 4-4.1Zm-.8 12.2h1.2L4.9 2.7H3.6l8.2 11Z"/></svg></a>
+        <a href="#" aria-label="GitHub"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .8a7.2 7.2 0 0 0-2.3 14c.36.07.5-.16.5-.35v-1.2c-2 .43-2.43-.97-2.43-.97-.33-.84-.8-1.06-.8-1.06-.66-.45.05-.44.05-.44.72.05 1.1.74 1.1.74.64 1.1 1.68.78 2.1.6.06-.47.25-.78.45-.96-1.6-.18-3.28-.8-3.28-3.56 0-.79.28-1.43.74-1.93-.07-.18-.32-.92.07-1.9 0 0 .6-.2 1.98.73a6.9 6.9 0 0 1 3.6 0c1.37-.93 1.97-.73 1.97-.73.4.98.15 1.72.08 1.9.46.5.73 1.14.73 1.93 0 2.77-1.68 3.38-3.28 3.56.26.22.49.65.49 1.31v1.95c0 .19.13.42.5.35A7.2 7.2 0 0 0 8 .8Z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.4 2a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8ZM2.2 5.8h2.4V14H2.2V5.8Zm4 0h2.3v1.1h.03c.32-.6 1.1-1.23 2.27-1.23 2.43 0 2.88 1.6 2.88 3.68V14h-2.4V9.8c0-.99-.02-2.27-1.38-2.27-1.39 0-1.6 1.08-1.6 2.2V14h-2.4V5.8Z"/></svg></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ---- count-up (JS 실패/모션최소화 시 HTML 의 최종값 그대로 유지) ----
+      function runCountUp() {
+        var els = document.querySelectorAll(".count");
+        els.forEach(function (el) {
+          var target = parseInt(el.getAttribute("data-target"), 10);
+          if (isNaN(target)) return;
+          var start = performance.now();
+          var dur = 900;
+          function frame(now) {
+            var t = Math.min(1, (now - start) / dur);
+            var eased = 1 - Math.pow(1 - t, 3);
+            var val = Math.round(target * eased);
+            el.textContent = val.toLocaleString("ko-KR");
+            if (t < 1) requestAnimationFrame(frame);
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      // ---- 막대 차오름: 최초 0 → 목표 ----
+      function runBars() {
+        var bars = document.querySelectorAll(".bars .bar");
+        bars.forEach(function (bar) {
+          var h = bar.style.getPropertyValue("--h");
+          bar.style.setProperty("--h", "0%");
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              bar.style.setProperty("--h", h);
+            });
+          });
+        });
+      }
+
+      // ---- 스파크 라인 draw-on ----
+      function runSpark() {
+        var line = document.querySelector(".spark path.line");
+        if (!line || !line.getTotalLength) return;
+        var len = line.getTotalLength();
+        line.style.strokeDasharray = len;
+        line.style.strokeDashoffset = len;
+        line.style.transition = "stroke-dashoffset 900ms cubic-bezier(0.22,1,0.36,1)";
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            line.style.strokeDashoffset = "0";
+          });
+        });
+      }
+
+      function start() {
+        if (reduce) return; // 최종 상태 그대로
+        runCountUp();
+        runBars();
+        runSpark();
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", start);
+      } else {
+        start();
+      }
+    })();
+  </script>
+</body>
+</html>

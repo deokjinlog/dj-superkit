@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProGuild — e스포츠 팀 관제 대시보드</title>
+
+<!-- 폰트 CDN (허용): 한글 Pretendard + 디스플레이 Archivo Black -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap">
+
+<style>
+  :root{
+    --paper:#FFFFFF;
+    --ink:#000000;
+    --red:#FF3B00;
+    --blue:#0037FF;
+    --yellow:#FFE600;
+    --bd:4px solid var(--ink);
+    --sh:8px 8px 0 var(--ink);
+    --sh-sm:5px 5px 0 var(--ink);
+    --disp:"Archivo Black","Pretendard",-apple-system,sans-serif;
+    --body:"Pretendard",-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-weight:600;
+    line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+  /* 상단 솔리드 잉크 띠 — 포스터 프레이밍 (그라디언트 아님, 단색 면) */
+  body::before{
+    content:"";
+    position:fixed;
+    top:0;left:0;right:0;
+    height:10px;
+    background:var(--ink);
+    z-index:5;
+  }
+
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:26px 20px 60px;
+  }
+
+  /* ── 헤더 ───────────────────────── */
+  header.top{
+    background:var(--ink);
+    color:var(--paper);
+    border:var(--bd);
+    box-shadow:var(--sh);
+    padding:20px 22px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header.top .brand{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(34px,7vw,68px);
+    letter-spacing:-.02em;
+    line-height:.92;
+    text-transform:uppercase;
+  }
+  header.top .brand small{
+    display:block;
+    font-family:var(--body);
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:.28em;
+    color:var(--yellow);
+    text-transform:uppercase;
+    margin-top:8px;
+  }
+  header.top .stamp{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    background:var(--yellow);
+    color:var(--ink);
+    border:3px solid var(--paper);
+    padding:8px 12px;
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:.02em;
+    transform:rotate(-2deg);
+    box-shadow:4px 4px 0 var(--red);
+  }
+  header.top .stamp b{font-family:var(--disp);font-weight:400;}
+  .live-dot{width:12px;height:12px;background:var(--red);border:2px solid var(--ink);display:inline-block;}
+
+  /* ── 히어로: 초대형 단일 KPI ─────── */
+  .hero{
+    margin-top:26px;
+    background:var(--paper);
+    border:var(--bd);
+    box-shadow:var(--sh);
+    padding:clamp(20px,4vw,40px) clamp(20px,4vw,44px);
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:end;
+    gap:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    /* 우측 옐로 면 분할 */
+    content:"";
+    position:absolute;
+    top:0;right:0;bottom:0;
+    width:34%;
+    background:var(--yellow);
+    border-left:var(--bd);
+    z-index:0;
+  }
+  .hero > *{position:relative;z-index:1;}
+  .hero .label{
+    font-weight:900;
+    font-size:15px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+  }
+  .hero .big{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(84px,20vw,190px);
+    line-height:.82;
+    letter-spacing:-.04em;
+    margin:6px 0 4px;
+  }
+  .hero .big i{font-style:normal;font-size:.42em;vertical-align:.24em;margin-left:2px;}
+  .hero .delta{
+    display:inline-block;
+    background:var(--red);
+    color:var(--paper);
+    border:3px solid var(--ink);
+    box-shadow:var(--sh-sm);
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(20px,3.4vw,30px);
+    padding:8px 14px;
+    letter-spacing:-.01em;
+  }
+  .hero .delta span{font-family:var(--body);font-weight:800;font-size:.62em;display:block;letter-spacing:.02em;}
+  .hero .aside{
+    text-align:right;
+    color:var(--ink);
+    max-width:230px;
+  }
+  .hero .aside p{margin:0;font-weight:800;font-size:14px;line-height:1.5;}
+  .hero .aside .vs{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(30px,5vw,44px);
+    line-height:.9;
+    display:block;
+    margin-bottom:6px;
+  }
+
+  /* ── 섹션 태그 ──────────────────── */
+  .sec-tag{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:15px;
+    letter-spacing:.06em;
+    padding:6px 12px;
+    transform:rotate(-2deg);
+    margin:34px 0 16px;
+  }
+  .sec-tag em{font-style:normal;color:var(--yellow);}
+
+  /* ── KPI 3종 ────────────────────── */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+  }
+  .kpi{
+    border:var(--bd);
+    box-shadow:var(--sh);
+    padding:20px;
+    min-height:170px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    background:var(--paper);
+  }
+  .kpi:nth-child(1){background:var(--blue);color:var(--paper);transform:rotate(-1deg);}
+  .kpi:nth-child(2){background:var(--paper);color:var(--ink);transform:rotate(.6deg);}
+  .kpi:nth-child(3){background:var(--yellow);color:var(--ink);transform:rotate(-.6deg);}
+  .kpi .k-label{font-weight:900;font-size:13px;letter-spacing:.2em;text-transform:uppercase;}
+  .kpi .k-val{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(40px,6vw,62px);
+    line-height:.9;
+    letter-spacing:-.03em;
+    margin:14px 0 8px;
+  }
+  .kpi .k-val u{text-decoration:none;font-size:.5em;}
+  .kpi .k-sub{
+    font-weight:900;
+    font-size:15px;
+    border-top:3px solid currentColor;
+    padding-top:8px;
+  }
+  .kpi:nth-child(2) .k-sub{color:var(--red);border-color:var(--ink);}
+
+  /* ── 차트 ───────────────────────── */
+  .chart-card{
+    border:var(--bd);
+    box-shadow:var(--sh);
+    background:var(--paper);
+    padding:22px 20px 16px;
+  }
+  .chart-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .chart-head h3{
+    margin:0;
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(20px,3.4vw,30px);
+    letter-spacing:-.01em;
+  }
+  .chart-head .peak-note{
+    background:var(--red);
+    color:var(--paper);
+    border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--ink);
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.04em;
+    padding:6px 11px;
+  }
+  .bars{
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+    gap:clamp(6px,1.6vw,16px);
+    align-items:end;
+    height:280px;
+    border-bottom:var(--bd);
+    padding-bottom:0;
+  }
+  .bar{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    height:100%;
+  }
+  .bar .stick{
+    width:100%;
+    background:var(--ink);
+    border:3px solid var(--ink);
+    border-bottom:0;
+  }
+  .bar.peak .stick{background:var(--red);}
+  .bar .v{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:clamp(15px,2.4vw,22px);
+    text-align:center;
+    margin-bottom:6px;
+    letter-spacing:-.02em;
+  }
+  .bar.peak .v{color:var(--red);}
+  .bar .peak-flag{
+    position:absolute;
+    top:-2px;left:50%;
+    transform:translate(-50%,-100%) rotate(-3deg);
+    background:var(--yellow);
+    color:var(--ink);
+    border:3px solid var(--ink);
+    font-weight:900;
+    font-size:11px;
+    letter-spacing:.04em;
+    padding:3px 7px;
+    white-space:nowrap;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .xaxis{
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+    gap:clamp(6px,1.6vw,16px);
+    margin-top:8px;
+  }
+  .xaxis span{
+    text-align:center;
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.02em;
+  }
+  .xaxis span.pk{color:var(--red);}
+
+  /* ── 테이블 ─────────────────────── */
+  .table-wrap{
+    border:var(--bd);
+    box-shadow:var(--sh);
+    background:var(--paper);
+    overflow-x:auto;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:640px;
+  }
+  thead th{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:14px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    text-align:left;
+    padding:14px 16px;
+    white-space:nowrap;
+  }
+  tbody td{
+    border-top:3px solid var(--ink);
+    padding:14px 16px;
+    font-weight:700;
+    font-size:16px;
+    background:transparent;
+  }
+  tbody td.name{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:18px;
+    letter-spacing:-.01em;
+  }
+  tbody td.kda{font-family:var(--disp);font-weight:400;font-size:19px;letter-spacing:-.02em;}
+  tbody tr{transition:background-color 90ms linear;}
+  tbody tr:hover,
+  tbody tr.picked{background:var(--yellow);}
+
+  .form{display:inline-flex;align-items:center;gap:7px;font-weight:900;}
+  .form .ar{font-family:var(--disp);font-weight:400;font-size:15px;line-height:1;}
+  .form.up .ar{color:var(--red);}
+  .form.flat .ar{color:var(--ink);}
+  .form.down .ar{color:var(--blue);}
+
+  /* 상태 4종 색 뱃지 */
+  .badge{
+    display:inline-block;
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.02em;
+    padding:6px 11px;
+    border:3px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);
+    white-space:nowrap;
+  }
+  .badge.s-locked{background:var(--ink);color:var(--paper);}   /* 주전확정 — 완료계열 */
+  .badge.s-active{background:var(--blue);color:var(--paper);}  /* 활성 — 진행계열 */
+  .badge.s-slump{background:var(--red);color:var(--paper);}    /* 폼저하 — 문제계열 */
+  .badge.s-wait{background:var(--yellow);color:var(--ink);}    /* 로테이션대기 — 대기계열 */
+
+  /* ── 물리성 마이크로 인터랙션 ──────
+     hover: 4px 이동 + 섀도 8→4 축소 / active: 완전히 붙음(이동 8, 섀도 0) */
+  .press{transition:transform 90ms linear, box-shadow 90ms linear;}
+  @media (hover:hover){
+    .press:hover{transform:translate(4px,4px);box-shadow:var(--sh-sm);}
+    .kpi.press:nth-child(1):hover{transform:translate(4px,4px) rotate(-1deg);}
+    .kpi.press:nth-child(2):hover{transform:translate(4px,4px) rotate(.6deg);}
+    .kpi.press:nth-child(3):hover{transform:translate(4px,4px) rotate(-.6deg);}
+  }
+  .press:active{transform:translate(8px,8px)!important;box-shadow:0 0 0 var(--ink)!important;}
+
+  /* ── 푸터 ───────────────────────── */
+  footer.foot{
+    margin-top:40px;
+    border:var(--bd);
+    box-shadow:var(--sh);
+    background:var(--ink);
+    color:var(--paper);
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  footer.foot .fstyle{
+    font-family:var(--disp);
+    font-weight:400;
+    font-size:17px;
+    letter-spacing:.06em;
+  }
+  footer.foot .fstyle em{font-style:normal;color:var(--yellow);}
+  footer.foot .fnote{font-weight:800;font-size:12px;letter-spacing:.14em;color:var(--yellow);text-transform:uppercase;}
+
+  /* ── 반응형 ─────────────────────── */
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;align-items:start;}
+    .hero::before{width:100%;height:0;border:0;}
+    .hero .aside{text-align:left;max-width:none;border-top:var(--bd);padding-top:14px;}
+    .kpis{grid-template-columns:1fr 1fr;}
+    .kpi:nth-child(3){grid-column:1 / -1;}
+    .bars{height:220px;}
+  }
+  @media (max-width:560px){
+    .kpis{grid-template-columns:1fr;}
+    .kpi:nth-child(3){grid-column:auto;}
+    .hero .big{font-size:clamp(76px,26vw,120px);}
+  }
+
+  /* ── 접근성: 모션 최소화 ─────────
+     hover 이동 제거, 색 변화만 유지 */
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;}
+    .press:hover,.press:active{transform:none!important;box-shadow:var(--sh)!important;}
+    .kpi.press:nth-child(1):hover{transform:rotate(-1deg)!important;}
+    .kpi.press:nth-child(2):hover{transform:rotate(.6deg)!important;}
+    .kpi.press:nth-child(3):hover{transform:rotate(-.6deg)!important;}
+    tbody tr:hover,tbody tr.picked{background:var(--yellow);}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- 헤더 -->
+  <header class="top">
+    <div class="brand">ProGuild<small>e스포츠 팀 관제 대시보드</small></div>
+    <div class="stamp"><span class="live-dot" aria-hidden="true"></span>갱신 <b class="num">2026-07-10 16:00</b></div>
+  </header>
+
+  <!-- 히어로: 초대형 단일 KPI (시즌 승률) -->
+  <section class="hero press" aria-label="시즌 승률">
+    <div>
+      <div class="label">시즌 승률</div>
+      <div class="big num">68.4<i>%</i></div>
+      <div class="delta">+3.2%p<span>전주 대비</span></div>
+    </div>
+    <div class="aside">
+      <span class="vs">D-2</span>
+      <p>다음 경기 · vs 팀 이클립스</p>
+    </div>
+  </section>
+
+  <!-- KPI 3종 -->
+  <div class="sec-tag"><em>01</em> 핵심 지표</div>
+  <section class="kpis">
+    <div class="kpi press">
+      <div class="k-label">리그 순위</div>
+      <div class="k-val num">2<u>위</u></div>
+      <div class="k-sub">▲ 1계단</div>
+    </div>
+    <div class="kpi press">
+      <div class="k-label">누적 상금</div>
+      <div class="k-val num">1억 8,400<u>만원</u></div>
+      <div class="k-sub num">+2,300만원</div>
+    </div>
+    <div class="kpi press">
+      <div class="k-label">다음 경기</div>
+      <div class="k-val num">D-2</div>
+      <div class="k-sub">vs 팀 이클립스</div>
+    </div>
+  </section>
+
+  <!-- 차트: 최근 8주 승률 -->
+  <div class="sec-tag"><em>02</em> 최근 8주 승률 추이</div>
+  <section class="chart-card press" aria-label="최근 8주 승률 차트">
+    <div class="chart-head">
+      <h3>승률 % / 주간</h3>
+      <div class="peak-note">피크 6주 · 71%</div>
+    </div>
+
+    <div class="bars" role="img" aria-label="주별 승률: 1주 52, 2주 58, 3주 61, 4주 55, 5주 64, 6주 71 피크, 7주 67, 8주 68 퍼센트">
+      <div class="bar"><span class="v num">52</span><div class="stick" style="height:69.3%"></div></div>
+      <div class="bar"><span class="v num">58</span><div class="stick" style="height:77.3%"></div></div>
+      <div class="bar"><span class="v num">61</span><div class="stick" style="height:81.3%"></div></div>
+      <div class="bar"><span class="v num">55</span><div class="stick" style="height:73.3%"></div></div>
+      <div class="bar"><span class="v num">64</span><div class="stick" style="height:85.3%"></div></div>
+      <div class="bar peak"><div class="peak-flag">PEAK</div><span class="v num">71</span><div class="stick" style="height:94.7%"></div></div>
+      <div class="bar"><span class="v num">67</span><div class="stick" style="height:89.3%"></div></div>
+      <div class="bar"><span class="v num">68</span><div class="stick" style="height:90.7%"></div></div>
+    </div>
+    <div class="xaxis num" aria-hidden="true">
+      <span>1주</span><span>2주</span><span>3주</span><span>4주</span>
+      <span>5주</span><span class="pk">6주</span><span>7주</span><span>8주</span>
+    </div>
+  </section>
+
+  <!-- 테이블: 로스터 -->
+  <div class="sec-tag"><em>03</em> 로스터 현황</div>
+  <section class="table-wrap press">
+    <table>
+      <thead>
+        <tr>
+          <th>선수</th><th>포지션</th><th>KDA</th><th>폼</th><th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">블레이즈</td><td>엔트리</td><td class="kda num">1.42</td>
+          <td><span class="form up"><span class="ar">▲</span>상승</span></td>
+          <td><span class="badge s-locked">주전확정</span></td>
+        </tr>
+        <tr>
+          <td class="name">프로스트</td><td>서포터</td><td class="kda num">0.98</td>
+          <td><span class="form flat"><span class="ar">▬</span>유지</span></td>
+          <td><span class="badge s-active">활성</span></td>
+        </tr>
+        <tr>
+          <td class="name">레이븐</td><td>스나이퍼</td><td class="kda num">1.67</td>
+          <td><span class="form up"><span class="ar">▲</span>상승</span></td>
+          <td><span class="badge s-locked">주전확정</span></td>
+        </tr>
+        <tr>
+          <td class="name">노바</td><td>리퍼</td><td class="kda num">0.71</td>
+          <td><span class="form down"><span class="ar">▼</span>하락</span></td>
+          <td><span class="badge s-slump">폼저하</span></td>
+        </tr>
+        <tr>
+          <td class="name">쿼츠</td><td>인게이저</td><td class="kda num">1.15</td>
+          <td><span class="form flat"><span class="ar">▬</span>유지</span></td>
+          <td><span class="badge s-active">활성</span></td>
+        </tr>
+        <tr>
+          <td class="name">에코</td><td>플렉스</td><td class="kda num">1.03</td>
+          <td><span class="form flat"><span class="ar">▬</span>유지</span></td>
+          <td><span class="badge s-wait">로테이션대기</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 푸터 -->
+  <footer class="foot">
+    <div class="fstyle">STYLE <em>05</em> · 브루탈리즘</div>
+    <div class="fnote">Bold / Ink / Stamp</div>
+  </footer>
+
+</main>
+
+<script>
+  // 진행형 향상(enhancement)일 뿐 — JS 없이도 화면은 완전하다.
+  (function(){
+    "use strict";
+    try{
+      // 테이블 행: 클릭(탭)하면 옐로 고정(picked) 토글 — 터치 기기 물리성 보강.
+      var rows = document.querySelectorAll("tbody tr");
+      rows.forEach(function(r){
+        r.tabIndex = 0;
+        r.setAttribute("role","button");
+        function toggle(){ r.classList.toggle("picked"); }
+        r.addEventListener("click", toggle);
+        r.addEventListener("keydown", function(e){
+          if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); }
+        });
+      });
+    }catch(e){ /* 실패해도 정적 화면 그대로 유지 */ }
+  })();
+</script>
+</body>
+</html>

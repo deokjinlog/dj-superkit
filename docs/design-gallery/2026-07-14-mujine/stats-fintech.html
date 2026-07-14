@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 매출 통계 · 핀테크 소프트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  /* 팔레트 — 화이트 + 브랜드 2색 절제 */
+  --bg:#FFFFFF;
+  --surface-soft:#F7F8FA;
+  --surface-hover:#F1F3F5;
+  --card:#FFFFFF;
+  --primary:#3182F6;
+  --primary-press:#1B64DA;
+  --blue-wash:#EAF2FE;
+  --mint:#00C6AE;
+  --mint-wash:#E5FAF6;
+  --text-strong:#191F28;
+  --text-mid:#4E5968;
+  --text-weak:#8B95A1;
+  --border:#E5E8EB;
+  --up:#F04452;      /* 상승·수익 — 한국 금융 관습 */
+  --down:#3182F6;    /* 하락·지출 */
+  --warning:#FF9500;
+  --success:#00C6AE;
+  /* elevation */
+  --sh-1:0 2px 8px rgba(23,31,40,.04);
+  --sh-2:0 8px 24px rgba(23,31,40,.06);
+  --sh-hover:0 12px 32px rgba(23,31,40,.10);
+  /* radius */
+  --r-card:20px;
+  --r-ctl:14px;
+  --r-chip:999px;
+  --r-icon:12px;
+  /* spacing (8px grid) */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  background:var(--surface-soft);
+  color:var(--text-strong);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-.01em;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:6px}
+
+/* ===== 레이아웃 셸 ===== */
+.shell{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+
+/* ===== 사이드바 ===== */
+.sidebar{
+  background:var(--bg);
+  border-right:1px solid var(--border);
+  padding:var(--s5) var(--s4);
+  display:flex;flex-direction:column;gap:var(--s5);
+  position:sticky;top:0;height:100vh;
+}
+.brand{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s2)}
+.brand-mark{
+  width:40px;height:40px;border-radius:var(--r-icon);
+  background:linear-gradient(135deg,var(--primary),var(--primary-press));
+  display:grid;place-items:center;color:#fff;font-weight:800;font-size:18px;
+  box-shadow:var(--sh-1);flex-shrink:0;
+}
+.brand-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.brand-sub{font-size:12px;font-weight:600;color:var(--text-weak)}
+
+.store-switch{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
+  background:var(--surface-soft);border-radius:var(--r-ctl);
+  padding:var(--s3) var(--s3);border:1px solid transparent;
+  transition:background .15s ease,border-color .15s ease;
+}
+.store-switch:hover{background:var(--surface-hover)}
+.store-switch:active{transform:scale(.99)}
+.store-switch .s-label{display:flex;align-items:center;gap:var(--s3);min-width:0}
+.store-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);flex-shrink:0}
+.store-switch .s-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-switch .chev{color:var(--text-weak);flex-shrink:0}
+
+.nav-group{display:flex;flex-direction:column;gap:2px}
+.nav-title{font-size:11px;font-weight:700;color:var(--text-weak);letter-spacing:.04em;padding:var(--s2) var(--s3);text-transform:uppercase}
+.nav-item{
+  display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s3) var(--s3);border-radius:var(--r-chip);
+  font-size:14px;font-weight:600;color:var(--text-mid);
+  transition:background .15s ease,color .15s ease;min-height:44px;
+}
+.nav-item .ic{width:20px;height:20px;flex-shrink:0;stroke:currentColor;stroke-width:1.8;fill:none}
+.nav-item:hover{background:var(--surface-soft);color:var(--text-strong)}
+.nav-item:active{background:var(--surface-hover)}
+.nav-item.active{background:var(--blue-wash);color:var(--primary);font-weight:700}
+.nav-item.active .ic{stroke:var(--primary)}
+.nav-item .badge-n{margin-left:auto;font-size:11px;font-weight:700;background:var(--up);color:#fff;border-radius:var(--r-chip);padding:1px 7px;line-height:1.6}
+
+.side-foot{margin-top:auto;padding:var(--s3);border-radius:var(--r-ctl);background:var(--surface-soft);display:flex;align-items:center;gap:var(--s3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-wash);color:var(--primary);display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
+.side-foot .who{font-size:13px;font-weight:700}
+.side-foot .role{font-size:11px;font-weight:600;color:var(--text-weak)}
+
+/* ===== 메인 ===== */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:var(--s4) var(--s6);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);flex-wrap:wrap;
+}
+.page-head{display:flex;flex-direction:column;gap:2px;min-width:0}
+.crumb{font-size:12px;font-weight:600;color:var(--text-weak)}
+.page-title{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-.02em}
+.toolbar{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+
+/* 컨트롤 (버튼/필터) */
+.ctl{
+  height:44px;display:inline-flex;align-items:center;gap:var(--s2);
+  padding:0 var(--s4);border-radius:var(--r-ctl);font-size:14px;font-weight:700;
+  border:1px solid var(--border);background:var(--bg);color:var(--text-strong);
+  transition:background .15s ease,border-color .15s ease,transform .12s ease,box-shadow .15s ease;
+}
+.ctl .ic{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+.ctl:hover{background:var(--surface-soft);border-color:#DBDFE4}
+.ctl:active{transform:scale(.98);background:var(--surface-hover)}
+.ctl .chev{color:var(--text-weak)}
+.ctl.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.ctl.primary .ic{stroke:#fff}
+.ctl.primary:hover{background:var(--primary-press);border-color:var(--primary-press)}
+.ctl.primary:active{transform:scale(.97);background:var(--primary-press)}
+
+/* 비교 토글 */
+.toggle{display:inline-flex;align-items:center;gap:var(--s3);height:44px;padding:0 var(--s3) 0 var(--s4);border-radius:var(--r-ctl);border:1px solid var(--border);background:var(--bg)}
+.toggle .t-label{font-size:14px;font-weight:700;color:var(--text-mid)}
+.switch{position:relative;width:44px;height:26px;border-radius:var(--r-chip);background:var(--border);transition:background .22s cubic-bezier(.34,1.56,.64,1);flex-shrink:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:var(--sh-1);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.switch[aria-checked="true"]{background:var(--primary)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.switch:active::after{transform:translateX(0) scaleX(1.08)}
+.switch[aria-checked="true"]:active::after{transform:translateX(18px) scaleX(1.08)}
+
+/* 콘텐츠 스크롤 영역 */
+.content{padding:var(--s6);display:flex;flex-direction:column;gap:var(--s5);max-width:1280px;width:100%;margin:0 auto}
+
+.section-note{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:var(--s1);height:32px;padding:0 var(--s3);
+  border-radius:var(--r-chip);font-size:13px;font-weight:700;
+  background:var(--surface-soft);color:var(--text-mid);border:1px solid transparent;
+  transition:background .15s ease,color .15s ease;
+}
+.chip:hover{background:var(--surface-hover)}
+.chip.sel{background:var(--blue-wash);color:var(--primary)}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.compare-hint{font-size:13px;font-weight:600;color:var(--text-weak);margin-left:auto}
+
+/* ===== KPI 그리드 ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4)}
+.card{
+  background:var(--card);border-radius:var(--r-card);border:1px solid var(--border);
+  box-shadow:var(--sh-1);padding:var(--s5);
+}
+.kpi{
+  position:relative;overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease;
+  will-change:transform;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--sh-hover)}
+.kpi::before{content:"";position:absolute;inset:0;background:radial-gradient(120px 120px at 85% 0%,var(--blue-wash),transparent 70%);opacity:0;transition:opacity .2s ease;pointer-events:none}
+.kpi:hover::before{opacity:.7}
+.kpi-top{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4)}
+.kpi-ic{width:40px;height:40px;border-radius:var(--r-icon);display:grid;place-items:center;flex-shrink:0}
+.kpi-ic svg{width:22px;height:22px;stroke-width:1.9;fill:none}
+.kpi-ic.rev{background:var(--blue-wash)}    .kpi-ic.rev svg{stroke:var(--primary)}
+.kpi-ic.ord{background:var(--mint-wash)}     .kpi-ic.ord svg{stroke:var(--mint)}
+.kpi-ic.aov{background:#FFF4E5}              .kpi-ic.aov svg{stroke:var(--warning)}
+.kpi-ic.ref{background:#FDECEE}              .kpi-ic.ref svg{stroke:var(--up)}
+.kpi-label{font-size:13px;font-weight:700;color:var(--text-mid)}
+.kpi-value{font-size:40px;line-height:48px;font-weight:800;letter-spacing:-.02em}
+.kpi-value .unit{font-size:20px;font-weight:700;color:var(--text-mid);margin-left:2px}
+.kpi-foot{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3)}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:800;padding:2px 8px;border-radius:var(--r-chip)}
+.delta .arw{font-size:11px}
+.delta.up{color:var(--up);background:#FDECEE}
+.delta.down{color:var(--down);background:var(--blue-wash)}
+.delta.good{color:var(--mint);background:var(--mint-wash)}
+.kpi-foot .vs{font-size:12px;font-weight:600;color:var(--text-weak)}
+
+/* ===== 차트 2단 ===== */
+.charts{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--s4)}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s5)}
+.card-title{font-size:17px;line-height:24px;font-weight:700}
+.card-desc{font-size:13px;font-weight:600;color:var(--text-weak);margin-top:2px}
+.legend{display:flex;align-items:center;gap:var(--s4)}
+.legend .lg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-mid)}
+.legend .swatch{width:10px;height:10px;border-radius:3px}
+
+/* 라인 차트 */
+.linechart{width:100%;height:auto;display:block}
+.axis-txt{font-size:11px;font-weight:700;fill:var(--text-weak)}
+.grid-line{stroke:var(--border);stroke-width:1;shape-rendering:crispEdges}
+.grid-line.base{stroke:#D4D9DE}
+.area-fill{fill:url(#areaGrad)}
+.trend-line{fill:none;stroke:var(--primary);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.dot{fill:#fff;stroke:var(--primary);stroke-width:2.5}
+.dot.peak{fill:var(--primary);stroke:#fff;stroke-width:3}
+.peak-badge rect{fill:var(--text-strong)}
+.peak-badge text{fill:#fff;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* 카테고리 막대 */
+.bars{display:flex;flex-direction:column;gap:var(--s4)}
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:var(--s2) var(--s4);align-items:center}
+.bar-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:var(--s2)}
+.bar-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.bar-val{font-size:14px;font-weight:800;text-align:right}
+.bar-val .pct{font-size:12px;font-weight:700;color:var(--text-weak);margin-left:6px}
+.bar-track{grid-column:1/-1;height:12px;border-radius:var(--r-chip);background:var(--surface-hover);overflow:hidden}
+.bar-fill{height:100%;border-radius:var(--r-chip);transform-origin:left center}
+
+/* ===== 상위 상품 테이블 ===== */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+thead th{
+  text-align:left;font-size:12px;font-weight:700;color:var(--text-weak);
+  padding:0 var(--s4) var(--s3);white-space:nowrap;
+}
+thead th.r{text-align:right}
+thead th button{display:inline-flex;align-items:center;gap:4px;font:inherit;color:inherit}
+thead th.sorted{color:var(--primary)}
+tbody tr{transition:background .14s ease}
+tbody tr:hover{background:var(--surface-soft)}
+tbody td{padding:var(--s4);border-top:1px solid var(--border);vertical-align:middle}
+tbody tr:first-child td{border-top:none}
+.rank{width:36px;height:36px;border-radius:var(--r-icon);display:grid;place-items:center;font-weight:800;font-size:15px;background:var(--surface-hover);color:var(--text-mid)}
+.rank.top{background:var(--blue-wash);color:var(--primary)}
+.prod{display:flex;align-items:center;gap:var(--s4);min-width:0}
+.thumb{width:44px;height:44px;border-radius:var(--r-icon);flex-shrink:0;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(23,31,40,.05)}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.35),transparent 55%)}
+.thumb .glyph{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:16px;color:rgba(255,255,255,.95)}
+.p-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-sub{font-size:12px;font-weight:600;color:var(--text-weak)}
+td.r{text-align:right}
+.qty{font-size:15px;font-weight:700}
+.qty .u{font-size:13px;font-weight:600;color:var(--text-weak);margin-left:1px}
+.rev-cell{font-size:15px;font-weight:800}
+.rev-cell .u{font-size:13px;font-weight:700;color:var(--text-mid)}
+.share{display:inline-flex;align-items:center;gap:var(--s3);justify-content:flex-end}
+.share-bar{width:64px;height:8px;border-radius:var(--r-chip);background:var(--surface-hover);overflow:hidden;flex-shrink:0}
+.share-bar span{display:block;height:100%;border-radius:var(--r-chip);background:var(--mint)}
+.share-pct{font-size:13px;font-weight:800;min-width:44px;text-align:right}
+.tstate{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:2px 8px;border-radius:var(--r-chip)}
+.tstate.up{color:var(--up);background:#FDECEE}
+.tstate.flat{color:var(--text-mid);background:var(--surface-hover)}
+.tstate.down{color:var(--down);background:var(--blue-wash)}
+
+.table-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);margin-top:var(--s5);flex-wrap:wrap}
+.link-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--primary);padding:var(--s2) var(--s3);border-radius:var(--r-ctl);transition:background .15s ease}
+.link-btn:hover{background:var(--blue-wash)}
+.link-btn:active{background:#DCEAFD}
+.foot-meta{font-size:13px;font-weight:600;color:var(--text-weak)}
+
+/* 페이지 푸터 */
+.page-footer{
+  padding:var(--s5) var(--s6) var(--s7);text-align:center;
+  font-size:12px;font-weight:600;color:var(--text-weak);
+}
+.page-footer strong{font-weight:800;color:var(--text-mid)}
+
+/* ===== FAB ===== */
+.fab{
+  position:fixed;right:24px;bottom:24px;z-index:30;
+  width:56px;height:56px;border-radius:18px;
+  background:var(--primary);color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 24px rgba(49,130,246,.36);
+  transition:transform .16s cubic-bezier(.34,1.56,.64,1),background .15s ease;
+}
+.fab svg{width:24px;height:24px;stroke:#fff;stroke-width:2;fill:none}
+.fab:hover{background:var(--primary-press);transform:translateY(-2px)}
+.fab:active{transform:scale(.94)}
+
+/* ===== 진입 애니메이션 ===== */
+@keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes drawLine{to{stroke-dashoffset:0}}
+@keyframes fabPop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.anim-rise{animation:riseIn .38s cubic-bezier(.22,.61,.36,1) both}
+.kpi:nth-child(1){animation-delay:.04s}
+.kpi:nth-child(2){animation-delay:.09s}
+.kpi:nth-child(3){animation-delay:.14s}
+.kpi:nth-child(4){animation-delay:.19s}
+.bar-fill{animation:barGrow .7s cubic-bezier(.22,.61,.36,1) both}
+.trend-line{stroke-dasharray:1;stroke-dashoffset:1;animation:drawLine .9s cubic-bezier(.4,0,.2,1) .35s forwards}
+.fab{animation:fabPop .5s cubic-bezier(.34,1.56,.64,1) .9s both}
+
+/* ===== 반응형 ===== */
+@media (max-width:1024px){
+  .charts{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:var(--s3);border-right:none;border-bottom:1px solid var(--border);padding:var(--s3) var(--s4)}
+  .store-switch,.nav-title,.side-foot{display:none}
+  .nav-group{flex-direction:row;flex-wrap:wrap;gap:var(--s2)}
+  .brand{margin-right:auto}
+  .nav-item{min-height:40px}
+  .nav-item .badge-n{display:none}
+  .content{padding:var(--s4)}
+  .topbar{padding:var(--s4)}
+}
+@media (max-width:560px){
+  .kpi-grid{grid-template-columns:1fr}
+  .kpi-value{font-size:34px;line-height:42px}
+  .compare-hint{margin-left:0;width:100%}
+  .toolbar{width:100%}
+  .ctl,.toggle{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+  .anim-rise{opacity:1;transform:none}
+  .bar-fill{transform:none}
+  .trend-line{stroke-dasharray:none;stroke-dashoffset:0}
+  .fab{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ===== 사이드바 ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div>
+        <div class="brand-name">MUJINE</div>
+        <div class="brand-sub">셀러 어드민</div>
+      </div>
+    </div>
+
+    <button class="store-switch" aria-label="스토어 전환">
+      <span class="s-label">
+        <span class="store-dot"></span>
+        <span class="s-name">무진 공식스토어</span>
+      </span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4 4 4-4"/></svg>
+    </button>
+
+    <nav class="nav-group" aria-label="통계 선택">
+      <div class="nav-title">통계</div>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        대시보드
+      </a>
+      <a class="nav-item active" href="#" aria-current="page">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3M20 16V6"/></svg>
+        매출 통계
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M6 4h12l1 4H5l1-4zM5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6"/></svg>
+        주문 통계
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>
+        상품 분석
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 6a3 3 0 010 6M21 20a6 6 0 00-4-5.6"/></svg>
+        고객 분석
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9M3 3v6h6M12 7v5l3 2"/></svg>
+        환불 · 취소
+        <span class="badge-n num">3</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 12h4l2-7 4 14 2-7h4"/></svg>
+        트래픽 · 유입
+      </a>
+    </nav>
+
+    <nav class="nav-group" aria-label="정산">
+      <div class="nav-title">운영</div>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+        정산 내역
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+        설정
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="avatar">SJ</div>
+      <div>
+        <div class="who">SJ 운영자</div>
+        <div class="role">셀러 · 마스터</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 메인 ===== -->
+  <main class="main">
+    <header class="topbar">
+      <div class="page-head">
+        <div class="crumb">통계 · 매출</div>
+        <h1 class="page-title">매출 통계</h1>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="기간 및 내보내기">
+        <button class="ctl" aria-haspopup="listbox">
+          <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+          최근 30일
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4 4 4-4"/></svg>
+        </button>
+
+        <div class="toggle">
+          <span class="t-label">이전 기간 비교</span>
+          <button class="switch" role="switch" aria-checked="true" aria-label="이전 기간 비교"></button>
+        </div>
+
+        <button class="ctl primary">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 21h16"/></svg>
+          내보내기
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <div class="section-note">
+        <span class="chip sel"><span class="dot"></span>2026.06.15 – 07.14</span>
+        <span class="chip">직전 30일 대비</span>
+        <span class="compare-hint">데이터 갱신: 2026.07.14 09:20 · 실시간 반영</span>
+      </div>
+
+      <!-- ===== KPI 4 ===== -->
+      <section class="kpi-grid" aria-label="핵심 지표">
+        <article class="card kpi anim-rise">
+          <div class="kpi-top">
+            <span class="kpi-ic rev"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="kpi-label">총 매출</span>
+          </div>
+          <div class="kpi-value num"><span class="cu" data-to="48250000" data-prefix="₩">₩48,250,000</span></div>
+          <div class="kpi-foot">
+            <span class="delta up"><span class="arw">▲</span><span class="num">12.4%</span></span>
+            <span class="vs">직전 대비 +₩5,320,000</span>
+          </div>
+        </article>
+
+        <article class="card kpi anim-rise">
+          <div class="kpi-top">
+            <span class="kpi-ic ord"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 4h12l1 4H5l1-4zM5 8v10a2 2 0 002 2h10a2 2 0 002-2V8M9 12h6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="kpi-label">주문 수</span>
+          </div>
+          <div class="kpi-value num"><span class="cu" data-to="1284" data-suffix="">1,284</span><span class="unit">건</span></div>
+          <div class="kpi-foot">
+            <span class="delta up"><span class="arw">▲</span><span class="num">8.2%</span></span>
+            <span class="vs">직전 대비 +97건</span>
+          </div>
+        </article>
+
+        <article class="card kpi anim-rise">
+          <div class="kpi-top">
+            <span class="kpi-ic aov"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg></span>
+            <span class="kpi-label">객단가</span>
+          </div>
+          <div class="kpi-value num"><span class="cu" data-to="375700" data-prefix="₩">₩375,700</span></div>
+          <div class="kpi-foot">
+            <span class="delta up"><span class="arw">▲</span><span class="num">3.9%</span></span>
+            <span class="vs">직전 대비 +₩14,100</span>
+          </div>
+        </article>
+
+        <article class="card kpi anim-rise">
+          <div class="kpi-top">
+            <span class="kpi-ic ref"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M3 12a9 9 0 109-9M3 3v6h6M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="kpi-label">환불율</span>
+          </div>
+          <div class="kpi-value num"><span class="cu" data-to="1.2" data-dec="1">1.2</span><span class="unit">%</span></div>
+          <div class="kpi-foot">
+            <span class="delta down"><span class="arw">▼</span><span class="num">0.3%p</span></span>
+            <span class="vs">직전 대비 개선</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- ===== 차트 2단 ===== -->
+      <section class="charts">
+        <!-- 매출 추이 라인 -->
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">매출 추이</h2>
+              <p class="card-desc">최근 8주 · 주간 매출 (단위 만원)</p>
+            </div>
+            <div class="legend">
+              <span class="lg"><span class="swatch" style="background:var(--primary)"></span>주간 매출</span>
+            </div>
+          </div>
+
+          <svg class="linechart" viewBox="0 0 720 260" role="img" aria-label="최근 8주 주간 매출 추이. 6월 23일 주 1,520만원으로 최고, 이후 완만한 하락.">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3182F6" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#3182F6" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- 그리드 + y축 라벨 (축 0 시작) -->
+            <g class="axis-txt" text-anchor="end">
+              <line class="grid-line" x1="48" y1="24"  x2="704" y2="24"/>
+              <line class="grid-line" x1="48" y1="75"  x2="704" y2="75"/>
+              <line class="grid-line" x1="48" y1="126" x2="704" y2="126"/>
+              <line class="grid-line" x1="48" y1="177" x2="704" y2="177"/>
+              <line class="grid-line base" x1="48" y1="228" x2="704" y2="228"/>
+              <text x="40" y="28">1,600</text>
+              <text x="40" y="79">1,200</text>
+              <text x="40" y="130">800</text>
+              <text x="40" y="181">400</text>
+              <text x="40" y="232">0</text>
+            </g>
+
+            <!-- 영역 + 라인 -->
+            <path class="area-fill" d="M48,103 L141.7,85.2 L235.4,94.1 L329.1,57.2 L422.9,77.6 L516.6,34.2 L610.3,48.2 L704,63.5 L704,228 L48,228 Z"/>
+            <path class="trend-line" pathLength="1" d="M48,103 L141.7,85.2 L235.4,94.1 L329.1,57.2 L422.9,77.6 L516.6,34.2 L610.3,48.2 L704,63.5"/>
+
+            <!-- 데이터 포인트 -->
+            <circle class="dot" cx="48"    cy="103"  r="4"/>
+            <circle class="dot" cx="141.7" cy="85.2" r="4"/>
+            <circle class="dot" cx="235.4" cy="94.1" r="4"/>
+            <circle class="dot" cx="329.1" cy="57.2" r="4"/>
+            <circle class="dot" cx="422.9" cy="77.6" r="4"/>
+            <circle class="dot peak" cx="516.6" cy="34.2" r="5.5"/>
+            <circle class="dot" cx="610.3" cy="48.2" r="4"/>
+            <circle class="dot" cx="704"   cy="63.5" r="4"/>
+
+            <!-- 피크 배지 -->
+            <g class="peak-badge">
+              <rect x="479" y="10" width="76" height="20" rx="6"/>
+              <text x="517" y="24" text-anchor="middle">▲ 1,520만</text>
+            </g>
+
+            <!-- x축 라벨 -->
+            <g class="axis-txt" text-anchor="middle">
+              <text x="48"    y="248">5/19</text>
+              <text x="141.7" y="248">5/26</text>
+              <text x="235.4" y="248">6/2</text>
+              <text x="329.1" y="248">6/9</text>
+              <text x="422.9" y="248">6/16</text>
+              <text x="516.6" y="248">6/23</text>
+              <text x="610.3" y="248">6/30</text>
+              <text x="704"   y="248">7/7</text>
+            </g>
+          </svg>
+        </article>
+
+        <!-- 카테고리별 막대 5 -->
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">카테고리별 매출</h2>
+              <p class="card-desc">상위 5개 · 전체 대비 비중</p>
+            </div>
+          </div>
+
+          <div class="bars">
+            <div class="bar-row">
+              <div class="bar-name"><span class="bar-swatch" style="background:#3182F6"></span>니트 · 스웨터</div>
+              <div class="bar-val num">1,480만<span class="pct">30.7%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%;background:#3182F6;animation-delay:.10s"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name"><span class="bar-swatch" style="background:#4B93F8"></span>아우터</div>
+              <div class="bar-val num">1,180만<span class="pct">24.5%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:79.7%;background:#4B93F8;animation-delay:.16s"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name"><span class="bar-swatch" style="background:#00C6AE"></span>원피스</div>
+              <div class="bar-val num">920만<span class="pct">19.1%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:62.2%;background:#00C6AE;animation-delay:.22s"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name"><span class="bar-swatch" style="background:#2ED3C0"></span>팬츠</div>
+              <div class="bar-val num">680만<span class="pct">14.1%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:45.9%;background:#2ED3C0;animation-delay:.28s"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name"><span class="bar-swatch" style="background:#8B95A1"></span>액세서리</div>
+              <div class="bar-val num">565만<span class="pct">11.7%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:38.2%;background:#8B95A1;animation-delay:.34s"></div></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ===== 상위 상품 테이블 6 ===== -->
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title">상위 상품</h2>
+            <p class="card-desc">판매량 기준 상위 6개 · 최근 30일</p>
+          </div>
+          <button class="ctl" style="height:36px;padding:0 12px;font-size:13px">
+            <svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            정렬: 판매량
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:44px">순위</th>
+                <th>상품</th>
+                <th class="r sorted"><button>판매량 <span aria-hidden="true">▾</span></button></th>
+                <th class="r"><button>매출</button></th>
+                <th class="r">추세</th>
+                <th class="r" style="width:180px">비중</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rank top num">1</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#3182F6,#1B64DA)"><span class="glyph">NK</span></span>
+                    <div>
+                      <div class="p-name">오버핏 캐시미어 니트</div>
+                      <div class="p-sub">니트 · 스웨터 · KNIT-092</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">312<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩9,048,000</span></td>
+                <td class="r"><span class="tstate up">▲ 24%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:100%"></span></span><span class="share-pct num">18.8%</span></span></td>
+              </tr>
+              <tr>
+                <td><span class="rank top num">2</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#00C6AE,#00A896)"><span class="glyph">DJ</span></span>
+                    <div>
+                      <div class="p-name">워시드 데님 자켓</div>
+                      <div class="p-sub">아우터 · OUTER-114</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">268<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩8,308,000</span></td>
+                <td class="r"><span class="tstate up">▲ 11%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:91.5%"></span></span><span class="share-pct num">17.2%</span></span></td>
+              </tr>
+              <tr>
+                <td><span class="rank top num">3</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#FF9500,#F76B1C)"><span class="glyph">OP</span></span>
+                    <div>
+                      <div class="p-name">플리츠 미디 원피스</div>
+                      <div class="p-sub">원피스 · DRESS-058</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">241<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩6,988,000</span></td>
+                <td class="r"><span class="tstate flat">– 2%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:77.1%"></span></span><span class="share-pct num">14.5%</span></span></td>
+              </tr>
+              <tr>
+                <td><span class="rank num">4</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#8B95A1,#5B6470)"><span class="glyph">PT</span></span>
+                    <div>
+                      <div class="p-name">와이드 슬랙스 팬츠</div>
+                      <div class="p-sub">팬츠 · PANT-071</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">205<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩5,740,000</span></td>
+                <td class="r"><span class="tstate up">▲ 6%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:65.6%"></span></span><span class="share-pct num">11.9%</span></span></td>
+              </tr>
+              <tr>
+                <td><span class="rank num">5</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#7C4DFF,#5B34C7)"><span class="glyph">BG</span></span>
+                    <div>
+                      <div class="p-name">레더 크로스백</div>
+                      <div class="p-sub">액세서리 · ACC-033</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">178<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩4,984,000</span></td>
+                <td class="r"><span class="tstate down">▼ 9%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:57.1%"></span></span><span class="share-pct num">10.3%</span></span></td>
+              </tr>
+              <tr>
+                <td><span class="rank num">6</span></td>
+                <td>
+                  <div class="prod">
+                    <span class="thumb" style="background:linear-gradient(135deg,#22C55E,#15A34A)"><span class="glyph">SH</span></span>
+                    <div>
+                      <div class="p-name">베이직 코튼 셔츠</div>
+                      <div class="p-sub">셔츠 · SHIRT-019</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="r"><span class="qty num">156<span class="u">개</span></span></td>
+                <td class="r"><span class="rev-cell num">₩3,432,000</span></td>
+                <td class="r"><span class="tstate up">▲ 3%</span></td>
+                <td class="r"><span class="share"><span class="share-bar"><span style="width:50%"></span></span><span class="share-pct num">7.1%</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-foot">
+          <span class="foot-meta">전체 <span class="num">142</span>개 상품 중 상위 6개</span>
+          <button class="link-btn">
+            상품 전체 보기
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="page-footer">
+      <strong>MUJINE</strong> · 매출 통계 (어드민) · 핀테크 소프트
+    </footer>
+  </main>
+</div>
+
+<button class="fab" aria-label="새 리포트 만들기">
+  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+</button>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 비교 토글
+  document.querySelectorAll('.switch').forEach(function(sw){
+    sw.addEventListener('click', function(){
+      var on = sw.getAttribute('aria-checked') === 'true';
+      sw.setAttribute('aria-checked', on ? 'false' : 'true');
+    });
+  });
+
+  // KPI count-up (JS 실패/모션축소 시 최종값 서버 렌더 그대로 유지)
+  if (reduce) return;
+
+  function fmt(n, dec, prefix, suffix){
+    var s = dec>0 ? n.toFixed(dec) : Math.round(n).toString();
+    if(dec===0){ s = Math.round(n).toLocaleString('en-US'); }
+    else{
+      var parts = s.split('.');
+      parts[0] = Number(parts[0]).toLocaleString('en-US');
+      s = parts.join('.');
+    }
+    return (prefix||'') + s + (suffix||'');
+  }
+
+  document.querySelectorAll('.cu').forEach(function(el){
+    var to = parseFloat(el.getAttribute('data-to'));
+    var dec = parseInt(el.getAttribute('data-dec')||'0',10);
+    var prefix = el.getAttribute('data-prefix')||'';
+    var suffix = el.getAttribute('data-suffix')||'';
+    var dur = 640, start = null, final = el.textContent;
+    function ease(t){ return 1 - Math.pow(1-t, 3); }
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts-start)/dur, 1);
+      el.textContent = fmt(to*ease(p), dec, prefix, suffix);
+      if(p<1){ requestAnimationFrame(step); }
+      else{ el.textContent = final; }
+    }
+    el.textContent = fmt(0, dec, prefix, suffix);
+    requestAnimationFrame(function(t){ setTimeout(function(){ requestAnimationFrame(step); }, 260); });
+  });
+})();
+</script>
+</body>
+</html>

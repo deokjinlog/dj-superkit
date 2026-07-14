@@ -1,0 +1,839 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>셀러허브 — 셀러 통합 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Material 3 tone palette */
+    --primary: #6750A4;
+    --on-primary: #FFFFFF;
+    --primary-container: #EADDFF;
+    --on-primary-container: #21005D;
+    --surface: #FEF7FF;
+    --surface-container-low: #F7F2FA;
+    --surface-container: #F3EDF7;
+    --surface-container-high: #ECE6F0;
+    --on-surface: #1D1B20;
+    --on-surface-variant: #49454F;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+    --secondary: #625B71;
+    --error: #B3261E;
+    --on-error-container: #410E0B;
+    --error-container: #F9DEDC;
+    --success: #386A20;
+    --success-container: #DDE9CE;
+
+    /* elevation */
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    --label: "Roboto", "Pretendard", system-ui, sans-serif;
+    --body: "Pretendard", "Roboto", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--body);
+    background: var(--surface);
+    color: var(--on-surface);
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: .15px;
+  }
+
+  .num {
+    font-family: var(--label);
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============ TOP APP BAR ============ */
+  .appbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--surface-container);
+    box-shadow: var(--dp2);
+    padding: 12px clamp(16px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: barDrop 240ms cubic-bezier(.2,0,0,1) both;
+  }
+  @keyframes barDrop {
+    from { transform: translateY(-16px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-right: auto;
+    min-width: 0;
+  }
+  .brand-mark {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: grid; place-items: center;
+    font-family: var(--label);
+    font-weight: 700;
+    font-size: 20px;
+    box-shadow: var(--dp1);
+    flex-shrink: 0;
+  }
+  .brand-text { min-width: 0; }
+  .brand-title {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 28px;
+    color: var(--on-surface);
+  }
+  .brand-sub {
+    font-family: var(--label);
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--on-surface-variant);
+    letter-spacing: .3px;
+  }
+  .appbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    font-family: var(--label);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: .1px;
+    border: none;
+    border-radius: 8px;
+    min-height: 40px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: box-shadow 150ms cubic-bezier(.2,0,0,1), background-color 150ms;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+  .btn-filled {
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--dp1);
+  }
+  .btn-filled:hover { box-shadow: var(--dp2); background: #7059b0; }
+  .btn-filled:active { background: #5c48a0; }
+  .btn-tonal {
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    box-shadow: var(--dp1);
+  }
+  .btn-tonal:hover { box-shadow: var(--dp2); background: #e4dced; }
+  .btn-text {
+    background: transparent;
+    color: var(--primary);
+    box-shadow: none;
+    min-height: 36px;
+    padding: 8px 12px;
+  }
+  .btn-text:hover { background: rgba(103,80,164,.08); }
+
+  /* state-layer via ::before for hover overlay on filled/tonal */
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 150ms;
+    pointer-events: none;
+  }
+  .btn-filled:hover::after,
+  .btn-tonal:hover::after { opacity: .04; }
+  .btn:active::after { opacity: .10; }
+
+  /* ============ LAYOUT ============ */
+  main {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(16px, 3vw, 32px) clamp(16px, 4vw, 40px) 120px;
+  }
+
+  /* ============ PERIOD TABS ============ */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-container-low);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 28px;
+    box-shadow: var(--dp1);
+    overflow-x: auto;
+  }
+  .tab {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 88px;
+    min-height: 48px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--label);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: .1px;
+    color: var(--on-surface-variant);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: color 150ms, background-color 150ms;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+  .tab:hover { background: rgba(103,80,164,.08); }
+  .tab[aria-selected="true"] {
+    color: var(--on-primary-container);
+    background: var(--primary-container);
+    font-weight: 700;
+  }
+  .tab[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: 20%; right: 20%;
+    bottom: 6px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--primary);
+    animation: tabInd 250ms cubic-bezier(.2,0,0,1) both;
+  }
+  @keyframes tabInd {
+    from { transform: scaleX(.3); opacity: 0; }
+    to   { transform: scaleX(1); opacity: 1; }
+  }
+  .tab:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* ============ KPI GRID ============ */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--surface-container-low);
+    border-radius: 12px;
+    box-shadow: var(--dp1);
+    padding: 20px;
+    transition: box-shadow 150ms cubic-bezier(.2,0,0,1);
+  }
+  .kpi.card:hover { box-shadow: var(--dp2); }
+  .kpi {
+    animation: kpiRise 220ms cubic-bezier(.2,0,0,1) both;
+  }
+  .kpi:nth-child(1) { animation-delay: 150ms; }
+  .kpi:nth-child(2) { animation-delay: 190ms; }
+  .kpi:nth-child(3) { animation-delay: 230ms; }
+  .kpi:nth-child(4) { animation-delay: 270ms; }
+  @keyframes kpiRise {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .kpi-label {
+    font-family: var(--label);
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: .1px;
+    color: var(--on-surface-variant);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-size: 26px;
+    line-height: 32px;
+    font-weight: 700;
+    color: var(--on-surface);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .kpi-value .unit {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    margin-left: 2px;
+  }
+  .kpi-delta {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--label);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .1px;
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+  .delta-up { background: var(--success-container); color: var(--success); }
+  .delta-down { background: var(--error-container); color: var(--error); }
+  .delta-flat { background: var(--surface-container-high); color: var(--on-surface-variant); }
+  .delta-icon { font-family: var(--label); font-weight: 700; }
+
+  /* ============ CHART ============ */
+  .chart-card {
+    margin-bottom: 24px;
+    animation: chartRise 300ms cubic-bezier(.2,0,0,1) both;
+    animation-delay: 300ms;
+  }
+  @keyframes chartRise {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .card-title {
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 700;
+    color: var(--on-surface);
+  }
+  .card-caption {
+    font-family: var(--label);
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    letter-spacing: .2px;
+  }
+  .chart {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    height: 300px;
+  }
+  .y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: var(--label);
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    font-variant-numeric: tabular-nums;
+    padding-bottom: 26px;
+  }
+  .plot {
+    position: relative;
+    border-left: 1px solid var(--outline-variant);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .gridline {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 1px dashed var(--outline-variant);
+    opacity: .55;
+  }
+  .bars {
+    position: absolute;
+    inset: 0 0 26px 0;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(6px, 2vw, 22px);
+    padding: 0 clamp(4px, 1.5vw, 16px);
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+  }
+  .bar-val {
+    font-family: var(--label);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .bar {
+    width: 100%;
+    max-width: 40px;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, #7C66C4, var(--primary));
+    box-shadow: var(--dp1);
+    transform-origin: bottom;
+    animation: barGrow 500ms cubic-bezier(0,0,.2,1) both;
+    animation-delay: 400ms;
+  }
+  .bar.peak {
+    background: linear-gradient(180deg, #8E77D6, var(--on-primary-container));
+  }
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+  }
+  .x-label {
+    position: absolute;
+    bottom: -22px;
+    font-family: var(--label);
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    white-space: nowrap;
+  }
+  .peak-tag {
+    position: absolute;
+    top: -8px;
+    transform: translateY(-100%);
+    background: var(--on-primary-container);
+    color: var(--on-primary);
+    font-family: var(--label);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    box-shadow: var(--dp2);
+    white-space: nowrap;
+  }
+
+  /* ============ TABLE ============ */
+  .table-card { padding: 0; overflow: hidden; }
+  .table-card .card-head { padding: 20px 20px 16px; margin-bottom: 0; }
+  .table-scroll { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+  thead th {
+    font-family: var(--label);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--surface-container-high);
+    border-bottom: 1px solid var(--outline-variant);
+    white-space: nowrap;
+  }
+  thead th.right, tbody td.right { text-align: right; }
+  tbody tr {
+    position: relative;
+    transition: background-color 150ms;
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(103,80,164,.06); }
+  tbody td {
+    padding: 14px 16px;
+    min-height: 48px;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--on-surface);
+    vertical-align: middle;
+  }
+  .prod-name {
+    font-weight: 500;
+    max-width: 340px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 20px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .miss { color: var(--outline); font-variant-numeric: tabular-nums; }
+
+  .cat-chip {
+    display: inline-block;
+    font-family: var(--label);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .1px;
+    color: var(--on-surface-variant);
+    background: var(--surface-container-high);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--label);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .1px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .st-sell { background: var(--primary-container); color: var(--on-primary-container); }
+  .st-sell .dot { background: var(--primary); }
+  .st-done { background: var(--success-container); color: var(--success); }
+  .st-done .dot { background: var(--success); }
+  .st-out  { background: var(--error-container); color: var(--error); }
+  .st-out .dot  { background: var(--error); }
+  .st-wait { background: var(--surface-container-high); color: var(--on-surface-variant); }
+  .st-wait .dot { background: var(--outline); }
+
+  .row-action { text-align: right; white-space: nowrap; }
+  .detail-btn {
+    opacity: 0;
+    transform: translateX(4px);
+    transition: opacity 150ms, transform 150ms;
+  }
+  tbody tr:hover .detail-btn,
+  tbody tr:focus-within .detail-btn { opacity: 1; transform: translateX(0); }
+  @media (hover: none) {
+    .detail-btn { opacity: 1; transform: none; }
+  }
+
+  /* ============ FAB ============ */
+  .fab {
+    position: fixed;
+    right: clamp(16px, 4vw, 40px);
+    bottom: clamp(16px, 4vw, 40px);
+    z-index: 30;
+    min-width: 56px; height: 56px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 16px;
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--dp4);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--label);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: .1px;
+    overflow: hidden;
+    transition: box-shadow 200ms cubic-bezier(.2,0,0,1), transform 200ms cubic-bezier(.2,0,0,1), background-color 150ms;
+    animation: fabPop 250ms cubic-bezier(.2,0,1,1) both;
+    animation-delay: 900ms;
+  }
+  @keyframes fabPop {
+    from { transform: scale(.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .fab:hover { box-shadow: var(--dp8); transform: scale(1.03); background: #7059b0; }
+  .fab:active { transform: scale(.97); }
+  .fab:focus-visible { outline: 3px solid var(--on-primary-container); outline-offset: 3px; }
+  .fab .fab-icon { font-size: 22px; line-height: 1; }
+
+  /* ============ RIPPLE ============ */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .12;
+    transform: scale(0);
+    pointer-events: none;
+    animation: rippleGo 400ms ease-out forwards;
+  }
+  @keyframes rippleGo {
+    to { transform: scale(2.4); opacity: 0; }
+  }
+
+  footer {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 32px clamp(16px, 4vw, 40px) 48px;
+    font-family: var(--label);
+    font-size: 12px;
+    letter-spacing: .3px;
+    color: var(--on-surface-variant);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(n) { animation-delay: 150ms; }
+    .chart { height: 260px; }
+    .bar-val { font-size: 10px; }
+  }
+  @media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .brand-title { font-size: 20px; }
+    .chart { grid-template-columns: 40px 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.001ms !important;
+    }
+    .ripple { display: none; }
+    .bar { transform: scaleY(1); }
+  }
+</style>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">셀</div>
+    <div class="brand-text">
+      <div class="brand-title">셀러허브</div>
+      <div class="brand-sub">갱신 <span class="num">2026-07-13 14:00</span></div>
+    </div>
+  </div>
+  <div class="appbar-actions">
+    <button class="btn btn-tonal" data-ripple type="button">
+      <span aria-hidden="true">⟳</span>새로고침
+    </button>
+    <button class="btn btn-filled" data-ripple type="button">
+      <span aria-hidden="true">↧</span>리포트 내보내기
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="tabs" role="tablist" aria-label="기간 선택">
+    <button class="tab" role="tab" aria-selected="false" data-ripple type="button">오늘</button>
+    <button class="tab" role="tab" aria-selected="false" data-ripple type="button">이번 주</button>
+    <button class="tab" role="tab" aria-selected="true" data-ripple type="button">이번 달</button>
+    <button class="tab" role="tab" aria-selected="false" data-ripple type="button">올해</button>
+  </div>
+
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <article class="kpi card">
+      <div class="kpi-label">이번 달 총 매출</div>
+      <div class="kpi-value"><span class="num">12,840,500,000</span><span class="unit">원</span></div>
+      <div class="kpi-delta delta-up">
+        <span class="delta-icon" aria-hidden="true">▲</span>
+        <span class="num">+8.2%</span>
+        <span>전월 대비</span>
+      </div>
+    </article>
+
+    <article class="kpi card">
+      <div class="kpi-label">신규 주문</div>
+      <div class="kpi-value"><span class="num">3,472</span><span class="unit">건</span></div>
+      <div class="kpi-delta delta-up">
+        <span class="delta-icon" aria-hidden="true">▲</span>
+        <span class="num">+12%</span>
+        <span>전월 대비</span>
+      </div>
+    </article>
+
+    <article class="kpi card">
+      <div class="kpi-label">전환율</div>
+      <div class="kpi-value"><span class="num">3.8</span><span class="unit">%</span></div>
+      <div class="kpi-delta delta-down">
+        <span class="delta-icon" aria-hidden="true">▼</span>
+        <span class="num">−0.4%p</span>
+        <span>전월 대비</span>
+      </div>
+    </article>
+
+    <article class="kpi card">
+      <div class="kpi-label">정산 대기</div>
+      <div class="kpi-value"><span class="num">284,000,000</span><span class="unit">원</span></div>
+      <div class="kpi-delta delta-flat">
+        <span class="delta-icon" aria-hidden="true">●</span>
+        <span>지연 <span class="num">0</span>건</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="card chart-card" aria-label="최근 8주 매출 추이">
+    <div class="card-head">
+      <h2 class="card-title">최근 8주 매출 추이</h2>
+      <span class="card-caption">단위: 백만원 · 세로축 0부터</span>
+    </div>
+    <div class="chart">
+      <div class="y-axis" aria-hidden="true">
+        <span>1,500</span>
+        <span>1,125</span>
+        <span>750</span>
+        <span>375</span>
+        <span>0</span>
+      </div>
+      <div class="plot">
+        <div class="gridline" style="top:0%"></div>
+        <div class="gridline" style="top:25%"></div>
+        <div class="gridline" style="top:50%"></div>
+        <div class="gridline" style="top:75%"></div>
+        <div class="bars" id="bars" role="img"
+             aria-label="1주 820, 2주 910, 3주 1,050, 4주 970, 5주 1,180, 6주 1,340 피크, 7주 1,220, 8주 1,284 백만원">
+          <!-- bars injected by JS; static fallback below -->
+          <div class="bar-col"><span class="bar-val num">820</span><span class="bar" style="height:54.7%"></span><span class="x-label">1주</span></div>
+          <div class="bar-col"><span class="bar-val num">910</span><span class="bar" style="height:60.7%"></span><span class="x-label">2주</span></div>
+          <div class="bar-col"><span class="bar-val num">1,050</span><span class="bar" style="height:70.0%"></span><span class="x-label">3주</span></div>
+          <div class="bar-col"><span class="bar-val num">970</span><span class="bar" style="height:64.7%"></span><span class="x-label">4주</span></div>
+          <div class="bar-col"><span class="bar-val num">1,180</span><span class="bar" style="height:78.7%"></span><span class="x-label">5주</span></div>
+          <div class="bar-col"><span class="peak-tag">피크</span><span class="bar-val num">1,340</span><span class="bar peak" style="height:89.3%"></span><span class="x-label">6주</span></div>
+          <div class="bar-col"><span class="bar-val num">1,220</span><span class="bar" style="height:81.3%"></span><span class="x-label">7주</span></div>
+          <div class="bar-col"><span class="bar-val num">1,284</span><span class="bar" style="height:85.6%"></span><span class="x-label">8주</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card table-card" aria-label="상품별 현황">
+    <div class="card-head">
+      <h2 class="card-title">상품별 현황</h2>
+      <span class="card-caption">전체 6개 상품</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">상품명</th>
+            <th scope="col">카테고리</th>
+            <th scope="col" class="right">재고</th>
+            <th scope="col" class="right">판매</th>
+            <th scope="col">상태</th>
+            <th scope="col"><span class="sr-only">동작</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr tabindex="0">
+            <td><div class="prod-name">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</div></td>
+            <td><span class="cat-chip">의류</span></td>
+            <td class="right num">1,240</td>
+            <td class="right num">856</td>
+            <td><span class="status st-sell"><span class="dot" aria-hidden="true"></span>판매중</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+          <tr tabindex="0">
+            <td><div class="prod-name">무선 블루투스 이어폰 Pro</div></td>
+            <td><span class="cat-chip">전자</span></td>
+            <td class="right num">0</td>
+            <td class="right num">2,103</td>
+            <td><span class="status st-out"><span class="dot" aria-hidden="true"></span>품절</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+          <tr tabindex="0">
+            <td><div class="prod-name">스테인리스 텀블러 500ml</div></td>
+            <td><span class="cat-chip">리빙</span></td>
+            <td class="right num">340</td>
+            <td class="right"><span class="miss" aria-label="값 없음">—</span></td>
+            <td><span class="status st-wait"><span class="dot" aria-hidden="true"></span>준비중</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+          <tr tabindex="0">
+            <td><div class="prod-name">친환경 대나무 칫솔 4개입</div></td>
+            <td><span class="cat-chip">생활</span></td>
+            <td class="right num">5,820</td>
+            <td class="right num">1,472</td>
+            <td><span class="status st-sell"><span class="dot" aria-hidden="true"></span>판매중</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+          <tr tabindex="0">
+            <td><div class="prod-name">아로마 캔들 세트</div></td>
+            <td><span class="cat-chip">리빙</span></td>
+            <td class="right num">88</td>
+            <td class="right num">640</td>
+            <td><span class="status st-done"><span class="dot" aria-hidden="true"></span>정산완료</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+          <tr tabindex="0">
+            <td><div class="prod-name">요가 매트 6mm 논슬립</div></td>
+            <td><span class="cat-chip">스포츠</span></td>
+            <td class="right num">210</td>
+            <td class="right num">95</td>
+            <td><span class="status st-wait"><span class="dot" aria-hidden="true"></span>준비중</span></td>
+            <td class="row-action"><button class="btn btn-text detail-btn" data-ripple type="button">상세</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<button class="fab" data-ripple type="button" aria-label="새 리포트 만들기">
+  <span class="fab-icon" aria-hidden="true">＋</span>새 리포트
+</button>
+
+<footer>STYLE 16 · 머티리얼</footer>
+
+<style>
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+</style>
+
+<script>
+  (function () {
+    "use strict";
+
+    // ---- Ripple (progressive enhancement; page fully works without it) ----
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function addRipple(e) {
+      if (reduce) return;
+      var el = e.currentTarget;
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var x = (e.clientX !== undefined ? e.clientX : rect.left + rect.width / 2) - rect.left - size / 2;
+      var y = (e.clientY !== undefined ? e.clientY : rect.top + rect.height / 2) - rect.top - size / 2;
+      var r = document.createElement("span");
+      r.className = "ripple";
+      r.style.width = r.style.height = size + "px";
+      r.style.left = x + "px";
+      r.style.top = y + "px";
+      el.appendChild(r);
+      r.addEventListener("animationend", function () { r.remove(); });
+    }
+
+    var ripples = document.querySelectorAll("[data-ripple]");
+    for (var i = 0; i < ripples.length; i++) {
+      ripples[i].addEventListener("pointerdown", addRipple);
+    }
+
+    // ---- Period tabs (toggle selected state) ----
+    var tablist = document.querySelector(".tabs");
+    if (tablist) {
+      var tabs = tablist.querySelectorAll(".tab");
+      tablist.addEventListener("click", function (e) {
+        var t = e.target.closest(".tab");
+        if (!t) return;
+        for (var j = 0; j < tabs.length; j++) {
+          tabs[j].setAttribute("aria-selected", tabs[j] === t ? "true" : "false");
+        }
+      });
+    }
+  })();
+</script>

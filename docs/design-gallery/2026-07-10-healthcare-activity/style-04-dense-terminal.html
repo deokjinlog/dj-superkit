@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핏펄스 (FitPulse) · 오늘의 활동 리포트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0C0E12;
+    --panel:#111419;
+    --panel2:#151920;
+    --border:#1E232B;
+    --amber:#F5A623;
+    --green:#3DDC84;
+    --red:#FF5252;
+    --blue:#4DA3FF;
+    --text:#D6DAE0;
+    --muted:#7E8798; /* 원 팔레트 #6B7482 대비 소폭 상향 — WCAG AA 4.5:1 확보용 조정 */
+    --hover-bg:#171C24;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Mono','Pretendard Variable',Pretendard,-apple-system,sans-serif;
+    font-size:12px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{font-variant-numeric:tabular-nums;}
+  .label{text-transform:uppercase;letter-spacing:.08em;}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+    gap:6px 16px;padding:9px 16px;background:var(--panel);border-bottom:1px solid var(--border);
+  }
+  .topbar-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .brand{font-size:15px;font-weight:700;color:var(--amber);letter-spacing:.08em;}
+  .brand-en{color:var(--muted);font-weight:400;font-size:10px;margin-left:6px;}
+  .title{font-size:12px;color:var(--text);}
+  .user-info{font-size:10.5px;color:var(--muted);}
+  .topbar-right{display:flex;align-items:center;gap:16px;font-size:11px;color:var(--muted);flex-wrap:wrap;}
+  .live{display:flex;align-items:center;gap:5px;color:var(--green);}
+  .live-dot{width:6px;height:6px;background:var(--green);display:inline-block;animation:blink 2s steps(1,end) infinite;}
+  @media (prefers-reduced-motion: reduce){.live-dot{animation:none;opacity:1;}}
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:.15;}}
+  .sys-clock{color:var(--text);}
+
+  /* ---------- hero strip ---------- */
+  .hero{
+    display:grid;grid-template-columns:180px 1fr 1.4fr;gap:22px;
+    padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border);
+    align-items:center;
+  }
+  .hero-score-label{font-size:9.5px;color:var(--muted);margin-bottom:4px;}
+  .hero-score-value{font-size:20px;font-weight:700;color:var(--text);}
+  .hero-score-unit{font-size:11px;color:var(--muted);margin-left:2px;}
+  .hero-score-delta{font-size:10.5px;color:var(--green);margin-top:3px;}
+  .hero-rings{display:flex;flex-direction:column;gap:6px;}
+  .ring-row{display:grid;grid-template-columns:52px 1fr 34px;align-items:center;gap:8px;}
+  .ring-label{font-size:10px;color:var(--muted);}
+  .ring-track{position:relative;height:8px;background:#0A0C10;border:1px solid var(--border);}
+  .ring-fill{height:100%;}
+  .ring-fill.rf-walk{background:repeating-linear-gradient(135deg,var(--blue) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .ring-fill.rf-ex{background:repeating-linear-gradient(135deg,var(--green) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .ring-fill.rf-stand{background:repeating-linear-gradient(135deg,var(--amber) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .ring-pct{font-size:10.5px;text-align:right;color:var(--text);}
+  .coach{
+    border-left:2px solid var(--amber);padding:6px 0 6px 12px;
+  }
+  .coach-tag{font-size:9px;color:var(--amber);letter-spacing:.08em;display:block;margin-bottom:3px;}
+  .coach-msg{font-size:11.5px;color:var(--text);}
+
+  /* ---------- grid ---------- */
+  .grid{display:grid;grid-template-columns:290px 1fr 300px;}
+  .col{display:flex;flex-direction:column;border-right:1px solid var(--border);}
+  .col:last-child{border-right:none;}
+  .panel{padding:12px 14px;border-bottom:1px solid var(--border);}
+  .panel:last-child{border-bottom:none;}
+  .col-left .panel:last-child{flex:1;display:flex;flex-direction:column;min-height:220px;}
+  .panel-header{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);margin-bottom:10px;}
+  .panel-index{color:var(--amber);border:1px solid var(--border);padding:0 4px;line-height:1.5;}
+  .panel-sub{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:9.5px;}
+
+  /* ---------- KPI summary ---------- */
+  .kpi-row{padding:7px 0;border-bottom:1px dotted var(--border);}
+  .kpi-row:last-child{border-bottom:none;}
+  .kpi-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .kpi-label-group{display:flex;align-items:center;gap:6px;}
+  .kpi-label{font-size:10.5px;color:var(--text);letter-spacing:.03em;}
+  .kpi-spark{flex:none;overflow:visible;}
+  .kpi-right{text-align:right;}
+  .kpi-value{font-size:16px;font-weight:600;}
+  .kpi-unit{font-size:9.5px;color:var(--muted);margin-left:2px;}
+  .kpi-meta{display:flex;justify-content:flex-end;gap:8px;margin-top:2px;}
+  .kpi-delta{font-size:9.5px;}
+  .kpi-delta.up{color:var(--green);}
+  .kpi-delta.down{color:var(--red);}
+  .kpi-sub{font-size:9.5px;color:var(--muted);}
+
+  /* ---------- event log ---------- */
+  .log-list{display:flex;flex-direction:column;font-size:10.5px;overflow:hidden;}
+  .log-line{padding:5px 0;border-bottom:1px dotted var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .log-line:last-child{border-bottom:none;}
+  .log-time{color:var(--muted);margin-right:6px;}
+  .log-tag{color:var(--amber);letter-spacing:.06em;margin-right:6px;}
+  .log-tag.tag-alert{color:var(--red);border:1px solid var(--red);padding:0 4px;margin-right:6px;}
+  .log-line.is-alert{background:rgba(255,82,82,.07);}
+  .log-text{color:var(--text);}
+  .log-line.latest .log-text{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:auto;border-right:1px solid transparent;}
+  @media (prefers-reduced-motion: no-preference){
+    .log-line.latest .log-text{width:0;animation:typeIn 1.5s steps(20,end) forwards, caret .8s step-end 6;border-right-color:var(--amber);}
+  }
+  @keyframes typeIn{to{width:24ch;}}
+  @keyframes caret{50%{border-right-color:transparent;}}
+  .log-line[data-rel]:hover{background:var(--hover-bg);cursor:default;}
+
+  /* ---------- chart A (hourly steps) ---------- */
+  .chart-meta{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-bottom:8px;}
+  .chart-row{display:grid;grid-template-columns:36px 1fr 70px;align-items:center;gap:8px;padding:4px 0;border-bottom:1px dotted var(--border);}
+  .chart-row:last-child{border-bottom:none;}
+  .chart-hour{font-size:10px;color:var(--muted);}
+  .chart-track{
+    position:relative;height:12px;border:1px solid var(--border);
+    background-color:#0A0C10;
+    background-image:linear-gradient(to right,
+      transparent 24.4%, var(--border) 24.4%, var(--border) 25%, transparent 25%,
+      transparent 49.4%, var(--border) 49.4%, var(--border) 50%, transparent 50%,
+      transparent 74.4%, var(--border) 74.4%, var(--border) 75%, transparent 75%);
+  }
+  .chart-fill{height:100%;background:repeating-linear-gradient(135deg,var(--blue) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .chart-fill.peak{background:repeating-linear-gradient(135deg,var(--amber) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .chart-value{font-size:10px;text-align:right;color:var(--text);}
+  .chart-value.peak{color:var(--amber);font-weight:600;}
+  .chart-tag{font-size:8px;color:var(--amber);letter-spacing:.06em;margin-left:3px;}
+  .chart-axis{display:grid;grid-template-columns:36px 1fr 70px;gap:8px;padding:1px 0 8px;}
+  .axis-track{position:relative;height:5px;border-top:1px solid var(--border);}
+  .axis-tick{position:absolute;top:-1px;width:1px;height:5px;background:var(--muted);transform:translateX(-50%);}
+  .chart-total{margin-top:1px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+  .chart-total b{color:var(--text);font-weight:600;}
+
+  /* ---------- weekly strip ---------- */
+  .week-meta{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-bottom:8px;}
+  .week-bars{display:flex;align-items:flex-end;gap:6px;height:74px;}
+  .week-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .week-track{width:100%;flex:1;display:flex;align-items:flex-end;background:#0A0C10;border:1px solid var(--border);position:relative;}
+  .week-fill{width:100%;background:repeating-linear-gradient(135deg,var(--blue) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .week-bar-col.peak .week-fill{background:repeating-linear-gradient(135deg,var(--amber) 0 3px,rgba(0,0,0,.4) 3px 6px);}
+  .week-bar-col.today .week-track{border-color:var(--amber);border-width:2px;}
+  .week-date{font-size:8.5px;color:var(--muted);margin-top:5px;}
+  .week-bar-col.today .week-date{color:var(--amber);}
+  .week-val{font-size:8px;color:var(--muted);margin-bottom:3px;}
+  .week-tag{display:block;font-size:7.5px;color:var(--amber);letter-spacing:.04em;}
+
+  /* ---------- chart B (HR zone) ---------- */
+  .hz-stack{display:flex;width:100%;height:14px;border:1px solid var(--border);margin-bottom:10px;}
+  .hz-seg{height:100%;}
+  .hz-seg.rest{background:var(--muted);}
+  .hz-seg.warm{background:var(--blue);}
+  .hz-seg.fat{background:var(--green);}
+  .hz-seg.cardio{background:var(--amber);}
+  .hz-seg.max{background:var(--red);}
+  .hz-row{display:grid;grid-template-columns:10px 1fr 62px 40px;align-items:center;gap:7px;padding:4px 0;border-bottom:1px dotted var(--border);font-size:10px;}
+  .hz-row:last-child{border-bottom:none;}
+  .hz-dot{width:8px;height:8px;}
+  .hz-dot.rest{background:var(--muted);}
+  .hz-dot.warm{background:var(--blue);}
+  .hz-dot.fat{background:var(--green);}
+  .hz-dot.cardio{background:var(--amber);}
+  .hz-dot.max{background:var(--red);}
+  .hz-zone{color:var(--text);}
+  .hz-range{color:var(--muted);font-size:9px;}
+  .hz-min{text-align:right;color:var(--text);}
+  .hz-row.hl .hz-zone{color:var(--amber);font-weight:600;}
+  .hz-row.hl .hz-min{color:var(--amber);font-weight:600;}
+  .hz-note{margin-top:9px;padding-top:8px;border-top:1px solid var(--border);font-size:9.5px;color:var(--amber);}
+
+  /* ---------- achievements ---------- */
+  .badge{border:1px solid var(--border);border-left:2px solid var(--amber);padding:7px 9px;margin-bottom:8px;background:var(--panel2);}
+  .badge:last-child{margin-bottom:0;}
+  .badge-tag{font-size:8.5px;color:var(--amber);letter-spacing:.06em;margin-bottom:3px;}
+  .badge-title{font-size:11px;color:var(--text);font-weight:600;}
+  .badge-desc{font-size:9.5px;color:var(--muted);margin-top:2px;}
+
+  /* ---------- mission table (full width) ---------- */
+  .mission-panel{padding:12px 16px;border-bottom:1px solid var(--border);}
+  .mission-wrap{overflow-x:auto;}
+  .mission-head,.mission-row{
+    display:grid;
+    grid-template-columns:60px 1.3fr .9fr .9fr 1.1fr .9fr .8fr;
+    gap:8px;align-items:center;min-width:640px;
+  }
+  .mission-head{font-size:9px;color:var(--muted);letter-spacing:.06em;padding-bottom:7px;border-bottom:1px solid var(--border);}
+  .mission-row{padding:7px 0;border-bottom:1px dotted var(--border);font-size:10.5px;}
+  .mission-row:last-child{border-bottom:none;}
+  .mission-row:hover,.mission-row.hl{background:var(--hover-bg);}
+  .mission-time{color:var(--muted);}
+  .mission-name{color:var(--text);}
+  .rate-cell{display:flex;align-items:center;}
+  .meter{color:var(--muted);letter-spacing:-1px;font-size:9.5px;margin-right:5px;}
+  .status-badge{display:inline-block;font-size:9px;letter-spacing:.04em;padding:1px 5px;border:1px solid currentColor;white-space:nowrap;}
+  .st-progress{color:var(--blue);}
+  .st-done{color:var(--green);}
+  .st-wait{color:var(--muted);}
+  .st-warn{color:var(--red);background:rgba(255,82,82,.14);font-weight:600;}
+
+  /* ---------- function key bar ---------- */
+  .fkeys{display:flex;background:var(--panel);border-top:1px solid var(--border);}
+  .fkey{flex:1;text-align:center;padding:8px 4px;font-size:9.5px;color:var(--muted);letter-spacing:.08em;border-right:1px solid var(--border);text-transform:uppercase;}
+  .fkey:last-child{border-right:none;}
+  .fkey b{color:var(--amber);margin-right:5px;}
+
+  .site-footer{text-align:center;padding:8px;font-size:9.5px;color:var(--muted);letter-spacing:.05em;border-top:1px solid var(--border);background:var(--bg);}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;gap:12px;}
+    .grid{grid-template-columns:1fr;}
+    .col{border-right:none;border-bottom:1px solid var(--border);}
+    .col-left .panel:last-child{flex:none;min-height:180px;}
+    .fkeys{flex-wrap:wrap;}
+    .fkey{flex:1 1 20%;border-bottom:1px solid var(--border);}
+  }
+  @media (max-width:520px){
+    .topbar{padding:8px 10px;}
+    .panel,.mission-panel{padding:10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="brand">핏펄스<span class="brand-en">FitPulse</span></span>
+    <span class="title">오늘의 활동 리포트</span>
+    <span class="user-info">닉네임 핏메이트 · 연속 기록 12일</span>
+  </div>
+  <div class="topbar-right">
+    <span>갱신 2026-07-10 08:42 · 동기화 완료</span>
+    <span class="live"><span class="live-dot"></span>LIVE</span>
+    <span class="sys-clock num" id="sysClock">08:42:00</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-score">
+    <div class="hero-score-label label">종합 활동 점수</div>
+    <div><span class="hero-score-value num">87</span><span class="hero-score-unit">점</span></div>
+    <div class="hero-score-delta num">▲ 전일 대비 +6점</div>
+  </div>
+  <div class="hero-rings">
+    <div class="ring-row">
+      <span class="ring-label">걷기</span>
+      <span class="ring-track"><span class="ring-fill rf-walk" style="width:84%"></span></span>
+      <span class="ring-pct num">84%</span>
+    </div>
+    <div class="ring-row">
+      <span class="ring-label">운동</span>
+      <span class="ring-track"><span class="ring-fill rf-ex" style="width:94%"></span></span>
+      <span class="ring-pct num">94%</span>
+    </div>
+    <div class="ring-row">
+      <span class="ring-label">스탠드</span>
+      <span class="ring-track"><span class="ring-fill rf-stand" style="width:75%"></span></span>
+      <span class="ring-pct num">75%</span>
+    </div>
+  </div>
+  <div class="coach">
+    <span class="coach-tag label">COACHING</span>
+    <div class="coach-msg">"목표까지 1,568걸음 남았어요. 저녁 산책이면 충분해요."</div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- LEFT: KPI SUMMARY + EVENT LOG -->
+  <div class="col col-left">
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">1</span>KPI SUMMARY</div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">걸음 수</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,13 7.33,5.42 14.67,7.69 22,1 29.33,6.13 36.67,4.41 44,3.11" fill="none" style="stroke:var(--green);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="3.11" r="1.6" style="fill:var(--green)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">8,432</span><span class="kpi-unit">걸음</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta up num">▲ 전일 대비 +12.3%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">목표 10,000보의 84%</span></div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">활동 칼로리</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,13 44,1" fill="none" style="stroke:var(--green);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="1" r="1.6" style="fill:var(--green)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">512</span><span class="kpi-unit">kcal</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta up num">▲ 전일 대비 +8.1%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">목표 700kcal의 73%</span></div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">운동 시간</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,13 44,1" fill="none" style="stroke:var(--green);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="1" r="1.6" style="fill:var(--green)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">47</span><span class="kpi-unit">분</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta up num">▲ 전일 대비 +15.2%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">목표 50분의 94%</span></div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">평균 심박수</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,1 44,13" fill="none" style="stroke:var(--red);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="13" r="1.6" style="fill:var(--red)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">72</span><span class="kpi-unit">bpm</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta down num">▼ 전일 대비 −2.7%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">안정 범위</span></div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">수면 점수</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,13 44,1" fill="none" style="stroke:var(--green);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="1" r="1.6" style="fill:var(--green)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">82</span><span class="kpi-unit">점</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta up num">▲ 전주 대비 +4.0%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">6시간 48분</span></div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-top">
+          <span class="kpi-label-group">
+            <span class="kpi-label">스트레스 지수</span>
+            <svg class="kpi-spark" width="44" height="14" viewBox="0 0 44 14" aria-hidden="true" focusable="false">
+              <polyline points="0,1 44,13" fill="none" style="stroke:var(--red);stroke-width:1.3;stroke-linejoin:round;stroke-linecap:round"/>
+              <circle cx="44" cy="13" r="1.6" style="fill:var(--red)"/>
+            </svg>
+          </span>
+          <span class="kpi-right"><span class="kpi-value num">34</span><span class="kpi-unit">—</span></span>
+        </div>
+        <div class="kpi-meta"><span class="kpi-delta down num">▼ 전일 대비 −11.0%</span></div>
+        <div class="kpi-meta"><span class="kpi-sub">낮음 (양호)</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">2</span>EVENT LOG</div>
+      <div class="log-list" id="eventLog">
+        <div class="log-line" data-rel="stretch"><span class="log-time num">08:35:20</span><span class="log-tag">SYNC</span><span class="log-text">모닝 스트레칭 완료 기록</span></div>
+        <div class="log-line" data-rel="commute"><span class="log-time num">08:36:55</span><span class="log-tag">GOAL</span><span class="log-text">출근 걷기 목표 108% 달성</span></div>
+        <div class="log-line" data-rel="hydrate"><span class="log-time num">08:38:03</span><span class="log-tag">HYDRATE</span><span class="log-text">수분 섭취 60% 진행 중</span></div>
+        <div class="log-line is-alert" data-rel="hrzone"><span class="log-time num">08:39:47</span><span class="log-tag tag-alert">ALERT</span><span class="log-text">심박존 유지 시간 부족 감지</span></div>
+        <div class="log-line latest" data-rel="run"><span class="log-time num">08:40:12</span><span class="log-tag">SYSTEM</span><span class="log-text">저녁 러닝 4.2km 갱신</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: CHART A + WEEKLY STRIP -->
+  <div class="col col-center">
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">3</span>CHART A<span class="panel-sub">&nbsp;시간대별 걸음 수 (오늘)</span></div>
+      <div class="chart-meta"><span>시각</span><span>피크 18시 · 2,140걸음</span></div>
+
+      <div class="chart-row">
+        <span class="chart-hour">06시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:14.95%"></span></span>
+        <span class="chart-value num">320</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">08시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:57.94%"></span></span>
+        <span class="chart-value num">1,240</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">10시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:31.78%"></span></span>
+        <span class="chart-value num">680</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">12시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:71.03%"></span></span>
+        <span class="chart-value num">1,520</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">14시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:25.23%"></span></span>
+        <span class="chart-value num">540</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">16시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:41.59%"></span></span>
+        <span class="chart-value num">890</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">18시</span>
+        <span class="chart-track"><span class="chart-fill peak" style="width:100%"></span></span>
+        <span class="chart-value peak num">2,140<span class="chart-tag">PEAK</span></span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">20시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:36.45%"></span></span>
+        <span class="chart-value num">780</span>
+      </div>
+      <div class="chart-row">
+        <span class="chart-hour">22시</span>
+        <span class="chart-track"><span class="chart-fill" style="width:15.05%"></span></span>
+        <span class="chart-value num">322</span>
+      </div>
+
+      <div class="chart-axis">
+        <span></span>
+        <span class="axis-track">
+          <span class="axis-tick" style="left:0%"></span>
+          <span class="axis-tick" style="left:25%"></span>
+          <span class="axis-tick" style="left:50%"></span>
+          <span class="axis-tick" style="left:75%"></span>
+          <span class="axis-tick" style="left:100%"></span>
+        </span>
+        <span></span>
+      </div>
+
+      <div class="chart-total"><span>SUM 06시–22시</span><b class="num">8,432 걸음</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">4</span>WEEKLY<span class="panel-sub">&nbsp;최근 7일 걸음</span></div>
+      <div class="week-meta"><span>7/4 – 7/10</span><span>주간 최고 7/7 · 9,120걸음</span></div>
+      <div class="week-bars">
+        <div class="week-bar-col">
+          <span class="week-val num">5,210</span>
+          <span class="week-track"><span class="week-fill" style="height:57%"></span></span>
+          <span class="week-date">7/4</span>
+        </div>
+        <div class="week-bar-col">
+          <span class="week-val num">7,680</span>
+          <span class="week-track"><span class="week-fill" style="height:84%"></span></span>
+          <span class="week-date">7/5</span>
+        </div>
+        <div class="week-bar-col">
+          <span class="week-val num">6,940</span>
+          <span class="week-track"><span class="week-fill" style="height:76%"></span></span>
+          <span class="week-date">7/6</span>
+        </div>
+        <div class="week-bar-col peak">
+          <span class="week-val num">9,120</span>
+          <span class="week-track"><span class="week-fill" style="height:100%"></span></span>
+          <span class="week-date">7/7<span class="week-tag">PEAK</span></span>
+        </div>
+        <div class="week-bar-col">
+          <span class="week-val num">7,450</span>
+          <span class="week-track"><span class="week-fill" style="height:82%"></span></span>
+          <span class="week-date">7/8</span>
+        </div>
+        <div class="week-bar-col">
+          <span class="week-val num">8,010</span>
+          <span class="week-track"><span class="week-fill" style="height:88%"></span></span>
+          <span class="week-date">7/9</span>
+        </div>
+        <div class="week-bar-col today">
+          <span class="week-val num">8,432</span>
+          <span class="week-track"><span class="week-fill" style="height:92%"></span></span>
+          <span class="week-date">7/10<span class="week-tag">TODAY</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CHART B + ACHIEVEMENTS -->
+  <div class="col col-right">
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">5</span>CHART B<span class="panel-sub">&nbsp;심박존 분포 (오늘)</span></div>
+
+      <div class="hz-stack">
+        <span class="hz-seg rest" style="width:66.02%"></span>
+        <span class="hz-seg warm" style="width:18.77%"></span>
+        <span class="hz-seg fat" style="width:9.92%"></span>
+        <span class="hz-seg cardio" style="width:4.42%"></span>
+        <span class="hz-seg max" style="width:0.86%"></span>
+      </div>
+
+      <div class="hz-row">
+        <span class="hz-dot rest"></span><span class="hz-zone">휴식</span><span class="hz-range">&lt;90 bpm</span><span class="hz-min num">612분</span>
+      </div>
+      <div class="hz-row">
+        <span class="hz-dot warm"></span><span class="hz-zone">워밍업</span><span class="hz-range">90–108</span><span class="hz-min num">174분</span>
+      </div>
+      <div class="hz-row">
+        <span class="hz-dot fat"></span><span class="hz-zone">지방연소</span><span class="hz-range">108–126</span><span class="hz-min num">92분</span>
+      </div>
+      <div class="hz-row hl">
+        <span class="hz-dot cardio"></span><span class="hz-zone">유산소</span><span class="hz-range">126–144</span><span class="hz-min num">41분</span>
+      </div>
+      <div class="hz-row">
+        <span class="hz-dot max"></span><span class="hz-zone">최대</span><span class="hz-range">144+</span><span class="hz-min num">8분</span>
+      </div>
+
+      <div class="hz-note">유산소 존 41분 = 목표 30분 초과 달성</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header label"><span class="panel-index">6</span>ACHIEVEMENTS</div>
+
+      <div class="badge">
+        <div class="badge-tag label">STREAK</div>
+        <div class="badge-title">연속 12일 목표 달성</div>
+        <div class="badge-desc">12일째 데일리 골 완료</div>
+      </div>
+      <div class="badge">
+        <div class="badge-tag label">BEST</div>
+        <div class="badge-title">이번 주 최고 걸음</div>
+        <div class="badge-desc">7/7 9,120걸음 기록</div>
+      </div>
+      <div class="badge">
+        <div class="badge-tag label">CARDIO</div>
+        <div class="badge-title">유산소 존 목표 3회</div>
+        <div class="badge-desc">이번 주 유산소 목표 3회 달성</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MISSION TABLE (full width — 7열 데이터를 위해 3열 그리드 밖으로 분리) -->
+<div class="mission-panel">
+  <div class="panel-header label"><span class="panel-index">7</span>MISSION FEED<span class="panel-sub">&nbsp;오늘의 건강 미션 (7열 × 8행)</span></div>
+
+  <div class="mission-wrap">
+    <div class="mission-head label">
+      <span>시각</span><span>활동</span><span>목표</span><span>현재</span><span>달성률</span><span>소비</span><span>상태</span>
+    </div>
+
+    <div class="mission-row" data-rel="stretch">
+      <span class="mission-time num">07:10</span>
+      <span class="mission-name">모닝 스트레칭</span>
+      <span class="num">15분</span>
+      <span class="num">15분</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▮▮▮▮</span><span class="num">100%</span></span>
+      <span class="num">38 kcal</span>
+      <span><span class="status-badge st-done">완료</span></span>
+    </div>
+    <div class="mission-row" data-rel="commute">
+      <span class="mission-time num">08:30</span>
+      <span class="mission-name">출근 걷기</span>
+      <span class="num">3,000보</span>
+      <span class="num">3,240보</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▮▮▮▮</span><span class="num">108%</span></span>
+      <span class="num">96 kcal</span>
+      <span><span class="status-badge st-done">완료</span></span>
+    </div>
+    <div class="mission-row" data-rel="lunchwalk">
+      <span class="mission-time num">12:20</span>
+      <span class="mission-name">점심 산책</span>
+      <span class="num">2,000보</span>
+      <span class="num">1,520보</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▮▯▯▯</span><span class="num">76%</span></span>
+      <span class="num">54 kcal</span>
+      <span><span class="status-badge st-progress">진행중</span></span>
+    </div>
+    <div class="mission-row" data-rel="hydrate">
+      <span class="mission-time num">14:00</span>
+      <span class="mission-name">수분 섭취</span>
+      <span class="num">2.0 L</span>
+      <span class="num">1.2 L</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▯▯▯▯</span><span class="num">60%</span></span>
+      <span class="num">—</span>
+      <span><span class="status-badge st-progress">진행중</span></span>
+    </div>
+    <div class="mission-row" data-rel="strength">
+      <span class="mission-time num">16:30</span>
+      <span class="mission-name">근력 운동</span>
+      <span class="num">3 세트</span>
+      <span class="num">0 세트</span>
+      <span class="rate-cell"><span class="meter">▯▯▯▯▯▯▯▯▯▯</span><span class="num">0%</span></span>
+      <span class="num">—</span>
+      <span><span class="status-badge st-wait">대기</span></span>
+    </div>
+    <div class="mission-row" data-rel="run">
+      <span class="mission-time num">18:00</span>
+      <span class="mission-name">저녁 러닝</span>
+      <span class="num">5.0 km</span>
+      <span class="num">4.2 km</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▮▮▯▯</span><span class="num">84%</span></span>
+      <span class="num">312 kcal</span>
+      <span><span class="status-badge st-progress">진행중</span></span>
+    </div>
+    <div class="mission-row" data-rel="meditate">
+      <span class="mission-time num">21:00</span>
+      <span class="mission-name">명상</span>
+      <span class="num">10분</span>
+      <span class="num">10분</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▮▮▮▮▮▮▮</span><span class="num">100%</span></span>
+      <span class="num">8 kcal</span>
+      <span><span class="status-badge st-done">완료</span></span>
+    </div>
+    <div class="mission-row" data-rel="hrzone">
+      <span class="mission-time num">22:30</span>
+      <span class="mission-name">심박존 유지</span>
+      <span class="num">20분</span>
+      <span class="num">6분</span>
+      <span class="rate-cell"><span class="meter">▮▮▮▯▯▯▯▯▯▯</span><span class="num">30%</span></span>
+      <span class="num">—</span>
+      <span><span class="status-badge st-warn">주의</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="fkeys label">
+  <div class="fkey"><b>F1</b>HERO</div>
+  <div class="fkey"><b>F2</b>SUMMARY</div>
+  <div class="fkey"><b>F3</b>CHARTS</div>
+  <div class="fkey"><b>F4</b>MISSIONS</div>
+  <div class="fkey"><b>F5</b>LOG</div>
+</div>
+
+<div class="site-footer">STYLE 04 · 고밀도 터미널</div>
+
+<script>
+(function(){
+  function pad(n){return n < 10 ? '0' + n : '' + n;}
+
+  // 1) 상태바 시계 — 초 단위로 흐름
+  var clockEl = document.getElementById('sysClock');
+  function tick(){
+    var d = new Date();
+    if (clockEl) clockEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  // 2) 이벤트 로그 순환 — 8~15초 간격, 최대 7줄 유지 (시그니처: 시스템이 지금 일하고 있다는 증거)
+  var logMessages = [
+    { tag: 'SYNC',    text: '모닝 스트레칭 완료 기록',        rel: 'stretch' },
+    { tag: 'GOAL',    text: '출근 걷기 목표 108% 달성',       rel: 'commute' },
+    { tag: 'HYDRATE', text: '수분 섭취 60% 진행 중',          rel: 'hydrate' },
+    { tag: 'ALERT',   text: '심박존 유지 시간 부족 감지',     rel: 'hrzone'  },
+    { tag: 'SYSTEM',  text: '저녁 러닝 4.2km 갱신',           rel: 'run'     }
+  ];
+  var logListEl = document.getElementById('eventLog');
+  var MAX_LINES = 7;
+  var msgIndex = 0;
+
+  function bindHover(line){
+    var rel = line.getAttribute('data-rel');
+    if (!rel) return;
+    line.addEventListener('mouseenter', function(){
+      var row = document.querySelector('.mission-row[data-rel="' + rel + '"]');
+      if (row) row.classList.add('hl');
+    });
+    line.addEventListener('mouseleave', function(){
+      var row = document.querySelector('.mission-row[data-rel="' + rel + '"]');
+      if (row) row.classList.remove('hl');
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#eventLog .log-line'), bindHover);
+
+  function appendLog(){
+    if (!logListEl) return;
+    var m = logMessages[msgIndex % logMessages.length];
+    msgIndex++;
+    var d = new Date();
+    var ts = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    var isAlert = (m.tag === 'ALERT');
+
+    var line = document.createElement('div');
+    line.className = 'log-line' + (isAlert ? ' is-alert' : '');
+    if (m.rel) line.setAttribute('data-rel', m.rel);
+    line.innerHTML =
+      '<span class="log-time num">' + ts + '</span>' +
+      '<span class="log-tag' + (isAlert ? ' tag-alert' : '') + '">' + m.tag + '</span>' +
+      '<span class="log-text">' + m.text + '</span>';
+
+    logListEl.appendChild(line);
+    while (logListEl.children.length > MAX_LINES){
+      logListEl.removeChild(logListEl.firstElementChild);
+    }
+    bindHover(line);
+  }
+
+  function scheduleNext(){
+    var delay = 8000 + Math.random() * 7000; // 8~15초
+    setTimeout(function(){
+      appendLog();
+      scheduleNext();
+    }, delay);
+  }
+  if (!reduced) scheduleNext();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,961 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>Vecta — 알림 센터</title>
+<style>
+  :root{
+    /* ── surface / hairline (저채도 다크) ── */
+    --base:#0E0E11;
+    --surface:#131317;
+    --surface-raised:#17171C;
+    --surface-hover:#1C1C22;
+    --border:#232326;
+    --border-strong:#2E2E33;
+
+    /* ── text (3단 위계만) ── */
+    --fg:#EDEDEF;
+    --fg-secondary:#A0A0A8;
+    --fg-tertiary:#6E6E76;
+
+    /* ── accent 하나 (저채도 인디고) ── */
+    --accent:#8B8BF5;
+    --accent-dim:rgba(139,139,245,.14);
+    --accent-line:rgba(139,139,245,.32);
+
+    /* ── 상태색 (억제, 아이콘/라벨 병행) ── */
+    --success:#4E9A76;
+    --warning:#C7A15A;
+    --danger:#C96A6A;
+    --success-dim:rgba(78,154,118,.14);
+    --warning-dim:rgba(199,161,90,.14);
+    --danger-dim:rgba(201,106,106,.14);
+
+    /* ── radius (작게 일관) ── */
+    --r-card:10px;
+    --r-ctl:8px;
+    --r-avatar:6px;
+
+    /* ── elevation (팝오버만, 아주 얕게) ── */
+    --pop-shadow:0 8px 24px rgba(0,0,0,.4);
+
+    /* ── motion ── */
+    --ease:cubic-bezier(.4,0,.2,1);
+
+    font-synthesis:none;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 82% -8%, rgba(139,139,245,.05), transparent 60%),
+      var(--base);
+    color:var(--fg);
+    font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    letter-spacing:-0.01em;
+    animation:pageIn .22s var(--ease) both;
+  }
+  @keyframes pageIn{from{opacity:0}to{opacity:1}}
+
+  .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+
+  /* ── focus ring (헤어라인 색 전환만으로 금지) ── */
+  a:focus-visible,button:focus-visible,input:focus-visible,
+  .nav-item:focus-visible,.check:focus-within,.icon-btn:focus-visible,
+  .seg:focus-visible,.pill:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+    border-radius:var(--r-ctl);
+  }
+
+  /* ═══════════ 상단바 ═══════════ */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    display:flex;align-items:center;gap:16px;
+    height:56px;padding:0 24px;
+    background:rgba(14,14,17,.82);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brand .mark{
+    width:26px;height:26px;border-radius:7px;flex-shrink:0;
+    background:linear-gradient(150deg,#9a9af7,#6f6fe0);
+    position:relative;
+  }
+  .brand .mark::after{
+    content:"";position:absolute;inset:7px;border-radius:2px;
+    background:var(--base);
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.14);
+  }
+  .brand .name{font-size:15px;font-weight:600;letter-spacing:-0.02em;color:var(--fg);}
+  .brand .name span{color:var(--fg-tertiary);font-weight:500;}
+
+  .topbar .search{
+    flex:1;max-width:420px;margin-left:8px;
+    display:flex;align-items:center;gap:8px;
+    height:34px;padding:0 12px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-ctl);
+    color:var(--fg-tertiary);
+    transition:border-color .15s var(--ease),background .15s var(--ease);
+  }
+  .topbar .search:hover{border-color:var(--border-strong);}
+  .topbar .search:focus-within{border-color:var(--accent);background:var(--surface-raised);}
+  .topbar .search svg{width:15px;height:15px;flex-shrink:0;}
+  .topbar .search input{
+    flex:1;border:0;background:transparent;outline:none;
+    color:var(--fg);font-family:inherit;font-size:13px;letter-spacing:-0.01em;
+  }
+  .topbar .search input::placeholder{color:var(--fg-tertiary);}
+  .topbar .search kbd{
+    font-family:inherit;font-size:11px;color:var(--fg-tertiary);
+    padding:2px 6px;border:1px solid var(--border);border-radius:5px;
+    background:var(--base);letter-spacing:0;
+  }
+
+  .topbar .right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .icon-btn{
+    position:relative;
+    width:34px;height:34px;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid transparent;border-radius:var(--r-avatar);
+    color:var(--fg-secondary);cursor:pointer;
+    transition:background .12s var(--ease),color .12s var(--ease),border-color .12s var(--ease),transform .08s var(--ease);
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{background:var(--surface-hover);color:var(--fg);border-color:var(--border);}
+  .icon-btn:active{transform:scale(.96);}
+  .icon-btn .dot{
+    position:absolute;top:7px;right:8px;
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--base);
+  }
+  .avatar{
+    width:30px;height:30px;flex-shrink:0;border-radius:var(--r-avatar);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:600;letter-spacing:0.02em;
+    color:var(--accent);background:var(--accent-dim);
+    border:1px solid var(--accent-line);cursor:pointer;
+    transition:transform .08s var(--ease);
+  }
+  .avatar:active{transform:scale(.96);}
+
+  /* ═══════════ 페이지 그리드 ═══════════ */
+  .shell{
+    display:grid;
+    grid-template-columns:240px minmax(0,1fr);
+    max-width:1280px;margin:0 auto;
+    align-items:start;
+  }
+
+  /* ── 좌측 설정 네비 ── */
+  .side{
+    position:sticky;top:56px;
+    align-self:start;
+    padding:24px 12px 48px 16px;
+    height:calc(100vh - 56px);
+    overflow:auto;
+    border-right:1px solid var(--border);
+  }
+  .side .group{margin-bottom:24px;}
+  .side .glabel{
+    font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--fg-tertiary);padding:0 8px;margin:0 0 8px;
+  }
+  .nav-item{
+    position:relative;
+    display:flex;align-items:center;gap:10px;
+    height:34px;padding:0 10px;margin-bottom:2px;
+    border-radius:var(--r-ctl);
+    color:var(--fg-secondary);text-decoration:none;
+    font-size:13.5px;font-weight:450;cursor:pointer;
+    transition:background .12s var(--ease),color .12s var(--ease);
+  }
+  .nav-item .ni-ico{width:16px;height:16px;flex-shrink:0;color:var(--fg-tertiary);transition:color .12s var(--ease);}
+  .nav-item::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;width:0;
+    background:var(--accent);border-radius:2px;
+    transition:width .12s var(--ease);
+  }
+  .nav-item:hover{background:var(--surface-hover);color:var(--fg);}
+  .nav-item:hover .ni-ico{color:var(--fg-secondary);}
+  .nav-item:hover::before{width:2px;}
+  .nav-item.active{background:var(--surface-raised);color:var(--fg);font-weight:550;}
+  .nav-item.active .ni-ico{color:var(--accent);}
+  .nav-item.active::before{width:2px;}
+  .nav-item .ni-badge{
+    margin-left:auto;font-size:11px;font-weight:600;
+    color:var(--fg-tertiary);
+    padding:1px 6px;border-radius:20px;border:1px solid var(--border);
+    background:var(--base);
+  }
+  .nav-item.active .ni-badge{color:var(--accent);border-color:var(--accent-line);background:var(--accent-dim);}
+
+  /* ── 메인 ── */
+  .main{padding:32px 40px 80px;min-width:0;}
+
+  .page-head{margin-bottom:32px;}
+  .crumb{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;color:var(--fg-tertiary);margin-bottom:14px;letter-spacing:0.01em;
+  }
+  .crumb a{color:var(--fg-tertiary);text-decoration:none;transition:color .12s var(--ease);}
+  .crumb a:hover{color:var(--fg-secondary);}
+  .crumb .sep{color:var(--border-strong);}
+  .crumb .cur{color:var(--fg-secondary);}
+  .page-head h1{
+    margin:0 0 6px;font-size:30px;line-height:38px;font-weight:620;letter-spacing:-0.02em;color:var(--fg);
+  }
+  .page-head p{margin:0;font-size:14px;color:var(--fg-secondary);max-width:56ch;}
+
+  /* ── KPI 스트립 ── */
+  .kpis{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;
+  }
+  .kpi{
+    padding:16px 18px;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--r-card);
+    animation:kpiIn .18s var(--ease) both;
+  }
+  .kpi:nth-child(1){animation-delay:.02s}
+  .kpi:nth-child(2){animation-delay:.06s}
+  .kpi:nth-child(3){animation-delay:.10s}
+  .kpi:nth-child(4){animation-delay:.14s}
+  @keyframes kpiIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .kpi .k-label{
+    font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--fg-tertiary);margin-bottom:10px;
+  }
+  .kpi .k-value{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--fg);line-height:1;}
+  .kpi .k-value small{font-size:13px;font-weight:500;color:var(--fg-tertiary);margin-left:4px;letter-spacing:0;}
+  .kpi .k-foot{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--fg-secondary);}
+  .kpi .k-foot .delta{display:inline-flex;align-items:center;gap:3px;font-weight:550;}
+  .delta.up{color:var(--success);}
+  .delta.down{color:var(--danger);}
+  .delta svg{width:12px;height:12px;}
+
+  /* ── 카드 (공용) ── */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    overflow:hidden;
+  }
+  .card + .card{margin-top:24px;}
+  .card-head{
+    display:flex;align-items:flex-start;gap:16px;
+    padding:20px 24px;border-bottom:1px solid var(--border);
+  }
+  .card-head .ch-text{min-width:0;}
+  .card-head h2{margin:0 0 3px;font-size:15px;font-weight:600;letter-spacing:-0.01em;color:var(--fg);}
+  .card-head p{margin:0;font-size:13px;color:var(--fg-secondary);}
+  .card-head .ch-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+  /* segmented control */
+  .seg-group{display:inline-flex;padding:3px;gap:2px;background:var(--base);border:1px solid var(--border);border-radius:var(--r-ctl);}
+  .seg{
+    border:0;background:transparent;color:var(--fg-secondary);
+    font-family:inherit;font-size:12.5px;font-weight:500;letter-spacing:-0.01em;
+    padding:5px 12px;border-radius:6px;cursor:pointer;
+    transition:background .12s var(--ease),color .12s var(--ease);
+  }
+  .seg:hover{color:var(--fg);}
+  .seg[aria-pressed="true"]{background:var(--surface-raised);color:var(--fg);box-shadow:inset 0 0 0 1px var(--border-strong);}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    height:32px;padding:0 13px;
+    font-family:inherit;font-size:13px;font-weight:550;letter-spacing:-0.01em;
+    border-radius:var(--r-ctl);cursor:pointer;white-space:nowrap;
+    border:1px solid var(--border);background:var(--surface-raised);color:var(--fg);
+    transition:background .12s var(--ease),border-color .12s var(--ease),color .12s var(--ease),transform .08s var(--ease);
+  }
+  .btn svg{width:14px;height:14px;}
+  .btn:hover{background:var(--surface-hover);border-color:var(--border-strong);}
+  .btn:active{transform:scale(.97);filter:brightness(.96);}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--fg-secondary);}
+  .btn.ghost:hover{background:var(--surface-hover);color:var(--fg);border-color:var(--border);}
+  .btn.primary{background:var(--accent);border-color:transparent;color:#0C0C14;font-weight:600;}
+  .btn.primary:hover{background:#9a9af7;}
+  .btn.primary:active{filter:brightness(.94);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none;}
+
+  /* ═══════════ 토글 매트릭스 ═══════════ */
+  .matrix{width:100%;border-collapse:collapse;}
+  .matrix thead th{
+    font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--fg-tertiary);text-align:center;
+    padding:12px 8px;border-bottom:1px solid var(--border);
+    background:var(--surface-raised);
+  }
+  .matrix thead th.evt-col{text-align:left;padding-left:24px;width:auto;}
+  .matrix thead th .ch-ch{display:inline-flex;align-items:center;gap:6px;justify-content:center;}
+  .matrix thead th .ch-ch svg{width:13px;height:13px;color:var(--fg-tertiary);}
+  .matrix .chan-col{width:120px;}
+
+  .matrix tbody tr{
+    border-bottom:1px solid var(--border);
+    transition:background .12s var(--ease);
+  }
+  .matrix tbody tr:last-child{border-bottom:0;}
+  .matrix tbody tr:hover{background:var(--surface-hover);}
+
+  .matrix td{padding:14px 8px;vertical-align:middle;}
+  .evt-cell{padding-left:24px;}
+  .evt{display:flex;align-items:center;gap:12px;}
+  .evt .evt-ico{
+    width:32px;height:32px;flex-shrink:0;border-radius:var(--r-avatar);
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--surface-raised);border:1px solid var(--border);color:var(--fg-secondary);
+  }
+  .evt .evt-ico svg{width:16px;height:16px;}
+  .evt.sec .evt-ico{color:var(--accent);border-color:var(--accent-line);background:var(--accent-dim);}
+  .evt.warn .evt-ico{color:var(--warning);border-color:rgba(199,161,90,.28);background:var(--warning-dim);}
+  .evt .evt-txt .t{font-size:13.5px;font-weight:550;color:var(--fg);letter-spacing:-0.01em;}
+  .evt .evt-txt .d{font-size:12px;color:var(--fg-tertiary);margin-top:1px;}
+  .evt .evt-txt .req{
+    display:inline-flex;align-items:center;gap:4px;margin-left:8px;
+    font-size:10.5px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;
+    color:var(--warning);vertical-align:middle;
+  }
+  .evt .evt-txt .req::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--warning);}
+
+  .cell-c{text-align:center;}
+
+  /* ── 커스텀 체크박스 ── */
+  .check{display:inline-flex;align-items:center;justify-content:center;position:relative;cursor:pointer;}
+  .check input{position:absolute;opacity:0;width:0;height:0;margin:0;}
+  .check .box{
+    width:20px;height:20px;border-radius:6px;
+    border:1px solid var(--border-strong);background:var(--base);
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:background .12s var(--ease),border-color .12s var(--ease),transform .08s var(--ease);
+  }
+  .check .box svg{width:12px;height:12px;color:#0C0C14;opacity:0;transform:scale(.6);transition:opacity .12s var(--ease),transform .12s var(--ease);}
+  .check:hover .box{border-color:var(--accent);}
+  .check input:checked + .box{background:var(--accent);border-color:var(--accent);}
+  .check input:checked + .box svg{opacity:1;transform:scale(1);}
+  .check:active .box{transform:scale(.9);}
+  .check input:disabled + .box{opacity:.4;cursor:not-allowed;background:var(--surface);border-color:var(--border);}
+  .check.locked{cursor:not-allowed;}
+  .check.locked .box{background:var(--accent-dim);border-color:var(--accent-line);}
+  .check.locked .box svg{color:var(--accent);opacity:1;transform:scale(1);}
+
+  .matrix tfoot td{padding:16px 24px;background:var(--surface-raised);border-top:1px solid var(--border);}
+  .mfoot{display:flex;align-items:center;gap:12px;}
+  .mfoot .hint{font-size:12.5px;color:var(--fg-tertiary);display:flex;align-items:center;gap:7px;}
+  .mfoot .hint svg{width:14px;height:14px;color:var(--fg-tertiary);flex-shrink:0;}
+  .mfoot .spacer{margin-left:auto;}
+
+  /* ═══════════ 최근 알림 리스트 ═══════════ */
+  .feed-toolbar{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface-raised);
+  }
+  .feed-toolbar .tabs{display:inline-flex;gap:2px;}
+  .pill{
+    border:0;background:transparent;color:var(--fg-secondary);
+    font-family:inherit;font-size:13px;font-weight:500;letter-spacing:-0.01em;
+    padding:5px 11px;border-radius:var(--r-ctl);cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;
+    transition:background .12s var(--ease),color .12s var(--ease);
+  }
+  .pill .cnt{font-size:11px;color:var(--fg-tertiary);font-weight:600;}
+  .pill:hover{background:var(--surface-hover);color:var(--fg);}
+  .pill[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:inset 0 0 0 1px var(--border-strong);}
+  .pill[aria-selected="true"] .cnt{color:var(--accent);}
+
+  .feed{list-style:none;margin:0;padding:0;}
+  .feed li{
+    position:relative;
+    display:flex;align-items:flex-start;gap:14px;
+    padding:16px 24px 16px 24px;
+    border-bottom:1px solid var(--border);
+    transition:background .12s var(--ease);
+  }
+  .feed li:last-child{border-bottom:0;}
+  .feed li::before{
+    content:"";position:absolute;left:0;top:12px;bottom:12px;width:0;
+    background:var(--accent);border-radius:2px;transition:width .12s var(--ease);
+  }
+  .feed li:hover{background:var(--surface-hover);}
+  .feed li:hover::before{width:2px;}
+
+  .feed .unread-dot{
+    width:8px;height:8px;flex-shrink:0;border-radius:50%;margin-top:6px;
+    background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);
+  }
+  .feed .unread-dot.read{background:transparent;box-shadow:inset 0 0 0 1.5px var(--border-strong);}
+
+  .feed .f-ico{
+    width:36px;height:36px;flex-shrink:0;border-radius:var(--r-avatar);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;letter-spacing:0.02em;
+    background:var(--surface-raised);border:1px solid var(--border);color:var(--fg-secondary);
+  }
+  .feed .f-ico.sec{color:var(--accent);border-color:var(--accent-line);background:var(--accent-dim);}
+  .feed .f-ico.bil{color:var(--success);border-color:rgba(78,154,118,.28);background:var(--success-dim);}
+  .feed .f-ico.adm{color:var(--fg);border-color:var(--border-strong);}
+  .feed .f-ico.ops{color:var(--warning);border-color:rgba(199,161,90,.28);background:var(--warning-dim);}
+
+  .feed .f-body{flex:1;min-width:0;}
+  .feed .f-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .feed .f-title{font-size:13.5px;font-weight:550;color:var(--fg);letter-spacing:-0.01em;}
+  .feed li.is-read .f-title{color:var(--fg-secondary);font-weight:450;}
+  .feed .f-desc{font-size:12.5px;color:var(--fg-tertiary);margin-top:3px;line-height:1.5;}
+  .feed .f-desc code{
+    font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:11.5px;
+    color:var(--fg-secondary);background:var(--base);border:1px solid var(--border);
+    padding:1px 5px;border-radius:5px;
+  }
+  .feed .f-meta{display:flex;align-items:center;gap:10px;margin-top:8px;}
+  .feed .f-time{font-size:11.5px;color:var(--fg-tertiary);letter-spacing:0.01em;}
+  .feed .f-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:600;letter-spacing:0.01em;
+    padding:2px 8px;border-radius:20px;border:1px solid var(--border);
+    color:var(--fg-secondary);background:var(--base);white-space:nowrap;
+  }
+  .badge .bd{width:5px;height:5px;border-radius:50%;background:currentColor;}
+  .badge.sec{color:var(--accent);border-color:var(--accent-line);background:var(--accent-dim);}
+  .badge.ok{color:var(--success);border-color:rgba(78,154,118,.28);background:var(--success-dim);}
+  .badge.warn{color:var(--warning);border-color:rgba(199,161,90,.28);background:var(--warning-dim);}
+  .badge.mute{color:var(--fg-tertiary);}
+
+  .link-btn{
+    border:0;background:transparent;cursor:pointer;
+    font-family:inherit;font-size:12.5px;font-weight:550;letter-spacing:-0.01em;
+    color:var(--accent);padding:3px 8px;border-radius:6px;
+    display:inline-flex;align-items:center;gap:5px;
+    transition:background .12s var(--ease),color .12s var(--ease);
+  }
+  .link-btn svg{width:13px;height:13px;}
+  .link-btn:hover{background:var(--accent-dim);}
+  .link-btn.mute{color:var(--fg-tertiary);}
+  .link-btn.mute:hover{background:var(--surface-hover);color:var(--fg-secondary);}
+
+  .feed-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 24px;background:var(--surface-raised);border-top:1px solid var(--border);
+  }
+  .feed-foot .ff-text{font-size:12.5px;color:var(--fg-tertiary);}
+  .feed-foot .ff-text b{color:var(--fg-secondary);font-weight:600;}
+
+  /* ── 페이지 푸터 ── */
+  .foot{
+    max-width:1280px;margin:0 auto;
+    padding:20px 40px 40px;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    color:var(--fg-tertiary);font-size:12px;letter-spacing:0.01em;
+  }
+  .foot .fl{display:flex;align-items:center;gap:8px;}
+  .foot .fl .dot{width:5px;height:5px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-dim);}
+  .foot .fr{display:flex;align-items:center;gap:16px;}
+  .foot .fr a{color:var(--fg-tertiary);text-decoration:none;transition:color .12s var(--ease);}
+  .foot .fr a:hover{color:var(--fg-secondary);}
+
+  /* ═══════════ 반응형 ═══════════ */
+  @media (max-width:1024px){
+    .shell{grid-template-columns:1fr;}
+    .side{
+      position:static;height:auto;
+      border-right:0;border-bottom:1px solid var(--border);
+      display:flex;gap:6px;overflow-x:auto;padding:12px 16px;
+    }
+    .side .group{margin-bottom:0;display:flex;align-items:center;gap:6px;}
+    .side .glabel{display:none;}
+    .nav-item{white-space:nowrap;margin-bottom:0;}
+    .nav-item::before{display:none;}
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .main{padding:24px 24px 64px;}
+  }
+  @media (max-width:768px){
+    .topbar .search{display:none;}
+    .page-head h1{font-size:24px;line-height:32px;}
+    .card-head{flex-direction:column;}
+    .card-head .ch-actions{margin-left:0;}
+    .matrix .chan-col{width:64px;}
+    .matrix thead th .ch-ch span{display:none;}
+    .evt .evt-txt .d{display:none;}
+    .foot{flex-direction:column;align-items:flex-start;}
+  }
+  @media (max-width:560px){
+    .kpis{grid-template-columns:1fr 1fr;}
+    .main{padding:20px 16px 56px;}
+    .matrix .evt-cell{padding-left:16px;}
+    .matrix thead th.evt-col{padding-left:16px;}
+    .feed li{padding-left:16px;padding-right:16px;}
+    .feed .f-ico{display:none;}
+  }
+
+  /* ── 접근성: 모션 억제 ── */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition-duration:.01ms !important;}
+  }
+</style>
+
+<!-- ═══════════ 상단바 ═══════════ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"></div>
+    <div class="name">Vecta <span>· 콘솔</span></div>
+  </div>
+
+  <label class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+    <input type="text" placeholder="설정, 알림, 멤버 검색…" aria-label="검색">
+    <kbd>⌘K</kbd>
+  </label>
+
+  <div class="right">
+    <button class="icon-btn" aria-label="도움말">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.1 1-1.1 1.8"/><path d="M12 17h.01"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="알림">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="dot" aria-hidden="true"></span>
+    </button>
+    <button class="avatar" aria-label="워크스페이스 관리자 계정">WS</button>
+  </div>
+</header>
+
+<!-- ═══════════ 본문 ═══════════ -->
+<div class="shell">
+
+  <!-- 좌측 설정 네비 -->
+  <nav class="side" aria-label="설정 메뉴">
+    <div class="group">
+      <p class="glabel">계정</p>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        프로필
+      </a>
+      <a class="nav-item active" href="#" aria-current="page">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        알림
+        <span class="ni-badge tnum">2</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+        보안
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+        결제 수단
+      </a>
+    </div>
+
+    <div class="group">
+      <p class="glabel">워크스페이스</p>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6.5a3 3 0 0 1 0 5.5"/><path d="M18 20a6 6 0 0 0-3-5"/></svg>
+        팀 멤버
+        <span class="ni-badge tnum">14</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 21 10l-7 7-2.5-2.5"/><circle cx="7" cy="17" r="3"/><path d="m9.1 14.9 2.4-2.4"/></svg>
+        API 키
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+        워크스페이스
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M8 13h8M8 17h5"/></svg>
+        청구 내역
+      </a>
+    </div>
+
+    <div class="group">
+      <p class="glabel">고급</p>
+      <a class="nav-item" href="#">
+        <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+        환경 설정
+      </a>
+    </div>
+  </nav>
+
+  <!-- 메인 -->
+  <main class="main">
+
+    <div class="page-head">
+      <div class="crumb">
+        <a href="#">설정</a>
+        <span class="sep">/</span>
+        <a href="#">계정</a>
+        <span class="sep">/</span>
+        <span class="cur">알림</span>
+      </div>
+      <h1>알림 센터</h1>
+      <p>이벤트별로 어떤 채널로 알림을 받을지 설정하세요. 보안 알림은 계정 보호를 위해 항상 켜져 있습니다.</p>
+    </div>
+
+    <!-- KPI -->
+    <section class="kpis" aria-label="알림 요약">
+      <div class="kpi">
+        <div class="k-label">읽지 않음</div>
+        <div class="k-value tnum">2</div>
+        <div class="k-foot"><span class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>+1</span> 지난 시간 대비</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">활성 채널</div>
+        <div class="k-value tnum">3<small>/ 3</small></div>
+        <div class="k-foot">이메일 · 푸시 · SMS</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">7일 전송</div>
+        <div class="k-value tnum">128</div>
+        <div class="k-foot"><span class="delta down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>-12%</span> 지난주 대비</div>
+      </div>
+      <div class="kpi">
+        <div class="k-label">전송 성공률</div>
+        <div class="k-value tnum">99.4<small>%</small></div>
+        <div class="k-foot">최근 30일 평균</div>
+      </div>
+    </section>
+
+    <!-- 토글 매트릭스 -->
+    <section class="card" aria-label="알림 채널 설정">
+      <div class="card-head">
+        <div class="ch-text">
+          <h2>알림 유형별 채널</h2>
+          <p>각 이벤트를 받을 채널을 선택하세요. 변경 사항은 자동 저장됩니다.</p>
+        </div>
+        <div class="ch-actions">
+          <div class="seg-group" role="group" aria-label="알림 빈도">
+            <button class="seg" aria-pressed="false">실시간</button>
+            <button class="seg" aria-pressed="true">요약</button>
+            <button class="seg" aria-pressed="false">끄기</button>
+          </div>
+          <button class="btn ghost">기본값 복원</button>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="evt-col" scope="col">이벤트</th>
+            <th class="chan-col" scope="col">
+              <span class="ch-ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>이메일</span></span>
+            </th>
+            <th class="chan-col" scope="col">
+              <span class="ch-ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.4"/><path d="M11 18.5h2"/></svg><span>푸시</span></span>
+            </th>
+            <th class="chan-col" scope="col">
+              <span class="ch-ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15.5a2 2 0 0 1-2 2H8l-4 3.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg><span>SMS</span></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. 보안 (필수) -->
+          <tr>
+            <td class="evt-cell">
+              <div class="evt sec">
+                <span class="evt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                <span class="evt-txt">
+                  <span class="t">새 로그인 감지 <span class="req">필수</span></span>
+                  <span class="d">새 기기·위치에서 로그인 시 즉시 통지</span>
+                </span>
+              </div>
+            </td>
+            <td class="cell-c">
+              <label class="check locked" title="보안 알림은 끌 수 없습니다">
+                <input type="checkbox" checked disabled aria-label="새 로그인 감지 — 이메일 (필수)">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="새 로그인 감지 — 푸시">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="새 로그인 감지 — SMS">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+          </tr>
+
+          <!-- 2. 결제 완료 -->
+          <tr>
+            <td class="evt-cell">
+              <div class="evt">
+                <span class="evt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span>
+                <span class="evt-txt">
+                  <span class="t">결제 완료</span>
+                  <span class="d">인보이스 결제·환불 처리 결과</span>
+                </span>
+              </div>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="결제 완료 — 이메일">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" aria-label="결제 완료 — 푸시">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" aria-label="결제 완료 — SMS">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+          </tr>
+
+          <!-- 3. 팀 초대 -->
+          <tr>
+            <td class="evt-cell">
+              <div class="evt">
+                <span class="evt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M17 8h4M19 6v4"/></svg></span>
+                <span class="evt-txt">
+                  <span class="t">팀 초대</span>
+                  <span class="d">멤버 초대·역할 변경 요청</span>
+                </span>
+              </div>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="팀 초대 — 이메일">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="팀 초대 — 푸시">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" aria-label="팀 초대 — SMS">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+          </tr>
+
+          <!-- 4. 주간 리포트 -->
+          <tr>
+            <td class="evt-cell">
+              <div class="evt">
+                <span class="evt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><rect x="8" y="10" width="3" height="6"/><rect x="14" y="6" width="3" height="10"/></svg></span>
+                <span class="evt-txt">
+                  <span class="t">주간 리포트</span>
+                  <span class="d">매주 월요일 사용량 요약 다이제스트</span>
+                </span>
+              </div>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="주간 리포트 — 이메일">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" aria-label="주간 리포트 — 푸시">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" disabled aria-label="주간 리포트 — SMS (지원 안 함)">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+          </tr>
+
+          <!-- 5. 시스템 점검 -->
+          <tr>
+            <td class="evt-cell">
+              <div class="evt warn">
+                <span class="evt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/><path d="M12 10v4M12 17h.01"/></svg></span>
+                <span class="evt-txt">
+                  <span class="t">시스템 점검 공지</span>
+                  <span class="d">예정된 점검·장애 및 복구 안내</span>
+                </span>
+              </div>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="시스템 점검 공지 — 이메일">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" checked aria-label="시스템 점검 공지 — 푸시">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+            <td class="cell-c">
+              <label class="check">
+                <input type="checkbox" aria-label="시스템 점검 공지 — SMS">
+                <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">
+              <div class="mfoot">
+                <span class="hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  보안 알림은 필수라 끌 수 없어요. SMS는 인증된 번호에만 발송됩니다.
+                </span>
+                <span class="spacer"></span>
+                <button class="btn ghost">모두 해제</button>
+                <button class="btn primary">변경 저장</button>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+      </div>
+    </section>
+
+    <!-- 최근 알림 리스트 -->
+    <section class="card" aria-label="최근 알림">
+      <div class="card-head">
+        <div class="ch-text">
+          <h2>최근 알림</h2>
+          <p>지난 24시간 동안 전송된 알림입니다.</p>
+        </div>
+        <div class="ch-actions">
+          <button class="btn ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>
+            모두 읽음
+          </button>
+        </div>
+      </div>
+
+      <div class="feed-toolbar" role="tablist" aria-label="알림 필터">
+        <div class="tabs">
+          <button class="pill" role="tab" aria-selected="true">전체 <span class="cnt tnum">4</span></button>
+          <button class="pill" role="tab" aria-selected="false">읽지 않음 <span class="cnt tnum">2</span></button>
+          <button class="pill" role="tab" aria-selected="false">보안 <span class="cnt tnum">1</span></button>
+          <button class="pill" role="tab" aria-selected="false">청구 <span class="cnt tnum">1</span></button>
+        </div>
+      </div>
+
+      <ul class="feed">
+        <!-- 1. 안읽음 · 보안 -->
+        <li>
+          <span class="unread-dot" aria-label="읽지 않음"></span>
+          <span class="f-ico sec">SEC</span>
+          <div class="f-body">
+            <div class="f-top">
+              <span class="f-title">새 기기에서 로그인되었습니다</span>
+              <span class="badge sec"><span class="bd"></span>보안</span>
+            </div>
+            <div class="f-desc">macOS · Safari · 서울에서 접속. 본인이 아니라면 즉시 세션을 종료하세요. IP <code>203.0.113.24</code></div>
+            <div class="f-meta">
+              <span class="f-time tnum">방금 전 · 09:41</span>
+              <button class="link-btn">세션 검토 →</button>
+            </div>
+          </div>
+          <div class="f-side">
+            <button class="link-btn mute" aria-label="읽음 처리">읽음 처리</button>
+          </div>
+        </li>
+
+        <!-- 2. 안읽음 · 청구 -->
+        <li>
+          <span class="unread-dot" aria-label="읽지 않음"></span>
+          <span class="f-ico bil">BIL</span>
+          <div class="f-body">
+            <div class="f-top">
+              <span class="f-title">인보이스 결제가 완료되었습니다</span>
+              <span class="badge ok"><span class="bd"></span>청구</span>
+            </div>
+            <div class="f-desc">Pro 플랜 월 구독료가 정상 청구되었습니다. 인보이스 <code>INV-4821</code> · ₩49,000</div>
+            <div class="f-meta">
+              <span class="f-time tnum">32분 전 · 09:09</span>
+              <button class="link-btn">영수증 보기 →</button>
+            </div>
+          </div>
+          <div class="f-side">
+            <button class="link-btn mute" aria-label="읽음 처리">읽음 처리</button>
+          </div>
+        </li>
+
+        <!-- 3. 읽음 · 팀 -->
+        <li class="is-read">
+          <span class="unread-dot read" aria-label="읽음"></span>
+          <span class="f-ico adm">ADM</span>
+          <div class="f-body">
+            <div class="f-top">
+              <span class="f-title">워크스페이스 초대가 수락되었습니다</span>
+              <span class="badge mute"><span class="bd"></span>팀</span>
+            </div>
+            <div class="f-desc">에디터 역할로 초대한 멤버가 워크스페이스에 합류했습니다. 현재 활성 시트 14석 중 12석 사용 중.</div>
+            <div class="f-meta">
+              <span class="f-time tnum">2시간 전 · 07:20</span>
+              <button class="link-btn">멤버 관리 →</button>
+            </div>
+          </div>
+          <div class="f-side">
+            <span class="badge mute">읽음</span>
+          </div>
+        </li>
+
+        <!-- 4. 읽음 · 시스템 -->
+        <li class="is-read">
+          <span class="unread-dot read" aria-label="읽음"></span>
+          <span class="f-ico ops">OPS</span>
+          <div class="f-body">
+            <div class="f-top">
+              <span class="f-title">예약된 시스템 점검 안내</span>
+              <span class="badge warn"><span class="bd"></span>운영</span>
+            </div>
+            <div class="f-desc">오늘 자정 <code>00:00–00:30 KST</code> API 게이트웨이 점검이 예정되어 있습니다. 짧은 응답 지연이 있을 수 있습니다.</div>
+            <div class="f-meta">
+              <span class="f-time tnum">어제 · 18:05</span>
+              <button class="link-btn">상태 페이지 →</button>
+            </div>
+          </div>
+          <div class="f-side">
+            <span class="badge mute">읽음</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="feed-foot">
+        <span class="ff-text">전체 <b class="tnum">4</b>건 중 <b class="tnum">4</b>건 표시</span>
+        <button class="btn ghost">전체 알림 보기 →</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- 푸터 -->
+<footer class="foot">
+  <div class="fl">
+    <span class="dot" aria-hidden="true"></span>
+    모든 시스템 정상 · 마지막 동기화 09:41 KST
+  </div>
+  <div class="fr">
+    <a href="#">상태</a>
+    <a href="#">문서</a>
+    <a href="#">지원</a>
+    <span>알림 센터 · 다크 프로 미니멀</span>
+  </div>
+</footer>

@@ -1,0 +1,867 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>셀러허브 — 셀러 통합 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ Material Design 3 — 톤 팔레트 ============ */
+  :root{
+    --primary:#6750A4; --on-primary:#FFFFFF;
+    --primary-container:#EADDFF; --on-primary-container:#21005D;
+    --surface:#FEF7FF;
+    --sc-low:#F7F2FA; --sc:#F3EDF7; --sc-high:#ECE6F0;
+    --on-surface:#1D1B20; --on-surface-variant:#49454F; --outline:#79747E;
+    --outline-variant:#CAC4D0;
+    --secondary:#625B71; --tertiary:#7D5260;
+    --error:#B3261E; --error-container:#F9DEDC; --on-error-container:#410E0B;
+    --success:#386A20; --success-container:#DCEAD1;
+    /* elevation dp1~dp8 */
+    --dp1:0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2:0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4:0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8:0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+    /* chart tone set (톤 팔레트 내부 — 보라/모브 톤만) */
+    --c1:#6750A4; --c2:#7D5260; --c3:#625B71; --c4:#9A8CB5; --c5:#B7ADD1;
+    --std:cubic-bezier(.2,0,0,1);
+    --emph:cubic-bezier(.05,.7,.1,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Pretendard",-apple-system,sans-serif;
+    background:var(--surface);
+    color:var(--on-surface);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{font-family:"Roboto","Pretendard",sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  a{color:inherit}
+
+  /* ---- Material type scale ---- */
+  .title-lg{font-size:22px;line-height:28px;font-weight:700;letter-spacing:0}
+  .body-md{font-size:14px;line-height:20px;letter-spacing:.25px}
+
+  /* ============ Layout shell ============ */
+  .shell{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+
+  /* ---- Navigation drawer (좌측) — surface-container-low 층 ---- */
+  .nav{
+    background:var(--sc-low);
+    border-right:1px solid var(--outline-variant);
+    display:flex;flex-direction:column;
+    padding:16px 12px;
+    position:sticky;top:0;height:100vh;
+    z-index:5;
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px}
+  .brand-mark{
+    width:40px;height:40px;border-radius:10px;
+    background:var(--primary);color:var(--on-primary);
+    display:grid;place-items:center;box-shadow:var(--dp1);
+    flex:0 0 auto;
+  }
+  .brand-name{font-size:20px;font-weight:700;letter-spacing:-.2px}
+  .nav-list{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+  .nav-item{
+    display:flex;align-items:center;gap:16px;
+    min-height:48px;padding:0 16px;border-radius:9999px;
+    color:var(--on-surface-variant);
+    position:relative;overflow:hidden;
+    transition:background .15s var(--std),color .15s var(--std);
+    width:100%;text-align:left;
+  }
+  .nav-item svg{flex:0 0 auto}
+  .nav-item .nav-txt{font-size:14px;font-weight:500;letter-spacing:.1px}
+  .nav-item:hover{background:rgba(103,80,164,.08)}
+  .nav-item:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+  .nav-item.sel{background:var(--primary-container);color:var(--on-primary-container)}
+  .nav-item.sel .nav-txt{font-weight:700}
+  .nav-user{
+    margin-top:auto;display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:12px;background:var(--sc);
+    box-shadow:var(--dp1);min-height:56px;
+  }
+  /* 각진 아바타 (radius 금지 스타일 준수 — 순수 원 회피, 8px 라운드 스퀘어) */
+  .avatar{
+    width:40px;height:40px;flex:0 0 auto;
+    background:var(--tertiary);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:14px;
+    border-radius:8px;
+    font-family:"Roboto",sans-serif;letter-spacing:.5px;
+  }
+  .nav-user .u-name{font-size:14px;font-weight:500}
+  .nav-user .u-role{font-size:12px;color:var(--on-surface-variant)}
+
+  /* ---- Top app bar ---- */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .appbar{
+    position:sticky;top:0;z-index:4;
+    background:var(--sc);
+    box-shadow:var(--dp2);
+    display:flex;align-items:center;gap:16px;
+    padding:12px 24px;min-height:72px;
+    animation:barDrop .24s var(--std) both;
+  }
+  @keyframes barDrop{from{transform:translateY(-16px)}to{transform:none}}
+  .search{
+    flex:1;max-width:520px;display:flex;align-items:center;gap:12px;
+    background:var(--sc-high);border-radius:9999px;
+    padding:0 20px;min-height:48px;color:var(--on-surface-variant);
+    border:1px solid transparent;transition:border-color .15s,background .15s;
+  }
+  .search:focus-within{border-color:var(--primary);background:var(--surface)}
+  .search input{
+    border:none;background:none;outline:none;flex:1;
+    font-family:inherit;font-size:16px;color:var(--on-surface);
+    letter-spacing:.15px;
+  }
+  .search input::placeholder{color:var(--on-surface-variant)}
+  .appbar-spacer{flex:1}
+  .icon-btn{
+    width:48px;height:48px;border-radius:9999px;
+    display:grid;place-items:center;color:var(--on-surface-variant);
+    position:relative;overflow:hidden;flex:0 0 auto;
+    transition:background .15s var(--std);
+  }
+  .icon-btn:hover{background:rgba(29,27,32,.08)}
+  .icon-btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+  .badge{
+    position:absolute;top:6px;right:6px;min-width:18px;height:18px;
+    padding:0 5px;border-radius:9999px;background:var(--error);color:#fff;
+    font-family:"Roboto",sans-serif;font-size:11px;font-weight:700;line-height:18px;
+    display:grid;place-items:center;box-shadow:var(--dp1);
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;padding:0 24px;border-radius:9999px;
+    font-family:"Roboto","Pretendard",sans-serif;font-size:14px;font-weight:500;letter-spacing:.1px;
+    position:relative;overflow:hidden;
+    transition:box-shadow .15s var(--std),background .15s var(--std);
+  }
+  .btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+  .btn-filled{background:var(--primary);color:var(--on-primary);box-shadow:var(--dp1)}
+  .btn-filled:hover{box-shadow:var(--dp2);background:#7462B0}
+  .btn-tonal{background:var(--sc-high);color:var(--on-surface)}
+  .btn-tonal:hover{box-shadow:var(--dp1);background:var(--outline-variant)}
+  .appbar .avatar{cursor:pointer}
+
+  /* ---- content ---- */
+  .content{padding:24px;max-width:1400px;width:100%;margin:0 auto}
+
+  /* ---- Tabs + filter row ---- */
+  .toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .tabs{
+    display:flex;background:var(--sc);border-radius:12px;padding:4px;
+    box-shadow:var(--dp1);position:relative;
+  }
+  .tab{
+    min-height:40px;padding:0 20px;border-radius:8px;
+    font-family:"Roboto","Pretendard",sans-serif;font-size:14px;font-weight:500;letter-spacing:.1px;
+    color:var(--on-surface-variant);position:relative;overflow:hidden;z-index:1;
+    transition:color .2s var(--std);
+  }
+  .tab:hover{background:rgba(103,80,164,.08)}
+  .tab:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+  .tab[aria-selected="true"]{color:var(--on-primary-container)}
+  /* JS 실패 폴백: 선택 탭 자체가 배경을 가져 인디케이터 역할 */
+  .tab[aria-selected="true"]{background:var(--primary-container)}
+  .tabs.js .tab[aria-selected="true"]{background:transparent}
+  .tab-ink{
+    position:absolute;top:4px;bottom:4px;left:4px;width:96px;
+    background:var(--primary-container);border-radius:8px;z-index:0;
+    opacity:0;
+    transition:transform .25s var(--emph),width .25s var(--emph);
+  }
+  .tabs.js .tab-ink{opacity:1}
+  .filter-drop{
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;padding:0 16px;border-radius:8px;margin-left:auto;
+    background:var(--surface);border:1px solid var(--outline);
+    color:var(--on-surface);font-size:14px;font-weight:500;letter-spacing:.1px;
+    transition:background .15s;
+  }
+  .filter-drop:hover{background:var(--sc-low)}
+  .filter-drop:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+  /* ---- Info banner ---- */
+  .banner{
+    display:flex;align-items:center;gap:16px;
+    background:var(--primary-container);color:var(--on-primary-container);
+    border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--dp1);
+  }
+  .banner svg{flex:0 0 auto}
+  .banner b{font-family:"Roboto","Pretendard",sans-serif;font-variant-numeric:tabular-nums}
+
+  /* ---- Card base ---- */
+  .card{
+    background:var(--sc-low);border-radius:12px;box-shadow:var(--dp1);
+    padding:20px;transition:box-shadow .15s var(--std);
+  }
+  .card-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .card-title h3{margin:0;font-size:16px;font-weight:700;letter-spacing:.1px}
+
+  /* ---- KPI grid ---- */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+  .kpi{
+    background:var(--sc-low);border-radius:12px;box-shadow:var(--dp1);
+    padding:20px;display:flex;flex-direction:column;gap:10px;min-height:150px;
+    transition:box-shadow .15s var(--std);
+    animation:kpiUp .22s var(--std) both;
+  }
+  .kpi:hover{box-shadow:var(--dp2)}
+  .kpi:nth-child(1){animation-delay:.15s}
+  .kpi:nth-child(2){animation-delay:.19s}
+  .kpi:nth-child(3){animation-delay:.23s}
+  .kpi:nth-child(4){animation-delay:.27s}
+  @keyframes kpiUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kpi-label{font-size:14px;color:var(--on-surface-variant);letter-spacing:.25px}
+  .kpi-val{font-family:"Roboto","Pretendard",sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .kpi-val .unit{font-size:15px;font-weight:500}
+  .kpi-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+  .delta{
+    display:inline-flex;align-items:center;gap:4px;
+    font-family:"Roboto",sans-serif;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;
+    padding:3px 8px;border-radius:8px;
+  }
+  .delta.up{background:var(--success-container);color:var(--success)}
+  .delta.down{background:var(--error-container);color:var(--error)}
+  .delta.flat{background:var(--sc-high);color:var(--on-surface-variant)}
+  .spark{flex:0 0 auto}
+
+  /* ---- Mid grid ---- */
+  .mid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;align-items:start}
+
+  /* segmented button */
+  .seg{display:inline-flex;border:1px solid var(--outline);border-radius:8px;overflow:hidden}
+  .seg button{
+    min-height:36px;padding:0 16px;font-family:"Roboto","Pretendard",sans-serif;
+    font-size:13px;font-weight:500;letter-spacing:.1px;color:var(--on-surface-variant);
+    position:relative;overflow:hidden;transition:background .15s;
+  }
+  .seg button+button{border-left:1px solid var(--outline)}
+  .seg button[aria-pressed="true"]{background:var(--primary-container);color:var(--on-primary-container)}
+  .seg button:hover:not([aria-pressed="true"]){background:rgba(103,80,164,.08)}
+  .seg button:focus-visible{outline:3px solid var(--primary);outline-offset:-3px}
+
+  /* Bar chart */
+  .bars{display:flex;align-items:flex-end;gap:12px;height:200px;padding-top:8px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;min-width:0}
+  .bar{
+    width:100%;max-width:34px;border-radius:8px 8px 0 0;
+    background:var(--primary);
+    transform-origin:bottom;animation:barGrow .5s var(--std) both;
+  }
+  .bar.peak{background:var(--tertiary)}
+  @keyframes barGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  .bar-val{font-family:"Roboto",sans-serif;font-size:11px;font-weight:500;color:var(--on-surface-variant);font-variant-numeric:tabular-nums}
+  .bar-x{font-family:"Roboto",sans-serif;font-size:11px;color:var(--on-surface-variant)}
+  .axis-note{font-size:12px;color:var(--on-surface-variant);margin-top:12px;letter-spacing:.25px}
+
+  /* Donut */
+  .donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .donut{flex:0 0 auto;position:relative;width:160px;height:160px}
+  .donut .ctr{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+  .donut .ctr .big{font-family:"Roboto",sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .donut .ctr .sub{font-size:12px;color:var(--on-surface-variant)}
+  .legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:140px}
+  .legend-row{display:flex;align-items:center;gap:10px;font-size:13px}
+  .legend-row .dot{width:12px;height:12px;border-radius:3px;flex:0 0 auto}
+  .legend-row .lg-name{flex:1;color:var(--on-surface-variant)}
+  .legend-row .lg-val{font-family:"Roboto",sans-serif;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* goal + channels */
+  .goal-num{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+  .goal-num .g-cur{font-family:"Roboto",sans-serif;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .goal-num .g-tot{font-size:14px;color:var(--on-surface-variant)}
+  .progress{height:16px;background:var(--sc-high);border-radius:9999px;overflow:hidden;position:relative}
+  .progress .fill{
+    height:100%;background:var(--primary);border-radius:9999px;
+    width:85.6%;transform-origin:left;animation:barGrow .5s var(--std) both;
+  }
+  .prog-lbl{display:flex;justify-content:space-between;margin-top:8px;font-family:"Roboto",sans-serif;font-size:13px;font-variant-numeric:tabular-nums}
+  .prog-lbl .pct{color:var(--primary);font-weight:700}
+
+  .chan-list{display:flex;flex-direction:column;gap:4px}
+  .chan{
+    display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 8px;border-radius:8px;
+    position:relative;overflow:hidden;transition:background .15s;
+  }
+  .chan:hover{background:rgba(103,80,164,.06)}
+  .chan .cav{
+    width:36px;height:36px;border-radius:8px;flex:0 0 auto;color:#fff;
+    display:grid;place-items:center;font-family:"Pretendard",sans-serif;font-weight:700;font-size:14px;
+  }
+  .chan .c-name{flex:1;font-size:14px;font-weight:500}
+  .chan .c-val{font-family:"Roboto",sans-serif;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* ---- Table ---- */
+  .table-card{padding:0;overflow:hidden}
+  .table-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 20px 12px}
+  .table-scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  thead th{
+    text-align:left;font-family:"Roboto","Pretendard",sans-serif;
+    font-size:12px;font-weight:500;letter-spacing:.5px;color:var(--on-surface-variant);
+    padding:12px 16px;border-bottom:1px solid var(--outline-variant);
+    white-space:nowrap;
+  }
+  th.sortable{cursor:pointer}
+  th.sortable .arw{opacity:.6;margin-left:4px;vertical-align:middle}
+  th.num-col,td.num-col{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:var(--sc)}
+  tbody td{padding:0 16px;height:56px;border-bottom:1px solid var(--outline-variant);font-size:14px;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  .prod-cell{display:flex;align-items:center;gap:12px;min-width:0;max-width:340px}
+  .thumb{
+    width:40px;height:40px;flex:0 0 auto;color:#fff;font-family:"Pretendard",sans-serif;
+    font-weight:700;font-size:14px;display:grid;place-items:center;
+  }
+  .thumb.sq{border-radius:8px}
+  .thumb.circ{border-radius:9999px}
+  .prod-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+  td.num-col{font-family:"Roboto","Pretendard",sans-serif}
+  .miss{color:var(--outline);font-family:"Roboto",sans-serif}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    height:28px;padding:0 12px;border-radius:8px;
+    font-family:"Roboto","Pretendard",sans-serif;font-size:12px;font-weight:500;letter-spacing:.1px;
+    white-space:nowrap;
+  }
+  .chip .cdot{width:8px;height:8px;border-radius:9999px;flex:0 0 auto}
+  .chip.on{background:var(--success-container);color:var(--success)}
+  .chip.on .cdot{background:var(--success)}
+  .chip.done{background:var(--primary-container);color:var(--on-primary-container)}
+  .chip.done .cdot{background:var(--primary)}
+  .chip.out{background:var(--error-container);color:var(--error)}
+  .chip.ready{background:var(--sc-high);color:var(--on-surface-variant)}
+  .chip.ready .cdot{background:var(--outline)}
+  .row-action{opacity:0;transition:opacity .12s}
+  tbody tr:hover .row-action,tbody tr:focus-within .row-action{opacity:1}
+  .action-btn{
+    display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:8px;
+    background:var(--sc-high);color:var(--primary);font-family:"Roboto","Pretendard",sans-serif;
+    font-size:13px;font-weight:500;position:relative;overflow:hidden;
+  }
+  .action-btn:hover{background:var(--primary-container)}
+  .action-btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+  /* ---- Activity feed ---- */
+  .feed-list{display:flex;flex-direction:column}
+  .feed-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--outline-variant)}
+  .feed-item:last-child{border-bottom:none}
+  .feed-ic{width:36px;height:36px;border-radius:9999px;flex:0 0 auto;display:grid;place-items:center}
+  .feed-ic.i-order{background:var(--primary-container);color:var(--on-primary-container)}
+  .feed-ic.i-pay{background:var(--success-container);color:var(--success)}
+  .feed-ic.i-stock{background:var(--error-container);color:var(--error)}
+  .feed-ic.i-review{background:var(--sc-high);color:var(--secondary)}
+  .feed-body{flex:1;min-width:0}
+  .feed-txt{font-size:14px}
+  .feed-txt b{font-family:"Roboto","Pretendard",sans-serif;font-variant-numeric:tabular-nums}
+  .feed-time{font-family:"Roboto",sans-serif;font-size:12px;color:var(--on-surface-variant);font-variant-numeric:tabular-nums;flex:0 0 auto}
+
+  .bottom-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;align-items:start}
+
+  /* ---- FAB (시그니처) ---- */
+  .fab{
+    position:fixed;right:32px;bottom:32px;z-index:20;
+    width:56px;height:56px;border-radius:16px;
+    background:var(--primary);color:var(--on-primary);
+    display:grid;place-items:center;box-shadow:var(--dp4);
+    overflow:hidden;
+    animation:fabPop .25s var(--emph) .9s both;
+    transition:box-shadow .15s var(--std),transform .12s var(--std);
+  }
+  @keyframes fabPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .fab:hover{box-shadow:var(--dp8);transform:scale(1.03)}
+  .fab:active{transform:scale(.97)}
+  .fab:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+
+  /* ---- Ripple ---- */
+  .ripple{position:absolute;border-radius:9999px;transform:scale(0);
+    background:currentColor;opacity:.16;pointer-events:none;animation:rip .4s var(--std)}
+  @keyframes rip{to{transform:scale(2.4);opacity:0}}
+
+  footer{padding:28px 24px;text-align:center;color:var(--on-surface-variant);font-size:13px;letter-spacing:.25px}
+
+  /* ============ Responsive 900px↓ (사이드바 접힘) ============ */
+  .menu-toggle{display:none}
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr}
+    .nav{
+      position:fixed;left:0;top:0;height:100vh;width:264px;
+      transform:translateX(-100%);transition:transform .25s var(--std);box-shadow:var(--dp8);
+    }
+    .nav.open{transform:none}
+    .menu-toggle{display:grid}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .mid{grid-template-columns:1fr}
+    .bottom-grid{grid-template-columns:1fr}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:4}
+    .scrim.show{display:block}
+  }
+  @media (max-width:560px){
+    .kpi-grid{grid-template-columns:1fr}
+    .search{max-width:none}
+    .appbar .btn .btn-lbl{display:none}
+    .appbar .btn{padding:0;width:44px;justify-content:center}
+    .content{padding:16px}
+  }
+
+  /* ============ reduced motion ============ */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:background .01s,color .01s,box-shadow .01s !important}
+    .ripple{display:none !important}
+    .bar,.progress .fill{transform:none !important}
+  }
+</style>
+
+<div class="shell">
+
+  <!-- ============ 좌측 네비게이션 드로어 ============ -->
+  <nav class="nav" id="nav" aria-label="주요 메뉴">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 7l1.5 11a2 2 0 002 1.8h5A2 2 0 0017 18L18.5 7M9 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brand-name">셀러허브</span>
+    </div>
+    <div class="nav-list" role="list">
+      <button class="nav-item sel" role="listitem" aria-current="page">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4v9zm0 7h6v-5H4v5zm10 0h6v-9h-6v9zm0-16v5h6V4h-6z" fill="currentColor"/></svg>
+        <span class="nav-txt">대시보드</span>
+      </button>
+      <button class="nav-item" role="listitem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 4h10l2 4v11a1 1 0 01-1 1H6a1 1 0 01-1-1V8l2-4zM5 8h14M9 12a3 3 0 006 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="nav-txt">주문</span>
+      </button>
+      <button class="nav-item" role="listitem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 7L12 3 4 7v10l8 4 8-4V7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7l8 4 8-4M12 11v10" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="nav-txt">상품</span>
+      </button>
+      <button class="nav-item" role="listitem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M7 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="nav-txt">정산</span>
+      </button>
+      <button class="nav-item" role="listitem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20a7 7 0 0114 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="nav-txt">고객</span>
+      </button>
+      <button class="nav-item" role="listitem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 00-2-1.2L16 3H8l-.5 2.6a7 7 0 00-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 003 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1c.6.5 1.3.9 2 1.2L8 21h8l.5-2.6c.7-.3 1.4-.7 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span class="nav-txt">설정</span>
+      </button>
+    </div>
+    <div class="nav-user">
+      <span class="avatar" aria-hidden="true">KD</span>
+      <div style="min-width:0">
+        <div class="u-name">김덕진</div>
+        <div class="u-role">셀러 · 프리미엄</div>
+      </div>
+    </div>
+  </nav>
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <!-- ============ 메인 ============ -->
+  <div class="main">
+
+    <!-- 상단바 -->
+    <header class="appbar">
+      <button class="icon-btn menu-toggle" id="menuBtn" aria-label="메뉴 열기">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <label class="search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="상품·주문 검색" aria-label="상품·주문 검색">
+      </label>
+      <span class="appbar-spacer"></span>
+      <button class="btn btn-tonal" aria-label="새로고침">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 10-2 5.3M20 5v4h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="btn-lbl">새로고침</span>
+      </button>
+      <button class="btn btn-filled">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="btn-lbl">리포트 내보내기</span>
+      </button>
+      <button class="icon-btn" aria-label="알림 5건">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 1112 0c0 4 1.5 5 2 6H4c.5-1 2-2 2-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="badge num" aria-hidden="true">5</span>
+      </button>
+      <span class="avatar" role="button" tabindex="0" aria-label="김덕진 계정">KD</span>
+    </header>
+
+    <!-- 콘텐츠 -->
+    <main class="content">
+
+      <!-- 탭 + 필터 -->
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="기간 선택">
+          <span class="tab-ink" id="tabInk"></span>
+          <button class="tab" role="tab" aria-selected="false">오늘</button>
+          <button class="tab" role="tab" aria-selected="false">이번 주</button>
+          <button class="tab" role="tab" aria-selected="true">이번 달</button>
+          <button class="tab" role="tab" aria-selected="false">올해</button>
+        </div>
+        <button class="filter-drop" aria-haspopup="listbox">
+          전체 채널
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- 알림 배너 (info) -->
+      <div class="banner" role="status">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="body-md">정산 예정 — 3일 후 <b>2억 8,400만원</b>이 등록 계좌로 지급됩니다.</div>
+      </div>
+
+      <!-- KPI 4개 -->
+      <section class="kpi-grid" aria-label="핵심 지표">
+        <article class="kpi">
+          <span class="kpi-label">총 매출</span>
+          <span class="kpi-val">12,840,500,000<span class="unit"> 원</span></span>
+          <div class="kpi-foot">
+            <span class="delta up">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 19V5m0 0l-6 6m6-6l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              8.2%
+            </span>
+            <svg class="spark" width="72" height="28" viewBox="0 0 72 28" aria-hidden="true"><polyline points="0,22 12,20 24,21 36,15 48,12 60,8 72,5" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </article>
+        <article class="kpi">
+          <span class="kpi-label">신규 주문</span>
+          <span class="kpi-val">3,472<span class="unit"> 건</span></span>
+          <div class="kpi-foot">
+            <span class="delta up">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 19V5m0 0l-6 6m6-6l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              12%
+            </span>
+            <svg class="spark" width="72" height="28" viewBox="0 0 72 28" aria-hidden="true"><polyline points="0,20 12,18 24,19 36,13 48,14 60,9 72,6" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </article>
+        <article class="kpi">
+          <span class="kpi-label">전환율</span>
+          <span class="kpi-val">3.8<span class="unit"> %</span></span>
+          <div class="kpi-foot">
+            <span class="delta down">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              0.4%p 하락
+            </span>
+            <svg class="spark" width="72" height="28" viewBox="0 0 72 28" aria-hidden="true"><polyline points="0,8 12,10 24,9 36,13 48,12 60,16 72,19" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </article>
+        <article class="kpi">
+          <span class="kpi-label">정산 대기</span>
+          <span class="kpi-val">284,000,000<span class="unit"> 원</span></span>
+          <div class="kpi-foot">
+            <span class="delta flat">지연 0건</span>
+            <svg class="spark" width="72" height="28" viewBox="0 0 72 28" aria-hidden="true"><polyline points="0,15 12,14 24,15 36,14 48,15 60,14 72,15" fill="none" stroke="var(--outline)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </article>
+      </section>
+
+      <!-- 차트 2종 -->
+      <section class="mid">
+        <!-- (a) 막대 차트 -->
+        <div class="card">
+          <div class="card-title">
+            <h3>최근 8주 매출 추이</h3>
+            <div class="seg" role="group" aria-label="표시 단위">
+              <button aria-pressed="true">금액</button>
+              <button aria-pressed="false">건수</button>
+            </div>
+          </div>
+          <div class="bars" role="img" aria-label="최근 8주 매출(백만원): 820, 910, 1050, 970, 1180, 1340, 1220, 1284. 6주가 피크.">
+            <div class="bar-col"><span class="bar-val">820</span><div class="bar" style="height:61.2%"></div><span class="bar-x">1주</span></div>
+            <div class="bar-col"><span class="bar-val">910</span><div class="bar" style="height:67.9%"></div><span class="bar-x">2주</span></div>
+            <div class="bar-col"><span class="bar-val">1,050</span><div class="bar" style="height:78.4%"></div><span class="bar-x">3주</span></div>
+            <div class="bar-col"><span class="bar-val">970</span><div class="bar" style="height:72.4%"></div><span class="bar-x">4주</span></div>
+            <div class="bar-col"><span class="bar-val">1,180</span><div class="bar" style="height:88.1%"></div><span class="bar-x">5주</span></div>
+            <div class="bar-col"><span class="bar-val">1,340</span><div class="bar peak" style="height:100%"></div><span class="bar-x">6주</span></div>
+            <div class="bar-col"><span class="bar-val">1,220</span><div class="bar" style="height:91.0%"></div><span class="bar-x">7주</span></div>
+            <div class="bar-col"><span class="bar-val">1,284</span><div class="bar" style="height:95.8%"></div><span class="bar-x">8주</span></div>
+          </div>
+          <div class="axis-note">단위 백만원 · 축 0부터 · 6주 피크</div>
+        </div>
+
+        <!-- (b) 도넛 (SVG arc — 그라디언트 없음) -->
+        <div class="card">
+          <div class="card-title"><h3>카테고리 구성비</h3></div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="카테고리 구성비: 의류 38%, 전자 24%, 리빙 20%, 생활 12%, 스포츠 6%">
+                <g transform="rotate(-90 80 80)" fill="none" stroke-width="22">
+                  <circle cx="80" cy="80" r="60" stroke="var(--c1)" stroke-dasharray="143.26 233.73" stroke-dashoffset="0"/>
+                  <circle cx="80" cy="80" r="60" stroke="var(--c2)" stroke-dasharray="90.48 286.51" stroke-dashoffset="-143.26"/>
+                  <circle cx="80" cy="80" r="60" stroke="var(--c3)" stroke-dasharray="75.40 301.59" stroke-dashoffset="-233.74"/>
+                  <circle cx="80" cy="80" r="60" stroke="var(--c4)" stroke-dasharray="45.24 331.75" stroke-dashoffset="-309.14"/>
+                  <circle cx="80" cy="80" r="60" stroke="var(--c5)" stroke-dasharray="22.62 354.37" stroke-dashoffset="-354.38"/>
+                </g>
+              </svg>
+              <div class="ctr"><span class="big">5</span><span class="sub">카테고리</span></div>
+            </div>
+            <div class="legend">
+              <div class="legend-row"><span class="dot" style="background:var(--c1)"></span><span class="lg-name">의류</span><span class="lg-val">38%</span></div>
+              <div class="legend-row"><span class="dot" style="background:var(--c2)"></span><span class="lg-name">전자</span><span class="lg-val">24%</span></div>
+              <div class="legend-row"><span class="dot" style="background:var(--c3)"></span><span class="lg-name">리빙</span><span class="lg-val">20%</span></div>
+              <div class="legend-row"><span class="dot" style="background:var(--c4)"></span><span class="lg-name">생활</span><span class="lg-val">12%</span></div>
+              <div class="legend-row"><span class="dot" style="background:var(--c5)"></span><span class="lg-name">스포츠</span><span class="lg-val">6%</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 목표 + 채널 -->
+      <section class="mid">
+        <div class="card">
+          <div class="card-title"><h3>이번 달 목표 진행률</h3></div>
+          <div class="goal-num">
+            <span class="g-cur">128.4억</span>
+            <span class="g-tot">/ 목표 150억</span>
+          </div>
+          <div class="progress" role="progressbar" aria-valuenow="85.6" aria-valuemin="0" aria-valuemax="100" aria-label="목표 진행률 85.6%">
+            <div class="fill"></div>
+          </div>
+          <div class="prog-lbl">
+            <span style="color:var(--on-surface-variant)">달성</span>
+            <span class="pct">85.6%</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>상위 채널</h3></div>
+          <div class="chan-list">
+            <div class="chan"><span class="cav" style="background:var(--c1)">스</span><span class="c-name">스마트스토어</span><span class="c-val">4.2억</span></div>
+            <div class="chan"><span class="cav" style="background:var(--c2)">쿠</span><span class="c-name">쿠팡</span><span class="c-val">3.1억</span></div>
+            <div class="chan"><span class="cav" style="background:var(--c3)">자</span><span class="c-name">자사몰</span><span class="c-val">2.4억</span></div>
+            <div class="chan"><span class="cav" style="background:var(--c4)">인</span><span class="c-name">인스타샵</span><span class="c-val">1.8억</span></div>
+            <div class="chan"><span class="cav" style="background:var(--c5)">카</span><span class="c-name">카카오</span><span class="c-val">0.9억</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 테이블 + 활동 피드 -->
+      <section class="bottom-grid">
+        <div class="card table-card">
+          <div class="table-head">
+            <h3 style="margin:0;font-size:16px;font-weight:700;letter-spacing:.1px">상품 현황</h3>
+            <span class="body-md" style="color:var(--on-surface-variant)">6개 상품</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable">상품 <span class="arw">↓</span></th>
+                  <th>카테고리</th>
+                  <th class="sortable num-col">재고 <span class="arw">↕</span></th>
+                  <th class="sortable num-col">판매 <span class="arw">↓</span></th>
+                  <th>상태</th>
+                  <th aria-label="작업"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb sq" style="background:var(--c1)">한</span>
+                      <span class="prod-name" title="[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</span>
+                    </div>
+                  </td>
+                  <td>의류</td>
+                  <td class="num-col">1,240</td>
+                  <td class="num-col">856</td>
+                  <td><span class="chip on"><span class="cdot"></span>판매중</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb circ" style="background:var(--c2)">무</span>
+                      <span class="prod-name" title="무선 블루투스 이어폰 Pro">무선 블루투스 이어폰 Pro</span>
+                    </div>
+                  </td>
+                  <td>전자</td>
+                  <td class="num-col">0</td>
+                  <td class="num-col">2,103</td>
+                  <td><span class="chip out">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5m0 3v.2M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L14 3.9a2 2 0 00-3.5 0z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    품절</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb sq" style="background:var(--c3)">스</span>
+                      <span class="prod-name" title="스테인리스 텀블러 500ml">스테인리스 텀블러 500ml</span>
+                    </div>
+                  </td>
+                  <td>리빙</td>
+                  <td class="num-col">340</td>
+                  <td class="num-col"><span class="miss">—</span></td>
+                  <td><span class="chip ready"><span class="cdot"></span>준비중</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb sq" style="background:var(--c4)">친</span>
+                      <span class="prod-name" title="친환경 대나무 칫솔 4개입">친환경 대나무 칫솔 4개입</span>
+                    </div>
+                  </td>
+                  <td>생활</td>
+                  <td class="num-col">5,820</td>
+                  <td class="num-col">1,472</td>
+                  <td><span class="chip on"><span class="cdot"></span>판매중</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb circ" style="background:var(--c1)">아</span>
+                      <span class="prod-name" title="아로마 캔들 세트">아로마 캔들 세트</span>
+                    </div>
+                  </td>
+                  <td>리빙</td>
+                  <td class="num-col">88</td>
+                  <td class="num-col">640</td>
+                  <td><span class="chip done"><span class="cdot"></span>정산완료</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="prod-cell">
+                      <span class="thumb sq" style="background:var(--c3)">요</span>
+                      <span class="prod-name" title="요가 매트 6mm 논슬립">요가 매트 6mm 논슬립</span>
+                    </div>
+                  </td>
+                  <td>스포츠</td>
+                  <td class="num-col">210</td>
+                  <td class="num-col">95</td>
+                  <td><span class="chip ready"><span class="cdot"></span>준비중</span></td>
+                  <td><span class="row-action"><button class="action-btn">상세</button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 활동 피드 -->
+        <div class="card">
+          <div class="card-title"><h3>활동</h3></div>
+          <div class="feed-list">
+            <div class="feed-item">
+              <span class="feed-ic i-order" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6h13l-1.5 8H8L6 3H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="19" r="1.5" fill="currentColor"/><circle cx="16" cy="19" r="1.5" fill="currentColor"/></svg>
+              </span>
+              <div class="feed-body">
+                <div class="feed-txt">새 주문 <b>#10482</b> · <b>89,000원</b></div>
+              </div>
+              <span class="feed-time">14:02</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-ic i-pay" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 7L9 18l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <div class="feed-body">
+                <div class="feed-txt">정산 완료 · 리빙 <b>1,240만원</b></div>
+              </div>
+              <span class="feed-time">13:45</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-ic i-stock" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 8v5m0 3v.2M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L14 3.9a2 2 0 00-3.5 0z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </span>
+              <div class="feed-body">
+                <div class="feed-txt">재고 부족 · 무선 이어폰 Pro</div>
+              </div>
+              <span class="feed-time">11:20</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-ic i-review" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 15.8 7.4 18.2l.9-5.1L4.5 9.5l5.2-.8L12 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              </span>
+              <div class="feed-body">
+                <div class="feed-txt">신규 리뷰 <b>3건</b></div>
+              </div>
+              <span class="feed-time">09:05</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>STYLE 16 · 머티리얼</footer>
+  </div>
+</div>
+
+<!-- FAB — 우하단 시그니처 (새 리포트) -->
+<button class="fab" aria-label="새 리포트 작성">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+</button>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+    // ---- 리플: 모든 인터랙티브 요소 ----
+    var sel = '.nav-item,.icon-btn,.btn,.tab,.seg button,.chan,.action-btn,.fab,.filter-drop,.avatar';
+    document.querySelectorAll(sel).forEach(function(el){
+      el.addEventListener('pointerdown', function(e){
+        if(reduce) return;
+        var r = el.getBoundingClientRect();
+        var d = Math.max(r.width, r.height);
+        var s = document.createElement('span');
+        s.className = 'ripple';
+        s.style.width = s.style.height = d + 'px';
+        s.style.left = (e.clientX - r.left - d/2) + 'px';
+        s.style.top = (e.clientY - r.top - d/2) + 'px';
+        el.appendChild(s);
+        s.addEventListener('animationend', function(){ s.remove(); });
+      });
+    });
+
+    // ---- 탭 인디케이터 슬라이드 ----
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var ink = document.getElementById('tabInk');
+    var tabsWrap = document.querySelector('.tabs');
+    if(tabsWrap) tabsWrap.classList.add('js');
+    function moveInk(btn){
+      if(!ink || !btn) return;
+      ink.style.width = btn.offsetWidth + 'px';
+      ink.style.transform = 'translateX(' + (btn.offsetLeft - 4) + 'px)';
+    }
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){ x.setAttribute('aria-selected','false'); });
+        t.setAttribute('aria-selected','true');
+        moveInk(t);
+      });
+    });
+    var selected = document.querySelector('.tab[aria-selected="true"]');
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ moveInk(document.querySelector('.tab[aria-selected="true"]')); }); }
+    window.addEventListener('load', function(){ moveInk(document.querySelector('.tab[aria-selected="true"]')); });
+    window.addEventListener('resize', function(){ moveInk(document.querySelector('.tab[aria-selected="true"]')); });
+    moveInk(selected);
+
+    // ---- 세그먼트 토글 ----
+    document.querySelectorAll('.seg').forEach(function(g){
+      var btns = g.querySelectorAll('button');
+      btns.forEach(function(b){
+        b.addEventListener('click', function(){
+          btns.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+          b.setAttribute('aria-pressed','true');
+        });
+      });
+    });
+
+    // ---- 모바일 드로어 ----
+    var nav = document.getElementById('nav');
+    var scrim = document.getElementById('scrim');
+    var menuBtn = document.getElementById('menuBtn');
+    if(menuBtn) menuBtn.addEventListener('click', function(){ nav.classList.add('open'); scrim.classList.add('show'); });
+    if(scrim) scrim.addEventListener('click', function(){ nav.classList.remove('open'); scrim.classList.remove('show'); });
+  })();
+</script>

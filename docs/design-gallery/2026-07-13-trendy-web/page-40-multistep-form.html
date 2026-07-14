@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>케어링크 · 돌봄 신청</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============================================================
+     케어링크 — 다단계 돌봄 신청 폼
+     스타일: 하이컨트라스트 접근성 (WCAG AAA 지향)
+     마감: 8px 그리드 · 제한된 타이포 스케일 · 상태 전수 · CSS 변수
+     ============================================================ */
+
+  :root {
+    /* 팔레트 — 순백 배경 + 고대비 잉크/액센트 */
+    --bg: #F4F5F7;          /* 페이지 존 배경 (테두리로 구분, 채우기 최소) */
+    --surface: #FFFFFF;     /* 카드 */
+    --zone: #F4F5F7;        /* 옅은 존 (선택 강조 배경) */
+    --ink: #111111;         /* 본문·헤딩 */
+    --ink-2: #2A2A2A;       /* 보조 텍스트 (AAA 유지 위해 진하게) */
+    --border: #111111;      /* 기본 보더 2px */
+    --focus: #0B5FFF;       /* 포커스 링 */
+    --blue: #0B5FFF;        /* 링크·주요 액션·선택 */
+    --on-blue: #FFFFFF;
+    --green: #067647;       /* 성공·정상·완료 */
+    --on-green: #FFFFFF;
+    --warn: #8A5A00;        /* 경고 (텍스트+아이콘 병행) */
+    --danger: #B00020;      /* 오류 (텍스트+아이콘 병행) */
+
+    /* 형태 토큰 */
+    --r: 10px;
+    --r-sm: 8px;
+    --bw: 2px;              /* 기본 보더 굵기 */
+    --bw-strong: 3px;       /* 선택·활성 보더 */
+
+    /* 8px 그리드 스페이싱 */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 24px;
+    --s-6: 32px;
+    --s-7: 48px;
+    --s-8: 64px;
+
+    /* 제한된 타이포 스케일 */
+    --fs-display: 40px;
+    --fs-h1: 30px;
+    --fs-h2: 24px;
+    --fs-title: 20px;
+    --fs-body: 16px;
+    --fs-label: 15px;
+    --fs-caption: 14px;
+
+    --touch: 48px;          /* 최소 터치 타겟 */
+    --wrap: 760px;          /* 콘텐츠 폭 */
+
+    --sans: "Pretendard", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    letter-spacing: 0;          /* 가독 우선 — 자간 압축 금지 */
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 포커스 링 — 전 인터랙티브 요소, outline:none 절대 금지 */
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: var(--bw-strong) solid var(--focus);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  /* 스킵 링크 */
+  .skip {
+    position: absolute;
+    left: var(--s-4);
+    top: -80px;
+    z-index: 50;
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: var(--r-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 120ms ease;
+  }
+  .skip:focus { top: var(--s-4); }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- 상단 앱바 ---------- */
+  .appbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--surface);
+    border-bottom: var(--bw) solid var(--border);
+    animation: fade 120ms ease both;
+  }
+  .appbar__in {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: var(--s-3) var(--s-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 64px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .brand__mark {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-sm);
+    border: var(--bw) solid var(--border);
+    background: var(--blue);
+    color: var(--on-blue);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    flex: 0 0 auto;
+  }
+  .brand__name { font-size: var(--fs-title); font-weight: 800; }
+  .brand__sub {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--ink-2);
+    display: block;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+
+  /* ---------- 버튼 시스템 (variant + 전 상태) ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    min-height: var(--touch);
+    padding: 14px 20px;
+    font-family: inherit;
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.2;
+    border-radius: var(--r-sm);
+    border: var(--bw) solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 100ms ease, color 100ms ease, border-width 100ms ease, transform 100ms ease;
+  }
+  .btn svg { width: 20px; height: 20px; flex: 0 0 auto; }
+
+  /* primary — 진파랑 채움, hover 시 반전 */
+  .btn--primary {
+    background: var(--blue);
+    color: var(--on-blue);
+    border-color: var(--blue);
+  }
+  .btn--primary:hover {
+    background: var(--on-blue);
+    color: var(--blue);
+    border-width: var(--bw-strong);
+    padding: 13px 19px;      /* 보더 +1px 보정 → 크기 고정 */
+  }
+  .btn--primary:active { transform: translateY(1px); }
+
+  /* secondary — 흰 배경 잉크 보더, hover 시 반전 */
+  .btn--secondary:hover {
+    background: var(--ink);
+    color: #fff;
+    border-width: var(--bw-strong);
+    padding: 13px 19px;
+  }
+  .btn--secondary:active { transform: translateY(1px); }
+
+  /* ghost — 앱바 도움말 */
+  .btn--ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--blue);
+    padding: 10px 16px;
+    min-height: 44px;
+    font-size: var(--fs-label);
+  }
+  .btn--ghost:hover {
+    background: var(--blue);
+    color: var(--on-blue);
+    border-color: var(--blue);
+    border-width: var(--bw-strong);
+    padding: 9px 15px;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    background: var(--zone);
+    color: var(--ink-2);
+    border-color: var(--ink-2);
+    opacity: 0.7;
+  }
+  .btn:disabled:hover { border-width: var(--bw); padding: 14px 20px; }
+
+  /* ---------- 페이지 셸 ---------- */
+  main {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: var(--s-6) var(--s-4) var(--s-8);
+  }
+
+  /* ---------- 진행 스텝퍼 ---------- */
+  .progress { margin-bottom: var(--s-6); }
+  .progress__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin-bottom: var(--s-4);
+    flex-wrap: wrap;
+  }
+  .progress__title { font-size: var(--fs-label); font-weight: 700; color: var(--ink-2); }
+  .progress__count { font-size: var(--fs-title); font-weight: 800; }
+  .progress__count b { color: var(--blue); }
+
+  .track {
+    height: 12px;
+    border: var(--bw) solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    overflow: hidden;
+    margin-bottom: var(--s-5);
+  }
+  .track__fill {
+    height: 100%;
+    width: 50%;
+    background: var(--green);
+    border-radius: 999px 0 0 999px;
+    transition: width 450ms ease;
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-2);
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--s-2);
+  }
+  .step__dot {
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    border: var(--bw) solid var(--border);
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: var(--fs-title);
+    flex: 0 0 auto;
+  }
+  .step__dot svg { width: 24px; height: 24px; }
+  .step--done .step__dot { background: var(--green); color: var(--on-green); border-color: var(--green); }
+  .step--current .step__dot { background: var(--blue); color: var(--on-blue); border-color: var(--blue); border-width: var(--bw-strong); }
+  .step__label { font-size: var(--fs-caption); font-weight: 700; line-height: 1.3; }
+  .step__state { font-size: 13px; font-weight: 700; line-height: 1.2; }
+  .step--done .step__state { color: var(--green); }
+  .step--current .step__state { color: var(--blue); }
+  .step--todo .step__label { color: var(--ink-2); }
+  .step--todo .step__state { color: var(--ink-2); }
+
+  /* ---------- 스텝 헤더 ---------- */
+  .stephead { margin-bottom: var(--s-6); }
+  .stephead h1 {
+    margin: 0 0 var(--s-2);
+    font-size: var(--fs-h1);
+    line-height: 38px;
+    font-weight: 800;
+  }
+  .stephead p {
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--ink-2);
+    font-weight: 500;
+    max-width: 52ch;
+  }
+
+  /* ---------- 질문 카드 (fieldset) ---------- */
+  .card {
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r);
+    background: var(--surface);
+    padding: var(--s-5);
+    margin: 0 0 var(--s-5);
+    animation: rise 240ms ease both;
+  }
+  .card:nth-of-type(1) { animation-delay: 40ms; }
+  .card:nth-of-type(2) { animation-delay: 90ms; }
+  .card:nth-of-type(3) { animation-delay: 140ms; }
+  .card:nth-of-type(4) { animation-delay: 190ms; }
+  .card:nth-of-type(5) { animation-delay: 240ms; }
+
+  .card__legend {
+    padding: 0;
+    margin-bottom: var(--s-2);
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    flex-wrap: wrap;
+  }
+  .card__q { font-size: var(--fs-title); font-weight: 800; line-height: 28px; }
+  .card__help {
+    margin: 0 0 var(--s-4);
+    font-size: var(--fs-label);
+    color: var(--ink-2);
+    font-weight: 500;
+    display: flex;
+    gap: var(--s-2);
+    align-items: flex-start;
+  }
+  .card__help svg { width: 18px; height: 18px; margin-top: 3px; flex: 0 0 auto; color: var(--blue); }
+
+  /* 필수/선택 배지 — 색+텍스트+아이콘 3중 */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: var(--bw) solid;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .tag svg { width: 14px; height: 14px; }
+  .tag--req { color: var(--danger); border-color: var(--danger); background: #fff; }
+  .tag--opt { color: var(--ink-2); border-color: var(--ink-2); background: #fff; }
+
+  /* ---------- 라디오 옵션 ---------- */
+  .options { display: flex; flex-direction: column; gap: var(--s-3); }
+
+  .option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-height: var(--touch);
+    padding: 14px 16px;
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    cursor: pointer;
+    transition: background 100ms ease, border-width 100ms ease;
+  }
+  .option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+  .option:hover { background: var(--zone); }
+  .option:hover::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 4px; background: var(--blue); border-radius: 0 4px 4px 0; }
+
+  .option:has(input:focus-visible) {
+    outline: var(--bw-strong) solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  /* 라디오 컨트롤 */
+  .radio-dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: var(--bw) solid var(--border);
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+  }
+  .radio-dot::after {
+    content: "";
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--blue);
+    transform: scale(0);
+    transition: transform 100ms ease;
+  }
+  .option__label { font-size: var(--fs-body); font-weight: 600; flex: 1; }
+  .option__note { display: block; font-size: var(--fs-caption); font-weight: 500; color: var(--ink-2); margin-top: 2px; }
+
+  /* 선택됨 배지 (라디오/체크 공용) — 기본 숨김 */
+  .picked {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+  .picked svg { width: 16px; height: 16px; }
+
+  .option:has(input[type="radio"]:checked) {
+    border-width: var(--bw-strong);
+    border-color: var(--blue);
+    background: var(--zone);
+    padding: 13px 15px;
+  }
+  .option:has(input[type="radio"]:checked) .radio-dot { border-color: var(--blue); border-width: var(--bw-strong); }
+  .option:has(input[type="radio"]:checked) .radio-dot::after { transform: scale(1); }
+  .option:has(input[type="radio"]:checked) .picked { display: inline-flex; }
+
+  /* ---------- 체크박스 옵션 ---------- */
+  .check-box {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: var(--bw) solid var(--border);
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+  }
+  .check-box svg { width: 18px; height: 18px; color: var(--on-green); transform: scale(0); transition: transform 100ms ease; }
+
+  .option:has(input[type="checkbox"]:checked) {
+    border-width: var(--bw-strong);
+    border-color: var(--green);
+    background: #F0F8F3;
+    padding: 13px 15px;
+  }
+  .option:has(input[type="checkbox"]:checked) .check-box { background: var(--green); border-color: var(--green); }
+  .option:has(input[type="checkbox"]:checked) .check-box svg { transform: scale(1); }
+  .option:has(input[type="checkbox"]:checked) .picked { display: inline-flex; color: var(--green); }
+  .option:has(input[type="checkbox"]:checked):hover::before { background: var(--green); }
+
+  /* ---------- 텍스트 영역 ---------- */
+  .field-label {
+    display: block;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    margin-bottom: var(--s-2);
+  }
+  textarea, input[type="text"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--fs-body);
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  textarea { min-height: 112px; }
+  input[type="text"] { min-height: var(--touch); }
+  textarea::placeholder, input::placeholder { color: var(--ink-2); opacity: 1; }
+  textarea:focus, input[type="text"]:focus {
+    border-color: var(--blue);
+    border-width: var(--bw-strong);
+    padding: 11px 13px;
+    outline: none;   /* :focus-visible 규칙이 링을 그림 */
+  }
+  textarea:focus-visible, input[type="text"]:focus-visible {
+    outline: var(--bw-strong) solid var(--focus);
+    outline-offset: 3px;
+  }
+  .field-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--s-2);
+    gap: var(--s-3);
+    flex-wrap: wrap;
+  }
+  .field-hint { font-size: var(--fs-caption); font-weight: 500; color: var(--ink-2); }
+  .counter { font-size: var(--fs-caption); font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  /* ---------- 슬라이더 ---------- */
+  .slider-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin-bottom: var(--s-3);
+    flex-wrap: wrap;
+  }
+  .slider-value {
+    font-size: var(--fs-h2);
+    font-weight: 800;
+    color: var(--blue);
+  }
+  .slider-value small { font-size: var(--fs-label); font-weight: 700; color: var(--ink-2); }
+
+  .range-wrap { padding: 6px 0 var(--s-2); }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: var(--touch);
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 12px;
+    border: var(--bw) solid var(--border);
+    border-radius: 999px;
+    background: linear-gradient(var(--blue), var(--blue)) no-repeat;
+    background-size: var(--fill, 50%) 100%;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 12px;
+    border: var(--bw) solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+  }
+  input[type="range"]::-moz-range-progress {
+    height: 12px;
+    background: var(--blue);
+    border-radius: 999px 0 0 999px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: var(--bw-strong) solid var(--blue);
+    margin-top: -11px;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: var(--bw-strong) solid var(--blue);
+  }
+  input[type="range"]:focus-visible { outline: none; }
+  input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--focus); }
+  input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--focus); }
+
+  .ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--s-2);
+  }
+  .ticks span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+
+  /* ---------- 토글 스위치 ---------- */
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    min-height: var(--touch);
+    justify-content: space-between;
+  }
+  .toggle__text b { display: block; font-size: var(--fs-body); font-weight: 700; }
+  .toggle__text span { font-size: var(--fs-caption); font-weight: 500; color: var(--ink-2); }
+  .switch { position: relative; display: inline-flex; align-items: center; gap: var(--s-3); cursor: pointer; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch__track {
+    width: 68px; height: 38px;
+    border: var(--bw) solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    position: relative;
+    flex: 0 0 auto;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .switch__track::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    transition: transform 120ms ease, background 120ms ease;
+  }
+  .switch__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--fs-label);
+    font-weight: 800;
+    color: var(--ink-2);
+    min-width: 56px;
+  }
+  .switch__state svg { width: 16px; height: 16px; }
+  .switch:has(input:checked) .switch__track { background: var(--green); border-color: var(--green); }
+  .switch:has(input:checked) .switch__track::after { transform: translateX(30px); background: #fff; }
+  .switch:has(input:checked) .switch__state { color: var(--green); }
+  .switch:has(input:focus-visible) .switch__track { outline: var(--bw-strong) solid var(--focus); outline-offset: 3px; }
+  .switch__on { display: none; }
+  .switch:has(input:checked) .switch__on { display: inline-flex; }
+  .switch:has(input:checked) .switch__off { display: none; }
+
+  /* ---------- 오류 상태 (색+텍스트+아이콘 3중) ---------- */
+  .card.is-error { border-color: var(--danger); border-width: var(--bw-strong); padding: calc(var(--s-5) - 1px); }
+  .errmsg {
+    display: none;
+    align-items: flex-start;
+    gap: var(--s-2);
+    margin-top: var(--s-3);
+    padding: 12px 14px;
+    border: var(--bw) solid var(--danger);
+    border-radius: var(--r-sm);
+    background: #FDF0F2;
+    color: var(--danger);
+    font-size: var(--fs-label);
+    font-weight: 700;
+  }
+  .errmsg svg { width: 20px; height: 20px; flex: 0 0 auto; margin-top: 1px; }
+  .card.is-error .errmsg { display: flex; }
+
+  /* ---------- 하단 내비 ---------- */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin-top: var(--s-6);
+    padding-top: var(--s-5);
+    border-top: var(--bw) solid var(--border);
+  }
+  .nav .btn { min-width: 148px; }
+
+  /* ---------- 저장/도움 콜아웃 ---------- */
+  .callout {
+    display: flex;
+    gap: var(--s-4);
+    align-items: flex-start;
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r);
+    background: var(--surface);
+    padding: var(--s-5);
+    margin-top: var(--s-5);
+  }
+  .callout__icon {
+    width: var(--touch); height: var(--touch);
+    border-radius: var(--r-sm);
+    border: var(--bw) solid var(--blue);
+    background: #fff;
+    color: var(--blue);
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+  }
+  .callout__icon svg { width: 26px; height: 26px; }
+  .callout__body b { display: block; font-size: var(--fs-body); font-weight: 800; margin-bottom: var(--s-1); }
+  .callout__body p { margin: 0 0 var(--s-2); font-size: var(--fs-label); color: var(--ink-2); font-weight: 500; }
+  .callout__body a { color: var(--blue); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* 저장 상태 배지 — 성공 3중 표기 */
+  .savebar {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-top: var(--s-5);
+    padding: 8px 14px;
+    border: var(--bw) solid var(--green);
+    border-radius: 999px;
+    color: var(--green);
+    font-size: var(--fs-label);
+    font-weight: 800;
+    background: #fff;
+  }
+  .savebar svg { width: 18px; height: 18px; }
+
+  /* ---------- 푸터 ---------- */
+  footer {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: var(--s-6) var(--s-4) var(--s-7);
+    border-top: var(--bw) solid var(--border);
+  }
+  .foot-name { font-size: var(--fs-label); font-weight: 800; }
+  .foot-name span { color: var(--ink-2); font-weight: 600; }
+  .foot-note { margin-top: var(--s-2); font-size: var(--fs-caption); color: var(--ink-2); font-weight: 500; }
+
+  /* ---------- 모션 ---------- */
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 640px) {
+    :root { --fs-h1: 26px; }
+    .stephead h1 { line-height: 34px; }
+    .steps { grid-template-columns: repeat(4, 1fr); gap: var(--s-1); }
+    .step__label { font-size: 12px; }
+    .step__dot { width: 44px; height: 44px; font-size: var(--fs-body); }
+    .card { padding: var(--s-4); }
+    .nav { flex-direction: column-reverse; }
+    .nav .btn { width: 100%; }
+    .brand__sub { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#form">본문 바로가기</a>
+
+<!-- 상단 앱바 -->
+<header class="appbar">
+  <div class="appbar__in">
+    <a class="brand" href="#" aria-label="케어링크 홈">
+      <span class="brand__mark" aria-hidden="true">CL</span>
+      <span>
+        <span class="brand__name">케어링크</span>
+        <span class="brand__sub">방문 돌봄 매칭 신청</span>
+      </span>
+    </a>
+    <button type="button" class="btn btn--ghost">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .8-1 1.7"/><path d="M12 17h.01"/>
+      </svg>
+      도움이 필요해요
+    </button>
+  </div>
+</header>
+
+<main id="form">
+
+  <!-- 진행 스텝퍼 -->
+  <section class="progress" aria-label="신청 진행 상황">
+    <div class="progress__head">
+      <span class="progress__title">돌봄 신청서 작성</span>
+      <span class="progress__count"><b>2</b> / 4 단계</span>
+    </div>
+    <div class="track" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="전체 진행률 50%">
+      <div class="track__fill"></div>
+    </div>
+
+    <ol class="steps">
+      <li class="step step--done">
+        <span class="step__dot" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+        </span>
+        <span class="step__label">기본 정보</span>
+        <span class="step__state">완료</span>
+      </li>
+      <li class="step step--current" aria-current="step">
+        <span class="step__dot" aria-hidden="true">2</span>
+        <span class="step__label">돌봄 필요사항</span>
+        <span class="step__state">진행 중</span>
+      </li>
+      <li class="step step--todo">
+        <span class="step__dot" aria-hidden="true">3</span>
+        <span class="step__label">일정·지역</span>
+        <span class="step__state">대기</span>
+      </li>
+      <li class="step step--todo">
+        <span class="step__dot" aria-hidden="true">4</span>
+        <span class="step__label">확인·제출</span>
+        <span class="step__state">대기</span>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 스텝 헤더 -->
+  <div class="stephead">
+    <h1>돌봄 필요사항을 알려주세요</h1>
+    <p>어떤 돌봄이 얼마나 필요한지 알려주시면, 조건에 맞는 요양보호사님을 연결해 드립니다. 별표(<span style="color:var(--danger);font-weight:800">*</span>) 항목만 필수예요.</p>
+  </div>
+
+  <form id="careForm" novalidate>
+
+    <!-- Q1. 라디오 (3) -->
+    <fieldset class="card" id="q1">
+      <legend class="card__legend">
+        <span class="card__q">돌봄 대상은 누구인가요?</span>
+        <span class="tag tag--req">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>
+          필수
+        </span>
+      </legend>
+      <p class="card__help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        가장 가까운 관계 하나만 골라주세요. 다음 단계에서 세부 정보를 더 받습니다.
+      </p>
+
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="target" value="parent" />
+          <span class="radio-dot" aria-hidden="true"></span>
+          <span class="option__label">부모님 또는 조부모님
+            <span class="option__note">65세 이상 어르신 돌봄을 가장 많이 신청해요.</span>
+          </span>
+          <span class="picked" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨
+          </span>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="target" value="spouse" />
+          <span class="radio-dot" aria-hidden="true"></span>
+          <span class="option__label">배우자
+            <span class="option__note">재활·회복기 돌봄이나 상시 돌봄을 함께 설계해요.</span>
+          </span>
+          <span class="picked" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨
+          </span>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="target" value="self" />
+          <span class="radio-dot" aria-hidden="true"></span>
+          <span class="option__label">본인
+            <span class="option__note">수술 후 회복이나 일상 지원이 필요할 때 선택하세요.</span>
+          </span>
+          <span class="picked" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨
+          </span>
+        </label>
+      </div>
+
+      <p class="errmsg" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        돌봄 대상을 하나 선택해 주세요. 이 항목은 필수입니다.
+      </p>
+    </fieldset>
+
+    <!-- Q2. 체크박스 (다중) -->
+    <fieldset class="card" id="q2">
+      <legend class="card__legend">
+        <span class="card__q">필요한 돌봄 서비스를 모두 골라주세요</span>
+        <span class="tag tag--opt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          여러 개 선택
+        </span>
+      </legend>
+      <p class="card__help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        해당하는 항목을 모두 선택하면 돌봄 계획을 더 정확하게 짤 수 있어요.
+      </p>
+
+      <div class="options">
+        <label class="option">
+          <input type="checkbox" name="service" value="visit" />
+          <span class="check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          <span class="option__label">방문 요양
+            <span class="option__note">세면·거동·투약 등 일상 돌봄</span>
+          </span>
+          <span class="picked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨</span>
+        </label>
+
+        <label class="option">
+          <input type="checkbox" name="service" value="house" />
+          <span class="check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          <span class="option__label">가사 지원
+            <span class="option__note">청소·세탁·장보기 등 생활 지원</span>
+          </span>
+          <span class="picked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨</span>
+        </label>
+
+        <label class="option">
+          <input type="checkbox" name="service" value="hospital" />
+          <span class="check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          <span class="option__label">병원 동행
+            <span class="option__note">외래 진료 예약·이동·접수 동행</span>
+          </span>
+          <span class="picked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨</span>
+        </label>
+
+        <label class="option">
+          <input type="checkbox" name="service" value="cognitive" />
+          <span class="check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          <span class="option__label">인지 활동
+            <span class="option__note">치매 예방 프로그램·말벗·산책</span>
+          </span>
+          <span class="picked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨</span>
+        </label>
+
+        <label class="option">
+          <input type="checkbox" name="service" value="meal" />
+          <span class="check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          <span class="option__label">식사 준비
+            <span class="option__note">영양식·당뇨식 등 맞춤 식단 조리</span>
+          </span>
+          <span class="picked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>선택됨</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Q3. 텍스트 -->
+    <fieldset class="card" id="q3">
+      <legend class="card__legend">
+        <span class="card__q">특별히 신경 써야 할 점이 있나요?</span>
+        <span class="tag tag--opt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          선택
+        </span>
+      </legend>
+      <p class="card__help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        알레르기, 복용 중인 약, 조심할 동작처럼 미리 알아야 할 점을 적어주세요.
+      </p>
+
+      <label class="field-label" for="note">돌봄 요청사항</label>
+      <textarea id="note" name="note" maxlength="300"
+        placeholder="예: 오른쪽 무릎이 불편해 계단 이동 시 부축이 필요합니다. 저염식으로 준비해 주세요."></textarea>
+      <div class="field-foot">
+        <span class="field-hint">개인정보는 매칭된 요양보호사에게만 안전하게 전달돼요.</span>
+        <span class="counter"><span id="count">0</span> / 300자</span>
+      </div>
+    </fieldset>
+
+    <!-- Q4. 슬라이더 -->
+    <fieldset class="card" id="q4">
+      <legend class="card__legend">
+        <span class="card__q">일주일에 몇 시간 정도 필요하세요?</span>
+        <span class="tag tag--req">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>
+          필수
+        </span>
+      </legend>
+      <p class="card__help">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        대략적인 시간이면 충분해요. 상담 때 함께 조정할 수 있습니다.
+      </p>
+
+      <div class="slider-head">
+        <span class="field-label" id="hoursLabel" style="margin:0">희망 돌봄 시간</span>
+        <span class="slider-value" aria-live="polite"><span id="hoursVal">20</span>시간 <small>/ 주</small></span>
+      </div>
+      <div class="range-wrap">
+        <input type="range" id="hours" name="hours" min="0" max="40" step="2" value="20"
+          aria-labelledby="hoursLabel" aria-valuetext="주당 20시간" />
+      </div>
+      <div class="ticks" aria-hidden="true">
+        <span>0시간</span><span>10</span><span>20</span><span>30</span><span>40시간</span>
+      </div>
+
+      <!-- 토글: 상태 3중 표기 데모 -->
+      <div class="toggle" style="margin-top:var(--s-5);padding-top:var(--s-4);border-top:var(--bw) solid var(--zone)">
+        <span class="toggle__text">
+          <b>주간 돌봄 일지 알림 받기</b>
+          <span>요양보호사님이 남긴 기록을 문자로 요약해 드려요.</span>
+        </span>
+        <label class="switch">
+          <input type="checkbox" id="digest" name="digest" checked />
+          <span class="switch__track" aria-hidden="true"></span>
+          <span class="switch__state">
+            <span class="switch__on">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>켜짐
+            </span>
+            <span class="switch__off">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>꺼짐
+            </span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- 하단 내비 -->
+    <div class="nav">
+      <button type="button" class="btn btn--secondary" id="prevBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        이전 단계
+      </button>
+      <button type="submit" class="btn btn--primary" id="nextBtn">
+        다음 단계
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- 자동 저장 상태 -->
+    <div class="savebar" role="status" aria-live="polite" id="saveBar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 1-6.4 2.6"/><path d="M8 12l3 3 5-6"/></svg>
+      <span id="saveText">작성 내용이 자동 저장됐어요 · 오후 2:41</span>
+    </div>
+  </form>
+
+  <!-- 도움말 콜아웃 -->
+  <aside class="callout" aria-label="도움말">
+    <span class="callout__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v12H8l-4 4z"/><path d="M9 10h6M9 13h4"/></svg>
+    </span>
+    <div class="callout__body">
+      <b>작성이 어려우신가요?</b>
+      <p>전화로 상담원이 대신 작성해 드립니다. 평일 오전 9시부터 오후 6시까지 운영해요.</p>
+      <a href="tel:15990000">돌봄 상담센터 1599-0000 전화하기</a>
+    </div>
+  </aside>
+
+</main>
+
+<footer>
+  <div class="foot-name">케어링크 <span>· 하이컨트라스트 접근성</span></div>
+  <p class="foot-note">모든 항목은 색·글자·아이콘으로 함께 표시되며, 키보드만으로 전 과정을 완료할 수 있습니다.</p>
+</footer>
+
+<script>
+  // 슬라이더 — 값 표시 + 채움 폭 동기화
+  var hours = document.getElementById('hours');
+  var hoursVal = document.getElementById('hoursVal');
+  function syncRange() {
+    var pct = ((hours.value - hours.min) / (hours.max - hours.min)) * 100;
+    hours.style.setProperty('--fill', pct + '%');
+    hoursVal.textContent = hours.value;
+    hours.setAttribute('aria-valuetext', '주당 ' + hours.value + '시간');
+  }
+  hours.addEventListener('input', syncRange);
+  syncRange();
+
+  // 텍스트 — 글자 수 카운터
+  var note = document.getElementById('note');
+  var count = document.getElementById('count');
+  note.addEventListener('input', function () { count.textContent = note.value.length; });
+
+  // 다음 단계 — 필수(라디오) 검증 → 오류 상태 3중 표기
+  var form = document.getElementById('careForm');
+  var q1 = document.getElementById('q1');
+  var saveText = document.getElementById('saveText');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var picked = form.querySelector('input[name="target"]:checked');
+    if (!picked) {
+      q1.classList.add('is-error');
+      q1.setAttribute('aria-invalid', 'true');
+      q1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var first = q1.querySelector('input[name="target"]');
+      if (first) first.focus();
+      return;
+    }
+    q1.classList.remove('is-error');
+    q1.removeAttribute('aria-invalid');
+    saveText.textContent = '3단계(일정·지역)로 넘어갑니다 · 내용 저장 완료';
+  });
+
+  // 라디오 선택 시 오류 상태 자동 해제
+  form.querySelectorAll('input[name="target"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      q1.classList.remove('is-error');
+      q1.removeAttribute('aria-invalid');
+    });
+  });
+
+  // 이전 단계 — 데모 안내
+  document.getElementById('prevBtn').addEventListener('click', function () {
+    saveText.textContent = '1단계(기본 정보)로 돌아갑니다 · 내용 저장 완료';
+  });
+</script>
+
+</body>
+</html>

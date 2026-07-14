@@ -1,0 +1,1495 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opswise · 프로필 편집</title>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<style>
+  /* =========================================================
+     Opswise — 프로필 편집 · 엔터프라이즈 B2B
+     팔레트/타이포/형태는 style-23 엔터프라이즈 규칙 + 프로덕션 품질 기준
+     ========================================================= */
+  :root {
+    /* 표면 · 구획 */
+    --canvas: #f4f5f7;
+    --surface: #ffffff;
+    --surface-subtle: #fafbfc;
+    --border: #dfe1e6;
+    --border-strong: #c1c7d0;
+    --row-selected: #deebff;
+
+    /* 실용 네이비 — 클릭 가능/링크/활성에만 */
+    --primary: #0052cc;
+    --primary-hover: #0747a6;
+    --primary-active: #043584;
+    --link: #0065ff;
+
+    /* 텍스트 위계 */
+    --text-strong: #172b4d;
+    --text-body: #42526e;
+    --text-muted: #6b778c;
+    --text-disabled: #97a0af;
+
+    /* 상태 (색 + 텍스트 + 아이콘 3중) */
+    --success: #00875a;
+    --success-bg: #e3fcef;
+    --info: #0052cc;
+    --info-bg: #deebff;
+    --warning: #ff8b00;
+    --warning-bg: #fffae6;
+    --danger: #de350b;
+    --danger-bg: #ffebe6;
+    --neutral: #42526e;
+    --neutral-bg: #f4f5f7;
+
+    /* 형태 토큰 */
+    --radius-card: 4px;
+    --radius-control: 3px;
+    --shadow-card: 0 1px 1px rgba(9, 30, 66, 0.08);
+    --shadow-raise: 0 4px 8px -2px rgba(9, 30, 66, 0.12),
+      0 0 1px rgba(9, 30, 66, 0.16);
+    --ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+
+    /* 치수 */
+    --sidebar-w: 240px;
+    --topbar-h: 56px;
+
+    --font: "Pretendard", "Inter", system-ui, -apple-system, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: var(--font);
+    background: var(--canvas);
+    color: var(--text-body);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "tnum" 0;
+  }
+  a {
+    color: var(--link);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* 공통 focus ring — 라이트 배경이라 그림자 대신 명시 링 */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--radius-control);
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ========== 상단바 ========== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: var(--topbar-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--text-strong);
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .brand__mark {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-control);
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+    flex: none;
+  }
+  .brand__sub {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 13px;
+    padding-left: 10px;
+    margin-left: 2px;
+    border-left: 1px solid var(--border);
+  }
+  .topbar__spacer {
+    flex: 1;
+  }
+  .topbar__search {
+    position: relative;
+    width: 260px;
+    max-width: 34vw;
+  }
+  .topbar__search input {
+    width: 100%;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: var(--surface-subtle);
+    padding: 0 10px 0 30px;
+    font-size: 13px;
+    color: var(--text-body);
+    transition: background 100ms ease, border-color 100ms ease;
+  }
+  .topbar__search input::placeholder {
+    color: var(--text-disabled);
+  }
+  .topbar__search input:hover {
+    border-color: var(--border-strong);
+  }
+  .topbar__search input:focus {
+    background: var(--surface);
+    border-color: var(--primary);
+  }
+  .topbar__search svg {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-disabled);
+    pointer-events: none;
+  }
+  .topbar__icon {
+    width: 32px;
+    height: 32px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    background: transparent;
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    position: relative;
+    transition: background 100ms ease, color 100ms ease;
+  }
+  .topbar__icon:hover {
+    background: var(--neutral-bg);
+    color: var(--text-strong);
+  }
+  .topbar__icon .dot {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--surface);
+  }
+  .topbar__me {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4c9aff, #0052cc);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex: none;
+    border: 1px solid rgba(9, 30, 66, 0.12);
+  }
+
+  /* ========== 셸 그리드 ========== */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: calc(100vh - var(--topbar-h));
+  }
+
+  /* ========== 좌측 사이드바 ========== */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px 24px;
+    position: sticky;
+    top: var(--topbar-h);
+    align-self: start;
+    height: calc(100vh - var(--topbar-h));
+    overflow-y: auto;
+  }
+  .sidebar__title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 12px 8px;
+  }
+  .navgroup + .navgroup {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-control);
+    color: var(--text-body);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 100ms ease, color 100ms ease;
+  }
+  .nav__item svg {
+    flex: none;
+    color: var(--text-muted);
+    transition: color 100ms ease;
+  }
+  .nav__item .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--neutral-bg);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-weight: 600;
+  }
+  .nav__item:hover {
+    background: var(--neutral-bg);
+    color: var(--text-strong);
+  }
+  .nav__item:hover svg {
+    color: var(--text-body);
+  }
+  .nav__item[aria-current="page"] {
+    background: var(--row-selected);
+    color: var(--primary-active);
+    font-weight: 600;
+  }
+  .nav__item[aria-current="page"] svg {
+    color: var(--primary);
+  }
+  .nav__item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--primary);
+  }
+  .sidebar__foot {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface-subtle);
+  }
+  .sidebar__foot .lbl {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .meter {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+    margin: 6px 0;
+  }
+  .meter > i {
+    display: block;
+    height: 100%;
+    width: 68%;
+    background: var(--primary);
+    border-radius: 3px;
+  }
+  .sidebar__foot .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ========== 본문 ========== */
+  .main {
+    min-width: 0;
+    padding: 24px;
+  }
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .crumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .crumb svg {
+    opacity: 0.6;
+  }
+
+  .pagehead {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .pagehead h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--text-strong);
+    letter-spacing: -0.02em;
+  }
+  .pagehead p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .pagehead__spacer {
+    flex: 1;
+  }
+
+  /* 상태 뱃지 (색 + 텍스트 + 아이콘) */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: var(--radius-control);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .badge svg {
+    flex: none;
+  }
+  .badge--success {
+    color: var(--success);
+    background: var(--success-bg);
+  }
+  .badge--info {
+    color: var(--info);
+    background: var(--info-bg);
+  }
+  .badge--warning {
+    color: #97590a;
+    background: var(--warning-bg);
+  }
+  .badge--neutral {
+    color: var(--neutral);
+    background: var(--neutral-bg);
+  }
+
+  /* 서브탭 (세그먼트) */
+  .subtabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+  .subtab {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 12px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: color 100ms ease, border-color 100ms ease;
+  }
+  .subtab:hover {
+    color: var(--text-strong);
+  }
+  .subtab[aria-selected="true"] {
+    color: var(--primary);
+    font-weight: 600;
+    border-bottom-color: var(--primary);
+  }
+
+  /* 폼 레이아웃 그리드 */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 288px;
+    gap: 24px;
+    align-items: start;
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* 카드 */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card__head h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+  .card__head .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .card__head .grow {
+    flex: 1;
+  }
+  .card__body {
+    padding: 16px;
+  }
+  .card__foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-subtle);
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+  }
+  .card__foot .grow {
+    flex: 1;
+  }
+  .card__foot .savehint {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 아바타 슬롯 */
+  .avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .avatar {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4c9aff 0%, #0052cc 100%);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    flex: none;
+    border: 1px solid rgba(9, 30, 66, 0.12);
+    box-shadow: var(--shadow-card);
+    user-select: none;
+  }
+  .avatar__edit {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-body);
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow-card);
+    transition: border-color 100ms ease, color 100ms ease;
+  }
+  .avatar__edit:hover {
+    border-color: var(--border-strong);
+    color: var(--primary);
+  }
+  .avatar-meta {
+    min-width: 0;
+  }
+  .avatar-meta .name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+  .avatar-meta .role {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .avatar-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .avatar-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 버튼 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--radius-control);
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: background 120ms ease, border-color 120ms ease,
+      color 120ms ease;
+    white-space: nowrap;
+  }
+  .btn svg {
+    flex: none;
+  }
+  .btn--sm {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .btn--primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--shadow-card);
+  }
+  .btn--primary:hover {
+    background: var(--primary-hover);
+  }
+  .btn--primary:active {
+    background: var(--primary-active);
+  }
+  .btn--secondary {
+    background: var(--surface);
+    color: var(--text-strong);
+    border-color: var(--border);
+  }
+  .btn--secondary:hover {
+    background: var(--surface-subtle);
+    border-color: var(--border-strong);
+  }
+  .btn--secondary:active {
+    background: #f1f2f4;
+  }
+  .btn--subtle {
+    background: transparent;
+    color: var(--text-body);
+  }
+  .btn--subtle:hover {
+    background: var(--neutral-bg);
+    color: var(--text-strong);
+  }
+  .btn--danger-subtle {
+    background: transparent;
+    color: var(--danger);
+  }
+  .btn--danger-subtle:hover {
+    background: var(--danger-bg);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    background: var(--neutral-bg);
+    color: var(--text-disabled);
+    border-color: var(--border);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* 폼 필드 */
+  .fieldset {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .field--full {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-strong);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field label .req {
+    color: var(--danger);
+    font-weight: 700;
+  }
+  .field label .opt {
+    color: var(--text-disabled);
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .control {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .control > svg.lead {
+    position: absolute;
+    left: 10px;
+    color: var(--text-disabled);
+    pointer-events: none;
+  }
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    color: var(--text-strong);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 100ms ease, background 100ms ease,
+      box-shadow 100ms ease;
+  }
+  .input,
+  .select {
+    height: 38px;
+    padding: 0 12px;
+  }
+  .control.has-lead .input {
+    padding-left: 34px;
+  }
+  .textarea {
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 96px;
+    line-height: 1.55;
+  }
+  .input::placeholder,
+  .textarea::placeholder {
+    color: var(--text-disabled);
+  }
+  .input:hover,
+  .select:hover,
+  .textarea:hover {
+    border-color: var(--border-strong);
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.16);
+  }
+  .input[readonly] {
+    background: var(--surface-subtle);
+    color: var(--text-body);
+    cursor: default;
+  }
+  /* 셀렉트 화살표 */
+  .select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b778c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+  .help {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .help--ok {
+    color: var(--success);
+  }
+  .help--warn {
+    color: #97590a;
+  }
+  .charcount {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-disabled);
+  }
+  .field__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  /* 인풋에 붙는 접미 액션 (검증 뱃지) */
+  .verify {
+    position: absolute;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--success);
+    background: var(--success-bg);
+    padding: 2px 6px;
+    border-radius: var(--radius-control);
+  }
+
+  /* 공개범위 라디오 카드 */
+  .visibility {
+    display: grid;
+    gap: 8px;
+  }
+  .vis-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color 100ms ease, background 100ms ease;
+  }
+  .vis-opt:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-subtle);
+  }
+  .vis-opt input {
+    margin: 0;
+    margin-top: 2px;
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+  .vis-opt__body .t {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-strong);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vis-opt__body .d {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .vis-opt:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--row-selected);
+  }
+  .vis-opt:has(input:focus-visible) {
+    box-shadow: var(--ring);
+  }
+
+  /* 우측 사이드 정보 카드 목록 */
+  .metalist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .metalist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .metalist li:last-child {
+    border-bottom: none;
+  }
+  .metalist .ico {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-control);
+    background: var(--neutral-bg);
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    flex: none;
+  }
+  .metalist .k {
+    color: var(--text-muted);
+  }
+  .metalist .v {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--text-strong);
+    text-align: right;
+  }
+
+  .checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    font-size: 13px;
+    color: var(--text-body);
+  }
+  .checklist .tick {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .checklist .tick--on {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .checklist .tick--off {
+    background: var(--neutral-bg);
+    color: var(--text-disabled);
+  }
+  .checklist li.done {
+    color: var(--text-muted);
+  }
+
+  .danger-zone {
+    border-color: #ffd0c4;
+  }
+  .danger-zone .card__head {
+    border-bottom-color: #ffd0c4;
+  }
+  .danger-zone .card__head h2 {
+    color: var(--danger);
+  }
+
+  /* 하단 sticky 저장바 */
+  .actionbar {
+    position: sticky;
+    bottom: 0;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-raise);
+    z-index: 10;
+  }
+  .actionbar .grow {
+    flex: 1;
+  }
+  .actionbar .dirty {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-body);
+  }
+  .dot-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warning);
+    box-shadow: 0 0 0 3px var(--warning-bg);
+    flex: none;
+  }
+
+  footer.pagefoot {
+    max-width: 1080px;
+    margin: 24px auto 8px;
+    padding: 16px 4px 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  footer.pagefoot .dotsep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+
+  /* ========== 로드 시퀀스 (절제) ========== */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .rise {
+    animation: rise 220ms ease-out both;
+  }
+  .rise-1 {
+    animation-delay: 40ms;
+  }
+  .rise-2 {
+    animation-delay: 90ms;
+  }
+  .rise-3 {
+    animation-delay: 140ms;
+  }
+  .rise-4 {
+    animation-delay: 190ms;
+  }
+
+  /* ========== 반응형 ========== */
+  @media (max-width: 1024px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 860px) {
+    :root {
+      --sidebar-w: 200px;
+    }
+  }
+  @media (max-width: 720px) {
+    .shell {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .navgroup--secondary {
+      display: none;
+    }
+    .topbar__search {
+      display: none;
+    }
+    .fieldset {
+      grid-template-columns: 1fr;
+    }
+    .main {
+      padding: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<!-- ================= 상단바 ================= -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand__mark">OW</span>
+    Opswise
+    <span class="brand__sub">운영 콘솔</span>
+  </div>
+
+  <div class="topbar__spacer"></div>
+
+  <label class="topbar__search">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="search" placeholder="설정 · 멤버 · 워크스페이스 검색" aria-label="검색" />
+  </label>
+
+  <button class="topbar__icon" aria-label="알림 3건">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    <span class="dot" aria-hidden="true"></span>
+  </button>
+  <button class="topbar__icon" aria-label="도움말">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 2.5"/><path d="M12 17h.01"/></svg>
+  </button>
+  <div class="topbar__me" title="플랫폼 관리자" aria-hidden="true">PA</div>
+</header>
+
+<!-- ================= 셸 ================= -->
+<div class="shell">
+  <!-- 좌측 사이드바 -->
+  <aside class="sidebar" aria-label="설정 탐색">
+    <div class="sidebar__title">계정 설정</div>
+    <nav class="navgroup">
+      <ul class="nav">
+        <li>
+          <a class="nav__item" aria-current="page" href="#profile">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+            프로필
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#account">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+            계정 · 로그인
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#security">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg>
+            보안 · 2단계 인증
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#notify">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            알림
+            <span class="count">4</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#sessions">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            활성 세션
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="navgroup navgroup--secondary">
+      <div class="sidebar__title">워크스페이스</div>
+      <ul class="nav">
+        <li>
+          <a class="nav__item" href="#members">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6a3 3 0 0 1 0 5.6M18 19a5 5 0 0 0-3-4.6"/></svg>
+            멤버
+            <span class="count">28</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#roles">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+            역할 · 권한
+          </a>
+        </li>
+        <li>
+          <a class="nav__item" href="#billing">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+            요금제 · 결제
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar__foot">
+      <div class="lbl">프로필 완성도</div>
+      <div class="meter" role="img" aria-label="프로필 완성도 68 퍼센트"><i></i></div>
+      <div class="hint"><strong style="color:var(--text-strong)">68%</strong> — 전화번호를 추가하면 완성됩니다.</div>
+    </div>
+  </aside>
+
+  <!-- 본문 -->
+  <main class="main" id="profile">
+    <div class="container">
+      <div class="crumb">
+        <span>설정</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        <span>계정 설정</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+        <span style="color:var(--text-body);font-weight:600">프로필</span>
+      </div>
+
+      <div class="pagehead">
+        <div>
+          <h1>프로필 편집</h1>
+          <p>워크스페이스 멤버에게 표시되는 정보입니다. 변경 사항은 저장 후 즉시 반영됩니다.</p>
+        </div>
+        <div class="pagehead__spacer"></div>
+        <span class="badge badge--info">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg>
+          플랫폼 관리자
+        </span>
+      </div>
+
+      <!-- 서브탭 -->
+      <div class="subtabs" role="tablist" aria-label="프로필 하위 설정">
+        <button class="subtab" role="tab" aria-selected="true">기본 정보</button>
+        <button class="subtab" role="tab" aria-selected="false">연락처</button>
+        <button class="subtab" role="tab" aria-selected="false">공개 범위</button>
+        <button class="subtab" role="tab" aria-selected="false">연결된 앱</button>
+      </div>
+
+      <!-- 2단 그리드 -->
+      <div class="layout">
+        <!-- 좌: 폼 스택 -->
+        <div class="stack">
+          <!-- 아바타 카드 -->
+          <section class="card rise rise-1" aria-labelledby="h-photo">
+            <div class="card__head">
+              <h2 id="h-photo">프로필 사진</h2>
+              <div class="grow"></div>
+              <span class="badge badge--neutral">PNG · JPG</span>
+            </div>
+            <div class="card__body">
+              <div class="avatar-row">
+                <div class="avatar" aria-label="현재 프로필 이니셜 PA">
+                  PA
+                  <button class="avatar__edit" aria-label="사진 변경">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15.5V20h4.5L19 9.5 14.5 5z"/><path d="m13 6.5 4.5 4.5"/></svg>
+                  </button>
+                </div>
+                <div class="avatar-meta">
+                  <div class="name">플랫폼 관리자</div>
+                  <div class="role">인프라 · 운영 팀</div>
+                  <div class="avatar-actions">
+                    <button class="btn btn--secondary btn--sm">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/></svg>
+                      새 사진 업로드
+                    </button>
+                    <button class="btn btn--danger-subtle btn--sm">제거</button>
+                  </div>
+                  <div class="avatar-note">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+                    정사각형 이미지 권장 · 최대 2MB · 이니셜은 사진이 없을 때 자동 표시됩니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 기본 정보 카드 -->
+          <section class="card rise rise-2" aria-labelledby="h-basic">
+            <div class="card__head">
+              <div>
+                <h2 id="h-basic">기본 정보</h2>
+                <div class="sub">이름과 소개는 멤버 디렉터리에 노출됩니다.</div>
+              </div>
+            </div>
+            <div class="card__body">
+              <div class="fieldset">
+                <div class="field">
+                  <label for="f-name">표시 이름 <span class="req" title="필수">*</span></label>
+                  <div class="control">
+                    <input class="input" id="f-name" type="text" value="플랫폼 관리자" placeholder="예: 운영 담당" />
+                  </div>
+                  <div class="help">동료가 검색·멘션할 때 보이는 이름입니다.</div>
+                </div>
+
+                <div class="field">
+                  <label for="f-handle">사용자 핸들 <span class="req" title="필수">*</span></label>
+                  <div class="control has-lead">
+                    <svg class="lead" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-2 10"/><circle cx="12" cy="12" r="3.2"/></svg>
+                    <input class="input" id="f-handle" type="text" value="platform-ops" />
+                    <span class="verify">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
+                      사용 가능
+                    </span>
+                  </div>
+                  <div class="help">workspace.opswise.io/@platform-ops</div>
+                </div>
+
+                <div class="field">
+                  <label for="f-email">업무 이메일 <span class="req" title="필수">*</span></label>
+                  <div class="control has-lead">
+                    <svg class="lead" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                    <input class="input" id="f-email" type="email" value="ops@opswise.io" />
+                  </div>
+                  <div class="field__row">
+                    <span class="help help--ok">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>
+                      인증 완료
+                    </span>
+                    <a href="#change-email">변경</a>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="f-phone">전화번호 <span class="opt">선택</span></label>
+                  <div class="control has-lead">
+                    <svg class="lead" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0 9 6 15 15 15l0-3.2-4-1.3-1.8 1.8a12 12 0 0 1-6.5-6.5L8.5 9 7.2 5z"/></svg>
+                    <input class="input" id="f-phone" type="tel" placeholder="+82 10 0000 0000" />
+                  </div>
+                  <div class="help help--warn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg>
+                    보안 알림 수신을 위해 등록을 권장합니다.
+                  </div>
+                </div>
+
+                <div class="field field--full">
+                  <div class="field__row">
+                    <label for="f-bio">소개 <span class="opt">선택</span></label>
+                    <span class="charcount"><span id="cc">72</span> / 240</span>
+                  </div>
+                  <textarea class="textarea" id="f-bio" maxlength="240" placeholder="담당 영역, 자주 다루는 워크플로우 등을 간단히 적어주세요.">인프라 운영과 배포 파이프라인을 담당합니다. 장애 대응 · 온콜 스케줄 조율 · 접근 권한 검토를 맡고 있습니다.</textarea>
+                  <div class="help">멤버 프로필 카드와 마우스 오버 미리보기에 표시됩니다.</div>
+                </div>
+              </div>
+            </div>
+            <div class="card__foot">
+              <span class="savehint">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                마지막 저장 2시간 전
+              </span>
+              <div class="grow"></div>
+              <button class="btn btn--subtle btn--sm">되돌리기</button>
+              <button class="btn btn--secondary btn--sm">이 섹션만 저장</button>
+            </div>
+          </section>
+
+          <!-- 공개 범위 카드 -->
+          <section class="card rise rise-3" aria-labelledby="h-vis">
+            <div class="card__head">
+              <div>
+                <h2 id="h-vis">공개 범위</h2>
+                <div class="sub">프로필 정보를 누가 볼 수 있는지 결정합니다.</div>
+              </div>
+            </div>
+            <div class="card__body">
+              <div class="field" style="margin-bottom:16px">
+                <label for="f-visibility">기본 공개 대상</label>
+                <select class="select" id="f-visibility" aria-describedby="vis-help">
+                  <option>워크스페이스 전체 멤버</option>
+                  <option>같은 팀 멤버만</option>
+                  <option selected>관리자 · 매니저만</option>
+                  <option>나만 보기 (비공개)</option>
+                </select>
+                <div class="help" id="vis-help">아래에서 항목별로 세부 공개 범위를 덮어쓸 수 있습니다.</div>
+              </div>
+
+              <div class="visibility" role="radiogroup" aria-label="이메일 공개 범위">
+                <label class="vis-opt">
+                  <input type="radio" name="email-vis" />
+                  <span class="vis-opt__body">
+                    <span class="t">
+                      이메일 전체 공개
+                      <span class="badge badge--neutral">모든 멤버</span>
+                    </span>
+                    <span class="d">디렉터리에서 누구나 이메일을 확인할 수 있습니다.</span>
+                  </span>
+                </label>
+                <label class="vis-opt">
+                  <input type="radio" name="email-vis" checked />
+                  <span class="vis-opt__body">
+                    <span class="t">
+                      관리자에게만 공개
+                      <span class="badge badge--success">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg>
+                        권장
+                      </span>
+                    </span>
+                    <span class="d">플랫폼 관리자와 워크스페이스 매니저만 볼 수 있습니다.</span>
+                  </span>
+                </label>
+                <label class="vis-opt">
+                  <input type="radio" name="email-vis" />
+                  <span class="vis-opt__body">
+                    <span class="t">완전 비공개</span>
+                    <span class="d">본인 외 누구에게도 이메일이 표시되지 않습니다.</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- 위험 구역 -->
+          <section class="card danger-zone rise rise-4" aria-labelledby="h-danger">
+            <div class="card__head">
+              <h2 id="h-danger">위험 구역</h2>
+              <div class="grow"></div>
+              <span class="badge badge--warning">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg>
+                되돌릴 수 없음
+              </span>
+            </div>
+            <div class="card__body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div style="min-width:200px;flex:1">
+                <div style="font-weight:600;color:var(--text-strong)">프로필 초기화</div>
+                <div class="help" style="margin-top:2px">모든 프로필 필드를 조직 기본값으로 되돌립니다. 아바타와 소개가 삭제됩니다.</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" style="border-color:#ffd0c4;color:var(--danger)">프로필 초기화…</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- 우: 사이드 정보 -->
+        <aside class="stack" aria-label="프로필 요약">
+          <section class="card rise rise-2">
+            <div class="card__head"><h2>계정 상태</h2></div>
+            <ul class="metalist">
+              <li>
+                <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></span>
+                <span class="k">역할</span>
+                <span class="v">플랫폼 관리자</span>
+              </li>
+              <li>
+                <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+                <span class="k">가입일</span>
+                <span class="v tnum">2024.03.11</span>
+              </li>
+              <li>
+                <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                <span class="k">마지막 접속</span>
+                <span class="v">방금 전</span>
+              </li>
+              <li>
+                <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                <span class="k">2단계 인증</span>
+                <span class="v"><span class="badge badge--success"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg>사용 중</span></span>
+              </li>
+            </ul>
+          </section>
+
+          <section class="card rise rise-3">
+            <div class="card__head">
+              <h2>완성 단계</h2>
+              <div class="grow"></div>
+              <span class="badge badge--info tnum">3 / 4</span>
+            </div>
+            <div class="card__body" style="padding:8px 12px">
+              <ul class="checklist">
+                <li class="done">
+                  <span class="tick tick--on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+                  이메일 인증
+                </li>
+                <li class="done">
+                  <span class="tick tick--on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+                  표시 이름 설정
+                </li>
+                <li class="done">
+                  <span class="tick tick--on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></span>
+                  2단계 인증 등록
+                </li>
+                <li>
+                  <span class="tick tick--off"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                  전화번호 추가
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="card rise rise-4" style="background:var(--surface-subtle)">
+            <div class="card__body" style="display:flex;gap:12px">
+              <span class="ico" style="width:32px;height:32px;background:var(--info-bg);color:var(--primary);border-radius:var(--radius-control);display:grid;place-items:center;flex:none">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </span>
+              <div>
+                <div style="font-weight:600;color:var(--text-strong);font-size:13px">공개 정보 안내</div>
+                <div class="help" style="margin-top:4px">여기서 설정한 값은 감사 로그에 기록되며, 조직 정책에 따라 일부 필드는 관리자만 변경할 수 있습니다.</div>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <!-- sticky 저장바 -->
+      <div class="actionbar" role="region" aria-label="변경 사항 저장">
+        <span class="dirty">
+          <span class="dot-live" aria-hidden="true"></span>
+          저장하지 않은 변경 사항 <strong style="color:var(--text-strong)">2건</strong>
+        </span>
+        <div class="grow"></div>
+        <button class="btn btn--subtle">취소</button>
+        <button class="btn btn--primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7M8 21v-7h8v7"/></svg>
+          변경 사항 저장
+        </button>
+      </div>
+
+      <footer class="pagefoot">
+        <span>프로필 편집</span>
+        <span class="dotsep" aria-hidden="true"></span>
+        <span>엔터프라이즈 B2B</span>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+  // 소개 글자 수 (프로그레시브 인핸스먼트 — JS 실패해도 폼은 그대로 동작)
+  (function () {
+    var ta = document.getElementById("f-bio");
+    var cc = document.getElementById("cc");
+    if (!ta || !cc) return;
+    function upd() {
+      cc.textContent = ta.value.length;
+    }
+    ta.addEventListener("input", upd);
+    upd();
+  })();
+
+  // 서브탭 시각 상태 토글 (콘텐츠 스위칭은 데모 범위 밖)
+  (function () {
+    var tabs = document.querySelectorAll(".subtab");
+    tabs.forEach(function (t) {
+      t.addEventListener("click", function () {
+        tabs.forEach(function (o) {
+          o.setAttribute("aria-selected", "false");
+        });
+        t.setAttribute("aria-selected", "true");
+      });
+    });
+  })();
+</script>

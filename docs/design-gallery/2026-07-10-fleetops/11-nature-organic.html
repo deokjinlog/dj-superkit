@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FleetOps · 배송 관제 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" />
+<style>
+  :root{
+    --paper:#F4F1E8;
+    --green:#2D4A3E;
+    --sage:#8BA888;
+    --terra:#C4704B;
+    --ink:#2B2A26;
+
+    /* palette-derived tints (믹싱 없음 — 동일 색상 계열의 투명도/명도 변형만) */
+    --green-08:rgba(45,74,62,.08);
+    --green-14:rgba(45,74,62,.14);
+    --green-22:rgba(45,74,62,.22);
+    --sage-18:rgba(139,168,136,.18);
+    --sage-30:rgba(139,168,136,.30);
+    --terra-14:rgba(196,112,75,.14);
+    --terra-28:rgba(196,112,75,.28);
+    --ink-60:rgba(43,42,38,.60);
+    --ink-45:rgba(43,42,38,.45);
+
+    --stroke:1.5px solid var(--green);
+    --organic:24px 40px 24px 40px;
+    --organic-alt:40px 24px 40px 24px;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    background-color:var(--paper);
+    color:var(--ink);
+    font-family:"Pretendard",system-ui,sans-serif;
+    font-weight:400;
+    line-height:1.6;
+  }
+
+  /* 종이 질감 — fractal noise 오버레이 (self-contained data URI) */
+  body{
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 12% 18%, var(--sage-18), transparent 42%),
+      radial-gradient(circle at 88% 8%, var(--green-08), transparent 38%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    background-attachment:fixed;
+  }
+
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:clamp(20px,4vw,52px) clamp(16px,4vw,44px) 40px;
+  }
+
+  h1,h2,h3,.serif{
+    font-family:"Gowun Batang","Pretendard",serif;
+  }
+
+  .num{
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
+  }
+
+  /* ── 헤더 ─────────────────────────── */
+  header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px 28px;
+    padding-bottom:22px;
+    margin-bottom:30px;
+    border-bottom:1.5px solid var(--green-22);
+  }
+  .brand{display:flex;align-items:center;gap:16px;}
+  .leafmark{
+    flex:none;width:52px;height:52px;
+    color:var(--green);
+  }
+  .brand-txt h1{
+    margin:0;
+    font-size:clamp(28px,4.6vw,40px);
+    font-weight:700;
+    color:var(--green);
+    letter-spacing:-.01em;
+  }
+  .brand-txt p{
+    margin:3px 0 0;
+    font-size:14px;
+    color:var(--ink-60);
+    letter-spacing:.02em;
+  }
+  .updated{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:9px 18px;
+    background:var(--sage-18);
+    border:1.5px solid var(--sage);
+    border-radius:22px 8px 22px 8px;
+    font-size:13.5px;
+    color:var(--green);
+  }
+  .updated .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--sage);
+    box-shadow:0 0 0 4px var(--sage-30);
+  }
+  .updated time{font-weight:600;}
+
+  /* ── 섹션 라벨 ─────────────────────── */
+  .sec-label{
+    display:flex;align-items:center;gap:12px;
+    margin:38px 0 18px;
+    font-size:13px;letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-45);
+  }
+  .sec-label::before{
+    content:"";width:22px;height:1.5px;background:var(--green);
+  }
+  .sec-label .ko{
+    font-family:"Gowun Batang",serif;
+    font-size:18px;letter-spacing:0;text-transform:none;
+    color:var(--green);
+  }
+
+  /* ── KPI 카드 ─────────────────────── */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+  }
+  .kpi{
+    position:relative;
+    padding:24px 24px 26px;
+    background:var(--paper);
+    border:var(--stroke);
+    border-radius:var(--organic);
+    box-shadow:6px 8px 0 var(--green-08);
+    overflow:hidden;
+  }
+  .kpi:nth-child(even){border-radius:var(--organic-alt);box-shadow:-6px 8px 0 var(--green-08);}
+  .kpi::after{
+    content:"";position:absolute;right:-26px;bottom:-26px;
+    width:96px;height:96px;border-radius:50%;
+    background:var(--sage-18);
+    z-index:0;
+  }
+  .kpi > *{position:relative;z-index:1;}
+  .kpi .cap{
+    font-size:13.5px;color:var(--ink-60);
+    display:flex;align-items:center;gap:8px;
+  }
+  .kpi .cap svg{width:18px;height:18px;color:var(--sage);flex:none;}
+  .kpi .val{
+    margin:12px 0 8px;
+    font-family:"Gowun Batang",serif;
+    font-size:clamp(30px,3.4vw,38px);
+    font-weight:700;
+    color:var(--green);
+    line-height:1.05;
+  }
+  .kpi .val .unit{font-size:.5em;font-weight:400;color:var(--ink-60);margin-left:2px;}
+  .delta{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;
+    padding:4px 12px;border-radius:14px 5px 14px 5px;
+  }
+  .delta.up{color:var(--green);background:var(--sage-18);border:1.5px solid var(--sage);}
+  .delta.down-good{color:var(--green);background:var(--sage-18);border:1.5px solid var(--sage);}
+  .delta.warn{color:var(--terra);background:var(--terra-14);border:1.5px solid var(--terra);}
+  .delta svg{width:13px;height:13px;}
+
+  /* ── 차트 (식물 줄기 막대) ────────── */
+  .chart-card{
+    padding:30px clamp(18px,3vw,34px) 20px;
+    background:var(--paper);
+    border:var(--stroke);
+    border-radius:40px 28px 40px 28px;
+    box-shadow:6px 9px 0 var(--green-08);
+  }
+  .chart-head{
+    display:flex;flex-wrap:wrap;gap:8px 18px;
+    align-items:baseline;justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .chart-head h3{margin:0;font-size:20px;color:var(--green);font-weight:700;}
+  .chart-head .hint{font-size:13px;color:var(--ink-60);}
+  .chart-head .peak-tag{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;color:var(--green);
+  }
+  .chart-head .peak-tag i{
+    width:12px;height:12px;border-radius:50% 50% 50% 0;
+    background:var(--sage);transform:rotate(45deg);display:inline-block;
+  }
+
+  .plot{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(9,1fr);
+    align-items:end;
+    gap:clamp(6px,1.4vw,18px);
+    height:270px;
+    padding:14px 4px 0;
+    /* 흙 라인 */
+    border-bottom:1.5px solid var(--green-22);
+    background-image:repeating-linear-gradient(to top,transparent 0,transparent 53px,var(--green-08) 53px,var(--green-08) 54px);
+  }
+  .stalk{
+    position:relative;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    align-items:center;height:100%;
+  }
+  .stem{
+    width:clamp(12px,2vw,24px);
+    /* 줄기: 끝을 둥글게 */
+    border-radius:20px 20px 6px 6px;
+    background:var(--green);
+    height:var(--h);
+    transform-origin:bottom center;
+    animation:grow .9s cubic-bezier(.22,.9,.3,1) both;
+    box-shadow:inset 0 0 0 1.5px rgba(43,42,38,.10);
+  }
+  .stalk.peak .stem{
+    /* 피크만 잎사귀 색 */
+    background:var(--sage);
+    width:clamp(16px,2.4vw,28px);
+  }
+  /* 피크 줄기 위 잎사귀 시그니처 */
+  .leaf{
+    position:absolute;
+    top:calc(100% - var(--h) - 20px);
+    width:26px;height:26px;
+    color:var(--sage);
+    animation:sway 4.5s ease-in-out infinite;
+    transform-origin:bottom center;
+  }
+  .stalk .xt{
+    margin-top:10px;font-size:12.5px;color:var(--ink-60);
+    font-variant-numeric:tabular-nums;
+  }
+  .stalk .vt{
+    margin-bottom:8px;font-size:12.5px;font-weight:600;color:var(--green);
+    font-variant-numeric:tabular-nums;
+  }
+  .stalk.peak .vt{color:var(--terra);font-weight:700;}
+
+  @keyframes grow{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+  @keyframes sway{0%,100%{transform:rotate(-7deg);}50%{transform:rotate(9deg);}}
+
+  /* ── 테이블 ───────────────────────── */
+  .table-card{
+    padding:8px clamp(6px,1.6vw,20px) 14px;
+    background:var(--paper);
+    border:var(--stroke);
+    border-radius:28px 40px 28px 40px;
+    box-shadow:-6px 9px 0 var(--green-08);
+    overflow-x:auto;
+  }
+  table{width:100%;border-collapse:collapse;min-width:620px;}
+  thead th{
+    text-align:left;
+    padding:18px 16px 14px;
+    font-family:"Gowun Batang",serif;
+    font-size:13.5px;font-weight:700;letter-spacing:.02em;
+    color:var(--green);
+    border-bottom:1.5px solid var(--green-22);
+  }
+  tbody td{
+    padding:15px 16px;
+    font-size:14.5px;
+    border-bottom:1.5px dashed var(--green-14);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--sage-18);}
+  td.code{font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+  td.time{font-variant-numeric:tabular-nums;color:var(--ink-60);}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:5px 13px;
+    font-size:12.5px;font-weight:600;
+    border-radius:14px 6px 14px 6px;
+    border:1.5px solid;
+    white-space:nowrap;
+  }
+  .badge i{width:8px;height:8px;border-radius:50%;flex:none;}
+  /* 상태 4종 — 팔레트 내 색상만 */
+  .b-transit{color:var(--green);background:var(--green-08);border-color:var(--green);}
+  .b-transit i{background:var(--green);}
+  .b-done{color:var(--green);background:var(--sage-18);border-color:var(--sage);}
+  .b-done i{background:var(--sage);}
+  .b-delay{color:var(--terra);background:var(--terra-14);border-color:var(--terra);}
+  .b-delay i{background:var(--terra);}
+  .b-wait{color:var(--ink);background:transparent;border-color:var(--ink-45);border-style:dashed;}
+  .b-wait i{background:var(--ink-45);}
+
+  /* ── 푸터 ─────────────────────────── */
+  footer{
+    margin-top:44px;padding-top:20px;
+    border-top:1.5px dashed var(--green-22);
+    display:flex;align-items:center;gap:10px;
+    font-size:12.5px;color:var(--ink-45);letter-spacing:.04em;
+  }
+  footer .sprout{width:16px;height:16px;color:var(--sage);}
+
+  /* ── 반응형 ───────────────────────── */
+  @media (max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    header{align-items:flex-start;}
+  }
+  @media (max-width:560px){
+    .kpis{grid-template-columns:1fr;}
+    .plot{height:230px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .stem{animation:none;transform:none;}
+    .leaf{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <header>
+    <div class="brand">
+      <svg class="leafmark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path d="M24 44C24 44 6 34 6 18C6 9 14 4 24 4C34 4 42 9 42 18C42 34 24 44 24 44Z" fill="currentColor" opacity="0.14"/>
+        <path d="M24 42C24 24 24 12 24 6M24 42C16 34 10 28 8 20M24 30C30 24 34 20 38 16M24 20C19 16 15 13 13 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-txt">
+        <h1>FleetOps</h1>
+        <p>배송 · 플릿 관제 대시보드</p>
+      </div>
+    </div>
+    <div class="updated">
+      <span class="dot"></span>
+      <span>갱신 <time datetime="2026-07-10T14:32" class="num">2026-07-10 14:32</time></span>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <div class="sec-label"><span class="ko">오늘의 흐름</span></div>
+  <section class="kpis">
+    <div class="kpi">
+      <div class="cap">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h13v10H3zM16 10h3l2 3v4h-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="18" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        오늘 배송
+      </div>
+      <div class="val num">1,284<span class="unit">건</span></div>
+      <span class="delta up">
+        <svg viewBox="0 0 12 12" fill="none"><path d="M6 10V2M6 2L2.5 5.5M6 2l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="num">전일 대비 +12.4%</span>
+      </span>
+    </div>
+
+    <div class="kpi">
+      <div class="cap">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        정시 배송률
+      </div>
+      <div class="val num">96.2<span class="unit">%</span></div>
+      <span class="delta up">
+        <svg viewBox="0 0 12 12" fill="none"><path d="M6 10V2M6 2L2.5 5.5M6 2l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="num">+0.8%p</span>
+      </span>
+    </div>
+
+    <div class="kpi">
+      <div class="cap">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h10v8H4zM14 11h3l3 3v2h-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="16" r="2" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="16" r="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        운행 중 차량
+      </div>
+      <div class="val num">87<span class="unit">대</span></div>
+      <span class="delta down-good">
+        <svg viewBox="0 0 12 12" fill="none"><path d="M6 2v8M6 10l3.5-3.5M6 10L2.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="num">-2대</span>
+      </span>
+    </div>
+
+    <div class="kpi">
+      <div class="cap">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 4L3 19h18L12 4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        지연 · 이슈
+      </div>
+      <div class="val num">14<span class="unit">건</span></div>
+      <span class="delta warn">
+        <svg viewBox="0 0 12 12" fill="none"><path d="M6 2v8M6 10l3.5-3.5M6 10L2.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="num">-5건 해결</span>
+      </span>
+    </div>
+  </section>
+
+  <!-- 차트 -->
+  <div class="sec-label"><span class="ko">시간대별 배송량</span></div>
+  <section class="chart-card">
+    <div class="chart-head">
+      <h3>2시간 단위 배송 흐름</h3>
+      <span class="peak-tag"><i></i>피크는 잎사귀 색으로 표시 · 16시 230건</span>
+    </div>
+    <div class="plot" role="img" aria-label="시간대별 배송량 막대 차트, 06시부터 22시까지 2시간 단위, 최고점은 16시 230건">
+      <!-- 최대값 230 기준 높이(%) -->
+      <div class="stalk">
+        <span class="vt num">42</span>
+        <div class="stem" style="--h:18.3%"></div>
+        <span class="xt num">06시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">95</span>
+        <div class="stem" style="--h:41.3%"></div>
+        <span class="xt num">08시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">160</span>
+        <div class="stem" style="--h:69.6%"></div>
+        <span class="xt num">10시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">210</span>
+        <div class="stem" style="--h:91.3%"></div>
+        <span class="xt num">12시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">188</span>
+        <div class="stem" style="--h:81.7%"></div>
+        <span class="xt num">14시</span>
+      </div>
+      <div class="stalk peak">
+        <svg class="leaf" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 22C12 22 4 17 4 9C4 9 12 8 12 2C12 8 20 9 20 9C20 17 12 22 12 22Z" fill="currentColor" opacity="0.9"/><path d="M12 20V4" stroke="#2D4A3E" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/></svg>
+        <span class="vt num">230</span>
+        <div class="stem" style="--h:100%"></div>
+        <span class="xt num">16시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">205</span>
+        <div class="stem" style="--h:89.1%"></div>
+        <span class="xt num">18시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">172</span>
+        <div class="stem" style="--h:74.8%"></div>
+        <span class="xt num">20시</span>
+      </div>
+      <div class="stalk">
+        <span class="vt num">120</span>
+        <div class="stem" style="--h:52.2%"></div>
+        <span class="xt num">22시</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 테이블 -->
+  <div class="sec-label"><span class="ko">배송 현황</span></div>
+  <section class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>운송장번호</th>
+          <th>목적지</th>
+          <th>담당 기사</th>
+          <th>상태</th>
+          <th>예정시각</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="code num">T-20931</td>
+          <td>성수동 물류센터</td>
+          <td>김민준</td>
+          <td><span class="badge b-transit"><i></i>배송중</span></td>
+          <td class="time num">14:20</td>
+        </tr>
+        <tr>
+          <td class="code num">T-20930</td>
+          <td>판교 테크노밸리</td>
+          <td>이서연</td>
+          <td><span class="badge b-done"><i></i>완료</span></td>
+          <td class="time num">13:55</td>
+        </tr>
+        <tr>
+          <td class="code num">T-20929</td>
+          <td>인천 남동공단</td>
+          <td>박지훈</td>
+          <td><span class="badge b-delay"><i></i>지연</span></td>
+          <td class="time num">13:40</td>
+        </tr>
+        <tr>
+          <td class="code num">T-20928</td>
+          <td>강남 파이낸스센터</td>
+          <td>최유진</td>
+          <td><span class="badge b-transit"><i></i>배송중</span></td>
+          <td class="time num">14:05</td>
+        </tr>
+        <tr>
+          <td class="code num">T-20927</td>
+          <td>김포 골드밸리</td>
+          <td>정우성</td>
+          <td><span class="badge b-done"><i></i>완료</span></td>
+          <td class="time num">13:10</td>
+        </tr>
+        <tr>
+          <td class="code num">T-20926</td>
+          <td>수원 영통지점</td>
+          <td>한소희</td>
+          <td><span class="badge b-wait"><i></i>픽업대기</span></td>
+          <td class="time num">15:00</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <svg class="sprout" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21V10M12 14C8 14 5 11 5 7C9 7 12 10 12 14ZM12 12C12 8 15 5 19 5C19 9 16 12 12 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>STYLE 11 · 네이처 오가닉</span>
+  </footer>
+
+</div>
+</body>
+</html>

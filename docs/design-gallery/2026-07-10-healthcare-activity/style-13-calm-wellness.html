@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>핏펄스 · 오늘의 활동 리포트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F6F5F2;
+    --card:#FFFFFF;
+    --border:#EAE8E3;
+    --ink:#22252A;
+    --ink-soft:#6E7278;
+    --ink-faint:#9CA1A7;
+    --track:#ECE9E3;
+
+    --sage:#6FAE8E;
+    --sage-tint:rgba(111,174,142,.11);
+    --sage-tint-strong:rgba(111,174,142,.18);
+    --bar-idle:#E2E7DF;
+
+    --coral:#E4886F;
+    --coral-tint:rgba(228,136,111,.11);
+    --coral-tint-strong:rgba(228,136,111,.20);
+
+    --blue:#6E8FC7;
+    --blue-tint:rgba(110,143,199,.11);
+
+    --r-lg:26px;
+    --r-md:16px;
+    --r-sm:9px;
+
+    --shadow-rest:0 1px 2px rgba(34,37,42,.04);
+    --shadow-hover:0 10px 24px rgba(34,37,42,.09);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+
+  html{ background:var(--bg); }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:52px 32px 88px;
+  }
+
+  a{ color:inherit; }
+
+  /* ===== Header ===== */
+  .site-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:20px;
+    padding-bottom:28px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .brand-mark{ display:block; flex:0 0 auto; }
+
+  .brand-text{ display:flex; align-items:baseline; gap:8px; }
+
+  .brand-kr{
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+
+  .brand-en{
+    font-size:10.5px;
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+
+  .page-title{
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+
+  .header-right{
+    text-align:right;
+  }
+
+  .user-line{
+    font-size:14px;
+    font-weight:600;
+  }
+
+  .status-line{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:400;
+    color:var(--ink-faint);
+    margin-top:6px;
+  }
+
+  .sync-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--ink-faint);
+    flex:0 0 auto;
+  }
+
+  /* ===== Section shell ===== */
+  section.block{ margin-top:56px; }
+
+  .eyebrow{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:18px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-rest);
+    transition:box-shadow .25s ease, transform .25s ease;
+  }
+  .card:hover{
+    box-shadow:var(--shadow-hover);
+    transform:translateY(-3px);
+  }
+
+  /* ===== Hero ===== */
+  .hero-card{
+    padding:44px 48px;
+  }
+
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:center;
+    gap:48px;
+  }
+
+  .score-label{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+
+  .score-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-top:10px;
+  }
+
+  .score-value{
+    font-size:84px;
+    font-weight:300;
+    letter-spacing:-0.03em;
+    line-height:1;
+  }
+
+  .score-unit{
+    font-size:18px;
+    font-weight:400;
+    color:var(--ink-soft);
+  }
+
+  .score-delta{
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .coach{
+    font-size:15px;
+    font-weight:400;
+    color:var(--ink-soft);
+    margin:20px 0 0;
+    max-width:36ch;
+    line-height:1.65;
+  }
+
+  .hero-rings{
+    display:flex;
+    gap:30px;
+  }
+
+  .ring-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+
+  .ring-item svg{ width:104px; height:104px; display:block; overflow:visible; }
+
+  .ring-track{ fill:none; stroke:var(--track); }
+  .ring-fill{
+    fill:none;
+    stroke:var(--sage);
+    stroke-linecap:round;
+    stroke-dashoffset:326.73;
+    animation:ringGrow 1.05s cubic-bezier(.16,.65,.3,1) forwards;
+    animation-delay:var(--ring-delay,0s);
+  }
+  @keyframes ringGrow{
+    from{ stroke-dashoffset:326.73; }
+    to{ stroke-dashoffset:var(--target); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ring-fill{ animation:none; stroke-dashoffset:var(--target); }
+  }
+
+  .ring-pct{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+
+  .ring-label{
+    font-size:12px;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+
+  /* ===== KPI grid ===== */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+
+  .kpi{
+    padding:26px 26px 24px;
+  }
+
+  .kpi-label{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.06em;
+    color:var(--ink-faint);
+  }
+
+  .kpi-value-row{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    margin-top:10px;
+  }
+
+  .kpi-value{
+    font-size:38px;
+    font-weight:300;
+    letter-spacing:-0.02em;
+    line-height:1;
+  }
+
+  .kpi-unit{
+    font-size:14px;
+    font-weight:400;
+    color:var(--ink-soft);
+  }
+
+  .kpi-delta{
+    font-size:12.5px;
+    font-weight:400;
+    color:var(--ink-faint);
+    margin-top:10px;
+  }
+
+  .kpi-extra{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+
+  .kpi-spark{
+    display:block;
+    margin-top:14px;
+  }
+
+  /* ===== Charts ===== */
+  .chart-grid{
+    display:grid;
+    grid-template-columns:1.15fr 1fr;
+    gap:20px;
+  }
+
+  .chart-card{ padding:30px 32px 26px; }
+
+  .chart-title{
+    font-size:14.5px;
+    font-weight:600;
+    margin:0 0 22px;
+  }
+
+  .chart-plot{
+    position:relative;
+    height:160px;
+  }
+
+  .baseline{
+    position:absolute;
+    left:0; right:0; bottom:70px;
+    height:0;
+    border-top:1px dashed #C9C6BF;
+  }
+
+  .baseline-tag{
+    position:absolute;
+    right:0; bottom:74px;
+    font-size:10.5px;
+    font-weight:500;
+    color:var(--ink-faint);
+    background:var(--card);
+    padding-left:6px;
+  }
+
+  .chart-bars{
+    position:relative;
+    height:100%;
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+  }
+
+  .bar-col{
+    flex:1 1 0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    position:relative;
+  }
+
+  .bar-value{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    opacity:0;
+    transition:opacity .2s ease, color .2s ease;
+  }
+  .bar-col.peak .bar-value{ opacity:1; color:var(--sage); }
+  .bar-col:hover .bar-value{ opacity:1; }
+
+  .bar{
+    width:100%;
+    max-width:34px;
+    border-radius:6px 6px 2px 2px;
+    background:var(--bar-idle);
+    transition:background .2s ease;
+  }
+  .bar-col.peak .bar{ background:var(--sage); }
+  .bar-col:hover .bar{ background:#CFDBD2; }
+  .bar-col.peak:hover .bar{ background:var(--sage); }
+
+  .bar-x-axis{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    border-top:1px solid var(--border);
+    padding-top:10px;
+  }
+
+  .bar-x{
+    flex:1 1 0;
+    text-align:center;
+    font-size:11px;
+    font-weight:500;
+    color:var(--ink-faint);
+  }
+  .bar-col.peak ~ .bar-x-axis{}
+
+  /* ===== Heart rate zone chart ===== */
+  .zone-callout{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+  }
+
+  .zone-tag{
+    font-size:10.5px;
+    font-weight:700;
+    color:#B85A3F;
+    background:var(--coral-tint);
+    border-radius:999px;
+    padding:3px 9px;
+    letter-spacing:.02em;
+  }
+
+  .zone-bar{
+    display:flex;
+    height:26px;
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .zone-seg{ height:100%; }
+  .z1{ background:#F3E7E1; }
+  .z2{ background:#EBC7B7; }
+  .z3{ background:#E1A78E; }
+  .z4{ background:var(--coral); }
+  .z5{ background:#B85A3F; }
+
+  .zone-legend{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-top:22px;
+  }
+
+  .zone-item{ text-align:left; }
+
+  .zone-chip{
+    width:10px; height:10px; border-radius:3px;
+    display:inline-block;
+    margin-bottom:8px;
+  }
+  .zone-item:nth-child(1) .zone-chip{ background:#F3E7E1; }
+  .zone-item:nth-child(2) .zone-chip{ background:#EBC7B7; }
+  .zone-item:nth-child(3) .zone-chip{ background:#E1A78E; }
+  .zone-item:nth-child(4) .zone-chip{ background:var(--coral); }
+  .zone-item:nth-child(5) .zone-chip{ background:#B85A3F; }
+
+  .zone-name{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .zone-range{
+    font-size:11px;
+    font-weight:400;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+
+  .zone-min{
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin-top:6px;
+  }
+
+  /* ===== Weekly strip ===== */
+  .strip-card{ padding:30px 32px 26px; }
+
+  .strip-chart{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    height:150px;
+  }
+
+  .strip-col{
+    flex:1 1 0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    height:100%;
+    justify-content:flex-end;
+  }
+
+  .strip-tag{
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--ink-faint);
+    height:14px;
+    line-height:14px;
+    margin-bottom:2px;
+  }
+
+  .strip-value{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+
+  .strip-bar{
+    width:100%;
+    max-width:40px;
+    border-radius:8px 8px 3px 3px;
+    background:#D9E6DF;
+  }
+  .strip-col.is-peak .strip-bar{ background:var(--sage); }
+  .strip-col.is-today .strip-bar{
+    background:var(--sage);
+    outline:2px solid var(--ink);
+    outline-offset:2px;
+  }
+
+  .strip-date{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--ink-faint);
+    border-top:1px solid var(--border);
+    padding-top:10px;
+    margin-top:12px;
+    width:100%;
+    text-align:center;
+  }
+  .strip-col.is-today .strip-date{ font-weight:700; color:var(--ink); }
+
+  /* ===== Mission table ===== */
+  .table-card{ padding:8px 32px 8px; overflow:hidden; }
+  .table-wrap{ overflow-x:auto; }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+  }
+
+  thead th{
+    text-align:left;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    padding:20px 14px 14px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th.num{ text-align:right; }
+  thead th:first-child{ padding-left:0; }
+  thead th:last-child{ padding-right:0; }
+
+  tbody td{
+    font-size:14px;
+    font-weight:400;
+    padding:16px 14px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody td.num{ text-align:right; }
+  tbody td:first-child{ padding-left:0; color:var(--ink-soft); }
+  tbody td:last-child{ padding-right:0; }
+  tbody tr:last-child td{ border-bottom:none; }
+
+  tbody tr{
+    transition:background .2s ease;
+    border-left:3px solid transparent;
+  }
+  tbody tr:hover{ background:#FBFAF8; }
+  tbody tr.is-warn{ border-left-color:var(--coral); }
+
+  .rate-cell{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:6px;
+  }
+
+  .pbar{
+    width:64px;
+    height:4px;
+    border-radius:999px;
+    background:var(--track);
+    overflow:hidden;
+  }
+  .pbar-fill{ height:100%; border-radius:999px; }
+  .pbar-fill.done{ background:var(--sage); }
+  .pbar-fill.progress{ background:var(--blue); }
+  .pbar-fill.wait{ background:var(--ink-faint); opacity:.35; }
+  .pbar-fill.warn{ background:var(--coral); }
+
+  .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    font-weight:600;
+    padding:5px 12px 5px 9px;
+    border-radius:999px;
+  }
+  .status-dot{ width:6px; height:6px; border-radius:50%; flex:0 0 auto; }
+
+  .status-pill.done{ background:var(--sage-tint); color:#4E8267; }
+  .status-pill.done .status-dot{ background:var(--sage); }
+
+  .status-pill.progress{ background:var(--blue-tint); color:#4C6699; }
+  .status-pill.progress .status-dot{ background:var(--blue); }
+
+  .status-pill.wait{ background:var(--track); color:var(--ink-faint); }
+  .status-pill.wait .status-dot{ background:var(--ink-faint); }
+
+  .status-pill.warn{ background:var(--coral-tint-strong); color:#B85A3F; }
+  .status-pill.warn .status-dot{ background:var(--coral); }
+
+  /* ===== Badges ===== */
+  .badge-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+
+  .badge{
+    padding:28px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .badge-mark svg{ width:38px; height:38px; display:block; }
+
+  .badge-title{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:-0.005em;
+  }
+
+  .badge-desc{
+    font-size:13px;
+    font-weight:400;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  /* ===== Footer ===== */
+  .site-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    padding-top:28px;
+    margin-top:56px;
+    border-top:1px solid var(--border);
+  }
+
+  .footer-brand{
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+
+  .footer-style{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-faint);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width:900px){
+    .wrap{ padding:36px 20px 64px; }
+
+    section.block{ margin-top:40px; }
+
+    .hero-card{ padding:32px 28px; }
+    .hero-grid{ grid-template-columns:1fr; gap:32px; }
+    .score-value{ font-size:64px; }
+    .hero-rings{ gap:20px; }
+    .ring-item svg{ width:84px; height:84px; }
+
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); gap:14px; }
+    .kpi{ padding:22px; }
+    .kpi-value{ font-size:32px; }
+
+    .chart-grid{ grid-template-columns:1fr; gap:16px; }
+    .chart-card{ padding:26px 22px; }
+    .bar{ max-width:22px; }
+    .zone-legend{ grid-template-columns:repeat(2,1fr); row-gap:16px; }
+
+    .strip-card{ padding:26px 22px; }
+    .strip-bar{ max-width:26px; }
+    .strip-chart{ gap:8px; }
+
+    .table-card{ padding:8px 22px; }
+
+    .badge-grid{ grid-template-columns:1fr; gap:14px; }
+
+    .site-header{ padding-bottom:22px; }
+    .header-right{ text-align:left; }
+    .status-line{ justify-content:flex-start; }
+  }
+
+  @media (max-width:520px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .zone-legend{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26">
+            <circle cx="13" cy="13" r="9.5" fill="none" stroke="#22252A" stroke-width="3"></circle>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <span class="brand-kr">핏펄스</span>
+          <span class="brand-en">FitPulse</span>
+        </div>
+      </div>
+      <div class="page-title">오늘의 활동 리포트</div>
+      <div class="header-right">
+        <div class="user-line">핏메이트 · 연속 기록 12일</div>
+        <div class="status-line"><span class="sync-dot" aria-hidden="true"></span>갱신 2026-07-10 08:42 · 동기화 완료</div>
+      </div>
+    </header>
+
+    <!-- 히어로 요약 밴드 -->
+    <section class="block">
+      <div class="card hero-card">
+        <div class="hero-grid">
+          <div>
+            <div class="score-label">종합 활동 점수</div>
+            <div class="score-row">
+              <span class="score-value">87</span><span class="score-unit">점</span>
+            </div>
+            <div class="score-delta">전일 대비 +6점</div>
+            <p class="coach">목표까지 1,568걸음 남았어요. 저녁 산책이면 충분해요.</p>
+          </div>
+          <div class="hero-rings">
+            <div class="ring-item">
+              <svg viewBox="0 0 120 120">
+                <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="10"></circle>
+                <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="10"
+                  stroke-dasharray="326.73" style="--target:52.28; --ring-delay:0s"
+                  transform="rotate(-90 60 60)"></circle>
+              </svg>
+              <div class="ring-pct">84%</div>
+              <div class="ring-label">걷기</div>
+            </div>
+            <div class="ring-item">
+              <svg viewBox="0 0 120 120">
+                <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="10"></circle>
+                <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="10"
+                  stroke-dasharray="326.73" style="--target:19.60; --ring-delay:.12s"
+                  transform="rotate(-90 60 60)"></circle>
+              </svg>
+              <div class="ring-pct">94%</div>
+              <div class="ring-label">운동</div>
+            </div>
+            <div class="ring-item">
+              <svg viewBox="0 0 120 120">
+                <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="10"></circle>
+                <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="10"
+                  stroke-dasharray="326.73" style="--target:81.68; --ring-delay:.24s"
+                  transform="rotate(-90 60 60)"></circle>
+              </svg>
+              <div class="ring-pct">75%</div>
+              <div class="ring-label">스탠드</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI 카드 6장 -->
+    <section class="block">
+      <div class="eyebrow">핵심 지표</div>
+      <div class="kpi-grid">
+        <div class="card kpi">
+          <div class="kpi-label">걸음 수</div>
+          <div class="kpi-value-row"><span class="kpi-value">8,432</span><span class="kpi-unit">걸음</span></div>
+          <div class="kpi-delta">전일 +12.3%</div>
+          <div class="kpi-extra">목표 10,000보의 84%</div>
+          <svg class="kpi-spark" width="100%" height="28" viewBox="0 0 96 28" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,21.7 12,12.3 24,18.0 36,9.4 48,19.5 60,15.9 72,3.0 84,17.0 96,21.7"
+              fill="none" stroke="#6FAE8E" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></polyline>
+            <circle cx="72" cy="3.0" r="2.2" fill="#6FAE8E"></circle>
+          </svg>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">활동 칼로리</div>
+          <div class="kpi-value-row"><span class="kpi-value">512</span><span class="kpi-unit">kcal</span></div>
+          <div class="kpi-delta">전일 +8.1%</div>
+          <div class="kpi-extra">목표 700kcal의 73%</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">운동 시간</div>
+          <div class="kpi-value-row"><span class="kpi-value">47</span><span class="kpi-unit">분</span></div>
+          <div class="kpi-delta">전일 +15.2%</div>
+          <div class="kpi-extra">목표 50분의 94%</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">평균 심박수</div>
+          <div class="kpi-value-row"><span class="kpi-value">72</span><span class="kpi-unit">bpm</span></div>
+          <div class="kpi-delta">전일 −2.7%</div>
+          <div class="kpi-extra">안정 범위</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">수면 점수</div>
+          <div class="kpi-value-row"><span class="kpi-value">82</span><span class="kpi-unit">점</span></div>
+          <div class="kpi-delta">전주 +4.0%</div>
+          <div class="kpi-extra">6시간 48분</div>
+        </div>
+        <div class="card kpi">
+          <div class="kpi-label">스트레스 지수</div>
+          <div class="kpi-value-row"><span class="kpi-value">34</span></div>
+          <div class="kpi-delta">전일 −11.0%</div>
+          <div class="kpi-extra">낮음 (양호)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 차트 2개 -->
+    <section class="block">
+      <div class="eyebrow">활동 그래프</div>
+      <div class="chart-grid">
+        <div class="card chart-card">
+          <div class="chart-title">시간대별 걸음 수</div>
+          <div class="chart-plot">
+            <div class="baseline"></div>
+            <span class="baseline-tag">평균 937</span>
+            <div class="chart-bars">
+              <div class="bar-col"><span class="bar-value">320</span><div class="bar" style="height:24px"></div></div>
+              <div class="bar-col"><span class="bar-value">1,240</span><div class="bar" style="height:93px"></div></div>
+              <div class="bar-col"><span class="bar-value">680</span><div class="bar" style="height:51px"></div></div>
+              <div class="bar-col"><span class="bar-value">1,520</span><div class="bar" style="height:114px"></div></div>
+              <div class="bar-col"><span class="bar-value">540</span><div class="bar" style="height:40px"></div></div>
+              <div class="bar-col"><span class="bar-value">890</span><div class="bar" style="height:67px"></div></div>
+              <div class="bar-col peak"><span class="bar-value">2,140</span><div class="bar" style="height:160px"></div></div>
+              <div class="bar-col"><span class="bar-value">780</span><div class="bar" style="height:58px"></div></div>
+              <div class="bar-col"><span class="bar-value">322</span><div class="bar" style="height:24px"></div></div>
+            </div>
+          </div>
+          <div class="bar-x-axis">
+            <span class="bar-x">06시</span>
+            <span class="bar-x">08시</span>
+            <span class="bar-x">10시</span>
+            <span class="bar-x">12시</span>
+            <span class="bar-x">14시</span>
+            <span class="bar-x">16시</span>
+            <span class="bar-x">18시</span>
+            <span class="bar-x">20시</span>
+            <span class="bar-x">22시</span>
+          </div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-title">심박존 분포</div>
+          <div class="zone-callout">유산소 41분 <span class="zone-tag">목표 30분 초과</span></div>
+          <div class="zone-bar">
+            <div class="zone-seg z1" style="flex-grow:612"></div>
+            <div class="zone-seg z2" style="flex-grow:174"></div>
+            <div class="zone-seg z3" style="flex-grow:92"></div>
+            <div class="zone-seg z4" style="flex-grow:41"></div>
+            <div class="zone-seg z5" style="flex-grow:8"></div>
+          </div>
+          <div class="zone-legend">
+            <div class="zone-item">
+              <span class="zone-chip"></span>
+              <div class="zone-name">휴식</div>
+              <div class="zone-range">&lt;90bpm</div>
+              <div class="zone-min">612분</div>
+            </div>
+            <div class="zone-item">
+              <span class="zone-chip"></span>
+              <div class="zone-name">워밍업</div>
+              <div class="zone-range">90–108</div>
+              <div class="zone-min">174분</div>
+            </div>
+            <div class="zone-item">
+              <span class="zone-chip"></span>
+              <div class="zone-name">지방연소</div>
+              <div class="zone-range">108–126</div>
+              <div class="zone-min">92분</div>
+            </div>
+            <div class="zone-item">
+              <span class="zone-chip"></span>
+              <div class="zone-name">유산소</div>
+              <div class="zone-range">126–144</div>
+              <div class="zone-min">41분</div>
+            </div>
+            <div class="zone-item">
+              <span class="zone-chip"></span>
+              <div class="zone-name">최대</div>
+              <div class="zone-range">144+</div>
+              <div class="zone-min">8분</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 최근 7일 걸음 스트립 -->
+    <section class="block">
+      <div class="eyebrow">최근 7일 걸음</div>
+      <div class="card strip-card">
+        <div class="strip-chart">
+          <div class="strip-col"><span class="strip-tag">&nbsp;</span><span class="strip-value">5,210</span><div class="strip-bar" style="height:63px"></div><span class="strip-date">7/4</span></div>
+          <div class="strip-col"><span class="strip-tag">&nbsp;</span><span class="strip-value">7,680</span><div class="strip-bar" style="height:93px"></div><span class="strip-date">7/5</span></div>
+          <div class="strip-col"><span class="strip-tag">&nbsp;</span><span class="strip-value">6,940</span><div class="strip-bar" style="height:84px"></div><span class="strip-date">7/6</span></div>
+          <div class="strip-col is-peak"><span class="strip-tag">최고</span><span class="strip-value">9,120</span><div class="strip-bar" style="height:110px"></div><span class="strip-date">7/7</span></div>
+          <div class="strip-col"><span class="strip-tag">&nbsp;</span><span class="strip-value">7,450</span><div class="strip-bar" style="height:90px"></div><span class="strip-date">7/8</span></div>
+          <div class="strip-col"><span class="strip-tag">&nbsp;</span><span class="strip-value">8,010</span><div class="strip-bar" style="height:97px"></div><span class="strip-date">7/9</span></div>
+          <div class="strip-col is-today"><span class="strip-tag">오늘</span><span class="strip-value">8,432</span><div class="strip-bar" style="height:102px"></div><span class="strip-date">7/10</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 오늘의 건강 미션 -->
+    <section class="block">
+      <div class="eyebrow">오늘의 건강 미션</div>
+      <div class="card table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>시각</th>
+                <th>활동</th>
+                <th>목표</th>
+                <th>현재</th>
+                <th class="num">달성률</th>
+                <th class="num">소비</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>07:10</td>
+                <td>모닝 스트레칭</td>
+                <td>15분</td>
+                <td>15분</td>
+                <td class="num"><div class="rate-cell">100%<div class="pbar"><div class="pbar-fill done" style="width:100%"></div></div></div></td>
+                <td class="num">38 kcal</td>
+                <td><span class="status-pill done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td>08:30</td>
+                <td>출근 걷기</td>
+                <td>3,000보</td>
+                <td>3,240보</td>
+                <td class="num"><div class="rate-cell">108%<div class="pbar"><div class="pbar-fill done" style="width:100%"></div></div></div></td>
+                <td class="num">96 kcal</td>
+                <td><span class="status-pill done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+              <tr>
+                <td>12:20</td>
+                <td>점심 산책</td>
+                <td>2,000보</td>
+                <td>1,520보</td>
+                <td class="num"><div class="rate-cell">76%<div class="pbar"><div class="pbar-fill progress" style="width:76%"></div></div></div></td>
+                <td class="num">54 kcal</td>
+                <td><span class="status-pill progress"><span class="status-dot"></span>진행중</span></td>
+              </tr>
+              <tr>
+                <td>14:00</td>
+                <td>수분 섭취</td>
+                <td>2.0 L</td>
+                <td>1.2 L</td>
+                <td class="num"><div class="rate-cell">60%<div class="pbar"><div class="pbar-fill progress" style="width:60%"></div></div></div></td>
+                <td class="num">—</td>
+                <td><span class="status-pill progress"><span class="status-dot"></span>진행중</span></td>
+              </tr>
+              <tr>
+                <td>16:30</td>
+                <td>근력 운동</td>
+                <td>3 세트</td>
+                <td>0 세트</td>
+                <td class="num"><div class="rate-cell">0%<div class="pbar"><div class="pbar-fill wait" style="width:100%"></div></div></div></td>
+                <td class="num">—</td>
+                <td><span class="status-pill wait"><span class="status-dot"></span>대기</span></td>
+              </tr>
+              <tr>
+                <td>18:00</td>
+                <td>저녁 러닝</td>
+                <td>5.0 km</td>
+                <td>4.2 km</td>
+                <td class="num"><div class="rate-cell">84%<div class="pbar"><div class="pbar-fill progress" style="width:84%"></div></div></div></td>
+                <td class="num">312 kcal</td>
+                <td><span class="status-pill progress"><span class="status-dot"></span>진행중</span></td>
+              </tr>
+              <tr>
+                <td>21:00</td>
+                <td>명상</td>
+                <td>10분</td>
+                <td>10분</td>
+                <td class="num"><div class="rate-cell">100%<div class="pbar"><div class="pbar-fill done" style="width:100%"></div></div></div></td>
+                <td class="num">8 kcal</td>
+                <td><span class="status-pill done"><span class="status-dot"></span>완료</span></td>
+              </tr>
+              <tr class="is-warn">
+                <td>22:30</td>
+                <td>심박존 유지</td>
+                <td>20분</td>
+                <td>6분</td>
+                <td class="num"><div class="rate-cell">30%<div class="pbar"><div class="pbar-fill warn" style="width:30%"></div></div></div></td>
+                <td class="num">—</td>
+                <td><span class="status-pill warn"><span class="status-dot"></span>주의</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 업적 배지 -->
+    <section class="block">
+      <div class="eyebrow">업적 배지</div>
+      <div class="badge-grid">
+        <div class="card badge">
+          <span class="badge-mark" aria-hidden="true">
+            <svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="14" fill="none" stroke="#6E7278" stroke-width="3.2"></circle></svg>
+          </span>
+          <div>
+            <div class="badge-title">연속 12일 목표 달성</div>
+            <div class="badge-desc">12일째 데일리 골 완료</div>
+          </div>
+        </div>
+        <div class="card badge">
+          <span class="badge-mark" aria-hidden="true">
+            <svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="14" fill="none" stroke="#6E7278" stroke-width="3.2"></circle></svg>
+          </span>
+          <div>
+            <div class="badge-title">이번 주 최고 걸음</div>
+            <div class="badge-desc">7/7 9,120걸음 기록</div>
+          </div>
+        </div>
+        <div class="card badge">
+          <span class="badge-mark" aria-hidden="true">
+            <svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="14" fill="none" stroke="#6E7278" stroke-width="3.2"></circle></svg>
+          </span>
+          <div>
+            <div class="badge-title">유산소 존 목표 3회</div>
+            <div class="badge-desc">이번 주 유산소 목표 3회 달성</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <span class="footer-brand">FitPulse</span>
+      <span class="footer-style">STYLE 13 · 차분한 웰니스</span>
+    </footer>
+
+  </div>
+</body>
+</html>

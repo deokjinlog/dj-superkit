@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terra — 리뷰 & 평점</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* 웜 뉴트럴 팔레트 */
+    --bg: #FAF6F0;
+    --surface: #FFFDF9;
+    --surface-sunken: #F3ECE2;
+    --border: #E7DDCF;
+    --border-strong: #DACEBB;
+
+    --fg: #3A342E;
+    --fg-muted: #6B6157;
+    --fg-faint: #9A8F82;
+
+    --terra: #C97B5A;
+    --terra-hover: #B4633F;
+    --terra-soft: #F3E0D6;
+
+    --olive: #8A9A5B;
+    --olive-strong: #6E7D45;
+    --olive-soft: #E7EBD8;
+
+    --mustard: #D8973C;
+    --brick: #B15A48;
+    --sand: #C9B79C;
+
+    /* 흙빛 저채도 그림자 */
+    --shadow-sm: 0 1px 2px rgba(80,60,40,.05);
+    --shadow-md: 0 1px 2px rgba(80,60,40,.05), 0 8px 24px rgba(120,90,60,.06);
+    --shadow-lg: 0 2px 4px rgba(80,60,40,.06), 0 16px 40px rgba(120,90,60,.10);
+
+    --radius-card: 14px;
+    --radius-ctrl: 10px;
+    --radius-pill: 999px;
+
+    --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--terra);
+
+    --step: 8px;
+    --maxw: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 82% -8%, #FBEFE4 0%, rgba(251,239,228,0) 60%),
+      radial-gradient(900px 500px at 4% 4%, #F4EEE4 0%, rgba(244,238,228,0) 55%),
+      var(--bg);
+    color: var(--fg);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(250,246,240,0.82);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 64px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(145deg, var(--terra) 0%, var(--terra-hover) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.28), var(--shadow-sm);
+    position: relative;
+    flex: none;
+  }
+  .brand-mark::before {
+    content: "";
+    position: absolute; inset: 9px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255,253,249,.92);
+    border-bottom-color: transparent;
+    transform: rotate(-38deg);
+  }
+  .brand small {
+    display: block;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .topnav {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .topnav a {
+    text-decoration: none;
+    color: var(--fg-muted);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: var(--radius-ctrl);
+    transition: color .18s ease, background .18s ease;
+  }
+  .topnav a:hover { color: var(--fg); background: var(--surface-sunken); }
+  .topnav a[aria-current="page"] { color: var(--terra-hover); background: var(--terra-soft); }
+  .topnav a:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  .btn-write {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--radius-ctrl);
+    background: var(--terra);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background .24s ease, transform .12s ease, box-shadow .24s ease;
+  }
+  .btn-write:hover { background: var(--terra-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-write:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
+  .btn-write:focus-visible { outline: none; box-shadow: var(--ring); }
+  .btn-write svg { width: 16px; height: 16px; }
+
+  /* ---------- Hero ---------- */
+  header.hero {
+    padding: 48px 0 8px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--olive-strong);
+    background: var(--olive-soft);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--olive);
+  }
+  header.hero h1 {
+    margin: 16px 0 8px;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header.hero p.lede {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--fg-muted);
+    font-size: 16px;
+  }
+
+  /* ---------- Summary layout ---------- */
+  .summary {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* score card */
+  .score {
+    padding: 28px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .score .big {
+    font-size: 56px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .score .big small {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--fg-faint);
+    letter-spacing: 0;
+  }
+  .stars {
+    display: inline-flex;
+    gap: 3px;
+    margin: 10px 0 6px;
+  }
+  .star {
+    width: 22px; height: 22px;
+    display: inline-block;
+  }
+  .star svg { width: 100%; height: 100%; display: block; }
+  .score .count {
+    font-size: 13px;
+    color: var(--fg-muted);
+  }
+  .score .count b { color: var(--fg); font-weight: 700; }
+  .score .rec {
+    margin-top: 16px;
+    width: 100%;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--olive-strong);
+  }
+  .score .rec .pct {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  /* distribution card */
+  .dist {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+  .dist h2 {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .dist-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 52px;
+    align-items: center;
+    gap: 14px;
+  }
+  .dist-row .lbl {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .dist-row .lbl svg { width: 13px; height: 13px; color: var(--mustard); }
+  .bar {
+    height: 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-sunken);
+    overflow: hidden;
+  }
+  .bar > span {
+    display: block;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--terra) 0%, var(--terra-hover) 100%);
+    width: var(--w, 0%);
+    transition: width .7s cubic-bezier(.22,.61,.36,1);
+  }
+  .dist-row:nth-child(2) .bar > span { background: linear-gradient(90deg, var(--terra) 0%, var(--terra-hover) 100%); }
+  .dist-row .num {
+    text-align: right;
+    font-size: 12px;
+    color: var(--fg-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Filter bar ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 40px 0 20px;
+  }
+  .toolbar h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .toolbar h2 span {
+    color: var(--fg-faint);
+    font-weight: 600;
+    font-size: 15px;
+    margin-left: 6px;
+  }
+  .filters {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-group > .flabel {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .segment {
+    display: inline-flex;
+    padding: 3px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    gap: 2px;
+  }
+  .segment button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: color .2s ease, background .25s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease;
+  }
+  .segment button:hover { color: var(--fg); }
+  .segment button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--terra-hover);
+    box-shadow: var(--shadow-sm);
+  }
+  .segment button:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  .select-wrap { position: relative; }
+  .select-wrap svg.chev {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    color: var(--fg-faint);
+    pointer-events: none;
+  }
+  select.sort {
+    appearance: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-ctrl);
+    height: 36px;
+    padding: 0 34px 0 14px;
+    cursor: pointer;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  select.sort:hover { border-color: var(--border-strong); }
+  select.sort:focus-visible { outline: none; border-color: var(--terra); box-shadow: 0 0 0 4px var(--terra-soft); }
+
+  /* ---------- Review list ---------- */
+  .reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .review {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .review:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+  .avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), var(--shadow-sm);
+    flex: none;
+  }
+  .av-terra { background: linear-gradient(145deg, #D08A6A, var(--terra-hover)); }
+  .av-olive { background: linear-gradient(145deg, #9AAA6B, var(--olive-strong)); }
+  .av-mustard { background: linear-gradient(145deg, #E0A64F, #BC7E2A); }
+  .av-brick { background: linear-gradient(145deg, #C06B58, #93463A); }
+  .av-sand { background: linear-gradient(145deg, #D3C3A6, #A6906E); }
+
+  .rv-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .rv-who { display: flex; flex-direction: column; gap: 3px; }
+  .rv-role {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .rv-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--fg-faint);
+  }
+  .rv-meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--sand); }
+  .verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--olive-strong);
+    font-weight: 600;
+  }
+  .verified svg { width: 12px; height: 12px; }
+
+  .rv-rating {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rv-rating .stars .star { width: 15px; height: 15px; }
+  .rv-rating .val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rv-title {
+    margin: 14px 0 6px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .rv-body {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .rv-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+  }
+  .tag.olive { color: var(--olive-strong); background: var(--olive-soft); border-color: transparent; }
+  .tag.terra { color: var(--terra-hover); background: var(--terra-soft); border-color: transparent; }
+
+  .rv-foot {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .btn-helpful {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 14px;
+    background: var(--surface);
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .18s ease, background .18s ease, border-color .18s ease, transform .12s ease;
+  }
+  .btn-helpful svg { width: 15px; height: 15px; transition: transform .2s ease; }
+  .btn-helpful .n { font-variant-numeric: tabular-nums; }
+  .btn-helpful:hover {
+    color: var(--olive-strong);
+    background: var(--olive-soft);
+    border-color: transparent;
+  }
+  .btn-helpful:hover svg { transform: translateY(-1px); }
+  .btn-helpful:active { transform: scale(.97); }
+  .btn-helpful:focus-visible { outline: none; box-shadow: var(--ring); }
+  .btn-helpful[aria-pressed="true"] {
+    color: #fff;
+    background: var(--olive);
+    border-color: transparent;
+  }
+  .btn-helpful[aria-pressed="true"] svg { fill: #fff; }
+
+  .rv-reply {
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-faint);
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: 8px;
+    transition: color .18s ease;
+  }
+  .rv-reply:hover { color: var(--terra-hover); }
+  .rv-reply:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  /* brand reply nested */
+  .brand-reply {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--surface-sunken);
+    border-radius: 12px;
+    border-left: 3px solid var(--olive);
+  }
+  .brand-reply .br-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--olive-strong);
+    margin-bottom: 6px;
+  }
+  .brand-reply .br-head .badge {
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    background: var(--olive);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+  }
+  .brand-reply p { margin: 0; font-size: 14px; color: var(--fg-muted); line-height: 1.6; }
+
+  /* ---------- Load more ---------- */
+  .more {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .btn-more {
+    height: 40px;
+    padding: 0 24px;
+    background: var(--surface);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-ctrl);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: border-color .18s ease, box-shadow .18s ease, transform .12s ease;
+  }
+  .btn-more:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .btn-more:active { transform: translateY(0); }
+  .btn-more:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  /* ---------- Footer ---------- */
+  footer.foot {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 40px;
+  }
+  footer.foot .wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--fg-faint);
+    font-size: 13px;
+  }
+  footer.foot .fdot { width: 4px; height: 4px; border-radius: 50%; background: var(--sand); }
+  footer.foot b { color: var(--fg-muted); font-weight: 600; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px) {
+    .summary { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    header.hero { padding: 32px 0 4px; }
+    header.hero h1 { font-size: 26px; }
+    .topnav { display: none; }
+    .toolbar { align-items: flex-start; }
+    .filters { margin-left: 0; width: 100%; }
+    .review { grid-template-columns: 1fr; gap: 14px; }
+    .rv-rating { margin-left: 0; }
+    .score .big { font-size: 48px; }
+  }
+
+  /* ---------- Motion / entrance ---------- */
+  .reveal { opacity: 0; transform: translateY(10px); }
+  .reveal.in { opacity: 1; transform: none; transition: opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+    .reveal, .reveal.in { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .bar > span { transition: none !important; }
+    .btn-write, .btn-helpful, .review, .btn-more { transition: color .01s, background .01s, border-color .01s !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Terra<small>Reviews</small></span>
+    </div>
+    <nav class="topnav" aria-label="주요">
+      <a href="#">둘러보기</a>
+      <a href="#">기능</a>
+      <a href="#" aria-current="page">리뷰</a>
+      <a href="#">요금제</a>
+    </nav>
+    <button class="btn-write" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      리뷰 작성
+    </button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>고객 평가</span>
+    <h1>실제로 써 본 팀들이 남긴 이야기</h1>
+    <p class="lede">Terra를 도입한 팀들이 남긴 솔직한 후기입니다. 평점 분포와 필터로 나에게 맞는 관점을 빠르게 찾아보세요.</p>
+
+    <div class="summary">
+      <!-- 평균 점수 카드 -->
+      <div class="card score reveal">
+        <div class="big" id="avg">4.7<small> / 5</small></div>
+        <div class="stars" id="avgStars" aria-label="평균 4.7점 만점 5점"></div>
+        <div class="count">총 <b>1,284</b>개 리뷰</div>
+        <div class="rec">
+          <span class="pct">96%</span>
+          <span>가 지인에게 추천</span>
+        </div>
+      </div>
+
+      <!-- 분포 카드 -->
+      <div class="card dist reveal">
+        <h2>평점 분포</h2>
+        <div class="dist-row">
+          <span class="lbl">5<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg></span>
+          <div class="bar"><span style="--w:72%"></span></div>
+          <span class="num">72%</span>
+        </div>
+        <div class="dist-row">
+          <span class="lbl">4<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg></span>
+          <div class="bar"><span style="--w:19%"></span></div>
+          <span class="num">19%</span>
+        </div>
+        <div class="dist-row">
+          <span class="lbl">3<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg></span>
+          <div class="bar"><span style="--w:6%"></span></div>
+          <span class="num">6%</span>
+        </div>
+        <div class="dist-row">
+          <span class="lbl">2<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg></span>
+          <div class="bar"><span style="--w:2%"></span></div>
+          <span class="num">2%</span>
+        </div>
+        <div class="dist-row">
+          <span class="lbl">1<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z"/></svg></span>
+          <div class="bar"><span style="--w:1%"></span></div>
+          <span class="num">1%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 필터 툴바 -->
+  <div class="toolbar">
+    <h2>리뷰 <span>1,284</span></h2>
+    <div class="filters">
+      <div class="filter-group" role="group" aria-label="별점 필터">
+        <span class="flabel">별점</span>
+        <div class="segment">
+          <button type="button" aria-pressed="true">전체</button>
+          <button type="button" aria-pressed="false">5</button>
+          <button type="button" aria-pressed="false">4</button>
+          <button type="button" aria-pressed="false">3↓</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <span class="flabel" id="sortLbl">정렬</span>
+        <div class="select-wrap">
+          <select class="sort" aria-labelledby="sortLbl">
+            <option>최신순</option>
+            <option>도움된 순</option>
+            <option>평점 높은 순</option>
+            <option>평점 낮은 순</option>
+          </select>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뷰 리스트 -->
+  <div class="reviews">
+
+    <!-- 1 -->
+    <article class="review reveal">
+      <div class="avatar av-terra">JP</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">프로덕트 매니저 · 핀테크 스타트업</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>3일 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="5" aria-label="5점 만점 5점"></span>
+            <span class="val">5.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">도입 첫 주에 회의 시간이 눈에 띄게 줄었습니다</h3>
+        <p class="rv-body">기획 문서를 여기저기 흩어 두던 습관이 있었는데, Terra로 옮기고 나서 한곳에서 맥락이 이어졌어요. 특히 변경 이력이 자동으로 정리되니 "이거 왜 바뀌었지" 하고 되묻는 일이 거의 사라졌습니다. 온보딩도 반나절이면 충분했습니다.</p>
+        <div class="rv-tags">
+          <span class="tag terra">협업</span>
+          <span class="tag">온보딩 빠름</span>
+          <span class="tag olive">추천</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">218</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- 2 -->
+    <article class="review reveal">
+      <div class="avatar av-olive">SD</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">시니어 디자이너 · 커머스 플랫폼</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>1주 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="5" aria-label="5점 만점 5점"></span>
+            <span class="val">5.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">디자인 톤이 절제되어 있어 오래 봐도 편합니다</h3>
+        <p class="rv-body">화면이 차분해서 눈이 덜 피로해요. 강조가 필요한 지점에만 색이 들어가 있어서, 하루 종일 켜 두는 도구인데도 자극이 적습니다. 다크 모드가 아니어도 밝은 화면이 이렇게 편안할 수 있다는 게 인상적이었어요.</p>
+        <div class="rv-tags">
+          <span class="tag terra">UI/UX</span>
+          <span class="tag">눈 편함</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">173</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+
+        <div class="brand-reply">
+          <div class="br-head"><span class="badge">Terra 팀</span> 답변</div>
+          <p>편안하게 쓰신다니 정말 기쁩니다. 저희가 색을 아끼는 이유를 정확히 짚어 주셨어요. 곧 화면 온도를 미세 조정하는 옵션도 준비하고 있습니다.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3 -->
+    <article class="review reveal">
+      <div class="avatar av-mustard">DE</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">데이터 엔지니어 · SaaS 기업</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>2주 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="4" aria-label="5점 만점 4점"></span>
+            <span class="val">4.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">API 연동은 훌륭, 대량 내보내기는 조금 아쉬움</h3>
+        <p class="rv-body">문서가 친절해서 연동은 반나절 만에 끝냈습니다. 응답 속도도 안정적이고요. 다만 수만 건을 한 번에 내보낼 때 페이지네이션을 직접 돌려야 하는 점은 개선되면 좋겠어요. 그 외에는 팀 전체가 만족하며 쓰고 있습니다.</p>
+        <div class="rv-tags">
+          <span class="tag terra">API/연동</span>
+          <span class="tag">문서 친절</span>
+          <span class="tag">개선 요청</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">142</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 -->
+    <article class="review reveal">
+      <div class="avatar av-brick">MK</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">마케팅 리드 · 교육 서비스</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>3주 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="5" aria-label="5점 만점 5점"></span>
+            <span class="val">5.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">비개발 직군도 부담 없이 쓸 수 있어요</h3>
+        <p class="rv-body">저는 개발을 전혀 모르는데도 캠페인 문서를 팀과 함께 관리하는 데 어려움이 없었습니다. 용어가 어렵지 않고, 안내 문구가 한국어로 자연스럽게 쓰여 있어서 헤맬 일이 적었어요. 도구가 사람을 배려한다는 느낌을 오랜만에 받았습니다.</p>
+        <div class="rv-tags">
+          <span class="tag olive">쉬움</span>
+          <span class="tag">비개발 친화</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">96</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- 5 -->
+    <article class="review reveal">
+      <div class="avatar av-sand">OP</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">운영 매니저 · 물류 스타트업</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>1개월 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="4" aria-label="5점 만점 4점"></span>
+            <span class="val">4.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">협업 알림이 딱 필요한 만큼만 옵니다</h3>
+        <p class="rv-body">알림이 시끄러운 도구를 여럿 겪어 봐서 걱정했는데, Terra는 정말 중요한 변경에만 알림이 와요. 덕분에 집중이 끊기지 않습니다. 모바일 화면도 데스크톱과 흐름이 같아서 이동 중에 확인하기도 편했습니다. 권한 설정이 조금 더 세분화되면 완벽하겠어요.</p>
+        <div class="rv-tags">
+          <span class="tag terra">협업</span>
+          <span class="tag">알림 절제</span>
+          <span class="tag">반응형</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">88</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+      </div>
+    </article>
+
+    <!-- 6 -->
+    <article class="review reveal">
+      <div class="avatar av-olive">CS</div>
+      <div class="rv-content">
+        <div class="rv-head">
+          <div class="rv-who">
+            <span class="rv-role">고객 성공 매니저 · B2B SaaS</span>
+            <span class="rv-meta">
+              <span class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+              <span class="sep"></span>
+              <span>1개월 전</span>
+            </span>
+          </div>
+          <div class="rv-rating">
+            <span class="stars" data-rating="5" aria-label="5점 만점 5점"></span>
+            <span class="val">5.0</span>
+          </div>
+        </div>
+        <h3 class="rv-title">고객 문의 이력을 한눈에 이어 볼 수 있어요</h3>
+        <p class="rv-body">여러 채널에 흩어진 문의를 하나의 흐름으로 묶어 주는 점이 가장 좋았습니다. 담당자가 바뀌어도 앞선 맥락이 그대로 남아 있어서 고객에게 같은 질문을 두 번 하지 않게 됐어요. 지원팀 응답 속도가 체감상 확실히 빨라졌습니다.</p>
+        <div class="rv-tags">
+          <span class="tag terra">고객 지원</span>
+          <span class="tag olive">맥락 유지</span>
+        </div>
+        <div class="rv-foot">
+          <button class="btn-helpful" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            도움됐어요 <span class="n">64</span>
+          </button>
+          <button class="rv-reply" type="button">답글</button>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="more">
+    <button class="btn-more" type="button">리뷰 더 보기</button>
+  </div>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span class="brand-mark" aria-hidden="true" style="width:24px;height:24px;border-radius:7px"></span>
+    <b>리뷰</b>
+    <span class="fdot"></span>
+    <span>웜 프로페셔널</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ----- 별 렌더 (SVG) -----
+  var STAR = '<span class="star"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g%ID%" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6934F"/><stop offset="1" stop-color="#C97B5A"/></linearGradient></defs><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.6 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z" fill="%FILL%"/></svg></span>';
+  var gid = 0;
+  function star(filled) {
+    gid++;
+    var fill = filled ? 'url(#g' + gid + ')' : '#E7DDCF';
+    return STAR.replace('%ID%', gid).replace('%FILL%', fill);
+  }
+  function renderStars(el, rating, total) {
+    total = total || 5;
+    var html = '';
+    for (var i = 1; i <= total; i++) html += star(i <= rating);
+    el.innerHTML = html;
+  }
+
+  // 평균(4.7 → 5칸 중 대략 표현: 4개 채움 + 1개 채움)
+  renderStars(document.getElementById('avgStars'), 5, 5);
+
+  // 각 리뷰 별점
+  document.querySelectorAll('.stars[data-rating]').forEach(function (el) {
+    renderStars(el, parseInt(el.getAttribute('data-rating'), 10), 5);
+  });
+
+  // ----- 별점 세그먼트 토글 -----
+  document.querySelectorAll('.segment').forEach(function (seg) {
+    seg.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+    });
+  });
+
+  // ----- 도움됐어요 토글 + 카운트 -----
+  document.querySelectorAll('.btn-helpful').forEach(function (btn) {
+    var nEl = btn.querySelector('.n');
+    var base = parseInt(nEl.textContent, 10);
+    if (btn.getAttribute('aria-pressed') === 'true') base -= 1; // 표시값이 이미 +1 반영이라 가정
+    btn.addEventListener('click', function () {
+      var on = btn.getAttribute('aria-pressed') === 'true';
+      var next = !on;
+      btn.setAttribute('aria-pressed', String(next));
+      nEl.textContent = String(base + (next ? 1 : 0));
+      var svg = btn.querySelector('svg');
+      svg.setAttribute('fill', next ? 'currentColor' : 'none');
+    });
+    // 초기 표시 정합
+    nEl.textContent = String(base + (btn.getAttribute('aria-pressed') === 'true' ? 1 : 0));
+  });
+
+  // ----- 진입 애니메이션 -----
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en, i) {
+        if (en.isIntersecting) {
+          setTimeout(function () { en.target.classList.add('in'); }, i * 50);
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(function (el) { io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>

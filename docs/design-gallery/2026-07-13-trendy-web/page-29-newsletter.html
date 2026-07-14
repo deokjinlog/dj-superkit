@@ -1,0 +1,1638 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terra — 흙의 감각을 담은 뉴스레터</title>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<style>
+  :root {
+    /* --- 팔레트: 웜 뉴트럴 (크림 + 흙 계열) --- */
+    --bg: #faf6f0;
+    --surface: #fffdf9;
+    --surface-low: #f3ece2;
+    --border: #e7ddcf;
+    --border-strong: #dbcdb8;
+
+    --fg: #3a342e;
+    --muted: #6b6157;
+    --faint: #9a8f82;
+
+    --primary: #c97b5a;
+    --primary-hover: #b4633f;
+    --primary-active: #a1552f;
+    --primary-soft: #f3e0d6;
+
+    --olive: #8a9a5b;
+    --olive-dark: #6e7d45;
+    --olive-soft: #e7ebd8;
+
+    --mustard: #d8973c;
+    --sand: #c9b79c;
+    --danger: #b15a48;
+
+    /* --- 흙빛 저채도 그림자 --- */
+    --shadow-sm: 0 1px 2px rgba(80, 60, 40, 0.05);
+    --shadow-md: 0 1px 2px rgba(80, 60, 40, 0.05),
+      0 8px 24px rgba(120, 90, 60, 0.06);
+    --shadow-lg: 0 2px 4px rgba(80, 60, 40, 0.06),
+      0 16px 40px rgba(120, 90, 60, 0.1);
+
+    /* --- radius --- */
+    --r-card: 14px;
+    --r-control: 10px;
+    --r-pill: 999px;
+
+    /* --- 8px 그리드 스페이싱 --- */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 24px;
+    --s-6: 32px;
+    --s-7: 48px;
+    --s-8: 64px;
+    --s-9: 96px;
+
+    --maxw: 1120px;
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    /* 크림 배경에 아주 옅은 온기 그라디언트 (도형/그라디언트로만 연출) */
+    background-image: radial-gradient(
+        1200px 520px at 82% -8%,
+        rgba(201, 123, 90, 0.08),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 480px at 6% 4%,
+        rgba(138, 154, 91, 0.07),
+        transparent 62%
+      );
+    background-attachment: fixed;
+    color: var(--fg);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+      sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ---------- 타이포 스케일 (제한) ---------- */
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  .display {
+    font-size: 34px;
+    line-height: 1.24;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .h1 {
+    font-size: 26px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+  .h2 {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .h3 {
+    font-size: 17px;
+    line-height: 1.45;
+    font-weight: 600;
+  }
+  .body {
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .small {
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .label {
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* ---------- 레이아웃 ---------- */
+  .container {
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-left: var(--s-5);
+    padding-right: var(--s-5);
+  }
+
+  /* ---------- 상단바 ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: rgba(250, 246, 240, 0.82);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: var(--s-4);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+  }
+  .brand__mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    color: #fffdf9;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(150deg, var(--primary), var(--primary-hover));
+    box-shadow: var(--shadow-sm);
+  }
+  .brand__name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .brand__name span {
+    color: var(--faint);
+    font-weight: 500;
+  }
+  .topnav {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+  .navlink {
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-control);
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 160ms var(--ease), color 160ms var(--ease);
+  }
+  .navlink:hover {
+    background-color: var(--surface-low);
+    color: var(--fg);
+  }
+  .topnav .btn {
+    margin-left: var(--s-2);
+  }
+  @media (max-width: 720px) {
+    .navlink:not(.navlink--keep) {
+      display: none;
+    }
+  }
+
+  /* ---------- 버튼 ---------- */
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    height: 40px;
+    padding: 0 var(--s-4);
+    border-radius: var(--r-control);
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 200ms var(--ease),
+      border-color 200ms var(--ease), transform 120ms var(--ease),
+      box-shadow 200ms var(--ease), color 200ms var(--ease);
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--primary-soft);
+  }
+
+  .btn--primary {
+    background-color: var(--primary);
+    color: #fffdf9;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn--primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .btn--primary:active {
+    background-color: var(--primary-active);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn--secondary {
+    background-color: var(--surface);
+    color: var(--fg);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn--secondary:hover {
+    background-color: var(--surface-low);
+    border-color: var(--border-strong);
+  }
+  .btn--secondary:active {
+    background-color: #ede4d7;
+  }
+
+  .btn--ghost {
+    background-color: transparent;
+    color: var(--muted);
+  }
+  .btn--ghost:hover {
+    background-color: var(--surface-low);
+    color: var(--fg);
+  }
+  .btn--ghost:active {
+    background-color: #ede4d7;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn--lg {
+    height: 48px;
+    padding: 0 var(--s-5);
+    font-size: 15px;
+  }
+
+  /* ---------- 배지 / 칩 ---------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    height: 26px;
+    padding: 0 var(--s-3);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge--olive {
+    background-color: var(--olive-soft);
+    color: var(--olive-dark);
+  }
+  .badge--terra {
+    background-color: var(--primary-soft);
+    color: var(--primary-hover);
+  }
+  .badge--sand {
+    background-color: #efe7d8;
+    color: #7c6f5b;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex: none;
+  }
+
+  /* ---------- 히어로 ---------- */
+  .hero {
+    padding-top: var(--s-9);
+    padding-bottom: var(--s-8);
+  }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--s-8);
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .hero {
+      padding-top: var(--s-7);
+    }
+    .hero__grid {
+      grid-template-columns: 1fr;
+      gap: var(--s-6);
+    }
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    margin-bottom: var(--s-4);
+  }
+  .hero__title {
+    margin-bottom: var(--s-4);
+    max-width: 15ch;
+  }
+  .hero__title .accent {
+    color: var(--primary);
+  }
+  .hero__lead {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.65;
+    max-width: 46ch;
+    margin-bottom: var(--s-6);
+  }
+
+  /* --- 구독 폼 --- */
+  .subscribe {
+    max-width: 480px;
+  }
+  .field {
+    display: flex;
+    gap: var(--s-2);
+  }
+  @media (max-width: 480px) {
+    .field {
+      flex-direction: column;
+    }
+  }
+  .input-wrap {
+    position: relative;
+    flex: 1 1 auto;
+  }
+  .input-wrap .input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--faint);
+    pointer-events: none;
+    transition: color 180ms var(--ease);
+    display: flex;
+  }
+  .input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 48px;
+    padding: 0 var(--s-4) 0 42px;
+    border-radius: var(--r-control);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 0.1px;
+    transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease),
+      background-color 180ms var(--ease);
+  }
+  .input::placeholder {
+    color: var(--faint);
+  }
+  .input:hover {
+    border-color: var(--border-strong);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+    background-color: #fffdf9;
+  }
+  .input:focus + .input-icon,
+  .input-wrap:focus-within .input-icon {
+    color: var(--primary);
+  }
+  .subscribe .btn {
+    flex: none;
+  }
+  @media (max-width: 480px) {
+    .subscribe .btn {
+      width: 100%;
+    }
+  }
+  .form-note {
+    margin-top: var(--s-3);
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--faint);
+    font-size: 13px;
+  }
+  .form-note svg {
+    color: var(--olive-dark);
+    flex: none;
+  }
+  .form-msg {
+    margin-top: var(--s-3);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--olive-dark);
+    min-height: 18px;
+  }
+  .form-msg[data-state="error"] {
+    color: var(--danger);
+  }
+
+  /* --- 구독자 수 / 아바타 스택 --- */
+  .proof {
+    margin-top: var(--s-6);
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    flex-wrap: wrap;
+  }
+  .avatars {
+    display: flex;
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fffdf9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border: 2px solid var(--bg);
+    margin-left: -10px;
+  }
+  .avatar:first-child {
+    margin-left: 0;
+  }
+  .avatar--1 {
+    background: linear-gradient(150deg, #c97b5a, #b4633f);
+  }
+  .avatar--2 {
+    background: linear-gradient(150deg, #8a9a5b, #6e7d45);
+  }
+  .avatar--3 {
+    background: linear-gradient(150deg, #d8973c, #b9762a);
+  }
+  .avatar--4 {
+    background: linear-gradient(150deg, #c9b79c, #a99372);
+  }
+  .avatar--more {
+    background: var(--surface-low);
+    color: var(--muted);
+    border-color: var(--bg);
+  }
+  .proof__text .count {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--fg);
+  }
+  .proof__text .count-label {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* --- 히어로 우측: 이슈 미리보기 카드 --- */
+  .hero__preview {
+    position: relative;
+  }
+  .preview-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .preview-card__banner {
+    height: 132px;
+    position: relative;
+    background: linear-gradient(135deg, #e9c9a8, #d79a6e 48%, #c97b5a);
+    overflow: hidden;
+  }
+  .preview-card__banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        120px 120px at 78% 24%,
+        rgba(255, 253, 249, 0.4),
+        transparent 60%
+      ),
+      radial-gradient(
+        160px 160px at 18% 96%,
+        rgba(110, 125, 69, 0.4),
+        transparent 62%
+      );
+  }
+  .preview-card__banner .sun {
+    position: absolute;
+    top: 22px;
+    right: 30px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #fff4e6, #f0c48a);
+    box-shadow: 0 0 0 8px rgba(255, 244, 230, 0.28);
+  }
+  .preview-card__banner .ridge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 46px;
+    background: linear-gradient(180deg, transparent, rgba(58, 52, 46, 0.12));
+    clip-path: polygon(
+      0 60%,
+      14% 40%,
+      30% 62%,
+      46% 34%,
+      64% 58%,
+      82% 32%,
+      100% 56%,
+      100% 100%,
+      0 100%
+    );
+  }
+  .preview-card__body {
+    padding: var(--s-5);
+  }
+  .preview-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--s-3);
+  }
+  .preview-card__title {
+    margin-bottom: var(--s-2);
+  }
+  .preview-card__excerpt {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .preview-card__foot {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--border);
+    color: var(--faint);
+    font-size: 12px;
+  }
+  .preview-card__foot .sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--sand);
+  }
+  /* 뒤에 겹친 종이 느낌 */
+  .hero__preview::after {
+    content: "";
+    position: absolute;
+    inset: 18px -14px -16px 22px;
+    z-index: -1;
+    border-radius: var(--r-card);
+    background-color: var(--surface-low);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 900px) {
+    .hero__preview::after {
+      inset: 14px -10px -12px 16px;
+    }
+  }
+
+  /* ---------- 섹션 공통 ---------- */
+  .section {
+    padding-top: var(--s-8);
+    padding-bottom: var(--s-8);
+  }
+  .section--band {
+    background-color: var(--surface-low);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .section__head {
+    max-width: 640px;
+    margin-bottom: var(--s-6);
+  }
+  .section__head .label {
+    display: block;
+    margin-bottom: var(--s-3);
+    color: var(--primary-hover);
+  }
+  .section__head p {
+    margin-top: var(--s-3);
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .section__head--between {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-4);
+    max-width: 100%;
+  }
+
+  /* ---------- 지난 호 카드 3 ---------- */
+  .issues {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-5);
+  }
+  @media (max-width: 900px) {
+    .issues {
+      grid-template-columns: 1fr;
+    }
+  }
+  .issue-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform 200ms var(--ease), box-shadow 200ms var(--ease),
+      border-color 200ms var(--ease);
+  }
+  .issue-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
+  .issue-card__cover {
+    height: 108px;
+    position: relative;
+    overflow: hidden;
+  }
+  .issue-card__cover .num {
+    position: absolute;
+    left: var(--s-4);
+    bottom: var(--s-3);
+    color: #fffdf9;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 2px rgba(58, 52, 46, 0.28);
+  }
+  .cover--a {
+    background: linear-gradient(135deg, #c97b5a, #a1552f);
+  }
+  .cover--b {
+    background: linear-gradient(135deg, #8a9a5b, #566234);
+  }
+  .cover--c {
+    background: linear-gradient(135deg, #d8973c, #a86a1f);
+  }
+  .issue-card__cover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        90px 90px at 82% 18%,
+        rgba(255, 253, 249, 0.32),
+        transparent 60%
+      ),
+      radial-gradient(
+        110px 110px at 12% 108%,
+        rgba(58, 52, 46, 0.22),
+        transparent 60%
+      );
+  }
+  .issue-card__body {
+    padding: var(--s-5);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  .issue-card__date {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    color: var(--faint);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: var(--s-3);
+  }
+  .issue-card__title {
+    margin-bottom: var(--s-2);
+  }
+  .issue-card__excerpt {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    flex: 1 1 auto;
+  }
+  .issue-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-top: var(--s-4);
+    color: var(--primary-hover);
+    font-size: 13px;
+    font-weight: 600;
+    width: fit-content;
+    border-radius: 6px;
+    transition: gap 180ms var(--ease), color 180ms var(--ease);
+  }
+  .issue-card__link:hover {
+    gap: 10px;
+    color: var(--primary-active);
+  }
+  .issue-card__link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+  .issue-card__link svg {
+    transition: transform 180ms var(--ease);
+  }
+
+  /* ---------- 후기 2 ---------- */
+  .quotes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-5);
+  }
+  @media (max-width: 760px) {
+    .quotes {
+      grid-template-columns: 1fr;
+    }
+  }
+  .quote {
+    position: relative;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: var(--s-6);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 200ms var(--ease), border-color 200ms var(--ease);
+  }
+  .quote:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
+  .quote__mark {
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--primary-soft);
+    height: 24px;
+  }
+  .quote__text {
+    margin-top: var(--s-3);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--fg);
+  }
+  .quote__by {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--border);
+  }
+  .quote__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fffdf9;
+    font-weight: 700;
+    font-size: 15px;
+    flex: none;
+  }
+  .quote__role {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .quote__org {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ---------- 발행 주기 안내 ---------- */
+  .cadence {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-8);
+    align-items: center;
+  }
+  @media (max-width: 860px) {
+    .cadence {
+      grid-template-columns: 1fr;
+      gap: var(--s-6);
+    }
+  }
+  .cadence__list {
+    list-style: none;
+    margin: var(--s-5) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+  .cadence__item {
+    display: flex;
+    gap: var(--s-4);
+    align-items: flex-start;
+    padding: var(--s-4);
+    border-radius: var(--r-control);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 180ms var(--ease), background-color 180ms var(--ease);
+  }
+  .cadence__item:hover {
+    border-color: var(--border-strong);
+    background-color: #fffdf9;
+  }
+  .cadence__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .ico--terra {
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+  }
+  .ico--olive {
+    background: var(--olive-soft);
+    color: var(--olive-dark);
+  }
+  .ico--sand {
+    background: #efe7d8;
+    color: #7c6f5b;
+  }
+  .cadence__item h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .cadence__item p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* --- 발행 캘린더 미니 (도형) --- */
+  .cal {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: var(--s-5);
+    box-shadow: var(--shadow-md);
+  }
+  .cal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--s-4);
+  }
+  .cal__dow,
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--s-2);
+  }
+  .cal__dow span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--faint);
+    padding-bottom: var(--s-2);
+  }
+  .cal__cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background-color: var(--surface-low);
+  }
+  .cal__cell.muted {
+    color: var(--faint);
+    opacity: 0.5;
+  }
+  .cal__cell.pub {
+    background-color: var(--primary);
+    color: #fffdf9;
+    box-shadow: var(--shadow-sm);
+  }
+  .cal__cell.today {
+    outline: 2px solid var(--olive);
+    outline-offset: -2px;
+    color: var(--olive-dark);
+  }
+  .cal__legend {
+    display: flex;
+    gap: var(--s-4);
+    margin-top: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .cal__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+  .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    flex: none;
+  }
+  .swatch--pub {
+    background: var(--primary);
+  }
+  .swatch--today {
+    background: transparent;
+    outline: 2px solid var(--olive);
+    outline-offset: -2px;
+  }
+
+  /* ---------- CTA 밴드 ---------- */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #b4633f, #c97b5a 58%, #d8973c);
+    border-radius: 20px;
+    padding: var(--s-8) var(--s-7);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        280px 200px at 88% 10%,
+        rgba(255, 253, 249, 0.22),
+        transparent 62%
+      ),
+      radial-gradient(
+        320px 220px at 6% 108%,
+        rgba(110, 125, 69, 0.34),
+        transparent 60%
+      );
+  }
+  .cta > * {
+    position: relative;
+  }
+  .cta h2 {
+    color: #fffdf9;
+    margin-bottom: var(--s-3);
+  }
+  .cta p {
+    color: rgba(255, 253, 249, 0.86);
+    max-width: 44ch;
+    margin: 0 auto var(--s-6);
+    font-size: 16px;
+  }
+  .cta .field {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+  .cta .input {
+    background-color: rgba(255, 253, 249, 0.94);
+    border-color: rgba(255, 253, 249, 0.5);
+  }
+  .cta .input:focus {
+    border-color: #fffdf9;
+    box-shadow: 0 0 0 4px rgba(255, 253, 249, 0.28);
+  }
+  .cta .btn--onlight {
+    background-color: #fffdf9;
+    color: var(--primary-hover);
+  }
+  .cta .btn--onlight:hover {
+    background-color: #f3ece2;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .cta .btn--onlight:active {
+    background-color: #e9dece;
+    transform: translateY(0);
+  }
+  .cta .btn--onlight:focus-visible {
+    outline: 2px solid #fffdf9;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(255, 253, 249, 0.4);
+  }
+  .cta__note {
+    color: rgba(255, 253, 249, 0.78);
+    font-size: 13px;
+    margin-top: var(--s-4);
+  }
+
+  /* ---------- 푸터 ---------- */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: var(--s-7) 0 var(--s-6);
+    margin-top: var(--s-8);
+  }
+  .footer__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-6);
+    flex-wrap: wrap;
+    margin-bottom: var(--s-6);
+  }
+  .footer__cols {
+    display: flex;
+    gap: var(--s-8);
+    flex-wrap: wrap;
+  }
+  .footer__col h4 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 var(--s-3);
+  }
+  .footer__col a {
+    display: block;
+    color: var(--muted);
+    font-size: 14px;
+    padding: var(--s-1) 0;
+    border-radius: 4px;
+    transition: color 160ms var(--ease);
+  }
+  .footer__col a:hover {
+    color: var(--primary-hover);
+  }
+  .footer__brand {
+    max-width: 260px;
+  }
+  .footer__brand p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: var(--s-3);
+  }
+  .footer__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--border);
+    color: var(--faint);
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .footer__sig {
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  /* ---------- 로드 시퀀스 애니메이션 ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: reveal 560ms var(--ease) forwards;
+  }
+  @keyframes reveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .d1 { animation-delay: 60ms; }
+  .d2 { animation-delay: 140ms; }
+  .d3 { animation-delay: 220ms; }
+  .d4 { animation-delay: 300ms; }
+  .d5 { animation-delay: 380ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    * {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.001ms !important;
+    }
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<!-- ================= 상단바 ================= -->
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand" href="#top" aria-label="Terra 홈">
+      <span class="brand__mark" aria-hidden="true">Te</span>
+      <span class="brand__name">Terra<span> 뉴스레터</span></span>
+    </a>
+    <nav class="topnav" aria-label="주요 메뉴">
+      <a class="navlink" href="#issues">지난 호</a>
+      <a class="navlink" href="#voices">구독자 후기</a>
+      <a class="navlink" href="#cadence">발행 주기</a>
+      <a class="btn btn--primary" href="#subscribe">구독하기</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ================= 히어로 ================= -->
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <span class="badge badge--olive hero__eyebrow reveal d1">
+          <span class="dot" aria-hidden="true"></span> 매주 목요일 아침 발행
+        </span>
+        <h1 class="display hero__title reveal d2">
+          흙의 감각으로 읽는<br /><span class="accent">브랜드와 로컬</span> 이야기
+        </h1>
+        <p class="hero__lead body reveal d3">
+          Terra는 잘 만든 로컬 브랜드, 공간, 그리고 그 뒤의 사람들을 차분히
+          들여다보는 뉴스레터입니다. 광고 없이, 한 주에 딱 한 편. 5분이면 다
+          읽습니다.
+        </p>
+
+        <!-- 구독 폼 -->
+        <form
+          id="subscribe"
+          class="subscribe reveal d4"
+          novalidate
+          aria-labelledby="subscribe-title"
+        >
+          <h2 id="subscribe-title" class="label" style="margin-bottom: var(--s-2)">
+            이메일로 받아보기
+          </h2>
+          <div class="field">
+            <div class="input-wrap">
+              <input
+                class="input"
+                id="email"
+                name="email"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                placeholder="you@example.com"
+                aria-label="이메일 주소"
+                aria-describedby="form-msg"
+                required
+              />
+              <span class="input-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+              </span>
+            </div>
+            <button class="btn btn--primary btn--lg" type="submit">
+              구독하기
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+          <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+          <p class="form-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            언제든 한 번의 클릭으로 구독 해지. 이메일은 발송 외 어디에도 쓰지 않습니다.
+          </p>
+        </form>
+
+        <!-- 구독자 수 / 소셜 프루프 -->
+        <div class="proof reveal d5">
+          <div class="avatars" aria-hidden="true">
+            <span class="avatar avatar--1">RN</span>
+            <span class="avatar avatar--2">MK</span>
+            <span class="avatar avatar--3">SB</span>
+            <span class="avatar avatar--4">JD</span>
+            <span class="avatar avatar--more">+</span>
+          </div>
+          <p class="proof__text">
+            <span class="count" data-count-to="18420" aria-hidden="true">18,420</span>
+            <span class="count-label">
+              명의 독자와 함께 읽는 중 · 평균 오픈율 <strong>62%</strong>
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 히어로 우측: 최신 호 미리보기 -->
+      <div class="hero__preview reveal d3" aria-hidden="true">
+        <article class="preview-card">
+          <div class="preview-card__banner">
+            <span class="sun"></span>
+            <span class="ridge"></span>
+          </div>
+          <div class="preview-card__body">
+            <div class="preview-card__meta">
+              <span class="badge badge--terra">
+                <span class="dot"></span> 최신 호 · No.84
+              </span>
+              <span class="label" style="letter-spacing: 0.3px">5분 읽기</span>
+            </div>
+            <h3 class="h2 preview-card__title">
+              오래된 방앗간이 로스터리가 되기까지
+            </h3>
+            <p class="preview-card__excerpt">
+              쓸모를 다한 공간은 어떻게 다시 온기를 얻을까. 원래의 결을 지우지
+              않고 새 쓰임을 얹은 세 곳의 기록.
+            </p>
+            <div class="preview-card__foot">
+              <span>2026년 7월 9일</span>
+              <span class="sep"></span>
+              <span>공간 · 리노베이션</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 지난 호 카드 3 ================= -->
+  <section class="section section--band" id="issues">
+    <div class="container">
+      <div class="section__head section__head--between">
+        <div>
+          <span class="label">지난 호 다시 읽기</span>
+          <h2 class="h1">놓친 이야기가 있다면</h2>
+        </div>
+        <a class="btn btn--secondary" href="#archive">전체 아카이브 보기</a>
+      </div>
+
+      <div class="issues">
+        <!-- 카드 1 -->
+        <article class="issue-card">
+          <div class="issue-card__cover cover--a">
+            <span class="num">No.83</span>
+          </div>
+          <div class="issue-card__body">
+            <p class="issue-card__date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              2026년 7월 2일 · 브랜드
+            </p>
+            <h3 class="h3 issue-card__title">작은 브랜드가 색을 고르는 법</h3>
+            <p class="issue-card__excerpt">
+              팔레트 세 개로 버틴 5년. 유행을 좇지 않고도 기억에 남는 브랜드들이
+              색을 아껴 쓰는 방식을 뜯어봤습니다.
+            </p>
+            <a class="issue-card__link" href="#issue-83">
+              이어 읽기
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- 카드 2 -->
+        <article class="issue-card">
+          <div class="issue-card__cover cover--b">
+            <span class="num">No.82</span>
+          </div>
+          <div class="issue-card__body">
+            <p class="issue-card__date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              2026년 6월 25일 · 사람
+            </p>
+            <h3 class="h3 issue-card__title">10년째 같은 시장에서 반찬을 만드는 이유</h3>
+            <p class="issue-card__excerpt">
+              규모를 키우자는 제안을 여러 번 거절한 노포. 성장이 아니라 지속을
+              택한 사람들의 셈법을 들었습니다.
+            </p>
+            <a class="issue-card__link" href="#issue-82">
+              이어 읽기
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- 카드 3 -->
+        <article class="issue-card">
+          <div class="issue-card__cover cover--c">
+            <span class="num">No.81</span>
+          </div>
+          <div class="issue-card__body">
+            <p class="issue-card__date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              2026년 6월 18일 · 공간
+            </p>
+            <h3 class="h3 issue-card__title">동네 서점이 살아남는 세 가지 문법</h3>
+            <p class="issue-card__excerpt">
+              책만 팔아선 못 버틴다. 그럼에도 문을 여는 서점들이 공간을 다시
+              정의하는 방법을 정리했습니다.
+            </p>
+            <a class="issue-card__link" href="#issue-81">
+              이어 읽기
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 구독자 후기 2 ================= -->
+  <section class="section" id="voices">
+    <div class="container">
+      <div class="section__head">
+        <span class="label">구독자의 목소리</span>
+        <h2 class="h1">왜 매주 열어보게 될까</h2>
+        <p>실명 대신 역할로 소개합니다 — 편지가 닿는 사람들의 자리.</p>
+      </div>
+
+      <div class="quotes">
+        <figure class="quote">
+          <div class="quote__mark" aria-hidden="true">&ldquo;</div>
+          <blockquote class="quote__text" style="margin: 0">
+            받은 편지함에서 유일하게 &lsquo;나중에&rsquo;가 아니라 지금 여는
+            뉴스레터예요. 짧은데 여운은 길고, 광고가 없어서 신뢰가 갑니다.
+          </blockquote>
+          <figcaption class="quote__by">
+            <span class="quote__avatar avatar--2" aria-hidden="true">BM</span>
+            <span>
+              <span class="quote__role">브랜드 마케터</span><br />
+              <span class="quote__org">로컬 F&amp;B 스타트업 재직</span>
+            </span>
+          </figcaption>
+        </figure>
+
+        <figure class="quote">
+          <div class="quote__mark" aria-hidden="true">&ldquo;</div>
+          <blockquote class="quote__text" style="margin: 0">
+            취재의 온도가 다릅니다. 숫자보다 사람을 먼저 보고, 그래서 우리 팀
+            회의 때 Terra 한 편을 종종 같이 읽어요.
+          </blockquote>
+          <figcaption class="quote__by">
+            <span class="quote__avatar avatar--1" aria-hidden="true">SP</span>
+            <span>
+              <span class="quote__role">공간 기획자</span><br />
+              <span class="quote__org">독립 스튜디오 운영</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 발행 주기 안내 ================= -->
+  <section class="section section--band" id="cadence">
+    <div class="container cadence">
+      <div>
+        <span class="label" style="color: var(--primary-hover)">발행 주기</span>
+        <h2 class="h1" style="margin-top: var(--s-3)">부담 없는 리듬으로 보냅니다</h2>
+        <p class="body" style="color: var(--muted); margin-top: var(--s-3); max-width: 42ch">
+          받은 편지함을 어지럽히지 않는 것도 편집입니다. Terra의 발행 원칙은
+          단순합니다.
+        </p>
+
+        <ul class="cadence__list">
+          <li class="cadence__item">
+            <span class="cadence__icon ico--terra" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>
+            </span>
+            <div>
+              <h3>매주 목요일 오전 7시</h3>
+              <p>한 주에 딱 한 편. 아침 커피와 함께 읽기 좋은 분량으로.</p>
+            </div>
+          </li>
+          <li class="cadence__item">
+            <span class="cadence__icon ico--olive" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </span>
+            <div>
+              <h3>평균 5분, 스크롤 두세 번</h3>
+              <p>길게 늘이지 않습니다. 다 읽는 데 커피가 식기 전이면 충분해요.</p>
+            </div>
+          </li>
+          <li class="cadence__item">
+            <span class="cadence__icon ico--sand" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.2z"/><path d="M8 9h8M8 12h5"/></svg>
+            </span>
+            <div>
+              <h3>월 1회, 긴 호흡의 인터뷰</h3>
+              <p>넷째 주에는 한 사람을 깊이 만나는 롱폼 한 편을 더 보냅니다.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 발행 캘린더 미니 -->
+      <div class="cal" aria-hidden="true">
+        <div class="cal__head">
+          <span class="h3">2026년 7월</span>
+          <span class="badge badge--terra"><span class="dot"></span> 발행일</span>
+        </div>
+        <div class="cal__dow">
+          <span>일</span><span>월</span><span>화</span><span>수</span
+          ><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="cal__grid" style="margin-top: var(--s-2)">
+          <span class="cal__cell muted">29</span>
+          <span class="cal__cell muted">30</span>
+          <span class="cal__cell">1</span>
+          <span class="cal__cell">2</span>
+          <span class="cal__cell pub">3</span>
+          <span class="cal__cell">4</span>
+          <span class="cal__cell">5</span>
+          <span class="cal__cell">6</span>
+          <span class="cal__cell">7</span>
+          <span class="cal__cell">8</span>
+          <span class="cal__cell">9</span>
+          <span class="cal__cell pub">10</span>
+          <span class="cal__cell">11</span>
+          <span class="cal__cell">12</span>
+          <span class="cal__cell today">13</span>
+          <span class="cal__cell">14</span>
+          <span class="cal__cell">15</span>
+          <span class="cal__cell">16</span>
+          <span class="cal__cell pub">17</span>
+          <span class="cal__cell">18</span>
+          <span class="cal__cell">19</span>
+          <span class="cal__cell">20</span>
+          <span class="cal__cell">21</span>
+          <span class="cal__cell">22</span>
+          <span class="cal__cell">23</span>
+          <span class="cal__cell pub">24</span>
+          <span class="cal__cell">25</span>
+          <span class="cal__cell">26</span>
+          <span class="cal__cell">27</span>
+          <span class="cal__cell">28</span>
+          <span class="cal__cell">29</span>
+          <span class="cal__cell pub">31</span>
+          <span class="cal__cell muted">1</span>
+        </div>
+        <div class="cal__legend">
+          <span><span class="swatch swatch--pub"></span> 발행일 (목)</span>
+          <span><span class="swatch swatch--today"></span> 오늘</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA 밴드 ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="cta">
+        <h2 class="h1">다음 목요일, 첫 편지를 받아보세요</h2>
+        <p>
+          지금 구독하면 이번 주 목요일 오전 7시에 84번째 편지가 도착합니다.
+          부담되면 언제든 한 번의 클릭으로 그만.
+        </p>
+        <form class="field" novalidate aria-label="하단 구독 폼">
+          <div class="input-wrap">
+            <input
+              class="input"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              aria-label="이메일 주소"
+            />
+            <span class="input-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+            </span>
+          </div>
+          <button class="btn btn--onlight btn--lg" type="submit">무료 구독</button>
+        </form>
+        <p class="cta__note">이미 18,420명이 매주 함께 읽고 있어요.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= 푸터 ================= -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="brand" href="#top" aria-label="Terra 홈">
+          <span class="brand__mark" aria-hidden="true">Te</span>
+          <span class="brand__name">Terra</span>
+        </a>
+        <p>흙의 감각으로 읽는 브랜드와 로컬 이야기. 매주 목요일, 광고 없이 한 편.</p>
+      </div>
+      <div class="footer__cols">
+        <div class="footer__col">
+          <h4>읽을거리</h4>
+          <a href="#issues">지난 호</a>
+          <a href="#archive">전체 아카이브</a>
+          <a href="#voices">구독자 후기</a>
+        </div>
+        <div class="footer__col">
+          <h4>Terra 소개</h4>
+          <a href="#about">편집 원칙</a>
+          <a href="#cadence">발행 주기</a>
+          <a href="#contact">제보 · 협업</a>
+        </div>
+        <div class="footer__col">
+          <h4>따라오기</h4>
+          <a href="#rss">RSS 피드</a>
+          <a href="#social">@terra_letter</a>
+          <a href="#unsubscribe">구독 관리</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bar">
+      <span class="footer__sig">뉴스레터 구독 랜딩 · 웜 프로페셔널</span>
+      <span>© 2026 Terra Letter. 크림빛 종이 위에서.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    "use strict";
+    var reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    /* ---- 구독자 수 카운트업 (JS 실패 시 정적 값 유지) ---- */
+    var counter = document.querySelector("[data-count-to]");
+    if (counter && !reduce) {
+      var target = parseInt(counter.getAttribute("data-count-to"), 10) || 0;
+      var start = null;
+      var dur = 900;
+      var fmt = function (n) {
+        return n.toLocaleString("ko-KR");
+      };
+      var step = function (ts) {
+        if (start === null) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        counter.textContent = fmt(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(step);
+        else counter.textContent = fmt(target);
+      };
+      counter.textContent = "0";
+      requestAnimationFrame(step);
+    }
+
+    /* ---- 구독 폼: 간단 검증 + 피드백 (실제 전송 없음, 데모) ---- */
+    var form = document.getElementById("subscribe");
+    if (form) {
+      var input = form.querySelector("#email");
+      var msg = form.querySelector("#form-msg");
+      var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var val = (input.value || "").trim();
+        if (!re.test(val)) {
+          msg.setAttribute("data-state", "error");
+          msg.textContent = "올바른 이메일 주소를 입력해 주세요.";
+          input.focus();
+          return;
+        }
+        msg.setAttribute("data-state", "ok");
+        msg.textContent =
+          "구독 신청이 접수됐어요. 확인 메일을 보냈으니 열어서 눌러 주세요.";
+        input.value = "";
+      });
+      input.addEventListener("input", function () {
+        if (msg.getAttribute("data-state") === "error") {
+          msg.textContent = "";
+          msg.removeAttribute("data-state");
+        }
+      });
+    }
+  })();
+</script>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 체크아웃 · 머티리얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============================================================
+     MUJINE 체크아웃 — Material Design 3
+     톤 팔레트(보라 primary) + surface 톤 elevation
+     ============================================================ */
+  :root {
+    /* --- Primary tones --- */
+    --primary: #6750A4;
+    --on-primary: #FFFFFF;
+    --primary-container: #EADDFF;
+    --on-primary-container: #21005D;
+    --primary-hover: #5B46A0;
+    --primary-press: #4F3A94;
+
+    /* --- Surface tones — 톤 차이가 elevation 층을 만든다 --- */
+    --surface: #FEF7FF;
+    --surface-container-lowest: #FFFFFF;
+    --surface-container-low: #F7F2FA;
+    --surface-container: #F3EDF7;
+    --surface-container-high: #ECE6F0;
+    --surface-container-highest: #E6E0E9;
+
+    /* --- On-surface --- */
+    --on-surface: #1D1B20;
+    --on-surface-variant: #49454F;
+    --outline: #79747E;
+    --outline-variant: #CAC4D0;
+
+    /* --- Secondary --- */
+    --secondary: #625B71;
+    --secondary-container: #E8DEF8;
+    --on-secondary-container: #1D192B;
+
+    /* --- Semantic --- */
+    --error: #B3261E;
+    --error-container: #F9DEDC;
+    --on-error-container: #410E0B;
+    --success: #386A20;
+    --success-container: #DCEFCC;
+    --on-success-container: #0E2100;
+
+    /* --- Elevation shadows (dp scale) --- */
+    --dp0: none;
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp3: 0 1px 3px rgba(0,0,0,.30), 0 4px 8px 3px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    /* --- State layer opacities --- */
+    --state-hover: 0.08;
+    --state-focus: 0.12;
+    --state-press: 0.12;
+
+    /* --- Shape --- */
+    --r-card: 12px;
+    --r-btn: 8px;
+    --r-fab: 16px;
+    --r-dialog: 28px;
+    --r-full: 999px;
+
+    /* --- Type --- */
+    --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    --num: "Pretendard Variable", Pretendard, "Roboto", ui-monospace, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--font);
+    background:
+      radial-gradient(1200px 600px at 85% -5%, #F0E9FB 0%, transparent 55%),
+      var(--surface);
+    color: var(--on-surface);
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    min-height: 100vh;
+    padding-bottom: 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tnum { font-variant-numeric: tabular-nums; font-family: var(--num); }
+
+  /* ============================================================
+     Top app bar
+     ============================================================ */
+  .appbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--surface-container);
+    box-shadow: var(--dp2);
+    animation: bar-drop 240ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  @keyframes bar-drop {
+    from { transform: translateY(-16px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .appbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.14em;
+    color: var(--on-surface);
+  }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), #8A74D0);
+    color: var(--on-primary);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 16px;
+    letter-spacing: 0;
+    box-shadow: var(--dp1);
+  }
+  .appbar-spacer { flex: 1; }
+  .appbar-secure {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--success);
+    background: var(--success-container);
+    padding: 6px 12px;
+    border-radius: var(--r-full);
+  }
+  .appbar-secure svg { display: block; }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: var(--r-full);
+    border: none;
+    background: transparent;
+    color: var(--on-surface-variant);
+    display: grid; place-items: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .icon-btn::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--on-surface); opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .icon-btn:hover::before { opacity: var(--state-hover); }
+  .icon-btn:active::before { opacity: var(--state-press); }
+
+  /* ============================================================
+     Stepper
+     ============================================================ */
+  .stepper-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px 8px;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-full);
+    padding: 10px 20px;
+    box-shadow: var(--dp1);
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: var(--r-full);
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .step.done .step-num { background: var(--primary-container); color: var(--on-primary-container); }
+  .step.done .step-label { color: var(--on-surface-variant); }
+  .step.current .step-num { background: var(--primary); color: var(--on-primary); box-shadow: var(--dp1); }
+  .step.current .step-label { color: var(--primary); font-weight: 700; }
+  .step.upcoming .step-num { background: var(--surface-container-high); color: var(--outline); border: 1px solid var(--outline-variant); }
+  .step.upcoming .step-label { color: var(--outline); }
+  .step-line {
+    flex: 1;
+    height: 2px;
+    min-width: 24px;
+    margin: 0 16px;
+    border-radius: 2px;
+    background: var(--outline-variant);
+    position: relative;
+    overflow: hidden;
+  }
+  .step-line.filled { background: var(--primary-container); }
+  .step-current-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--on-primary-container);
+    background: var(--primary-container);
+    padding: 2px 8px;
+    border-radius: var(--r-full);
+    margin-left: 2px;
+  }
+
+  /* ============================================================
+     Layout
+     ============================================================ */
+  .layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 24px;
+    align-items: start;
+  }
+  .col-left { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ============================================================
+     Card
+     ============================================================ */
+  .card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    transition: box-shadow 150ms cubic-bezier(0.2,0,0,1);
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 12px;
+  }
+  .card-head-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .card-sub {
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+  .card-head-action {
+    margin-left: auto;
+  }
+  .card-body { padding: 4px 24px 24px; }
+
+  /* --- Text button --- */
+  .btn-text {
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 8px 12px;
+    border-radius: var(--r-btn);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 40px;
+  }
+  .btn-text::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--primary); opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .btn-text:hover::before { opacity: var(--state-hover); }
+  .btn-text:active::before { opacity: var(--state-press); }
+  .btn-text:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  /* ============================================================
+     Form fields (Material outlined text field)
+     ============================================================ */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .field.span-2 { grid-column: 1 / -1; }
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .req { color: var(--error); font-weight: 700; }
+  .input, .select {
+    font-family: var(--font);
+    font-size: 15px;
+    color: var(--on-surface);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--outline);
+    border-radius: var(--r-btn);
+    padding: 12px 14px;
+    min-height: 48px;
+    width: 100%;
+    transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    letter-spacing: 0.01em;
+  }
+  .input::placeholder { color: var(--outline); }
+  .input:hover, .select:hover { border-color: var(--on-surface); }
+  .input:focus, .select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .input:focus-visible, .select:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .field-help {
+    font-size: 12px;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.02em;
+  }
+  .field-help.ok { color: var(--success); display: flex; align-items: center; gap: 4px; }
+  .select-wrap { position: relative; }
+  .select {
+    appearance: none;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+  .select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 16px; top: 50%;
+    width: 9px; height: 9px;
+    border-right: 2px solid var(--on-surface-variant);
+    border-bottom: 2px solid var(--on-surface-variant);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  /* --- Recipient chip (이니셜) --- */
+  .recipient {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface-container-low);
+    border-radius: var(--r-card);
+    margin-bottom: 16px;
+  }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: var(--r-full);
+    background: linear-gradient(135deg, var(--primary), #9C86DE);
+    color: var(--on-primary);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 16px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    box-shadow: var(--dp1);
+  }
+  .recipient-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .recipient-name { font-size: 15px; font-weight: 700; }
+  .recipient-meta { font-size: 13px; color: var(--on-surface-variant); }
+  .recipient-badge {
+    margin-left: auto;
+    font-size: 12px; font-weight: 700;
+    color: var(--on-primary-container);
+    background: var(--primary-container);
+    padding: 4px 10px;
+    border-radius: var(--r-full);
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     Order items
+     ============================================================ */
+  .order-list { display: flex; flex-direction: column; }
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .order-item:last-child { border-bottom: none; }
+  .thumb {
+    width: 68px; height: 68px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--dp1);
+  }
+  /* CSS 도형 thumbnail — 세라믹/우드/린넨 */
+  .thumb.t1 { background: linear-gradient(135deg, #C9B8E8 0%, #A98FD6 100%); }
+  .thumb.t1::after {
+    content: ""; position: absolute; left: 50%; top: 52%;
+    width: 34px; height: 34px; transform: translate(-50%,-50%);
+    border-radius: 50% 50% 46% 46%;
+    background: linear-gradient(160deg, #F7F2FA, #E6DBF6);
+    box-shadow: inset 0 -6px 8px rgba(93,58,148,.25);
+  }
+  .thumb.t2 { background: linear-gradient(135deg, #E7D8C3 0%, #C9A87E 100%); }
+  .thumb.t2::after {
+    content: ""; position: absolute; inset: 16px;
+    border-radius: 6px;
+    background: repeating-linear-gradient(90deg, #B8935F 0 6px, #A9824C 6px 12px);
+    opacity: .85;
+  }
+  .thumb.t3 { background: linear-gradient(135deg, #D7DCC9 0%, #AEBB93 100%); }
+  .thumb.t3::after {
+    content: ""; position: absolute; inset: 14px;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 2px, transparent 2px 6px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 2px, transparent 2px 6px),
+      #8FA06C;
+  }
+  .order-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .order-brand { font-size: 12px; font-weight: 700; color: var(--primary); letter-spacing: 0.06em; }
+  .order-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .order-opt { font-size: 13px; color: var(--on-surface-variant); }
+  .order-qty {
+    font-size: 12px; color: var(--on-surface-variant);
+    background: var(--surface-container-high);
+    padding: 2px 8px; border-radius: var(--r-full);
+    align-self: flex-start;
+  }
+  .order-price { font-size: 16px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+  /* ============================================================
+     Payment method radios
+     ============================================================ */
+  .pay-methods { display: flex; flex-direction: column; gap: 12px; }
+  .pay-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-card);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-container-lowest);
+    transition: border-color 120ms ease, background 120ms ease;
+    min-height: 48px;
+  }
+  .pay-option::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--primary); opacity: 0;
+    transition: opacity 120ms ease; pointer-events: none;
+  }
+  .pay-option:hover::before { opacity: var(--state-hover); }
+  .pay-option:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary-container);
+    box-shadow: inset 0 0 0 1px var(--primary);
+  }
+  .pay-option:has(input:focus-visible) { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .radio-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--outline);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: border-color 150ms ease;
+  }
+  .radio-dot::after {
+    content: ""; width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    transform: scale(0);
+    transition: transform 200ms cubic-bezier(0.2,0,0,1);
+  }
+  .pay-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .pay-option:has(input:checked) .radio-dot { border-color: var(--primary); }
+  .pay-option:has(input:checked) .radio-dot::after { transform: scale(1); }
+  .pay-glyph {
+    width: 40px; height: 28px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.04em;
+  }
+  .pay-label { font-size: 15px; font-weight: 600; }
+  .pay-meta { font-size: 12px; color: var(--on-surface-variant); margin-top: 2px; }
+  .pay-text { display: flex; flex-direction: column; min-width: 0; }
+  .pay-tag {
+    margin-left: auto;
+    font-size: 11px; font-weight: 700;
+    color: var(--on-primary-container);
+    background: var(--primary-container);
+    padding: 3px 9px; border-radius: var(--r-full);
+    position: relative;
+    white-space: nowrap;
+  }
+  .pay-option:has(input:checked) .pay-tag {
+    background: var(--primary); color: var(--on-primary);
+  }
+
+  /* ============================================================
+     Summary (right, sticky, dp4 — 가장 높은 층)
+     ============================================================ */
+  .col-right { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+  .summary {
+    background: var(--surface-container-lowest);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp4);
+    overflow: hidden;
+  }
+  .summary-head {
+    padding: 20px 24px 4px;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .summary-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .summary-count { font-size: 13px; color: var(--on-surface-variant); font-weight: 600; }
+  .summary-body { padding: 12px 24px 4px; }
+  .sum-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0;
+    font-size: 14px;
+  }
+  .sum-label { color: var(--on-surface-variant); display: flex; align-items: center; gap: 6px; }
+  .sum-value { font-weight: 600; font-size: 15px; }
+  .sum-value.discount { color: var(--error); }
+  .sum-value.point { color: var(--success); }
+  .sum-hint {
+    font-size: 11px;
+    color: var(--outline);
+    padding: 0 0 6px;
+  }
+  .sum-divider { height: 1px; background: var(--outline-variant); margin: 8px 0; }
+  .sum-total {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 14px 0 6px;
+  }
+  .sum-total-label { font-size: 16px; font-weight: 700; }
+  .sum-total-value {
+    font-size: 28px; font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .sum-total-value .won { font-size: 18px; font-weight: 700; margin-left: 2px; }
+  .save-note {
+    margin: 8px 24px 0;
+    padding: 10px 14px;
+    background: var(--success-container);
+    color: var(--on-success-container);
+    border-radius: var(--r-btn);
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* --- Terms --- */
+  .terms { padding: 16px 24px 4px; display: flex; flex-direction: column; gap: 10px; }
+  .term-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    padding: 4px 0;
+    position: relative;
+  }
+  .term-row.all {
+    font-size: 14px; font-weight: 700; color: var(--on-surface);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--outline-variant);
+    margin-bottom: 4px;
+  }
+  .checkbox {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--outline);
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    transition: background 150ms ease, border-color 150ms ease;
+    margin-top: 1px;
+  }
+  .checkbox svg { opacity: 0; transform: scale(0.6); transition: opacity 150ms ease, transform 200ms cubic-bezier(0.2,0,0,1); }
+  .term-row input { position: absolute; opacity: 0; pointer-events: none; }
+  .term-row:has(input:checked) .checkbox { background: var(--primary); border-color: var(--primary); }
+  .term-row:has(input:checked) .checkbox svg { opacity: 1; transform: scale(1); }
+  .term-row:has(input:focus-visible) .checkbox { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .term-row .req-mark { color: var(--error); font-weight: 700; margin-left: 2px; }
+  .term-text { flex: 1; line-height: 1.45; }
+  .term-link { color: var(--on-surface-variant); text-decoration: underline; text-underline-offset: 2px; margin-left: auto; font-size: 12px; }
+
+  /* --- Primary pay button (filled, dp1→dp2 hover) --- */
+  .pay-cta-wrap { padding: 12px 24px 24px; }
+  .btn-pay {
+    width: 100%;
+    min-height: 56px;
+    border: none;
+    border-radius: var(--r-btn);
+    background: var(--primary);
+    color: var(--on-primary);
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--dp1);
+    transition: box-shadow 150ms cubic-bezier(0.2,0,0,1), background 120ms ease;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-pay::before {
+    content: ""; position: absolute; inset: 0;
+    background: #FFFFFF; opacity: 0;
+    transition: opacity 120ms ease; pointer-events: none;
+  }
+  .btn-pay:hover { box-shadow: var(--dp2); background: var(--primary-hover); }
+  .btn-pay:hover::before { opacity: var(--state-hover); }
+  .btn-pay:active { background: var(--primary-press); box-shadow: var(--dp1); }
+  .btn-pay:active::before { opacity: var(--state-press); }
+  .btn-pay:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .btn-pay .amt { font-variant-numeric: tabular-nums; }
+
+  .safe-line {
+    text-align: center;
+    font-size: 12px;
+    color: var(--on-surface-variant);
+    padding: 0 24px 20px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  /* --- Help card under summary --- */
+  .help-card {
+    background: var(--surface-container-low);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+    box-shadow: var(--dp1);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .help-card .help-ic {
+    width: 36px; height: 36px; border-radius: var(--r-full);
+    background: var(--secondary-container); color: var(--on-secondary-container);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .help-card .help-t { font-size: 13px; font-weight: 700; }
+  .help-card .help-s { font-size: 12px; color: var(--on-surface-variant); }
+
+  /* ============================================================
+     Ripple
+     ============================================================ */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.24;
+    transform: scale(0);
+    pointer-events: none;
+    animation: ripple-out 420ms cubic-bezier(0.2,0,0,1);
+  }
+  @keyframes ripple-out {
+    to { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* ============================================================
+     FAB — Material signature, 우하단 상주
+     ============================================================ */
+  .fab {
+    position: fixed;
+    right: 28px; bottom: 28px;
+    z-index: 50;
+    height: 56px;
+    padding: 0 20px 0 18px;
+    border: none;
+    border-radius: var(--r-fab);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    font-family: var(--font);
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 0.02em;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    box-shadow: var(--dp4);
+    overflow: hidden;
+    transition: box-shadow 200ms cubic-bezier(0.2,0,0,1), transform 200ms cubic-bezier(0.2,0,0,1);
+    animation: fab-in 250ms cubic-bezier(0.2,0,0,1) 0.5s both;
+  }
+  @keyframes fab-in {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .fab:hover { box-shadow: var(--dp8); transform: scale(1.03); }
+  .fab:active { transform: scale(0.97); }
+  .fab:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+  /* ============================================================
+     Footer
+     ============================================================ */
+  .foot {
+    max-width: 1200px;
+    margin: 24px auto 0;
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    letter-spacing: 0.04em;
+  }
+  .foot b { color: var(--on-surface); font-weight: 700; }
+
+  /* ============================================================
+     Entrance stagger
+     ============================================================ */
+  .rise { animation: rise-in 220ms cubic-bezier(0.2,0,0,1) both; }
+  @keyframes rise-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .d1 { animation-delay: 0.10s; }
+  .d2 { animation-delay: 0.15s; }
+  .d3 { animation-delay: 0.20s; }
+  .d4 { animation-delay: 0.25s; }
+
+  /* ============================================================
+     Responsive
+     ============================================================ */
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .col-right { position: static; top: auto; }
+    .summary { box-shadow: var(--dp2); }
+  }
+  @media (max-width: 640px) {
+    .appbar-inner, .stepper-wrap, .layout { padding-left: 16px; padding-right: 16px; }
+    .brand { font-size: 17px; letter-spacing: 0.08em; }
+    .appbar-secure span { display: none; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stepper { padding: 10px 12px; overflow-x: auto; }
+    .step-label { font-size: 13px; }
+    .step-line { margin: 0 8px; min-width: 12px; }
+    .card-head, .card-body, .summary-head, .summary-body, .terms, .pay-cta-wrap { padding-left: 16px; padding-right: 16px; }
+    .sum-total-value { font-size: 24px; }
+    .fab { right: 16px; bottom: 16px; padding: 0 16px; }
+    .fab .fab-label { display: none; }
+    .fab { padding: 0; width: 56px; justify-content: center; }
+  }
+
+  /* ============================================================
+     Reduced motion — 애니메이션 전면 제거
+     ============================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.001ms !important;
+    }
+    .ripple { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== Top app bar ===================== -->
+  <header class="appbar">
+    <div class="appbar-inner">
+      <div class="brand">
+        <span class="brand-mark">MJ</span>
+        <span>MUJINE</span>
+      </div>
+      <div class="appbar-spacer"></div>
+      <span class="appbar-secure">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 4.4-3 8.3-7 9-4-.7-7-4.6-7-9V5l7-3z" fill="currentColor" opacity=".2"/><path d="M12 2l7 3v6c0 4.4-3 8.3-7 9-4-.7-7-4.6-7-9V5l7-3z" stroke="currentColor" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>안전 결제</span>
+      </span>
+      <button class="icon-btn" aria-label="주문 도움말">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.7-.9 1.4v.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== Stepper ===================== -->
+  <div class="stepper-wrap">
+    <nav class="stepper" aria-label="주문 단계">
+      <div class="step done">
+        <span class="step-num" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="step-label">장바구니</span>
+      </div>
+      <span class="step-line filled" aria-hidden="true"></span>
+      <div class="step current" aria-current="step">
+        <span class="step-num">2</span>
+        <span class="step-label">주문 / 결제</span>
+        <span class="step-current-badge">현재</span>
+      </div>
+      <span class="step-line" aria-hidden="true"></span>
+      <div class="step upcoming">
+        <span class="step-num">3</span>
+        <span class="step-label">주문 완료</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ===================== Layout ===================== -->
+  <main class="layout">
+
+    <!-- ============= LEFT ============= -->
+    <div class="col-left">
+
+      <!-- 배송지 -->
+      <section class="card rise d1">
+        <div class="card-head">
+          <span class="card-head-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21c4.5-4.2 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.8 7 11z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
+          </span>
+          <div>
+            <div class="card-title">배송지</div>
+            <div class="card-sub">받는 분과 배송 정보를 확인하세요</div>
+          </div>
+          <div class="card-head-action">
+            <button class="btn-text" data-ripple>배송지 변경</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="recipient">
+            <span class="avatar" aria-hidden="true">K.J</span>
+            <div class="recipient-info">
+              <span class="recipient-name">받는 분 · K.J</span>
+              <span class="recipient-meta tnum">우리집 (기본 배송지)</span>
+            </div>
+            <span class="recipient-badge">기본</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="f-name">받는 분 이니셜 <span class="req" aria-hidden="true">*</span></label>
+              <input class="input tnum" id="f-name" value="K.J" aria-required="true">
+            </div>
+            <div class="field">
+              <label class="field-label" for="f-phone">연락처 <span class="req" aria-hidden="true">*</span></label>
+              <input class="input tnum" id="f-phone" type="tel" value="010-••••-3928" aria-required="true">
+              <span class="field-help ok">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                인증 완료된 번호
+              </span>
+            </div>
+            <div class="field span-2">
+              <label class="field-label" for="f-zip">우편번호 <span class="req" aria-hidden="true">*</span></label>
+              <div style="display:flex; gap:12px;">
+                <input class="input tnum" id="f-zip" value="04524" style="max-width:140px;" aria-required="true">
+                <button class="btn-text" data-ripple style="border:1px solid var(--outline-variant); border-radius:var(--r-btn); flex-shrink:0;">주소 검색</button>
+              </div>
+            </div>
+            <div class="field span-2">
+              <label class="field-label" for="f-addr1">기본 주소 <span class="req" aria-hidden="true">*</span></label>
+              <input class="input" id="f-addr1" value="서울특별시 중구 세종대로 000" aria-required="true">
+            </div>
+            <div class="field span-2">
+              <label class="field-label" for="f-addr2">상세 주소</label>
+              <input class="input" id="f-addr2" placeholder="동·호수 등 상세 주소를 입력하세요">
+            </div>
+            <div class="field span-2">
+              <label class="field-label" for="f-memo">배송 메모</label>
+              <div class="select-wrap">
+                <select class="select" id="f-memo">
+                  <option>부재 시 문 앞에 놓아주세요</option>
+                  <option>배송 전 연락 부탁드립니다</option>
+                  <option>경비실에 맡겨주세요</option>
+                  <option>택배함에 넣어주세요</option>
+                  <option>직접 입력</option>
+                </select>
+              </div>
+              <span class="field-help">공동현관 비밀번호가 있다면 함께 남겨주세요</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 주문 상품 -->
+      <section class="card rise d2">
+        <div class="card-head">
+          <span class="card-head-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.2 11a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 7a3.5 3.5 0 0 1 7 0" stroke="currentColor" stroke-width="1.7"/></svg>
+          </span>
+          <div>
+            <div class="card-title">주문 상품</div>
+            <div class="card-sub">총 <span class="tnum">3</span>개 · MUJINE 셀렉트</div>
+          </div>
+          <div class="card-head-action">
+            <button class="btn-text" data-ripple>수정</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="order-list">
+            <div class="order-item">
+              <span class="thumb t1" aria-hidden="true"></span>
+              <div class="order-info">
+                <span class="order-brand">MUJINE HOME</span>
+                <span class="order-name">무광 세라믹 머그</span>
+                <span class="order-opt">색상 · 라벤더 그레이 / 320ml</span>
+                <span class="order-qty tnum">수량 2</span>
+              </div>
+              <span class="order-price tnum">36,000원</span>
+            </div>
+            <div class="order-item">
+              <span class="thumb t2" aria-hidden="true"></span>
+              <div class="order-info">
+                <span class="order-brand">MUJINE LIVING</span>
+                <span class="order-name">오크 원목 트레이</span>
+                <span class="order-opt">사이즈 · M (32×22cm)</span>
+                <span class="order-qty tnum">수량 1</span>
+              </div>
+              <span class="order-price tnum">42,000원</span>
+            </div>
+            <div class="order-item">
+              <span class="thumb t3" aria-hidden="true"></span>
+              <div class="order-info">
+                <span class="order-brand">MUJINE FABRIC</span>
+                <span class="order-name">워싱 린넨 테이블 매트</span>
+                <span class="order-opt">색상 · 세이지 / 2매 세트</span>
+                <span class="order-qty tnum">수량 1</span>
+              </div>
+              <span class="order-price tnum">24,000원</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 결제수단 -->
+      <section class="card rise d3">
+        <div class="card-head">
+          <span class="card-head-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5.5" width="18" height="13" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3 9.5h18" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 14.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </span>
+          <div>
+            <div class="card-title">결제수단</div>
+            <div class="card-sub">결제 방법을 선택하세요</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="pay-methods" role="radiogroup" aria-label="결제수단 선택">
+            <label class="pay-option" data-ripple>
+              <input type="radio" name="pay" checked>
+              <span class="radio-dot" aria-hidden="true"></span>
+              <span class="pay-glyph">CARD</span>
+              <span class="pay-text">
+                <span class="pay-label">신용 / 체크카드</span>
+                <span class="pay-meta">무이자 할부 최대 <span class="tnum">6</span>개월</span>
+              </span>
+              <span class="pay-tag">추천</span>
+            </label>
+
+            <label class="pay-option" data-ripple>
+              <input type="radio" name="pay">
+              <span class="radio-dot" aria-hidden="true"></span>
+              <span class="pay-glyph">PAY</span>
+              <span class="pay-text">
+                <span class="pay-label">간편결제</span>
+                <span class="pay-meta">등록된 카드로 원터치 결제</span>
+              </span>
+            </label>
+
+            <label class="pay-option" data-ripple>
+              <input type="radio" name="pay">
+              <span class="radio-dot" aria-hidden="true"></span>
+              <span class="pay-glyph">BANK</span>
+              <span class="pay-text">
+                <span class="pay-label">실시간 계좌이체</span>
+                <span class="pay-meta">오픈뱅킹 즉시 이체</span>
+              </span>
+            </label>
+
+            <label class="pay-option" data-ripple>
+              <input type="radio" name="pay">
+              <span class="radio-dot" aria-hidden="true"></span>
+              <span class="pay-glyph">DEP</span>
+              <span class="pay-text">
+                <span class="pay-label">무통장 입금</span>
+                <span class="pay-meta">입금 확인 후 <span class="tnum">1</span>~<span class="tnum">2</span>일 내 배송 시작</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============= RIGHT ============= -->
+    <aside class="col-right rise d4">
+      <section class="summary" aria-label="결제 요약">
+        <div class="summary-head">
+          <span class="summary-title">결제 요약</span>
+          <span class="summary-count tnum">상품 3개</span>
+        </div>
+        <div class="summary-body">
+          <div class="sum-row">
+            <span class="sum-label">상품 금액</span>
+            <span class="sum-value tnum">102,000원</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-label">배송비</span>
+            <span class="sum-value tnum">3,000원</span>
+          </div>
+          <div class="sum-hint">50,000원 이상 무료 배송 · 도서산간 추가</div>
+          <div class="sum-row">
+            <span class="sum-label">
+              쿠폰 할인
+              <span class="recipient-badge" style="font-size:10px;padding:1px 7px;">웰컴</span>
+            </span>
+            <span class="sum-value discount tnum">−10,000원</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-label">적립 예정</span>
+            <span class="sum-value point tnum">+1,850P</span>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="sum-total">
+            <span class="sum-total-label">최종 결제금액</span>
+            <span class="sum-total-value tnum">95,000<span class="won">원</span></span>
+          </div>
+        </div>
+
+        <div class="save-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          쿠폰과 적립으로 <b class="tnum">&nbsp;8,150원&nbsp;</b> 아꼈어요
+        </div>
+
+        <!-- 약관 체크 -->
+        <div class="terms">
+          <label class="term-row all" data-ripple>
+            <input type="checkbox" id="term-all">
+            <span class="checkbox" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="term-text">전체 동의 (필수 및 선택 포함)</span>
+          </label>
+
+          <label class="term-row" data-ripple>
+            <input type="checkbox" class="term-req" checked>
+            <span class="checkbox" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="term-text">주문 내용 확인 및 결제 동의<span class="req-mark" aria-hidden="true">*</span></span>
+            <a href="#" class="term-link" onclick="return false;">보기</a>
+          </label>
+
+          <label class="term-row" data-ripple>
+            <input type="checkbox" class="term-req" checked>
+            <span class="checkbox" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="term-text">개인정보 수집·이용 동의<span class="req-mark" aria-hidden="true">*</span></span>
+            <a href="#" class="term-link" onclick="return false;">보기</a>
+          </label>
+
+          <label class="term-row" data-ripple>
+            <input type="checkbox">
+            <span class="checkbox" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="term-text">마케팅 정보 수신 동의 (선택)</span>
+            <a href="#" class="term-link" onclick="return false;">보기</a>
+          </label>
+        </div>
+
+        <div class="pay-cta-wrap">
+          <button class="btn-pay" data-ripple id="payBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="amt">95,000원 결제하기</span>
+          </button>
+        </div>
+        <div class="safe-line">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          SSL 보안 결제로 안전하게 처리됩니다
+        </div>
+      </section>
+
+      <div class="help-card">
+        <span class="help-ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H9l-4 3V5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 10h7M8.5 12.6h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <div>
+          <div class="help-t">주문에 문제가 있나요?</div>
+          <div class="help-s">평일 <span class="tnum">09</span>–<span class="tnum">18</span>시 고객센터 상담 가능</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===================== FAB ===================== -->
+  <button class="fab" data-ripple aria-label="고객센터 문의하기">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H9l-4 3V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12.5" cy="10.5" r="1.1" fill="currentColor"/><circle cx="16" cy="10.5" r="1.1" fill="currentColor"/></svg>
+    <span class="fab-label">문의하기</span>
+  </button>
+
+  <!-- ===================== Footer ===================== -->
+  <footer class="foot">
+    <b>MUJINE</b> · 체크아웃(고객) · 머티리얼
+  </footer>
+
+  <script>
+    // ---- Ripple (JS 실패 시 :hover/:active state-layer 로 폴백) ----
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      document.querySelectorAll('[data-ripple]').forEach(function (el) {
+        el.addEventListener('pointerdown', function (e) {
+          var rect = el.getBoundingClientRect();
+          var size = Math.max(rect.width, rect.height);
+          var r = document.createElement('span');
+          r.className = 'ripple';
+          r.style.width = r.style.height = size + 'px';
+          r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+          r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+          el.appendChild(r);
+          setTimeout(function () { r.remove(); }, 440);
+        });
+      });
+
+      // ---- 전체 동의 체크박스 연동 ----
+      var all = document.getElementById('term-all');
+      var terms = document.querySelectorAll('.terms .term-row input:not(#term-all)');
+      if (all) {
+        all.addEventListener('change', function () {
+          terms.forEach(function (t) { t.checked = all.checked; });
+        });
+        terms.forEach(function (t) {
+          t.addEventListener('change', function () {
+            var every = Array.prototype.every.call(terms, function (x) { return x.checked; });
+            all.checked = every;
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

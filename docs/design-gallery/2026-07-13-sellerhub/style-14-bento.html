@@ -1,0 +1,785 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>셀러허브 · 벤토 그리드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F4F4F5; --card:#FFFFFF;
+    --ink:#18181B; --sub:#71717A; --line:#E4E4E7;
+    --point:#6366F1; --point-d:#4F46E5; --point-100:#E0E7FF; --point-200:#C7D2FE;
+    --tint:#F4F5FE; --tint-2:#F7F7FE;
+    --bad:#EF4444; --good:#10B981; --amber:#F59E0B; --sky:#0EA5E9; --gray:#A1A1AA;
+    --radius:22px; --gap:16px;
+    --sh:0 1px 3px rgba(0,0,0,.06);
+    --sh-h:0 8px 24px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+    background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.45; overflow-x:hidden;
+  }
+  .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+  a{color:inherit; text-decoration:none}
+  button{font-family:inherit; cursor:pointer}
+  :focus-visible{outline:2px solid var(--point); outline-offset:2px; border-radius:8px}
+
+  /* ---------- shell ---------- */
+  .app{display:flex; min-height:100vh}
+  .sidebar{
+    width:236px; flex:0 0 236px; background:var(--card);
+    border-right:1px solid var(--line);
+    padding:20px 16px; display:flex; flex-direction:column; gap:6px;
+    position:sticky; top:0; height:100vh;
+  }
+  .logo{display:flex; align-items:center; gap:10px; padding:6px 8px 18px}
+  .logo-mark{
+    width:32px; height:32px; border-radius:10px; flex:0 0 32px;
+    background:var(--point); color:#fff; display:grid; place-items:center;
+    font-weight:800; font-size:16px;
+  }
+  .logo-text{font-weight:800; font-size:17px; letter-spacing:-.02em}
+  .nav{display:flex; flex-direction:column; gap:3px; margin-top:4px}
+  .nav a{
+    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    border-radius:12px; color:var(--sub); font-weight:600; font-size:14px;
+    transition:background .15s, color .15s;
+  }
+  .nav a svg{width:19px; height:19px; flex:0 0 19px}
+  .nav a:hover{background:var(--bg); color:var(--ink)}
+  .nav a.active{background:var(--point-100); color:var(--point-d)}
+  .nav a.active svg{color:var(--point-d)}
+  .side-foot{margin-top:auto; padding-top:12px; border-top:1px solid var(--line)}
+  .user{display:flex; align-items:center; gap:10px; padding:8px 6px}
+  .avatar{
+    background:var(--point); color:#fff; font-weight:700; font-size:13px;
+    display:grid; place-items:center; border-radius:10px; letter-spacing:.02em;
+  }
+  .user .avatar{width:34px; height:34px; flex:0 0 34px}
+  .user-name{font-weight:600; font-size:14px}
+  .user-role{font-size:12px; color:var(--sub)}
+
+  .main{flex:1; min-width:0; display:flex; flex-direction:column}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20; background:rgba(244,244,245,.82);
+    backdrop-filter:saturate(180%) blur(10px);
+    display:flex; align-items:center; gap:14px;
+    padding:14px 24px; border-bottom:1px solid var(--line);
+  }
+  .search{position:relative; flex:1; max-width:420px}
+  .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); width:17px; height:17px; color:var(--sub)}
+  .search input{
+    width:100%; border:1px solid var(--line); background:var(--card);
+    border-radius:12px; padding:10px 12px 10px 36px; font-size:14px; color:var(--ink);
+  }
+  .search input::placeholder{color:var(--sub)}
+  .search input:focus{outline:none; border-color:var(--point); box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+  .top-actions{display:flex; align-items:center; gap:10px; margin-left:auto}
+  .icon-btn{
+    position:relative; width:40px; height:40px; border-radius:12px;
+    border:1px solid var(--line); background:var(--card); color:var(--sub);
+    display:grid; place-items:center; transition:background .15s, color .15s;
+  }
+  .icon-btn:hover{color:var(--ink)}
+  .icon-btn svg{width:19px; height:19px}
+  .badge{
+    position:absolute; top:-5px; right:-5px; min-width:18px; height:18px; padding:0 4px;
+    background:var(--bad); color:#fff; border-radius:9px; font-size:11px; font-weight:700;
+    display:grid; place-items:center; border:2px solid var(--bg);
+  }
+  .btn{
+    border-radius:12px; padding:10px 16px; font-size:14px; font-weight:600;
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    transition:background .15s, box-shadow .15s, transform .12s; white-space:nowrap;
+  }
+  .btn:hover{background:#fafafa}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--point); color:#fff; border-color:var(--point)}
+  .btn.primary:hover{background:var(--point-d)}
+  .top-avatar{width:40px; height:40px; flex:0 0 40px; border-radius:12px; font-size:14px}
+
+  /* ---------- content ---------- */
+  .content{padding:22px 24px 40px; max-width:1360px; width:100%; margin:0 auto}
+  .toolbar{display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap}
+  .tabs{display:inline-flex; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:4px; gap:2px}
+  .tabs button{
+    border:none; background:transparent; color:var(--sub); font-weight:600; font-size:13.5px;
+    padding:8px 14px; border-radius:10px; transition:color .15s, background .15s;
+  }
+  .tabs button:hover{color:var(--ink)}
+  .tabs button.on{background:var(--point-100); color:var(--point-d)}
+  .filter{
+    display:inline-flex; align-items:center; gap:8px; margin-left:auto;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:9px 14px; font-weight:600; font-size:13.5px; color:var(--ink);
+  }
+  .filter svg{width:14px; height:14px; color:var(--sub)}
+
+  /* ---------- bento grid ---------- */
+  .bento{
+    display:grid; gap:var(--gap);
+    grid-template-columns:repeat(4,1fr);
+    grid-auto-rows:minmax(112px,auto);
+    grid-template-areas:
+      "banner  banner  banner  banner"
+      "rev     rev     ord     settle"
+      "chart   chart   conv    settle"
+      "chart   chart   donut   goal"
+      "channel channel donut   goal"
+      "table   table   table   table"
+      "feed    feed    feed    feed";
+  }
+  .card{
+    background:var(--card); border-radius:var(--radius); padding:22px;
+    box-shadow:var(--sh); position:relative; min-width:0;
+    display:flex; flex-direction:column;
+    transition:transform .2s ease-out, box-shadow .2s ease-out;
+    animation:cardIn .4s ease-out backwards;
+    animation-delay:calc(120ms + var(--i,0)*60ms);
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:var(--sh-h)}
+  @keyframes cardIn{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+
+  .clabel{
+    font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--sub); margin:0 0 10px;
+  }
+
+  .banner{grid-area:banner}
+  .rev{grid-area:rev}
+  .ord{grid-area:ord}
+  .conv{grid-area:conv}
+  .settle{grid-area:settle}
+  .chart{grid-area:chart}
+  .donut{grid-area:donut}
+  .goal{grid-area:goal}
+  .channel{grid-area:channel}
+  .table{grid-area:table}
+  .feed{grid-area:feed}
+
+  /* ---------- banner ---------- */
+  .banner{
+    flex-direction:row; align-items:center; gap:14px; padding:16px 20px;
+    background:var(--tint); box-shadow:var(--sh), inset 0 0 0 1px rgba(99,102,241,.14);
+  }
+  .banner .b-ico{
+    width:38px; height:38px; flex:0 0 38px; border-radius:11px;
+    background:var(--point); color:#fff; display:grid; place-items:center;
+  }
+  .banner .b-ico svg{width:20px; height:20px}
+  .banner .b-txt{font-size:14.5px; font-weight:500}
+  .banner .b-txt b{font-weight:800; color:var(--point-d)}
+  .banner .b-tag{
+    margin-left:auto; font-size:12px; font-weight:700; color:var(--point-d);
+    background:#fff; padding:6px 12px; border-radius:20px; white-space:nowrap;
+    box-shadow:inset 0 0 0 1px rgba(99,102,241,.2);
+  }
+
+  /* ---------- KPI ---------- */
+  .kpi{justify-content:space-between}
+  .kpi .k-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+  .kpi-val{font-weight:800; letter-spacing:-.02em; line-height:1.05; margin:8px 0 2px}
+  .rev .kpi-val{font-size:clamp(25px,3.3vw,35px)}
+  .ord .kpi-val,.conv .kpi-val,.settle .kpi-val{font-size:clamp(25px,3vw,33px)}
+  .delta{display:inline-flex; align-items:center; gap:4px; font-size:13px; font-weight:700}
+  .delta .arw{transition:filter .2s, opacity .2s; opacity:.85; font-size:11px}
+  .card:hover .delta .arw{filter:drop-shadow(0 0 6px currentColor); opacity:1}
+  .delta.up{color:var(--good)}
+  .delta.down{color:var(--bad)}
+  .spark{margin-top:12px; width:100%; height:34px; display:block}
+  .settle{gap:6px}
+  .settle .s-mid{display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
+    padding:5px 10px; border-radius:20px;
+  }
+  .chip .dot{width:7px; height:7px; border-radius:50%; flex:0 0 7px}
+  .chip.ok{background:rgba(16,185,129,.12); color:#047857}
+  .chip.ok .dot{background:var(--good)}
+
+  /* ---------- bar chart ---------- */
+  .chart .ch-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px}
+  .chart .ch-title{font-weight:800; font-size:15px; letter-spacing:-.01em}
+  .chart .ch-sub{font-size:12px; color:var(--sub); font-weight:500}
+  .seg{display:inline-flex; background:var(--bg); border-radius:10px; padding:3px; gap:2px}
+  .seg button{
+    border:none; background:transparent; color:var(--sub); font-weight:700; font-size:12.5px;
+    padding:6px 12px; border-radius:8px; transition:.15s;
+  }
+  .seg button.active{background:var(--card); color:var(--point-d); box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .plot{position:relative; flex:1; min-height:190px; display:flex; gap:12px; margin-top:14px}
+  .yaxis{display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--sub); text-align:right; padding-bottom:22px; min-width:38px}
+  .bars{position:relative; flex:1; display:flex; align-items:flex-end; gap:10px}
+  .gridline{position:absolute; left:0; right:0; height:1px; background:var(--line)}
+  .gridline.g0{bottom:22px; background:#D4D4D8}
+  .gridline.g1{top:33%}
+  .gridline.g2{top:66%}
+  .gridline.gtop{top:0}
+  .bar{position:relative; flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding-bottom:22px}
+  .bar-fill{
+    width:100%; max-width:34px; height:var(--h); min-height:3px; border-radius:8px 8px 3px 3px;
+    background:var(--point-200); transition:background .18s;
+    transform-origin:bottom; animation:grow .5s cubic-bezier(.2,.7,.2,1) backwards;
+    animation-delay:calc(640ms + var(--bi,0)*55ms);
+  }
+  .bar.peak .bar-fill{background:var(--point)}
+  .bar:hover .bar-fill{background:var(--point-d)}
+  @keyframes grow{from{transform:scaleY(0)} to{transform:scaleY(1)}}
+  .bar-x{position:absolute; bottom:0; font-size:11px; color:var(--sub); font-weight:500}
+  .bar-tip{
+    position:absolute; bottom:calc(var(--h) + 26px); left:50%; transform:translateX(-50%) translateY(4px);
+    background:var(--ink); color:#fff; font-size:11.5px; font-weight:700; padding:4px 8px; border-radius:7px;
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s, transform .15s; z-index:3;
+  }
+  .bar-tip::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:4px solid transparent; border-top-color:var(--ink)}
+  .bar:hover .bar-tip{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  /* ---------- donut ---------- */
+  .donut-wrap{display:flex; align-items:center; justify-content:center; margin:6px 0 14px}
+  .donut svg{width:150px; height:150px; overflow:visible}
+  .d-track circle,.d-seg{fill:none}
+  .d-seg{stroke-width:22; stroke-linecap:butt}
+  .d-center-t{font-size:22px; font-weight:800; fill:var(--ink)}
+  .d-center-s{font-size:12px; font-weight:600; fill:var(--sub)}
+  .legend{display:flex; flex-direction:column; gap:8px; margin-top:auto; padding:0; list-style:none}
+  .legend li{display:flex; align-items:center; gap:9px; font-size:13px}
+  .legend .lg-dot{width:9px; height:9px; border-radius:3px; flex:0 0 9px}
+  .legend .lg-name{font-weight:600}
+  .legend .lg-val{margin-left:auto; font-weight:700; color:var(--sub)}
+
+  /* ---------- goal ---------- */
+  .goal{background:var(--tint-2); justify-content:center}
+  .goal .g-pct{font-size:clamp(40px,5vw,54px); font-weight:800; letter-spacing:-.03em; line-height:1; color:var(--point-d)}
+  .goal .g-pct small{font-size:22px; font-weight:800}
+  .goal .g-sub{font-size:13px; color:var(--sub); font-weight:600; margin:6px 0 16px}
+  .g-track{height:12px; border-radius:8px; background:var(--point-100); overflow:hidden}
+  .g-fill{height:100%; width:85.6%; border-radius:8px; background:var(--point); transform-origin:left; animation:grow-x .7s cubic-bezier(.2,.7,.2,1) backwards; animation-delay:.5s}
+  @keyframes grow-x{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+  .g-foot{display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-top:12px}
+  .g-foot .muted{color:var(--sub)}
+
+  /* ---------- channel list ---------- */
+  .channel .list{display:flex; flex-direction:column; margin-top:2px}
+  .row-item{
+    display:flex; align-items:center; gap:12px; padding:9px 8px; border-radius:12px;
+    transition:background .15s; position:relative;
+  }
+  .row-item:hover{background:var(--bg)}
+  .row-item .avatar{width:32px; height:32px; flex:0 0 32px; font-size:12px}
+  .row-item .ci-name{font-weight:600; font-size:14px; min-width:0}
+  .ci-bar{flex:1; height:6px; border-radius:6px; background:var(--point-100); overflow:hidden; margin:0 4px}
+  .ci-bar span{display:block; height:100%; border-radius:6px; background:var(--point)}
+  .ci-val{font-weight:700; font-size:14px; white-space:nowrap}
+  .ci-chev{width:14px; color:var(--sub); opacity:0; transform:translateX(-4px); transition:.18s; flex:0 0 14px}
+  .row-item:hover .ci-chev{opacity:1; transform:translateX(0)}
+
+  /* ---------- table ---------- */
+  .table .ch-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px}
+  .table .ch-title{font-weight:800; font-size:15px}
+  .table .ch-sub{font-size:12px; color:var(--sub); font-weight:600}
+  .tbl-scroll{overflow-x:auto; margin:0 -6px}
+  table{width:100%; border-collapse:collapse; min-width:660px}
+  thead th{
+    text-align:left; font-size:12px; font-weight:700; color:var(--sub); letter-spacing:.02em;
+    padding:8px 12px; border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  th.sortable{cursor:pointer; user-select:none}
+  th.sortable .sort{margin-left:5px; color:#D4D4D8; font-size:10px}
+  th.sortable.desc .sort,th.sortable.asc .sort{color:var(--point-d)}
+  th.num-c,td.num-c{text-align:right}
+  tbody td{padding:12px; border-bottom:1px solid var(--bg); font-size:14px; vertical-align:middle}
+  tbody tr{transition:background .15s}
+  tbody tr:hover{background:var(--bg)}
+  tbody tr:last-child td{border-bottom:none}
+  .prod{display:flex; align-items:center; gap:12px; min-width:0}
+  .thumb{
+    width:38px; height:38px; flex:0 0 38px; border-radius:11px; display:grid; place-items:center;
+    font-weight:800; font-size:15px; color:#fff;
+  }
+  .prod-name{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:300px}
+  .cat{color:var(--sub); font-weight:500}
+  .st{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700;
+    padding:5px 10px; border-radius:20px; white-space:nowrap;
+  }
+  .st .dot{width:7px; height:7px; border-radius:50%}
+  .st.sell{background:rgba(16,185,129,.12); color:#047857}
+  .st.sell .dot{background:var(--good)}
+  .st.done{background:rgba(99,102,241,.12); color:#4338CA}
+  .st.done .dot{background:var(--point)}
+  .st.soldout{background:rgba(239,68,68,.12); color:#B91C1C}
+  .st.soldout .dot{background:var(--bad)}
+  .st.ready{background:rgba(245,158,11,.14); color:#B45309}
+  .st.ready .dot{background:var(--amber)}
+  .miss{color:var(--gray); font-weight:600}
+  .act-cell{width:70px; text-align:right}
+  .act-btn{
+    border:1px solid var(--line); background:var(--card); color:var(--point-d);
+    font-weight:700; font-size:12.5px; padding:6px 12px; border-radius:9px;
+    opacity:0; transform:translateX(4px); transition:.15s;
+  }
+  tr:hover .act-btn,tr:focus-within .act-btn{opacity:1; transform:translateX(0)}
+  .act-btn:hover{background:var(--point-100)}
+
+  /* ---------- feed ---------- */
+  .feed .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:2px}
+  .fi{
+    background:var(--bg); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:8px;
+    transition:background .15s, transform .15s;
+  }
+  .fi:hover{background:#ececee; transform:translateY(-2px)}
+  .fi .fi-top{display:flex; align-items:center; gap:8px}
+  .fi .fdot{width:8px; height:8px; border-radius:50%; flex:0 0 8px}
+  .fi .ftime{font-size:12px; font-weight:700; color:var(--sub)}
+  .fi .ftxt{font-size:13.5px; font-weight:600; line-height:1.4}
+  .fi .fval{font-weight:800}
+  .fdot.i{background:var(--point)} .fdot.g{background:var(--good)}
+  .fdot.r{background:var(--bad)} .fdot.a{background:var(--amber)}
+
+  .foot{margin-top:26px; text-align:center; font-size:12px; color:var(--sub); letter-spacing:.04em; font-weight:600}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .sidebar{width:66px; flex-basis:66px; padding:20px 10px}
+    .logo-text,.nav a span,.user-name,.user-role{display:none}
+    .logo{justify-content:center; padding:6px 0 18px}
+    .nav a{justify-content:center; padding:11px 0}
+    .user{justify-content:center; padding:8px 0}
+    .search{max-width:none}
+    .feed .grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:1024px){
+    .bento{
+      grid-template-columns:repeat(2,1fr);
+      grid-template-areas:
+        "banner  banner"
+        "rev     rev"
+        "ord     conv"
+        "chart   chart"
+        "donut   settle"
+        "goal    channel"
+        "table   table"
+        "feed    feed";
+    }
+    .prod-name{max-width:220px}
+  }
+  @media (max-width:640px){
+    .content{padding:16px}
+    .topbar{padding:12px 16px; gap:10px; flex-wrap:wrap}
+    .search{flex:1 1 100%; order:-1; max-width:none}
+    .top-actions{margin-left:0; width:100%; justify-content:flex-end}
+    .prod-name{max-width:170px}
+    .feed .grid{grid-template-columns:1fr 1fr}
+    .banner{flex-wrap:wrap}
+    .banner .b-tag{margin-left:52px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .card,.bar-fill,.g-fill{animation:none !important}
+    .card{opacity:1; transform:none}
+    .bar-fill,.g-fill{transform:none}
+    .card:hover{transform:none; box-shadow:var(--sh-h)}
+    .fi:hover{transform:none}
+    *{transition-duration:.01ms !important}
+  }
+</style>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-mark">셀</span>
+      <span class="logo-text">셀러허브</span>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>주문</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span>상품</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M16 15h2"/></svg>
+        <span>정산</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>고객</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+    <div class="side-foot">
+      <div class="user">
+        <span class="avatar">KD</span>
+        <span>
+          <div class="user-name">김덕진</div>
+          <div class="user-role">셀러 관리자</div>
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <!-- topbar -->
+    <header class="topbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="상품·주문 검색" aria-label="상품·주문 검색">
+      </label>
+      <div class="top-actions">
+        <button class="icon-btn" aria-label="알림 5개">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="badge num">5</span>
+        </button>
+        <button class="btn">새로고침</button>
+        <button class="btn primary">리포트 내보내기</button>
+        <span class="avatar top-avatar" aria-label="김덕진">KD</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- tabs + filter -->
+      <div class="toolbar">
+        <div class="tabs" role="tablist" aria-label="기간">
+          <button role="tab">오늘</button>
+          <button role="tab">이번 주</button>
+          <button class="on" role="tab" aria-selected="true">이번 달</button>
+          <button role="tab">올해</button>
+        </div>
+        <div class="filter">
+          전체 채널
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- ======= BENTO ======= -->
+      <div class="bento">
+
+        <!-- banner -->
+        <div class="card banner" style="--i:0">
+          <span class="b-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </span>
+          <div class="b-txt">정산 예정 — 3일 후 <b class="num">2억 8,400만원</b>이 등록 계좌로 지급됩니다.</div>
+          <span class="b-tag">D-3</span>
+        </div>
+
+        <!-- KPI: 총 매출 (wide) -->
+        <div class="card kpi rev" style="--i:1">
+          <div class="k-top">
+            <div>
+              <p class="clabel">총 매출</p>
+              <div class="kpi-val num">12,840,500,000원</div>
+              <span class="delta up"><span class="arw">▲</span> +8.2%</span>
+            </div>
+            <svg class="spark" style="max-width:140px" viewBox="0 0 140 34" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="0,27 23,22 46,24 70,14 93,17 117,7 140,4" fill="none" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- KPI: 신규 주문 -->
+        <div class="card kpi ord" style="--i:2">
+          <p class="clabel">신규 주문</p>
+          <div class="kpi-val num">3,472건</div>
+          <span class="delta up"><span class="arw">▲</span> +12%</span>
+          <svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,26 24,21 48,23 72,13 96,10 120,4" fill="none" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- KPI: 전환율 -->
+        <div class="card kpi conv" style="--i:4">
+          <p class="clabel">전환율</p>
+          <div class="kpi-val num">3.8%</div>
+          <span class="delta down"><span class="arw">▼</span> −0.4%p 하락</span>
+          <svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,8 24,10 48,9 72,15 96,18 120,25" fill="none" stroke="#EF4444" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- KPI: 정산 대기 (tall) -->
+        <div class="card kpi settle" style="--i:3">
+          <div>
+            <p class="clabel">정산 대기</p>
+            <div class="kpi-val num">284,000,000원</div>
+          </div>
+          <div class="s-mid">
+            <span class="chip ok"><span class="dot"></span>지연 0건</span>
+          </div>
+          <svg class="spark" style="height:46px" viewBox="0 0 120 46" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,46 0,32 24,28 48,31 72,26 96,28 120,24 120,46" fill="rgba(99,102,241,.08)" stroke="none"/>
+            <polyline points="0,32 24,28 48,31 72,26 96,28 120,24" fill="none" stroke="#6366F1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div style="font-size:12.5px; color:var(--sub); font-weight:600; margin-top:auto; padding-top:12px; border-top:1px solid var(--line)">
+            등록 계좌로 <b class="num" style="color:var(--ink)">3일 후</b> 지급 예정
+          </div>
+        </div>
+
+        <!-- 매출 추이 bar chart (big 2x2) -->
+        <div class="card chart" style="--i:5">
+          <div class="ch-head">
+            <div>
+              <div class="ch-title">최근 8주 매출 추이</div>
+              <div class="ch-sub">단위 · 백만원</div>
+            </div>
+            <div class="seg" id="seg" role="group" aria-label="지표 선택">
+              <button class="active" data-mode="amount">금액</button>
+              <button data-mode="count">건수</button>
+            </div>
+          </div>
+          <div class="plot">
+            <div class="yaxis"><span id="ymax">1,400</span><span>1,050</span><span>700</span><span>350</span><span>0</span></div>
+            <div class="bars" id="bars">
+              <span class="gridline gtop"></span>
+              <span class="gridline g1"></span>
+              <span class="gridline g2"></span>
+              <span class="gridline g0"></span>
+              <div class="bar" style="--h:58.6%;--bi:0" data-amt="820" data-cnt="2410"><span class="bar-tip">820</span><span class="bar-fill"></span><span class="bar-x">1주</span></div>
+              <div class="bar" style="--h:65.0%;--bi:1" data-amt="910" data-cnt="2680"><span class="bar-tip">910</span><span class="bar-fill"></span><span class="bar-x">2주</span></div>
+              <div class="bar" style="--h:75.0%;--bi:2" data-amt="1,050" data-cnt="3120"><span class="bar-tip">1,050</span><span class="bar-fill"></span><span class="bar-x">3주</span></div>
+              <div class="bar" style="--h:69.3%;--bi:3" data-amt="970" data-cnt="2890"><span class="bar-tip">970</span><span class="bar-fill"></span><span class="bar-x">4주</span></div>
+              <div class="bar" style="--h:84.3%;--bi:4" data-amt="1,180" data-cnt="3350"><span class="bar-tip">1,180</span><span class="bar-fill"></span><span class="bar-x">5주</span></div>
+              <div class="bar peak" style="--h:95.7%;--bi:5" data-amt="1,340" data-cnt="3980"><span class="bar-tip">1,340</span><span class="bar-fill"></span><span class="bar-x">6주</span></div>
+              <div class="bar" style="--h:87.1%;--bi:6" data-amt="1,220" data-cnt="3610"><span class="bar-tip">1,220</span><span class="bar-fill"></span><span class="bar-x">7주</span></div>
+              <div class="bar" style="--h:91.7%;--bi:7" data-amt="1,284" data-cnt="3472"><span class="bar-tip">1,284</span><span class="bar-fill"></span><span class="bar-x">8주</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 카테고리 도넛 (tall) -->
+        <div class="card donut" style="--i:6">
+          <p class="clabel">카테고리 구성비</p>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 160 160" role="img" aria-label="카테고리 구성비: 의류 38%, 전자 24%, 리빙 20%, 생활 12%, 스포츠 6%">
+              <g class="d-track">
+                <circle cx="80" cy="80" r="60" stroke="#EDEDF0" stroke-width="22"/>
+                <circle class="d-seg" cx="80" cy="80" r="60" stroke="#6366F1" stroke-dasharray="143.26 376.99" transform="rotate(-90 80 80)"/>
+                <circle class="d-seg" cx="80" cy="80" r="60" stroke="#0EA5E9" stroke-dasharray="90.48 376.99" transform="rotate(46.8 80 80)"/>
+                <circle class="d-seg" cx="80" cy="80" r="60" stroke="#10B981" stroke-dasharray="75.40 376.99" transform="rotate(133.2 80 80)"/>
+                <circle class="d-seg" cx="80" cy="80" r="60" stroke="#F59E0B" stroke-dasharray="45.24 376.99" transform="rotate(205.2 80 80)"/>
+                <circle class="d-seg" cx="80" cy="80" r="60" stroke="#A1A1AA" stroke-dasharray="22.62 376.99" transform="rotate(248.4 80 80)"/>
+              </g>
+              <text class="d-center-t num" x="80" y="78" text-anchor="middle">38%</text>
+              <text class="d-center-s" x="80" y="96" text-anchor="middle">의류 최다</text>
+            </svg>
+          </div>
+          <ul class="legend">
+            <li><span class="lg-dot" style="background:#6366F1"></span><span class="lg-name">의류</span><span class="lg-val num">38%</span></li>
+            <li><span class="lg-dot" style="background:#0EA5E9"></span><span class="lg-name">전자</span><span class="lg-val num">24%</span></li>
+            <li><span class="lg-dot" style="background:#10B981"></span><span class="lg-name">리빙</span><span class="lg-val num">20%</span></li>
+            <li><span class="lg-dot" style="background:#F59E0B"></span><span class="lg-name">생활</span><span class="lg-val num">12%</span></li>
+            <li><span class="lg-dot" style="background:#A1A1AA"></span><span class="lg-name">스포츠</span><span class="lg-val num">6%</span></li>
+          </ul>
+        </div>
+
+        <!-- 목표 진행률 (tall) -->
+        <div class="card goal" style="--i:7">
+          <p class="clabel">이번 달 목표 진행률</p>
+          <div class="g-pct num">85.6<small>%</small></div>
+          <div class="g-sub num">150억 목표 중 128.4억 달성</div>
+          <div class="g-track" role="progressbar" aria-valuenow="85.6" aria-valuemin="0" aria-valuemax="100" aria-label="이번 달 목표 진행률 85.6퍼센트">
+            <div class="g-fill"></div>
+          </div>
+          <div class="g-foot">
+            <span class="num">128.4억 달성</span>
+            <span class="muted num">남은 목표 21.6억</span>
+          </div>
+        </div>
+
+        <!-- 상위 채널 -->
+        <div class="card channel" style="--i:8">
+          <p class="clabel">상위 채널</p>
+          <div class="list">
+            <div class="row-item" tabindex="0">
+              <span class="avatar" style="background:#6366F1">스</span>
+              <span class="ci-name">스마트스토어</span>
+              <span class="ci-bar"><span style="width:100%"></span></span>
+              <span class="ci-val num">4.2억</span>
+              <svg class="ci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+            <div class="row-item" tabindex="0">
+              <span class="avatar" style="background:#0EA5E9">쿠</span>
+              <span class="ci-name">쿠팡</span>
+              <span class="ci-bar"><span style="width:73.8%"></span></span>
+              <span class="ci-val num">3.1억</span>
+              <svg class="ci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+            <div class="row-item" tabindex="0">
+              <span class="avatar" style="background:#10B981">자</span>
+              <span class="ci-name">자사몰</span>
+              <span class="ci-bar"><span style="width:57.1%"></span></span>
+              <span class="ci-val num">2.4억</span>
+              <svg class="ci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+            <div class="row-item" tabindex="0">
+              <span class="avatar" style="background:#F59E0B">인</span>
+              <span class="ci-name">인스타샵</span>
+              <span class="ci-bar"><span style="width:42.9%"></span></span>
+              <span class="ci-val num">1.8억</span>
+              <svg class="ci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+            <div class="row-item" tabindex="0">
+              <span class="avatar" style="background:#A1A1AA">카</span>
+              <span class="ci-name">카카오</span>
+              <span class="ci-bar"><span style="width:21.4%"></span></span>
+              <span class="ci-val num">0.9억</span>
+              <svg class="ci-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- 상품 테이블 -->
+        <div class="card table" style="--i:9">
+          <div class="ch-head">
+            <div class="ch-title">상품 현황</div>
+            <span class="ch-sub">6개 상품</span>
+          </div>
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable">상품 <span class="sort">↕</span></th>
+                  <th class="sortable">카테고리 <span class="sort">↕</span></th>
+                  <th class="sortable num-c">재고 <span class="sort">↕</span></th>
+                  <th class="sortable num-c desc" aria-sort="descending">판매 <span class="sort">▼</span></th>
+                  <th>상태</th>
+                  <th class="act-cell"><span class="sr-only"></span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#6366F1">한</span><span class="prod-name" title="[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</span></div></td>
+                  <td class="cat">의류</td>
+                  <td class="num-c num">1,240</td>
+                  <td class="num-c num">856</td>
+                  <td><span class="st sell"><span class="dot"></span>판매중</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#0EA5E9">무</span><span class="prod-name" title="무선 블루투스 이어폰 Pro">무선 블루투스 이어폰 Pro</span></div></td>
+                  <td class="cat">전자</td>
+                  <td class="num-c num">0</td>
+                  <td class="num-c num">2,103</td>
+                  <td><span class="st soldout"><span class="dot"></span>품절</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#10B981">스</span><span class="prod-name" title="스테인리스 텀블러 500ml">스테인리스 텀블러 500ml</span></div></td>
+                  <td class="cat">리빙</td>
+                  <td class="num-c num">340</td>
+                  <td class="num-c miss">—</td>
+                  <td><span class="st ready"><span class="dot"></span>준비중</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#84CC16">친</span><span class="prod-name" title="친환경 대나무 칫솔 4개입">친환경 대나무 칫솔 4개입</span></div></td>
+                  <td class="cat">생활</td>
+                  <td class="num-c num">5,820</td>
+                  <td class="num-c num">1,472</td>
+                  <td><span class="st sell"><span class="dot"></span>판매중</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#F59E0B">아</span><span class="prod-name" title="아로마 캔들 세트">아로마 캔들 세트</span></div></td>
+                  <td class="cat">리빙</td>
+                  <td class="num-c num">88</td>
+                  <td class="num-c num">640</td>
+                  <td><span class="st done"><span class="dot"></span>정산완료</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><span class="thumb" style="background:#A1A1AA">요</span><span class="prod-name" title="요가 매트 6mm 논슬립">요가 매트 6mm 논슬립</span></div></td>
+                  <td class="cat">스포츠</td>
+                  <td class="num-c num">210</td>
+                  <td class="num-c num">95</td>
+                  <td><span class="st ready"><span class="dot"></span>준비중</span></td>
+                  <td class="act-cell"><button class="act-btn">상세</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 활동 피드 -->
+        <div class="card feed" style="--i:10">
+          <p class="clabel">활동 피드</p>
+          <div class="grid">
+            <div class="fi">
+              <div class="fi-top"><span class="fdot i"></span><span class="ftime num">14:02</span></div>
+              <div class="ftxt">새 주문 <span class="num">#10482</span> · <span class="fval num">89,000원</span></div>
+            </div>
+            <div class="fi">
+              <div class="fi-top"><span class="fdot g"></span><span class="ftime num">13:45</span></div>
+              <div class="ftxt">정산 완료 · 리빙 <span class="fval num">1,240만원</span></div>
+            </div>
+            <div class="fi">
+              <div class="fi-top"><span class="fdot r"></span><span class="ftime num">11:20</span></div>
+              <div class="ftxt">재고 부족 · 무선 이어폰 Pro</div>
+            </div>
+            <div class="fi">
+              <div class="fi-top"><span class="fdot a"></span><span class="ftime num">09:05</span></div>
+              <div class="ftxt">신규 리뷰 <span class="fval num">3건</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /bento -->
+
+      <div class="foot">STYLE 14 · 벤토 그리드</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  try{
+    var seg = document.getElementById('seg');
+    var bars = document.getElementById('bars');
+    var ymax = document.getElementById('ymax');
+    if(!seg || !bars) return;
+    var barEls = Array.prototype.slice.call(bars.querySelectorAll('.bar'));
+
+    function fmt(n){ return n.toLocaleString('en-US'); }
+
+    function render(mode){
+      var vals = barEls.map(function(b){
+        var raw = mode === 'count' ? b.getAttribute('data-cnt') : b.getAttribute('data-amt');
+        return parseInt(String(raw).replace(/,/g,''), 10);
+      });
+      var max = Math.max.apply(null, vals);
+      var peakIdx = vals.indexOf(max);
+      var top = mode === 'count' ? 4000 : 1400;
+      barEls.forEach(function(b, i){
+        b.style.setProperty('--h', (vals[i] / top * 100).toFixed(1) + '%');
+        var tip = b.querySelector('.bar-tip');
+        if(tip) tip.textContent = fmt(vals[i]);
+        b.classList.toggle('peak', i === peakIdx);
+      });
+      if(ymax) ymax.textContent = fmt(top);
+    }
+
+    seg.addEventListener('click', function(e){
+      var btn = e.target.closest('button');
+      if(!btn) return;
+      seg.querySelectorAll('button').forEach(function(x){ x.classList.remove('active'); });
+      btn.classList.add('active');
+      render(btn.getAttribute('data-mode'));
+    });
+  }catch(err){ /* 정적 마크업만으로 완전 동작 */ }
+})();
+</script>

@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layerframe · 커뮤니티 포럼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============================================================
+     Layerframe — 네이처 오가닉 커뮤니티 포럼
+     팔레트: 흙·잎·종이 (순백/순흑 금지, 모든 색 따뜻)
+     8px 그리드 · 제한 타이포 스케일 · 상태 전부 그림 · CSS 변수
+     ============================================================ */
+  :root {
+    /* 종이 / 표면 */
+    --bg:          #F4F1E8;
+    --surface:     #FBF9F2;
+    --surface-2:   #EFEBDD;
+    --surface-warm:#F6EFE0;   /* 카드 hover 시 한 톤 따뜻 */
+
+    /* 잎 / 흙 */
+    --green:       #2D4A3E;
+    --green-soft:  #3C5B4D;
+    --sage:        #8BA888;
+    --sage-soft:   #A9C0A6;
+    --terracotta:  #C4704B;
+    --terracotta-soft:#D98C6A;
+    --tan:         #C9B98F;
+
+    /* 잉크 */
+    --ink:         #2B2A26;
+    --ink-muted:   #6E6A5F;
+    --ink-faint:   #918C7E;
+
+    /* 보더 (1.5px 손그림 느낌 — 따뜻한 저대비) */
+    --border:        rgba(43,42,38,.13);
+    --border-strong: rgba(43,42,38,.22);
+
+    /* 포커스 링 (세이지) */
+    --ring: 0 0 0 3px rgba(139,168,136,.48);
+
+    /* 유기 radius — 규칙을 가진 비대칭 (무작위 ≠ 유기적) */
+    --r-card:  18px 30px 18px 30px;
+    --r-chip:  10px 18px 10px 18px;
+    --r-btn:   11px 20px 11px 20px;
+    --r-pebble:52% 48% 47% 53%;   /* 아바타: 조약돌 */
+
+    /* 타이포 스케일 — 12·14·16·20·24·32 */
+    --fs-12: 12px; --fs-14: 14px; --fs-16: 16px;
+    --fs-20: 20px; --fs-24: 24px; --fs-32: 32px;
+
+    --serif: "Gowun Batang", "Nanum Myeongjo", Georgia, "Times New Roman", serif;
+    --sans:  "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    --maxw: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--fs-16);
+    line-height: 1.6;
+    color: var(--ink);
+    /* 종이 배경 — 부드러운 라디얼 온기 (차가운 파랑 금지) */
+    background:
+      radial-gradient(1100px 620px at 84% -8%, #FBF6E7 0%, rgba(251,246,231,0) 60%),
+      radial-gradient(900px 560px at 6% 108%, #EDEAD9 0%, rgba(237,234,217,0) 55%),
+      var(--bg);
+    background-attachment: fixed;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 미세한 종이 질감 — SVG 노이즈 opacity ≤ .03 (텍스트 가독 보존) */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a { color: inherit; text-decoration: none; }
+  svg { display: block; }
+  .icon { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: 8px;
+  }
+
+  /* ---------- 상단 네비 ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .nav__inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .brand__mark {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    background: var(--green);
+    color: var(--surface);
+    border-radius: 12px 18px 12px 18px;
+    border: 1.5px solid var(--green-soft);
+  }
+  .brand__mark .icon { width: 19px; height: 19px; stroke-width: 1.6; }
+  .brand__name { font-family: var(--serif); font-size: var(--fs-20); font-weight: 700; letter-spacing: -0.01em; }
+  .brand__name b { color: var(--green); font-weight: 700; }
+
+  .nav__links { display: flex; gap: 4px; margin-left: 8px; }
+  .nav__link {
+    font-size: var(--fs-14);
+    color: var(--ink-muted);
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: color .18s ease, background .18s ease;
+  }
+  .nav__link:hover { color: var(--ink); background: var(--surface-2); }
+  .nav__link[aria-current="page"] { color: var(--green); font-weight: 600; }
+
+  .nav__spacer { flex: 1; }
+
+  .search {
+    position: relative;
+    display: flex; align-items: center;
+    width: clamp(160px, 22vw, 260px);
+  }
+  .search .icon {
+    position: absolute; left: 12px;
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--fs-14);
+    color: var(--ink);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-chip);
+    padding: 9px 12px 9px 38px;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .search input::placeholder { color: var(--ink-faint); }
+  .search input:hover { border-color: var(--border-strong); }
+  .search input:focus-visible {
+    outline: none;
+    border-color: var(--sage);
+    box-shadow: var(--ring);
+  }
+
+  /* ---------- 버튼 (primary / secondary / ghost) ---------- */
+  .btn {
+    font-family: inherit;
+    font-size: var(--fs-14);
+    font-weight: 600;
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: var(--r-btn);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .1s ease, color .18s ease;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn--primary { background: var(--green); color: var(--surface); border-color: var(--green-soft); }
+  .btn--primary:hover { background: var(--green-soft); }
+  .btn--primary .icon { stroke-width: 1.7; }
+  .btn--secondary { background: var(--surface); color: var(--ink); border-color: var(--border-strong); }
+  .btn--secondary:hover { background: var(--surface-2); border-color: var(--tan); }
+  .btn--ghost { background: transparent; color: var(--ink-muted); }
+  .btn--ghost:hover { background: var(--surface-2); color: var(--ink); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ---------- 레이아웃 ---------- */
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 32px 24px 64px; position: relative; z-index: 1; }
+
+  /* 페이지 헤더 */
+  .header { margin-bottom: 24px; }
+  .header__eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: var(--fs-12); font-weight: 600; letter-spacing: 0.02em;
+    color: var(--green);
+    background: color-mix(in srgb, var(--sage) 22%, var(--surface));
+    border: 1.5px solid color-mix(in srgb, var(--sage) 40%, transparent);
+    padding: 5px 12px;
+    border-radius: 8px 14px 8px 14px;
+    margin-bottom: 14px;
+  }
+  .header h1 {
+    font-family: var(--serif);
+    font-size: var(--fs-32);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+  .header p { font-size: var(--fs-16); color: var(--ink-muted); margin: 0; max-width: 60ch; }
+
+  /* KPI (부드럽게 페이드인) */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+    opacity: 0;
+    animation: fadeUp .6s ease both;
+  }
+  .kpi:nth-child(1) { animation-delay: .15s; }
+  .kpi:nth-child(2) { animation-delay: .28s; }
+  .kpi:nth-child(3) { animation-delay: .41s; }
+  .kpi__val { font-family: var(--serif); font-size: var(--fs-24); font-weight: 700; color: var(--green); line-height: 1.1; }
+  .kpi__val small { font-size: var(--fs-14); color: var(--ink-muted); font-family: var(--sans); font-weight: 500; margin-left: 4px; }
+  .kpi__label { font-size: var(--fs-12); color: var(--ink-faint); margin-top: 6px; letter-spacing: 0.01em; }
+
+  /* 카테고리 칩 */
+  .chips {
+    display: flex; gap: 8px;
+    margin: 28px 0 20px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .chips::-webkit-scrollbar { height: 6px; }
+  .chips::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+  .chip {
+    font-family: inherit;
+    font-size: var(--fs-14);
+    font-weight: 500;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-chip);
+    padding: 8px 15px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .chip:hover { color: var(--ink); background: var(--surface-2); border-color: var(--tan); }
+  .chip[aria-pressed="true"] {
+    color: var(--surface);
+    background: var(--green);
+    border-color: var(--green-soft);
+    font-weight: 600;
+  }
+  .chip[aria-pressed="true"]:hover { background: var(--green-soft); }
+
+  /* ---------- 본문 그리드 ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* 리스트 헤더 (정렬) */
+  .list-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .list-head__title { font-size: var(--fs-14); color: var(--ink-muted); }
+  .list-head__title b { color: var(--ink); font-weight: 600; }
+  .sort { display: flex; gap: 4px; }
+  .sort button {
+    font-family: inherit; font-size: var(--fs-12); font-weight: 500;
+    color: var(--ink-faint);
+    background: transparent; border: none; cursor: pointer;
+    padding: 5px 10px; border-radius: 8px;
+    transition: color .18s ease, background .18s ease;
+  }
+  .sort button:hover { color: var(--ink); background: var(--surface-2); }
+  .sort button[aria-pressed="true"] { color: var(--green); background: color-mix(in srgb, var(--sage) 20%, var(--surface)); font-weight: 600; }
+
+  /* 스레드 리스트 */
+  .threads { display: flex; flex-direction: column; gap: 12px; }
+  .thread {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .12s ease;
+  }
+  /* hover: 그림자 대신 배경이 한 톤 따뜻해진다 */
+  .thread:hover { background: var(--surface-warm); border-color: var(--tan); }
+  .thread:active { transform: translateY(1px); }
+  .thread:focus-within { border-color: var(--sage); box-shadow: var(--ring); }
+
+  /* 아바타 (조약돌 + 이니셜) */
+  .avatar {
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    border-radius: var(--r-pebble);
+    border: 1.5px solid var(--border-strong);
+    font-family: var(--serif);
+    font-size: var(--fs-16);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--surface);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .avatar--a { background: #3C5B4D; }
+  .avatar--b { background: #8BA888; color: #23372E; }
+  .avatar--c { background: #6E8E6B; }
+  .avatar--d { background: #C4704B; }
+  .avatar--e { background: #A98A55; color: #2B2415; }
+
+  /* 상태 점 — 씨앗→새싹→열매→시듦 (색 단계로만) */
+  .status-dot {
+    position: absolute;
+    right: -3px; bottom: -3px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2.5px solid var(--surface);
+  }
+  .st-seed   { background: var(--tan); }        /* 대기 (새 글) */
+  .st-sprout { background: var(--sage); }        /* 진행 (활발) */
+  .st-fruit  { background: var(--green); }        /* 완료 (해결됨) */
+  .st-wither { background: var(--terracotta); }   /* 문제 (막힘) */
+
+  .thread__main { min-width: 0; }
+  .thread__title {
+    font-family: var(--serif);
+    font-size: var(--fs-20);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0 0 8px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color .18s ease;
+  }
+  .thread:hover .thread__title { color: var(--green); }
+
+  .thread__meta {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 8px;
+    font-size: var(--fs-12);
+    color: var(--ink-faint);
+  }
+  .tag {
+    font-size: var(--fs-12); font-weight: 600;
+    color: var(--green-soft);
+    background: color-mix(in srgb, var(--sage) 18%, var(--surface));
+    border: 1.5px solid color-mix(in srgb, var(--sage) 34%, transparent);
+    padding: 3px 10px;
+    border-radius: 7px 12px 7px 12px;
+  }
+  .tag--warn {
+    color: #A24E2C;
+    background: color-mix(in srgb, var(--terracotta) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--terracotta) 38%, transparent);
+  }
+  .byline { color: var(--ink-muted); font-weight: 500; }
+  .dot-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-faint); opacity: .6; }
+  .state-label { font-weight: 600; }
+  .state-label.st-seed-t   { color: var(--tan); }
+  .state-label.st-sprout-t { color: var(--sage); }
+  .state-label.st-fruit-t  { color: var(--green); }
+  .state-label.st-wither-t { color: var(--terracotta); }
+
+  /* 스레드 통계 (답글·좋아요·시간) */
+  .thread__stats {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 88px;
+  }
+  .stat-row { display: flex; gap: 12px; }
+  .stat {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: var(--fs-14); font-weight: 600;
+    color: var(--ink-muted);
+  }
+  .stat .icon { width: 15px; height: 15px; color: var(--ink-faint); }
+  .thread:hover .stat--reply { color: var(--green); }
+  .thread:hover .stat--reply .icon { color: var(--sage); }
+  .thread__time { font-size: var(--fs-12); color: var(--ink-faint); display: inline-flex; align-items: center; gap: 5px; }
+
+  /* ---------- 사이드바 ---------- */
+  .side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 84px; }
+  .panel {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 20px;
+  }
+  .panel__head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .panel__head .icon { width: 17px; height: 17px; color: var(--sage); }
+  .panel__title { font-family: var(--serif); font-size: var(--fs-16); font-weight: 700; letter-spacing: -0.01em; }
+
+  /* 인기 태그 */
+  .tagcloud { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tagcloud a {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: var(--fs-12); font-weight: 500;
+    color: var(--ink-muted);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    padding: 6px 11px;
+    border-radius: var(--r-chip);
+    transition: color .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .tagcloud a:hover { color: var(--green); background: color-mix(in srgb, var(--sage) 18%, var(--surface)); border-color: color-mix(in srgb, var(--sage) 36%, transparent); }
+  .tagcloud a b { color: var(--sage); font-weight: 700; }
+  .tagcloud a:hover b { color: var(--green); }
+
+  /* 이번 주 활동 — 줄기처럼 자라는 막대 (차트 라이브러리 없음, 순수 CSS) */
+  .activity__legend {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .activity__now { font-family: var(--serif); font-size: var(--fs-24); font-weight: 700; color: var(--green); line-height: 1; }
+  .activity__now small { font-size: var(--fs-12); font-family: var(--sans); font-weight: 500; color: var(--ink-muted); margin-left: 4px; }
+  .activity__delta { font-size: var(--fs-12); font-weight: 600; color: var(--sage); }
+
+  .chart {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 116px;
+    padding-top: 8px;
+  }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .bar-track { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .bar {
+    width: 11px;
+    border-radius: 8px 8px 3px 3px;   /* 끝은 둥글게 */
+    background: var(--sage);
+    transform-origin: bottom;
+    transform: scaleY(1);
+    position: relative;
+    animation: grow 700ms cubic-bezier(.22,.61,.36,1) both;   /* ease-out, 바운스 없음 */
+  }
+  /* 피크만 세이지→딥그린으로 짙어진다 */
+  .bar.peak { background: var(--green); }
+  .bar:nth-child(1){ animation-delay:.30s } /* 컬럼별 stagger는 col index로 */
+  .col:nth-child(1) .bar { animation-delay:.30s }
+  .col:nth-child(2) .bar { animation-delay:.37s }
+  .col:nth-child(3) .bar { animation-delay:.44s }
+  .col:nth-child(4) .bar { animation-delay:.51s }
+  .col:nth-child(5) .bar { animation-delay:.58s }
+  .col:nth-child(6) .bar { animation-delay:.65s }
+  .col:nth-child(7) .bar { animation-delay:.72s }
+  /* 막대 hover: 끝에 작은 잎(원형 캡)이 점등 */
+  .bar::after {
+    content: "";
+    position: absolute;
+    top: -9px; left: 50%;
+    width: 9px; height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--sage-soft);
+    opacity: 0; transform: scale(.4);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .col:hover .bar::after { opacity: 1; transform: scale(1); }
+  .col:hover .bar { background: var(--green-soft); }
+  .col:hover .bar.peak { background: var(--green); }
+  .col__label { font-size: var(--fs-12); color: var(--ink-faint); }
+  .col--today .col__label { color: var(--green); font-weight: 700; }
+
+  .activity__stats {
+    display: flex; justify-content: space-between;
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1.5px solid var(--border);
+  }
+  .astat { text-align: center; }
+  .astat__v { font-family: var(--serif); font-size: var(--fs-20); font-weight: 700; color: var(--ink); line-height: 1; }
+  .astat__l { font-size: var(--fs-12); color: var(--ink-faint); margin-top: 5px; }
+
+  /* 상태 범례 */
+  .legend-list { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; font-size: var(--fs-14); color: var(--ink-muted); }
+  .legend-item .lg-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  .legend-item b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- 푸터 ---------- */
+  .foot {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+    border-top: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    position: relative; z-index: 1;
+    font-size: var(--fs-12);
+    color: var(--ink-faint);
+  }
+  .foot__brand { font-family: var(--serif); color: var(--ink-muted); }
+  .foot__brand b { color: var(--green); font-weight: 700; }
+
+  /* ---------- 애니메이션 ---------- */
+  @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* prefers-reduced-motion: 성장 연출 제거, 완성 상태 렌더 */
+  @media (prefers-reduced-motion: reduce) {
+    .bar { animation: none !important; transform: scaleY(1) !important; }
+    .kpi { animation: none !important; opacity: 1 !important; }
+    * { transition-duration: .01ms !important; }
+  }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: 1fr; }
+    .side { position: static; flex-direction: row; flex-wrap: wrap; }
+    .side .panel { flex: 1 1 260px; }
+  }
+  @media (max-width: 768px) {
+    .nav__links { display: none; }
+    .header h1 { font-size: var(--fs-24); }
+    .thread { grid-template-columns: auto minmax(0, 1fr); }
+    .thread__stats { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; margin-top: 4px; padding-top: 12px; border-top: 1.5px dashed var(--border); }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 24px 16px 48px; }
+    .nav__inner { padding: 10px 16px; gap: 12px; }
+    .search { display: none; }
+    .kpis { grid-template-columns: 1fr; }
+    .foot { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 재사용 아이콘 심볼 (인라인, 외부 자원 없음) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-sprout" viewBox="0 0 24 24">
+      <path d="M12 20v-7"/><path d="M12 13c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6Z"/>
+      <path d="M12 11c0-2.8 2.2-5 5-5 0 2.8-2.2 5-5 5Z"/>
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.6 12 20 12 20Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.6 3.6 21 12l-8 8-8.4-8.4V4Z"/><circle cx="8" cy="8" r="1.3"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M4 20C4 11 11 4 20 4c0 9-7 16-16 16Z"/><path d="M4 20 14 10"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============ 상단 네비 ============ -->
+<header class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="#" aria-label="Layerframe 홈">
+      <span class="brand__mark"><svg class="icon"><use href="#i-sprout"/></svg></span>
+      <span class="brand__name"><b>Layer</b>frame</span>
+    </a>
+    <nav class="nav__links" aria-label="주요 메뉴">
+      <a class="nav__link" href="#" aria-current="page">포럼</a>
+      <a class="nav__link" href="#">자료실</a>
+      <a class="nav__link" href="#">쇼케이스</a>
+      <a class="nav__link" href="#">가이드</a>
+    </nav>
+    <span class="nav__spacer"></span>
+    <div class="search">
+      <svg class="icon"><use href="#i-search"/></svg>
+      <input type="search" placeholder="스레드·태그 검색" aria-label="검색">
+    </div>
+    <button class="btn btn--primary" type="button">
+      <svg class="icon"><use href="#i-plus"/></svg>새 글
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 페이지 헤더 + KPI -->
+  <section class="header">
+    <span class="header__eyebrow"><svg class="icon" style="width:14px;height:14px"><use href="#i-leaf"/></svg>디자인 시스템 커뮤니티</span>
+    <h1>함께 키우는 프로덕트 이야기</h1>
+    <p>설계 결정부터 토큰, 리서치, 트러블슈팅까지 — 실무에서 마주친 질문을 나누고 답이 자라나는 곳입니다.</p>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi__val">42<small>건</small></div>
+        <div class="kpi__label">오늘 올라온 새 글</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__val">1,284<small>명</small></div>
+        <div class="kpi__label">이번 주 활동 멤버</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__val">71<small>%</small></div>
+        <div class="kpi__label">이번 주 질문 해결률</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 카테고리 칩 -->
+  <nav class="chips" aria-label="카테고리">
+    <button class="chip" type="button" aria-pressed="true">전체</button>
+    <button class="chip" type="button" aria-pressed="false">설계</button>
+    <button class="chip" type="button" aria-pressed="false">토큰</button>
+    <button class="chip" type="button" aria-pressed="false">리서치</button>
+    <button class="chip" type="button" aria-pressed="false">레이아웃</button>
+    <button class="chip" type="button" aria-pressed="false">피드백</button>
+    <button class="chip" type="button" aria-pressed="false">트러블슈팅</button>
+    <button class="chip" type="button" aria-pressed="false">자료</button>
+    <button class="chip" type="button" aria-pressed="false">커리어</button>
+  </nav>
+
+  <!-- 본문 -->
+  <div class="grid">
+
+    <!-- 스레드 리스트 -->
+    <section aria-label="스레드 목록">
+      <div class="list-head">
+        <div class="list-head__title"><b>8</b>개의 스레드</div>
+        <div class="sort" role="group" aria-label="정렬">
+          <button type="button" aria-pressed="true">최신</button>
+          <button type="button" aria-pressed="false">인기</button>
+          <button type="button" aria-pressed="false">미해결</button>
+        </div>
+      </div>
+
+      <div class="threads">
+
+        <!-- 1 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--a">JD<span class="status-dot st-sprout"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">레이어 구조를 다시 짤 때 컴포넌트 경계는 어디서 끊는 게 좋을까요</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 설계</span>
+              <span class="byline">시스템 디자이너</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-sprout-t">활발</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>24</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>87</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>12분 전</span>
+          </div>
+        </article>
+
+        <!-- 2 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--c">SM<span class="status-dot st-fruit"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">다크모드, 변수 스왑 방식과 이중 팔레트 중 뭘 쓰고 계세요</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 토큰</span>
+              <span class="byline">디자인 엔지니어</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-fruit-t">해결됨</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>18</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>64</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>41분 전</span>
+          </div>
+        </article>
+
+        <!-- 3 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--b">KH<span class="status-dot st-fruit"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">포럼 첫 온보딩 3화면, A/B 테스트 결과를 정리해서 공유합니다</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 리서치</span>
+              <span class="byline">프로덕트 리서처</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-fruit-t">해결됨</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>56</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>210</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>1시간 전</span>
+          </div>
+        </article>
+
+        <!-- 4 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--e">PL<span class="status-dot st-sprout"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">8px 그리드를 지키다 보면 아이콘 광학 정렬이 자꾸 어긋나요</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 레이아웃</span>
+              <span class="byline">UI 디자이너</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-sprout-t">활발</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>9</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>33</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>2시간 전</span>
+          </div>
+        </article>
+
+        <!-- 5 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--b">YB<span class="status-dot st-sprout"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">이 배너, 카피 톤이 너무 차갑다는 피드백을 받았는데 어떻게 보세요</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 피드백</span>
+              <span class="byline">콘텐츠 디자이너</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-sprout-t">활발</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>41</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>120</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>3시간 전</span>
+          </div>
+        </article>
+
+        <!-- 6 (문제 — 시듦) -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--d">RA<span class="status-dot st-wither"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">빌드가 CI에서만 깨집니다 — 폰트 CDN 캐시 이슈 같은데 원인을 못 찾겠어요</a></h2>
+            <div class="thread__meta">
+              <span class="tag tag--warn"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 트러블슈팅</span>
+              <span class="byline">프론트엔드</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-wither-t">막힘</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>7</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>15</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>5시간 전</span>
+          </div>
+        </article>
+
+        <!-- 7 -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--c">MC<span class="status-dot st-fruit"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">리서치 리포트 템플릿을 무료로 공유해요 (편집 가능한 파일 포함)</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 자료</span>
+              <span class="byline">리서처</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-fruit-t">해결됨</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>33</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>178</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>8시간 전</span>
+          </div>
+        </article>
+
+        <!-- 8 (새 글 — 씨앗) -->
+        <article class="thread" tabindex="0">
+          <div class="avatar avatar--a">DW<span class="status-dot st-seed"></span></div>
+          <div class="thread__main">
+            <h2 class="thread__title"><a href="#">신입 프로덕트 디자이너인데, 첫 디자인 시스템 구축은 어디부터 손대면 좋을까요</a></h2>
+            <div class="thread__meta">
+              <span class="tag"><svg class="icon" style="width:12px;height:12px;display:inline"><use href="#i-tag"/></svg> 커리어</span>
+              <span class="byline">주니어 디자이너</span>
+              <span class="dot-sep"></span>
+              <span class="state-label st-seed-t">새 글</span>
+            </div>
+          </div>
+          <div class="thread__stats">
+            <div class="stat-row">
+              <span class="stat stat--reply"><svg class="icon"><use href="#i-comment"/></svg>62</span>
+              <span class="stat"><svg class="icon"><use href="#i-heart"/></svg>95</span>
+            </div>
+            <span class="thread__time"><svg class="icon" style="width:13px;height:13px"><use href="#i-clock"/></svg>어제</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 사이드바 -->
+    <aside class="side" aria-label="사이드바">
+
+      <!-- 인기 태그 -->
+      <section class="panel">
+        <div class="panel__head">
+          <svg class="icon"><use href="#i-tag"/></svg>
+          <h3 class="panel__title">인기 태그</h3>
+        </div>
+        <div class="tagcloud">
+          <a href="#">#디자인시스템 <b>128</b></a>
+          <a href="#">#토큰 <b>94</b></a>
+          <a href="#">#접근성 <b>76</b></a>
+          <a href="#">#레이아웃 <b>61</b></a>
+          <a href="#">#리서치 <b>55</b></a>
+          <a href="#">#온보딩 <b>43</b></a>
+          <a href="#">#트러블슈팅 <b>37</b></a>
+          <a href="#">#커리어 <b>29</b></a>
+        </div>
+      </section>
+
+      <!-- 이번 주 활동 (줄기처럼 자라는 차트) -->
+      <section class="panel">
+        <div class="panel__head">
+          <svg class="icon"><use href="#i-sprout"/></svg>
+          <h3 class="panel__title">이번 주 활동</h3>
+        </div>
+        <div class="activity__legend">
+          <div class="activity__now">318<small>답글</small></div>
+          <div class="activity__delta">지난주 대비 +23%</div>
+        </div>
+        <div class="chart" role="img" aria-label="요일별 활동량 — 목요일이 가장 활발">
+          <div class="col"><div class="bar-track"><div class="bar" style="height:42%"></div></div><span class="col__label">월</span></div>
+          <div class="col"><div class="bar-track"><div class="bar" style="height:58%"></div></div><span class="col__label">화</span></div>
+          <div class="col"><div class="bar-track"><div class="bar" style="height:50%"></div></div><span class="col__label">수</span></div>
+          <div class="col"><div class="bar-track"><div class="bar peak" style="height:100%"></div></div><span class="col__label">목</span></div>
+          <div class="col"><div class="bar-track"><div class="bar" style="height:78%"></div></div><span class="col__label">금</span></div>
+          <div class="col"><div class="bar-track"><div class="bar" style="height:34%"></div></div><span class="col__label">토</span></div>
+          <div class="col col--today"><div class="bar-track"><div class="bar" style="height:66%"></div></div><span class="col__label">일</span></div>
+        </div>
+        <div class="activity__stats">
+          <div class="astat"><div class="astat__v">42</div><div class="astat__l">새 글</div></div>
+          <div class="astat"><div class="astat__v">318</div><div class="astat__l">답글</div></div>
+          <div class="astat"><div class="astat__v">71%</div><div class="astat__l">해결률</div></div>
+        </div>
+      </section>
+
+      <!-- 상태 범례 (씨앗→새싹→열매→시듦) -->
+      <section class="panel">
+        <div class="panel__head">
+          <svg class="icon"><use href="#i-leaf"/></svg>
+          <h3 class="panel__title">스레드 상태</h3>
+        </div>
+        <div class="legend-list">
+          <div class="legend-item"><span class="lg-dot st-seed"></span><b>새 글</b>&nbsp;· 아직 답변을 기다리는 중</div>
+          <div class="legend-item"><span class="lg-dot st-sprout"></span><b>활발</b>&nbsp;· 대화가 자라는 중</div>
+          <div class="legend-item"><span class="lg-dot st-fruit"></span><b>해결됨</b>&nbsp;· 답이 맺힌 스레드</div>
+          <div class="legend-item"><span class="lg-dot st-wither"></span><b>막힘</b>&nbsp;· 도움이 필요한 스레드</div>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+</main>
+
+<footer class="foot">
+  <span class="foot__brand"><b>Layerframe</b> · 네이처 오가닉</span>
+  <span>커뮤니티 포럼 시안 · 흙과 종이의 온기로 데이터를 감쌉니다</span>
+</footer>
+
+</body>
+</html>

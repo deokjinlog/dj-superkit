@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>커머스OS 어드민 — 방향 결정 (5)</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0b0d12; color:#e7e9ee; font-family:'Pretendard',-apple-system,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  header { padding:32px 28px 8px; }
+  h1 { margin:0 0 6px; font-size:25px; letter-spacing:-.02em; }
+  .sub { color:#9aa0ad; font-size:14px; line-height:1.55; }
+  .sub b { color:#c7ccd6; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(540px,1fr)); gap:22px; padding:20px 28px; }
+  .card { background:#14171f; border:1px solid #232733; border-radius:14px; overflow:hidden; display:flex; flex-direction:column; transition:border-color .15s, transform .15s; }
+  .card:hover { border-color:#3a4560; transform:translateY(-2px); }
+  .bar { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:13px 15px; }
+  .name b { font-weight:700; font-size:16px; }
+  .name em { font-style:normal; color:#8f97a6; font-size:12px; margin-left:9px; }
+  .open { color:#8ab4ff; text-decoration:none; font-size:12.5px; white-space:nowrap; border:1px solid #2b3446; border-radius:8px; padding:6px 12px; }
+  .open:hover { background:#1b2233; }
+  .frame { position:relative; width:100%; height:378px; overflow:hidden; border-top:1px solid #232733; background:#fff; }
+  .frame iframe { position:absolute; top:0; left:0; width:1280px; height:900px; border:0; transform:scale(.42); transform-origin:top left; }
+  footer { color:#6b7280; font-size:12px; text-align:center; padding:22px; }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; padding:14px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>커머스OS 어드민 — 방향 결정</h1>
+  <div class="sub">
+    같은 대시보드, <b>5가지 실무 어드민 방향</b>. 하나 고르면 그 방향으로 <b>주요 화면 ~30개</b>(주문·상품·고객·정산·통계·설정…)를 일관되게 만들고, 디자인 시스템까지 역추출해요.<br>
+    새 탭으로 크게 보고 <b>몇 번</b>이 맘에 드는지 알려주세요.
+  </div>
+</header>
+<div class="grid">
+  <div class="card"><div class="bar"><div class="name"><b>① 엔터프라이즈 B2B</b><em>실용 네이비 · 클래식 어드민</em></div><a class="open" href="dir-01-enterprise.html" target="_blank" rel="noopener">새 탭 ↗</a></div><div class="frame"><iframe src="dir-01-enterprise.html" loading="lazy" title="엔터프라이즈"></iframe></div></div>
+  <div class="card"><div class="bar"><div class="name"><b>② 다크 대시보드</b><em>관제 · 데이터 밀도</em></div><a class="open" href="dir-02-dark-analytics.html" target="_blank" rel="noopener">새 탭 ↗</a></div><div class="frame"><iframe src="dir-02-dark-analytics.html" loading="lazy" title="다크 대시보드"></iframe></div></div>
+  <div class="card"><div class="bar"><div class="name"><b>③ 머티리얼</b><em>Google · 익숙·체계</em></div><a class="open" href="dir-03-material.html" target="_blank" rel="noopener">새 탭 ↗</a></div><div class="frame"><iframe src="dir-03-material.html" loading="lazy" title="머티리얼"></iframe></div></div>
+  <div class="card"><div class="bar"><div class="name"><b>④ 데이터 리치 라이트</b><em>에어테이블 · 촘촘 라이트</em></div><a class="open" href="dir-04-data-admin.html" target="_blank" rel="noopener">새 탭 ↗</a></div><div class="frame"><iframe src="dir-04-data-admin.html" loading="lazy" title="데이터 라이트"></iframe></div></div>
+  <div class="card"><div class="bar"><div class="name"><b>⑤ 벤토 그리드</b><em>모듈 조합 · 스캔 좋음</em></div><a class="open" href="dir-05-bento.html" target="_blank" rel="noopener">새 탭 ↗</a></div><div class="frame"><iframe src="dir-05-bento.html" loading="lazy" title="벤토"></iframe></div></div>
+</div>
+<footer>dj-superkit · 커머스OS 어드민 · 방향 결정 5</footer>
+</body>
+</html>

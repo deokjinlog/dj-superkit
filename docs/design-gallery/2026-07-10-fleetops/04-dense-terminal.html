@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FleetOps · 관제 단말</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#0C0E12;
+    --panel:#111419;
+    --amber:#F5A623;
+    --green:#3DDC84;
+    --red:#FF5252;
+    --blue:#4DA3FF;
+    --fg:rgba(255,255,255,.90);
+    --dim:rgba(255,255,255,.42);
+    --dimmer:rgba(255,255,255,.24);
+    --line:rgba(245,166,35,.20);
+    --line-soft:rgba(255,255,255,.09);
+    --dot:rgba(245,166,35,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:var(--bg);}
+  body{
+    font-family:'IBM Plex Mono','Pretendard',ui-monospace,monospace;
+    font-size:12px;
+    line-height:1.42;
+    color:var(--fg);
+    letter-spacing:.01em;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:44px;
+  }
+  .num{font-variant-numeric:tabular-nums;}
+  .lbl{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:10px;
+    font-weight:500;
+    color:var(--dim);
+  }
+
+  /* ---- outer frame ---- */
+  .terminal{
+    border:1px solid var(--line);
+    margin:0 auto;
+    max-width:1480px;
+    background:
+      linear-gradient(var(--bg),var(--bg)) padding-box;
+  }
+
+  /* ---- top bar ---- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:9px 12px;
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  .brand{
+    display:flex;align-items:baseline;gap:8px;
+    font-weight:700;font-size:14px;letter-spacing:.06em;
+    color:var(--amber);
+  }
+  .brand .mk{color:var(--fg);font-weight:600;}
+  .brand .cursor{
+    display:inline-block;width:8px;height:14px;
+    background:var(--amber);transform:translateY(1px);
+    animation:blink 1.1s steps(1) infinite;
+  }
+  .topbar .sep{
+    flex:0 0 1px;height:16px;background:var(--line);
+  }
+  .topbar .pair{display:flex;gap:7px;align-items:baseline;}
+  .topbar .pair b{color:var(--fg);font-weight:600;}
+  .topbar .spacer{flex:1;}
+  .live{
+    display:flex;align-items:center;gap:6px;
+    color:var(--green);font-weight:600;font-size:11px;letter-spacing:.1em;
+  }
+  .live .d{
+    width:7px;height:7px;background:var(--green);border-radius:0;
+    box-shadow:0 0 0 1px rgba(61,220,132,.4);
+    animation:blink 1.4s steps(1) infinite;
+  }
+  .stamp{color:var(--fg);font-weight:600;}
+  .stamp .k{color:var(--dim);}
+
+  /* ---- ticker status strip ---- */
+  .strip{
+    display:flex;flex-wrap:wrap;gap:0;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(245,166,35,.05),transparent);
+  }
+  .strip .cell{
+    flex:1 1 auto;
+    display:flex;gap:8px;align-items:baseline;
+    padding:5px 12px;
+    border-right:1px dotted var(--dot);
+    white-space:nowrap;
+    min-width:150px;
+  }
+  .strip .cell:last-child{border-right:0;}
+  .strip .cell .v{color:var(--fg);font-weight:600;}
+  .strip .cell .v.amber{color:var(--amber);}
+  .strip .cell .v.blue{color:var(--blue);}
+
+  /* ---- KPI ---- */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .kpi{
+    padding:11px 13px 12px;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .kpi:last-child{border-right:0;}
+  .kpi::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:var(--amber);opacity:.55;
+  }
+  .kpi .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+  .kpi .code{font-size:9.5px;color:var(--dimmer);letter-spacing:.16em;}
+  .kpi .val{
+    font-size:23px;font-weight:600;line-height:1;color:var(--fg);
+    letter-spacing:.01em;
+  }
+  .kpi .val .u{font-size:12px;color:var(--dim);font-weight:500;margin-left:2px;}
+  .kpi .delta{
+    margin-top:8px;font-size:10.5px;font-weight:600;letter-spacing:.02em;
+    display:flex;align-items:center;gap:5px;
+  }
+  .kpi .delta .arw{font-size:9px;}
+  .up{color:var(--green);}
+  .down{color:var(--red);}
+  .flat{color:var(--blue);}
+
+  /* ---- middle grid ---- */
+  .mid{
+    display:grid;
+    grid-template-columns:1.9fr 1fr;
+  }
+  .panel{background:var(--panel);}
+  .panel .ph{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:7px 12px;
+    border-bottom:1px solid var(--line);
+    background:rgba(245,166,35,.05);
+  }
+  .panel .ph .t{
+    color:var(--amber);font-weight:600;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;
+    display:flex;align-items:center;gap:7px;
+  }
+  .panel .ph .t::before{content:"▍";color:var(--amber);}
+  .panel .ph .meta{font-size:9.5px;color:var(--dim);letter-spacing:.1em;}
+
+  .chart{border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .chart .body{padding:10px 12px 12px;}
+  .axis{
+    display:flex;justify-content:space-between;
+    font-size:9px;color:var(--dimmer);letter-spacing:.08em;
+    padding:0 0 6px 46px;
+    border-bottom:1px dotted var(--dot);
+    margin-bottom:6px;
+  }
+  .row{
+    display:grid;
+    grid-template-columns:40px 1fr 44px;
+    align-items:center;
+    gap:8px;
+    padding:2.5px 0;
+    border-bottom:1px dotted var(--dot);
+  }
+  .row:last-child{border-bottom:0;}
+  .row .tk{font-size:10px;color:var(--dim);letter-spacing:.04em;text-align:right;}
+  .track{
+    height:12px;background:rgba(255,255,255,.035);
+    border:1px solid var(--line-soft);position:relative;
+  }
+  .bar{
+    height:100%;
+    background:repeating-linear-gradient(90deg,
+      var(--blue) 0 5px, rgba(77,163,255,.32) 5px 8px);
+    box-shadow:inset -1px 0 0 rgba(77,163,255,.7);
+    animation:grow .7s ease-out both;
+    transform-origin:left;
+  }
+  .bar.peak{
+    background:repeating-linear-gradient(90deg,
+      var(--amber) 0 5px, rgba(245,166,35,.32) 5px 8px);
+    box-shadow:inset -1px 0 0 rgba(245,166,35,.85);
+  }
+  .row .vv{font-size:10.5px;color:var(--fg);font-weight:600;text-align:right;}
+  .row.is-peak .vv{color:var(--amber);}
+  .peaktag{
+    font-size:8px;color:var(--bg);background:var(--amber);
+    padding:0 3px;margin-left:5px;letter-spacing:.1em;font-weight:700;
+    vertical-align:1px;
+  }
+
+  /* ---- event log (signature) ---- */
+  .log{border-bottom:1px solid var(--line);}
+  .log .body{padding:6px 0 6px;max-height:none;overflow:hidden;}
+  .lg{
+    display:grid;
+    grid-template-columns:64px 46px 1fr;
+    gap:8px;align-items:baseline;
+    padding:3px 12px;
+    border-bottom:1px dotted var(--dot);
+    font-size:10.5px;white-space:nowrap;
+  }
+  .lg:last-child{border-bottom:0;}
+  .lg .ts{color:var(--dim);}
+  .lg .tg{font-weight:700;font-size:9px;letter-spacing:.1em;text-align:center;padding:0 2px;}
+  .lg .msg{color:var(--fg);overflow:hidden;text-overflow:ellipsis;}
+  .lg .msg .id{color:var(--amber);}
+  .tg.sync{color:var(--amber);}
+  .tg.move{color:var(--blue);}
+  .tg.done{color:var(--green);}
+  .tg.warn{color:var(--red);}
+  .tg.wait{color:var(--amber);}
+  .tg.stat{color:var(--green);}
+
+  /* ---- table ---- */
+  .tablewrap{border-bottom:1px solid var(--line);}
+  .tscroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  thead th{
+    text-align:left;
+    padding:7px 12px;
+    font-size:9.5px;color:var(--dim);letter-spacing:.12em;font-weight:500;
+    border-bottom:1px solid var(--line);
+    text-transform:uppercase;
+    background:rgba(255,255,255,.02);
+    white-space:nowrap;
+  }
+  thead th.r{text-align:right;}
+  tbody td{
+    padding:8px 12px;
+    border-bottom:1px dotted var(--dot);
+    font-size:11px;color:var(--fg);white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:0;}
+  tbody tr:hover td{background:rgba(245,166,35,.045);}
+  td.id{color:var(--amber);font-weight:600;letter-spacing:.03em;}
+  td.eta{text-align:right;color:var(--dim);font-weight:600;}
+  .badge{
+    display:inline-block;
+    padding:1px 7px;
+    font-size:9.5px;font-weight:700;letter-spacing:.08em;
+    border:1px solid currentColor;border-radius:0;
+    line-height:1.5;
+  }
+  .b-transit{color:var(--blue);background:rgba(77,163,255,.09);}
+  .b-done{color:var(--green);background:rgba(61,220,132,.09);}
+  .b-delay{color:var(--red);background:rgba(255,82,82,.10);}
+  .b-wait{color:var(--amber);background:rgba(245,166,35,.09);}
+
+  /* ---- footer ---- */
+  .pagefoot{
+    padding:8px 12px;
+    font-size:9.5px;letter-spacing:.16em;color:var(--dimmer);
+    text-transform:uppercase;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:10px;
+  }
+  .pagefoot .dots{color:var(--dot);flex:1;overflow:hidden;white-space:nowrap;}
+
+  /* ---- function key bar (signature) ---- */
+  .fnbar{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;
+    background:var(--panel);
+    border-top:1px solid var(--line);
+    font-size:10.5px;
+    z-index:20;
+  }
+  .fk{
+    flex:1 1 0;
+    display:flex;align-items:center;gap:7px;
+    padding:8px 12px;
+    border-right:1px dotted var(--dot);
+    color:var(--dim);letter-spacing:.06em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .fk:last-child{border-right:0;}
+  .fk .k{
+    background:var(--amber);color:var(--bg);
+    font-weight:700;font-size:9.5px;letter-spacing:.02em;
+    padding:1px 5px;border-radius:0;
+  }
+  .fk .n{color:var(--fg);font-weight:600;}
+  .fk:hover{background:rgba(245,166,35,.06);color:var(--fg);}
+
+  /* ---- animations ---- */
+  @keyframes blink{50%{opacity:0;}}
+  @keyframes grow{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;}
+    .brand .cursor,.live .d{opacity:1;}
+  }
+
+  /* ---- responsive ---- */
+  @media (max-width:900px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .kpi:nth-child(2){border-right:0;}
+    .mid{grid-template-columns:1fr;}
+    .chart{border-right:0;}
+    .strip .cell{min-width:50%;flex:1 1 45%;}
+  }
+  @media (max-width:560px){
+    body{font-size:11px;}
+    .kpis{grid-template-columns:1fr;}
+    .kpi{border-right:0;}
+    .topbar{flex-wrap:wrap;gap:8px;}
+    .fnbar{font-size:9.5px;}
+    .fk{padding:8px 8px;gap:5px;}
+    .lg{grid-template-columns:58px 40px 1fr;}
+  }
+</style>
+</head>
+<body>
+<main class="terminal">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand"><span>FLEET</span><span class="mk">OPS</span><span class="cursor" aria-hidden="true"></span></div>
+    <div class="sep" aria-hidden="true"></div>
+    <div class="pair lbl">MODULE <b>배송 관제</b></div>
+    <div class="sep" aria-hidden="true"></div>
+    <div class="pair lbl">NODE <b>SEOUL-01</b></div>
+    <div class="spacer"></div>
+    <div class="live"><span class="d" aria-hidden="true"></span>LIVE</div>
+    <div class="sep" aria-hidden="true"></div>
+    <div class="stamp num"><span class="k lbl">갱신 </span>2026-07-10 14:32</div>
+  </header>
+
+  <!-- STATUS STRIP -->
+  <section class="strip" aria-label="시스템 상태">
+    <div class="cell"><span class="lbl">SESSION</span><span class="v num">2026-07-10</span></div>
+    <div class="cell"><span class="lbl">FLEET ACTIVE</span><span class="v amber num">87</span></div>
+    <div class="cell"><span class="lbl">ON-TIME</span><span class="v num">96.2%</span></div>
+    <div class="cell"><span class="lbl">OPEN ISSUE</span><span class="v blue num">14</span></div>
+    <div class="cell"><span class="lbl">FEED</span><span class="v">STABLE</span></div>
+  </section>
+
+  <!-- KPI -->
+  <section class="kpis" aria-label="핵심 지표">
+    <div class="kpi">
+      <div class="head"><span class="lbl">오늘 배송</span><span class="code num">KP-01</span></div>
+      <div class="val num">1,284<span class="u">건</span></div>
+      <div class="delta up"><span class="arw">▲</span><span class="num">전일 대비 +12.4%</span></div>
+    </div>
+    <div class="kpi">
+      <div class="head"><span class="lbl">정시 배송률</span><span class="code num">KP-02</span></div>
+      <div class="val num">96.2<span class="u">%</span></div>
+      <div class="delta up"><span class="arw">▲</span><span class="num">+0.8%p</span></div>
+    </div>
+    <div class="kpi">
+      <div class="head"><span class="lbl">운행 중 차량</span><span class="code num">KP-03</span></div>
+      <div class="val num">87<span class="u">대</span></div>
+      <div class="delta down"><span class="arw">▼</span><span class="num">-2대</span></div>
+    </div>
+    <div class="kpi">
+      <div class="head"><span class="lbl">지연·이슈</span><span class="code num">KP-04</span></div>
+      <div class="val num">14<span class="u">건</span></div>
+      <div class="delta up"><span class="arw">▼</span><span class="num">-5건 해결</span></div>
+    </div>
+  </section>
+
+  <!-- MIDDLE: CHART + EVENT LOG -->
+  <section class="mid">
+
+    <!-- CHART -->
+    <div class="panel chart">
+      <div class="ph"><span class="t">시간대별 배송량</span><span class="meta num">2H INTERVAL · UNIT 건</span></div>
+      <div class="body">
+        <div class="axis num"><span>0</span><span>60</span><span>120</span><span>180</span><span>230</span></div>
+
+        <div class="row"><span class="tk num">06시</span>
+          <div class="track"><div class="bar" style="width:18.3%"></div></div>
+          <span class="vv num">42</span></div>
+
+        <div class="row"><span class="tk num">08시</span>
+          <div class="track"><div class="bar" style="width:41.3%"></div></div>
+          <span class="vv num">95</span></div>
+
+        <div class="row"><span class="tk num">10시</span>
+          <div class="track"><div class="bar" style="width:69.6%"></div></div>
+          <span class="vv num">160</span></div>
+
+        <div class="row"><span class="tk num">12시</span>
+          <div class="track"><div class="bar" style="width:91.3%"></div></div>
+          <span class="vv num">210</span></div>
+
+        <div class="row"><span class="tk num">14시</span>
+          <div class="track"><div class="bar" style="width:81.7%"></div></div>
+          <span class="vv num">188</span></div>
+
+        <div class="row is-peak"><span class="tk num">16시</span>
+          <div class="track"><div class="bar peak" style="width:100%"></div></div>
+          <span class="vv num">230<span class="peaktag">PEAK</span></span></div>
+
+        <div class="row"><span class="tk num">18시</span>
+          <div class="track"><div class="bar" style="width:89.1%"></div></div>
+          <span class="vv num">205</span></div>
+
+        <div class="row"><span class="tk num">20시</span>
+          <div class="track"><div class="bar" style="width:74.8%"></div></div>
+          <span class="vv num">172</span></div>
+
+        <div class="row"><span class="tk num">22시</span>
+          <div class="track"><div class="bar" style="width:52.2%"></div></div>
+          <span class="vv num">120</span></div>
+      </div>
+    </div>
+
+    <!-- EVENT LOG (SIGNATURE) -->
+    <div class="panel log">
+      <div class="ph"><span class="t">이벤트 로그</span><span class="meta">TAIL · REALTIME</span></div>
+      <div class="body">
+        <div class="lg"><span class="ts num">14:32:00</span><span class="tg sync">SYNC</span><span class="msg">대시보드 갱신 완료</span></div>
+        <div class="lg"><span class="ts num">14:32:00</span><span class="tg stat">STAT</span><span class="msg">정시 배송률 96.2% (+0.8%p)</span></div>
+        <div class="lg"><span class="ts num">14:20:11</span><span class="tg move">MOVE</span><span class="msg"><span class="id">T-20931</span> 성수동 물류센터 배송중</span></div>
+        <div class="lg"><span class="ts num">14:05:47</span><span class="tg move">MOVE</span><span class="msg"><span class="id">T-20928</span> 강남 파이낸스센터 배송중</span></div>
+        <div class="lg"><span class="ts num">13:55:03</span><span class="tg done">DONE</span><span class="msg"><span class="id">T-20930</span> 판교 테크노밸리 완료</span></div>
+        <div class="lg"><span class="ts num">13:40:22</span><span class="tg warn">WARN</span><span class="msg"><span class="id">T-20929</span> 인천 남동공단 지연</span></div>
+        <div class="lg"><span class="ts num">13:10:09</span><span class="tg done">DONE</span><span class="msg"><span class="id">T-20927</span> 김포 골드밸리 완료</span></div>
+        <div class="lg"><span class="ts num">15:00:00</span><span class="tg wait">WAIT</span><span class="msg"><span class="id">T-20926</span> 수원 영통지점 픽업대기</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="panel tablewrap" aria-label="배송 현황">
+    <div class="ph"><span class="t">배송 현황</span><span class="meta num">6 RECORDS</span></div>
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr>
+            <th>운송장번호</th>
+            <th>목적지</th>
+            <th>담당 기사</th>
+            <th>상태</th>
+            <th class="r">예정시각</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id num">T-20931</td><td>성수동 물류센터</td><td>김민준</td>
+            <td><span class="badge b-transit">배송중</span></td><td class="eta num">14:20</td>
+          </tr>
+          <tr>
+            <td class="id num">T-20930</td><td>판교 테크노밸리</td><td>이서연</td>
+            <td><span class="badge b-done">완료</span></td><td class="eta num">13:55</td>
+          </tr>
+          <tr>
+            <td class="id num">T-20929</td><td>인천 남동공단</td><td>박지훈</td>
+            <td><span class="badge b-delay">지연</span></td><td class="eta num">13:40</td>
+          </tr>
+          <tr>
+            <td class="id num">T-20928</td><td>강남 파이낸스센터</td><td>최유진</td>
+            <td><span class="badge b-transit">배송중</span></td><td class="eta num">14:05</td>
+          </tr>
+          <tr>
+            <td class="id num">T-20927</td><td>김포 골드밸리</td><td>정우성</td>
+            <td><span class="badge b-done">완료</span></td><td class="eta num">13:10</td>
+          </tr>
+          <tr>
+            <td class="id num">T-20926</td><td>수원 영통지점</td><td>한소희</td>
+            <td><span class="badge b-wait">픽업대기</span></td><td class="eta num">15:00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAGE FOOTER -->
+  <footer class="pagefoot">
+    <span>STYLE 04 · 고밀도 터미널</span>
+    <span class="dots" aria-hidden="true">· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·</span>
+    <span class="num">FLEETOPS TERMINAL</span>
+  </footer>
+
+</main>
+
+<!-- FUNCTION KEY BAR (SIGNATURE) -->
+<nav class="fnbar" aria-label="펑션키">
+  <div class="fk"><span class="k">F1</span><span class="n">도움말</span></div>
+  <div class="fk"><span class="k">F2</span><span class="n">관제</span></div>
+  <div class="fk"><span class="k">F3</span><span class="n">배송현황</span></div>
+  <div class="fk"><span class="k">F4</span><span class="n">차량</span></div>
+  <div class="fk"><span class="k">F5</span><span class="n">새로고침</span></div>
+</nav>
+</body>
+</html>

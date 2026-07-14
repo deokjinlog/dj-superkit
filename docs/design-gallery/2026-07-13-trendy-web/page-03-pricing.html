@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slate — 요금제</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --ink-hover:#2A2A2A;
+    --gray:#767676;
+    --gray-light:#A8A8A8;
+    --hairline:#E5E5E5;
+    --gray-50:#F5F5F5;
+    --accent:#FF4D00;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Pretendard","Pretendard Variable",system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    font-weight:400;
+    letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    animation:fadeIn 400ms ease both;
+  }
+
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+  .container{
+    max-width:1080px;
+    margin:0 auto;
+    padding-left:32px;
+    padding-right:32px;
+  }
+
+  /* ---------- Typography scale: 11 / 16 / 24 / 36 / 54 ---------- */
+  .eyebrow{
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    margin:0;
+  }
+
+  h1{
+    font-size:36px;
+    font-weight:800;
+    letter-spacing:-0.03em;
+    margin:16px 0 0;
+    max-width:16ch;
+  }
+
+  h2{ margin:0; }
+
+  .lede{
+    font-size:16px;
+    color:var(--gray);
+    margin:16px 0 0;
+    max-width:56ch;
+  }
+
+  /* ---------- Header ---------- */
+  .site-header{ border-bottom:1px solid var(--hairline); }
+  .header-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:16px;
+    padding-bottom:16px;
+    gap:32px;
+  }
+  .brand{ font-size:16px; font-weight:700; letter-spacing:-0.02em; }
+  .nav{ display:flex; align-items:center; gap:32px; }
+  .nav a{
+    font-size:16px;
+    font-weight:500;
+    color:var(--gray);
+    text-decoration:none;
+    transition:color 150ms ease;
+  }
+  .nav a:hover{ color:var(--ink); }
+  .nav a:focus-visible{ outline:2px solid var(--ink); outline-offset:4px; }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    height:40px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 16px;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    border:1px solid transparent;
+    border-radius:0;
+    cursor:pointer;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+  .btn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .btn--sm{ height:32px; }
+  .btn--block{ width:100%; }
+
+  .btn--primary{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .btn--primary:hover{ background:var(--ink-hover); border-color:var(--ink-hover); }
+  .btn--primary:active{ background:#000; border-color:#000; }
+  .btn--primary:disabled{ background:var(--gray-light); border-color:var(--gray-light); cursor:not-allowed; }
+
+  .btn--secondary{ background:var(--bg); color:var(--ink); border-color:var(--ink); }
+  .btn--secondary:hover{ background:var(--gray-50); }
+  .btn--secondary:active{ background:var(--hairline); }
+
+  /* ---------- Sections ---------- */
+  .section{ padding-top:64px; padding-bottom:64px; }
+  .section-head{ max-width:56ch; }
+  .section-title{ font-size:24px; font-weight:700; letter-spacing:-0.02em; margin:8px 0 0; }
+
+  /* ---------- Hero + billing toggle ---------- */
+  .hero{ padding-top:64px; padding-bottom:32px; }
+
+  .billing-toggle{
+    display:inline-flex;
+    align-items:flex-end;
+    gap:32px;
+    margin-top:32px;
+  }
+  .billing-toggle button{
+    background:none;
+    border:0;
+    border-bottom:2px solid transparent;
+    padding:8px 0;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:500;
+    color:var(--gray);
+    cursor:pointer;
+    display:inline-flex;
+    align-items:baseline;
+    gap:8px;
+    transition:color 150ms ease, border-color 150ms ease;
+  }
+  .billing-toggle button:hover{ color:var(--ink); }
+  .billing-toggle button[aria-pressed="true"]{
+    color:var(--ink);
+    font-weight:700;
+    border-bottom-color:var(--ink);
+  }
+  .billing-toggle button:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .save{
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+  }
+
+  /* ---------- Tiers ---------- */
+  .tiers{ display:grid; grid-template-columns:repeat(3,1fr); }
+  .tier{ padding:32px; }
+  .tier + .tier{ border-left:1px solid var(--hairline); }
+  /* ORANGE #1 — featured column left marker (peak) */
+  .tier--featured{ border-left:2px solid var(--accent); }
+
+  .tier__tag{
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+    margin:0;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  /* ORANGE #2 — featured badge dot */
+  .tier__tag--rec{ color:var(--ink); }
+  .tier__tag--rec::before{
+    content:"";
+    width:6px;
+    height:6px;
+    background:var(--accent);
+    border-radius:0;
+    display:inline-block;
+  }
+  .tier__name{ font-size:24px; font-weight:700; letter-spacing:-0.02em; margin:16px 0 0; }
+  .tier__desc{ font-size:16px; color:var(--gray); margin:8px 0 0; min-height:48px; }
+  .tier-price{ margin-top:32px; display:flex; align-items:baseline; gap:8px; }
+  .currency{ font-size:24px; font-weight:500; color:var(--gray); }
+  .amount{ font-size:54px; font-weight:800; letter-spacing:-0.04em; line-height:1; }
+  /* ORANGE #3 — featured price KPI */
+  .tier--featured .amount{ color:var(--accent); }
+  .period{ font-size:16px; font-weight:500; color:var(--gray); }
+  .billing-note{ font-size:11px; letter-spacing:.02em; color:var(--gray); margin:8px 0 0; }
+  .tier .btn{ margin-top:32px; }
+
+  .feature-list{
+    list-style:none;
+    margin:32px 0 0;
+    padding:0;
+    border-top:1px solid var(--hairline);
+  }
+  .feature-list li{
+    font-size:16px;
+    color:var(--ink);
+    padding:16px 0;
+    border-bottom:1px solid var(--hairline);
+  }
+  .feature-list li span{ color:var(--gray); }
+
+  /* ---------- Comparison table ---------- */
+  .table-scroll{ overflow-x:auto; margin-top:32px; }
+  .compare-table{ width:100%; border-collapse:collapse; min-width:600px; }
+  .compare-table th,
+  .compare-table td{
+    text-align:left;
+    padding:16px;
+    font-size:16px;
+    font-weight:400;
+    color:var(--ink);
+  }
+  .compare-table thead th{
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+  }
+  .compare-table thead tr{ border-bottom:1px solid var(--hairline); }
+  .compare-table tbody tr:last-child{ border-bottom:1px solid var(--hairline); }
+  .compare-table tbody th[scope="row"]{ font-weight:500; transition:box-shadow 150ms ease; }
+  /* micro-interaction — row hover: 2px left ink bar, no background change */
+  .compare-table tbody tr:hover th[scope="row"]{ box-shadow:inset 2px 0 0 0 var(--ink); }
+  .compare-table td.na{ color:var(--gray-light); }
+
+  /* ---------- FAQ ---------- */
+  .faq-list{ border-bottom:1px solid var(--hairline); margin-top:32px; }
+  .faq-item{ border-top:1px solid var(--hairline); }
+  .faq-item summary{
+    list-style:none;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    padding:16px 0;
+    font-size:16px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{
+    content:"+";
+    font-size:24px;
+    font-weight:400;
+    color:var(--gray);
+    line-height:1;
+    transition:color 150ms ease;
+  }
+  .faq-item[open] summary::after{ content:"\2212"; color:var(--ink); }
+  .faq-item summary:hover::after{ color:var(--ink); }
+  .faq-item summary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .faq-answer{
+    font-size:16px;
+    color:var(--gray);
+    max-width:70ch;
+    margin:0;
+    padding:0 0 16px;
+  }
+
+  /* ---------- Contact ---------- */
+  .visually-hidden{
+    position:absolute;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+  }
+  .contact-form{
+    display:flex;
+    gap:8px;
+    margin-top:32px;
+    max-width:480px;
+    flex-wrap:wrap;
+  }
+  .contact-form input{
+    flex:1 1 240px;
+    height:40px;
+    padding:0 16px;
+    font-family:inherit;
+    font-size:16px;
+    color:var(--ink);
+    background:var(--bg);
+    border:1px solid var(--hairline);
+    border-radius:0;
+    transition:border-color 150ms ease;
+  }
+  .contact-form input::placeholder{ color:var(--gray-light); }
+  .contact-form input:hover{ border-color:var(--gray); }
+  .contact-form input:focus-visible{
+    outline:2px solid var(--ink);
+    outline-offset:2px;
+    border-color:var(--ink);
+  }
+
+  /* ---------- Footer ---------- */
+  .site-footer{ border-top:1px solid var(--hairline); }
+  .footer-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-top:32px;
+    padding-bottom:32px;
+    font-size:11px;
+    letter-spacing:.04em;
+    color:var(--gray);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:768px){
+    h1{ font-size:24px; }
+    .amount{ font-size:36px; }
+    .nav .nav-link{ display:none; }
+    .tiers{ grid-template-columns:1fr; }
+    .tier + .tier{ border-left:0; border-top:1px solid var(--hairline); }
+    .tier--featured{ border-left:0; border-top:2px solid var(--accent); }
+    .tier__desc{ min-height:0; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <span class="brand">Slate</span>
+      <nav class="nav" aria-label="주 메뉴">
+        <a class="nav-link" href="#">제품</a>
+        <a class="nav-link" href="#tiers">요금제</a>
+        <a class="nav-link" href="#faq">문서</a>
+        <a class="btn btn--primary btn--sm" href="#tiers">시작하기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="container hero">
+      <p class="eyebrow">요금제</p>
+      <h1>규모에 맞춰 자라는 요금제</h1>
+      <p class="lede">필요한 만큼만 지불하세요. 언제든 업그레이드하거나 다운그레이드할 수 있고, 숨은 비용은 없습니다.</p>
+
+      <div class="billing-toggle" role="group" aria-label="결제 주기 선택">
+        <button type="button" data-billing="monthly" aria-pressed="true">월간</button>
+        <button type="button" data-billing="annual" aria-pressed="false">
+          연간 <span class="save">20% 절약</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="container section" id="tiers" aria-label="요금제 티어">
+      <div class="tiers">
+
+        <div class="tier">
+          <p class="tier__tag">개인 · 소규모</p>
+          <h2 class="tier__name">Starter</h2>
+          <p class="tier__desc">혼자 또는 작은 팀이 시작하기에 충분합니다.</p>
+          <div class="tier-price">
+            <span class="currency">₩</span>
+            <span class="amount" data-monthly="9,000" data-annual="7,200">9,000</span>
+            <span class="period">/월</span>
+          </div>
+          <p class="billing-note">월 결제 기준</p>
+          <a class="btn btn--secondary btn--block" href="#">무료로 시작</a>
+          <ul class="feature-list">
+            <li>프로젝트 <span>3개</span></li>
+            <li>팀 멤버 <span>1명</span></li>
+            <li>저장 용량 <span>5GB</span></li>
+            <li>커뮤니티 지원</li>
+            <li>기본 분석 리포트</li>
+          </ul>
+        </div>
+
+        <div class="tier tier--featured">
+          <p class="tier__tag tier__tag--rec">추천</p>
+          <h2 class="tier__name">Pro</h2>
+          <p class="tier__desc">빠르게 성장하는 팀을 위한 표준 선택.</p>
+          <div class="tier-price">
+            <span class="currency">₩</span>
+            <span class="amount" data-monthly="29,000" data-annual="23,200">29,000</span>
+            <span class="period">/월</span>
+          </div>
+          <p class="billing-note">월 결제 기준</p>
+          <a class="btn btn--primary btn--block" href="#">Pro 시작하기</a>
+          <ul class="feature-list">
+            <li>프로젝트 <span>무제한</span></li>
+            <li>팀 멤버 <span>10명</span></li>
+            <li>저장 용량 <span>100GB</span></li>
+            <li>우선 지원</li>
+            <li>고급 분석 · 자동화</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <p class="tier__tag">조직 전체</p>
+          <h2 class="tier__name">Team</h2>
+          <p class="tier__desc">규정 준수와 규모가 필요한 조직을 위해.</p>
+          <div class="tier-price">
+            <span class="currency">₩</span>
+            <span class="amount" data-monthly="59,000" data-annual="47,200">59,000</span>
+            <span class="period">/월</span>
+          </div>
+          <p class="billing-note">월 결제 기준</p>
+          <a class="btn btn--secondary btn--block" href="#">영업팀 문의</a>
+          <ul class="feature-list">
+            <li>Pro 모든 기능 포함</li>
+            <li>팀 멤버 <span>무제한</span></li>
+            <li>저장 용량 <span>1TB</span></li>
+            <li>SSO · SAML</li>
+            <li>전담 지원 매니저</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="container section" aria-label="기능 비교">
+      <div class="section-head">
+        <p class="eyebrow">기능 비교</p>
+        <h2 class="section-title">플랜별로 무엇이 다른가</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th scope="col">기능</th>
+              <th scope="col">Starter</th>
+              <th scope="col">Pro</th>
+              <th scope="col">Team</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">프로젝트</th>
+              <td>3개</td>
+              <td>무제한</td>
+              <td>무제한</td>
+            </tr>
+            <tr>
+              <th scope="row">팀 멤버</th>
+              <td>1명</td>
+              <td>10명</td>
+              <td>무제한</td>
+            </tr>
+            <tr>
+              <th scope="row">저장 용량</th>
+              <td>5GB</td>
+              <td>100GB</td>
+              <td>1TB</td>
+            </tr>
+            <tr>
+              <th scope="row">SSO · SAML</th>
+              <td class="na">—</td>
+              <td class="na">—</td>
+              <td>포함</td>
+            </tr>
+            <tr>
+              <th scope="row">우선 지원</th>
+              <td class="na">—</td>
+              <td>포함</td>
+              <td>포함</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="container section" id="faq" aria-label="자주 묻는 질문">
+      <div class="section-head">
+        <p class="eyebrow">자주 묻는 질문</p>
+        <h2 class="section-title">궁금한 점을 먼저 확인하세요</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>요금제는 언제든 변경할 수 있나요?</summary>
+          <p class="faq-answer">네. 대시보드에서 즉시 업그레이드하거나 다운그레이드할 수 있습니다. 변경 사항은 다음 결제 주기에 일할 계산되어 반영됩니다.</p>
+        </details>
+        <details class="faq-item">
+          <summary>연간 결제는 얼마나 절약되나요?</summary>
+          <p class="faq-answer">연간 결제를 선택하면 월간 대비 20% 할인된 금액이 청구됩니다. 두 달치 요금을 아끼는 셈입니다.</p>
+        </details>
+        <details class="faq-item">
+          <summary>무료 체험이 있나요?</summary>
+          <p class="faq-answer">모든 유료 플랜은 14일간 무료로 체험할 수 있습니다. 카드 등록 없이 시작하며, 체험 종료 시 자동으로 청구되지 않습니다.</p>
+        </details>
+        <details class="faq-item">
+          <summary>결제 수단은 무엇을 지원하나요?</summary>
+          <p class="faq-answer">주요 신용카드와 계좌 이체를 지원합니다. 엔터프라이즈 고객은 세금계산서 발행과 연간 인보이스 결제가 가능합니다.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="container section" aria-label="엔터프라이즈 문의">
+      <div class="section-head">
+        <p class="eyebrow">엔터프라이즈</p>
+        <h2 class="section-title">더 큰 규모가 필요하신가요?</h2>
+        <p class="lede">규모에 맞는 보안, 지원, 결제 조건을 안내해 드립니다. 회사 이메일을 남겨 주세요.</p>
+      </div>
+      <form class="contact-form" onsubmit="return false;">
+        <label class="visually-hidden" for="work-email">회사 이메일</label>
+        <input id="work-email" type="email" placeholder="name@company.com" autocomplete="email">
+        <button type="submit" class="btn btn--primary">문의 보내기</button>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>요금제 · 미니멀 모노크롬</span>
+      <span>© 2026 Slate</span>
+    </div>
+  </footer>
+
+  <script>
+    (function(){
+      var buttons = document.querySelectorAll('[data-billing]');
+      var notes = { monthly: '월 결제 기준', annual: '연간 결제 · 월 환산 금액' };
+      buttons.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var mode = btn.dataset.billing;
+          buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b === btn)); });
+          document.querySelectorAll('.amount').forEach(function(a){ a.textContent = a.dataset[mode]; });
+          document.querySelectorAll('.billing-note').forEach(function(n){ n.textContent = notes[mode]; });
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

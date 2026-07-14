@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layerframe · 컬러풀 모던</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* palette — 밝은 배경 + 비비드 브랜드 */
+    --bg:#F6F9FC;
+    --surface:#FFFFFF;
+    --surface-alt:#EEF2FF;
+    --border:#E3E8EF;
+    --border-strong:#D5DCE6;
+
+    --primary:#635BFF;
+    --primary-hover:#5548E8;
+    --on-primary:#FFFFFF;
+    --primary-tint:rgba(99,91,255,.12);
+
+    --violet:#7A5AF8;
+    --teal:#00C2B8;
+    --pink:#FF6699;
+    --amber:#FFB020;
+
+    --text:#0A2540;
+    --subtext:#425466;
+    --muted:#8792A2;
+
+    --success:#00A87E;
+    --warning:#E5A000;
+    --danger:#E5484D;
+
+    --grad-brand:linear-gradient(135deg,#635BFF 0%,#7A5AF8 100%);
+    --grad-cover:linear-gradient(135deg,#635BFF 0%,#7A5AF8 46%,#00C2B8 100%);
+    --grad-teal:linear-gradient(135deg,#00C2B8 0%,#635BFF 100%);
+
+    /* radius */
+    --r-card:16px;
+    --r-ctrl:10px;
+    --r-pill:999px;
+    --r-avatar:50%;
+
+    /* shadow — 인디고 틴트 소프트 섀도우 */
+    --sh-rest:0 1px 2px rgba(10,37,64,.06), 0 4px 12px rgba(10,37,64,.05);
+    --sh-hover:0 4px 8px rgba(99,91,255,.12), 0 12px 28px rgba(99,91,255,.14);
+
+    /* type scale (제한) */
+    --fs-display:40px;
+    --fs-h1:30px;
+    --fs-h2:22px;
+    --fs-title:18px;
+    --fs-body:15px;
+    --fs-small:13px;
+    --fs-label:12px;
+
+    --ease:cubic-bezier(.2,.7,.3,1);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 480px at 82% -8%, rgba(122,90,248,.10), transparent 60%),
+      radial-gradient(900px 420px at 6% 4%, rgba(0,194,184,.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:"Pretendard",-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",Roboto,sans-serif;
+    font-size:var(--fs-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+
+  a{color:inherit;text-decoration:none;}
+
+  /* focus ring — 컬러 대비만으로 표시 금지, 3px outline + offset */
+  :focus-visible{
+    outline:3px solid var(--primary);
+    outline-offset:2px;
+    border-radius:6px;
+  }
+
+  .shell{max-width:1120px;margin:0 auto;padding:24px 20px 64px;}
+
+  /* ── top bar ── */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:12px 16px;margin-bottom:24px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-ctrl);
+    box-shadow:var(--sh-rest);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;}
+  .brand-dot{
+    width:14px;height:14px;border-radius:var(--r-pill);
+    background:var(--grad-brand);
+    box-shadow:0 0 0 4px var(--primary-tint);
+  }
+  .brand-name{font-size:var(--fs-title);}
+  .brand-name b{background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .topnav{display:flex;align-items:center;gap:4px;}
+  .navlink{
+    padding:8px 12px;border-radius:var(--r-ctrl);
+    font-size:var(--fs-small);font-weight:600;color:var(--subtext);
+    transition:background .15s var(--ease),color .15s var(--ease);
+  }
+  .navlink:hover{background:var(--surface-alt);color:var(--text);}
+  .navlink.active{background:var(--primary-tint);color:var(--primary);}
+  .topnav .icon-btn{margin-left:6px;}
+
+  .icon-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:36px;height:36px;border-radius:var(--r-ctrl);
+    background:var(--surface);border:1px solid var(--border);color:var(--subtext);
+    cursor:pointer;transition:all .15s var(--ease);
+  }
+  .icon-btn:hover{color:var(--primary);border-color:rgba(99,91,255,.35);box-shadow:var(--sh-rest);}
+  .icon-btn:active{transform:translateY(1px);}
+
+  /* ── profile card ── */
+  .profile-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    box-shadow:var(--sh-rest);
+    overflow:hidden;
+    margin-bottom:24px;
+  }
+
+  /* cover banner — 비비드 그라디언트 섹션 블록 (시그니처) */
+  .cover{
+    position:relative;height:184px;
+    background:var(--grad-cover);
+    overflow:hidden;
+  }
+  .cover::before{
+    /* aurora blob */
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(420px 200px at 18% 20%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(360px 220px at 88% 78%, rgba(0,194,184,.55), transparent 60%);
+    mix-blend-mode:screen;
+  }
+  .cover-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size:32px 32px;
+    mask-image:linear-gradient(to bottom, rgba(0,0,0,.5), transparent 78%);
+    -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.5), transparent 78%);
+  }
+  .cover-shape{position:absolute;border-radius:var(--r-pill);filter:blur(2px);opacity:.9;}
+  .cs-1{width:120px;height:120px;top:-32px;right:120px;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,102,153,.5));}
+  .cs-2{width:64px;height:64px;bottom:24px;right:40px;background:radial-gradient(circle at 40% 30%, rgba(255,176,32,.95), rgba(255,102,153,.2));}
+  .cover-badge{
+    position:absolute;top:16px;left:16px;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:var(--r-pill);
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    backdrop-filter:none;
+    color:var(--on-primary);
+    font-size:var(--fs-label);font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+  }
+  .cover-badge .live-dot{width:7px;height:7px;border-radius:var(--r-pill);background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.3);}
+
+  .profile-body{padding:0 24px 24px;}
+
+  .profile-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    margin-top:-48px;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .avatar{
+    width:112px;height:112px;border-radius:24px;
+    background:var(--grad-brand);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--on-primary);font-size:40px;font-weight:700;letter-spacing:-.02em;
+    border:4px solid var(--surface);
+    box-shadow:var(--sh-rest);
+    flex-shrink:0;
+  }
+  .head-actions{display:flex;align-items:center;gap:8px;padding-bottom:6px;}
+
+  /* buttons — primary / secondary / ghost, 상태 다 그림 */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:40px;padding:0 18px;border-radius:var(--r-ctrl);
+    font-family:inherit;font-size:var(--fs-small);font-weight:600;
+    border:1px solid transparent;cursor:pointer;
+    transition:transform .12s var(--ease), box-shadow .18s var(--ease),
+               background .18s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+    white-space:nowrap;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  .btn-primary{
+    background:var(--grad-brand);color:var(--on-primary);
+    background-size:140% 140%;background-position:0% 0%;
+    box-shadow:0 1px 2px rgba(10,37,64,.10), 0 6px 16px rgba(99,91,255,.28);
+  }
+  .btn-primary:hover{background-position:100% 30%;box-shadow:0 4px 10px rgba(99,91,255,.30), 0 12px 28px rgba(99,91,255,.30);}
+  .btn-primary:active{box-shadow:0 1px 2px rgba(99,91,255,.35);}
+  .btn-primary.is-following{background:var(--surface-alt);color:var(--primary);box-shadow:none;border-color:rgba(99,91,255,.30);}
+
+  .btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border-strong);box-shadow:var(--sh-rest);}
+  .btn-secondary:hover{border-color:rgba(99,91,255,.35);color:var(--primary);}
+
+  .btn-ghost{background:transparent;color:var(--subtext);}
+  .btn-ghost:hover{background:var(--surface-alt);color:var(--text);}
+
+  .btn svg{width:16px;height:16px;}
+
+  .profile-meta .name{font-size:var(--fs-h1);font-weight:700;letter-spacing:-.02em;line-height:1.15;}
+  .profile-meta .handle{
+    display:inline-flex;align-items:center;gap:6px;margin-top:6px;
+    font-size:var(--fs-small);font-weight:600;color:var(--primary);
+  }
+  .verified{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:var(--r-pill);
+    background:var(--grad-teal);color:#fff;
+  }
+  .verified svg{width:11px;height:11px;}
+
+  .roles{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 12px;border-radius:var(--r-pill);
+    font-size:var(--fs-label);font-weight:600;letter-spacing:.01em;
+  }
+  .chip .swatch{width:8px;height:8px;border-radius:var(--r-pill);}
+  .chip-indigo{background:var(--surface-alt);color:var(--primary);}
+  .chip-indigo .swatch{background:var(--primary);}
+  .chip-teal{background:rgba(0,194,184,.12);color:#068f88;}
+  .chip-teal .swatch{background:var(--teal);}
+  .chip-pink{background:rgba(255,102,153,.12);color:#d63b6e;}
+  .chip-pink .swatch{background:var(--pink);}
+  .chip-amber{background:rgba(255,176,32,.14);color:#b57708;}
+  .chip-amber .swatch{background:var(--amber);}
+
+  .bio{margin:16px 0 0;max-width:68ch;color:var(--subtext);font-size:var(--fs-body);}
+  .bio-links{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:var(--fs-small);color:var(--muted);}
+  .bio-links a,.bio-links span{display:inline-flex;align-items:center;gap:6px;}
+  .bio-links a{position:relative;color:var(--subtext);font-weight:500;transition:color .15s var(--ease);}
+  .bio-links a::after{content:"";position:absolute;left:0;bottom:-2px;width:100%;height:1.5px;background:var(--primary);transform:scaleX(0);transform-origin:left;transition:transform .18s var(--ease);}
+  .bio-links a:hover{color:var(--primary);}
+  .bio-links a:hover::after{transform:scaleX(1);}
+  .bio-links svg{width:14px;height:14px;color:var(--muted);}
+
+  /* stats — 3개: 게시물/팔로워/팔로잉 */
+  .stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    margin-top:24px;padding-top:24px;border-top:1px solid var(--border);
+  }
+  .stat{
+    display:flex;flex-direction:column;gap:2px;
+    padding:16px;border-radius:12px;
+    background:var(--surface);border:1px solid var(--border);
+    transition:box-shadow .18s var(--ease), border-color .15s var(--ease), transform .18s var(--ease);
+    cursor:pointer;
+  }
+  .stat:hover{transform:translateY(-2px);box-shadow:var(--sh-hover);border-color:rgba(99,91,255,.20);}
+  .stat.stat-hero{background:var(--grad-teal);border-color:transparent;color:var(--on-primary);}
+  .stat.stat-hero .stat-value,.stat.stat-hero .stat-label{color:var(--on-primary);}
+  .stat.stat-hero .stat-delta{background:rgba(255,255,255,.20);color:#fff;}
+  .stat-value{font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.1;}
+  .stat-label{font-size:var(--fs-label);font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);}
+  .stat-delta{
+    align-self:flex-start;margin-top:8px;
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 9px;border-radius:var(--r-pill);
+    font-size:var(--fs-label);font-weight:700;
+  }
+  .delta-up{background:rgba(0,194,184,.14);color:#068f88;}
+  .delta-flat{background:var(--surface-alt);color:var(--muted);}
+
+  /* ── feed layout ── */
+  .feed-header{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    margin:8px 4px 16px;
+  }
+  .feed-header h2{font-size:var(--fs-h2);font-weight:700;letter-spacing:-.01em;margin:0;}
+  /* segmented control */
+  .segment{
+    display:inline-flex;padding:4px;gap:2px;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);
+    box-shadow:var(--sh-rest);
+  }
+  .seg-btn{
+    padding:7px 16px;border:none;background:transparent;cursor:pointer;
+    font-family:inherit;font-size:var(--fs-small);font-weight:600;color:var(--subtext);
+    border-radius:var(--r-pill);
+    transition:color .2s var(--ease),background .2s var(--ease);
+  }
+  .seg-btn:hover{color:var(--text);}
+  .seg-btn.active{background:var(--grad-brand);color:var(--on-primary);box-shadow:0 2px 8px rgba(99,91,255,.28);}
+
+  .feed{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:20px;
+  }
+
+  .post{
+    display:flex;flex-direction:column;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-card);
+    box-shadow:var(--sh-rest);
+    overflow:hidden;
+    transition:transform .18s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease);
+  }
+  .post:hover{transform:translateY(-2px);box-shadow:var(--sh-hover);border-color:rgba(99,91,255,.20);}
+
+  .post-head{display:flex;align-items:center;gap:12px;padding:16px 16px 0;}
+  .post-avatar{
+    width:40px;height:40px;border-radius:12px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:15px;font-weight:700;
+  }
+  .pa-brand{background:var(--grad-brand);}
+  .post-who{display:flex;flex-direction:column;line-height:1.35;min-width:0;}
+  .post-who .n{font-size:var(--fs-small);font-weight:600;color:var(--text);}
+  .post-who .t{font-size:var(--fs-label);color:var(--muted);}
+  .post-tag{
+    margin-left:auto;
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 10px;border-radius:var(--r-pill);
+    font-size:var(--fs-label);font-weight:600;
+  }
+  .tag-teal{background:rgba(0,194,184,.12);color:#068f88;}
+  .tag-violet{background:rgba(122,90,248,.12);color:#6338d4;}
+  .tag-amber{background:rgba(255,176,32,.14);color:#b57708;}
+  .tag-pink{background:rgba(255,102,153,.12);color:#d63b6e;}
+  .post-tag .swatch{width:7px;height:7px;border-radius:var(--r-pill);}
+  .tag-teal .swatch{background:var(--teal);}
+  .tag-violet .swatch{background:var(--violet);}
+  .tag-amber .swatch{background:var(--amber);}
+  .tag-pink .swatch{background:var(--pink);}
+
+  .post-text{padding:14px 16px 4px;}
+  .post-text p{margin:0;color:var(--subtext);font-size:var(--fs-body);}
+  .post-text .lead{color:var(--text);font-weight:600;font-size:var(--fs-title);letter-spacing:-.01em;margin-bottom:6px;}
+  .mention{color:var(--primary);font-weight:600;}
+
+  /* image slot — CSS 도형/그라디언트 */
+  .post-media{
+    position:relative;margin:14px 16px 0;height:200px;border-radius:12px;overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .media-a{background:var(--grad-brand);}
+  .media-a::after{content:"";position:absolute;inset:0;background:radial-gradient(300px 160px at 78% 22%, rgba(0,194,184,.6), transparent 60%), radial-gradient(240px 160px at 12% 88%, rgba(255,102,153,.45), transparent 60%);mix-blend-mode:screen;}
+  .media-b{background:linear-gradient(135deg,#00C2B8 0%,#635BFF 100%);}
+  .media-b::after{content:"";position:absolute;inset:0;background:conic-gradient(from 210deg at 70% 30%, rgba(255,255,255,.35), transparent 40%, rgba(255,176,32,.4) 70%, transparent 90%);mix-blend-mode:screen;}
+  .media-c{background:linear-gradient(135deg,#7A5AF8 0%,#FF6699 100%);}
+  .media-d{background:linear-gradient(135deg,#635BFF 0%,#00C2B8 100%);}
+
+  .media-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.10) 1px,transparent 1px);background-size:28px 28px;}
+  .media-orb{position:absolute;border-radius:var(--r-pill);}
+  .mo-1{width:96px;height:96px;top:24px;left:28px;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(255,255,255,.05));filter:blur(1px);}
+  .mo-2{width:56px;height:56px;bottom:22px;right:36px;background:radial-gradient(circle at 40% 30%,rgba(255,176,32,.95),transparent 70%);}
+  .media-label{
+    position:absolute;left:12px;bottom:12px;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 11px;border-radius:var(--r-pill);
+    background:rgba(10,37,64,.36);color:#fff;
+    font-size:var(--fs-label);font-weight:600;letter-spacing:.01em;
+  }
+  .media-label svg{width:12px;height:12px;}
+
+  /* bar-chart made of CSS bars (no lib) */
+  .media-bars{position:absolute;inset:auto 16px 16px 16px;display:flex;align-items:flex-end;gap:8px;height:96px;}
+  .media-bars .bar{flex:1;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.45));}
+
+  /* engagement bar */
+  .post-actions{
+    display:flex;align-items:center;gap:4px;
+    margin-top:16px;padding:12px 10px;border-top:1px solid var(--border);
+  }
+  .act{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:8px 12px;border-radius:var(--r-ctrl);
+    background:transparent;border:none;cursor:pointer;
+    font-family:inherit;font-size:var(--fs-small);font-weight:600;color:var(--subtext);
+    transition:background .15s var(--ease),color .15s var(--ease),transform .12s var(--ease);
+  }
+  .act svg{width:17px;height:17px;transition:transform .18s var(--ease);}
+  .act:hover{background:var(--surface-alt);color:var(--text);}
+  .act:active{transform:scale(.96);}
+  .act-like:hover{color:var(--pink);}
+  .act-like.liked{color:var(--pink);}
+  .act-like.liked svg{transform:scale(1.08);}
+  .act-comment:hover{color:var(--primary);}
+  .act-share:hover{color:var(--teal);}
+  .act .num{font-variant-numeric:tabular-nums;}
+  .act-share{margin-left:auto;}
+  .act-save{padding:8px 10px;}
+  .act-save:hover{color:var(--amber);}
+  .act-save.saved{color:var(--amber);}
+
+  /* footer */
+  .footer{
+    margin-top:40px;padding-top:24px;border-top:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:var(--fs-small);color:var(--muted);
+  }
+  .footer .fbrand{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--subtext);}
+  .footer .fbrand .brand-dot{width:10px;height:10px;}
+
+  /* ── responsive ── */
+  @media (max-width:860px){
+    .feed{grid-template-columns:1fr;}
+    .topnav .navlink{display:none;}
+  }
+  @media (max-width:560px){
+    .shell{padding:16px 14px 48px;}
+    .stats{grid-template-columns:1fr;}
+    .profile-head{margin-top:-40px;}
+    .avatar{width:88px;height:88px;font-size:32px;border-radius:20px;}
+    .stat-value{font-size:28px;}
+    .head-actions{width:100%;}
+    .head-actions .btn{flex:1;}
+  }
+
+  /* ── entrance anim ── */
+  @keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-16px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes shimmer{0%{background-position:-140% 0;}60%,100%{background-position:140% 0;}}
+  .profile-card{animation:slideIn .28s var(--ease) both;}
+  .post{animation:rise .34s var(--ease) both;}
+  .post:nth-child(1){animation-delay:.05s;}
+  .post:nth-child(2){animation-delay:.10s;}
+  .post:nth-child(3){animation-delay:.15s;}
+  .post:nth-child(4){animation-delay:.20s;}
+  .btn-primary::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);
+    background-size:220% 100%;
+    animation:shimmer 2.4s var(--ease) .6s 1;
+    pointer-events:none;
+  }
+  .btn-primary{position:relative;overflow:hidden;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+    .btn-primary::after{display:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+
+    <!-- top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">Layer<b>frame</b></span>
+      </div>
+      <nav class="topnav" aria-label="주요 메뉴">
+        <a class="navlink active" href="#">홈</a>
+        <a class="navlink" href="#">탐색</a>
+        <a class="navlink" href="#">알림</a>
+        <a class="navlink" href="#">저장됨</a>
+        <button class="icon-btn" type="button" aria-label="검색">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+        </button>
+        <button class="icon-btn" type="button" aria-label="새 게시물 작성">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- profile card -->
+    <section class="profile-card" aria-label="프로필">
+      <div class="cover" role="img" aria-label="브랜드 커버 배너">
+        <span class="cover-grid" aria-hidden="true"></span>
+        <span class="cover-shape cs-1" aria-hidden="true"></span>
+        <span class="cover-shape cs-2" aria-hidden="true"></span>
+        <span class="cover-badge"><span class="live-dot" aria-hidden="true"></span>디자인 스튜디오</span>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-head">
+          <div class="avatar" aria-hidden="true">LF</div>
+          <div class="head-actions">
+            <button class="btn btn-secondary" type="button" aria-label="메시지 보내기">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
+              메시지
+            </button>
+            <button class="btn btn-primary" id="followBtn" type="button" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" id="followIcon"><path d="M12 5v14M5 12h14"/></svg>
+              <span id="followLabel">팔로우</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-meta">
+          <div class="name">Layerframe Studio</div>
+          <span class="handle">
+            @layerframe
+            <span class="verified" aria-label="인증됨"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
+          </span>
+        </div>
+
+        <div class="roles">
+          <span class="chip chip-indigo"><span class="swatch" aria-hidden="true"></span>프로덕트 디자인</span>
+          <span class="chip chip-teal"><span class="swatch" aria-hidden="true"></span>디자인 시스템</span>
+          <span class="chip chip-pink"><span class="swatch" aria-hidden="true"></span>모션</span>
+          <span class="chip chip-amber"><span class="swatch" aria-hidden="true"></span>브랜딩</span>
+        </div>
+
+        <p class="bio">
+          레이어를 쌓아 화면을 짓습니다. 컬러풀 모던 UI, 반응형 컴포넌트, 접근성까지 한 번에 다듬는 소규모 디자인 스튜디오. 매주 새 시안과 작업 과정을 공유합니다.
+        </p>
+        <div class="bio-links">
+          <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>layerframe.studio</a>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>서울 · 원격</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>2023년 봄 합류</span>
+        </div>
+
+        <!-- stats: 게시물 / 팔로워 / 팔로잉 -->
+        <div class="stats">
+          <div class="stat" tabindex="0" role="button">
+            <span class="stat-value num">248</span>
+            <span class="stat-label">게시물</span>
+            <span class="stat-delta delta-flat">이번 주 6건</span>
+          </div>
+          <div class="stat stat-hero" tabindex="0" role="button">
+            <span class="stat-value num">18.4K</span>
+            <span class="stat-label">팔로워</span>
+            <span class="stat-delta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="m6 15 6-6 6 6"/></svg>+412</span>
+          </div>
+          <div class="stat" tabindex="0" role="button">
+            <span class="stat-value num">312</span>
+            <span class="stat-label">팔로잉</span>
+            <span class="stat-delta delta-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="m6 15 6-6 6 6"/></svg>+9</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- feed -->
+    <div class="feed-header">
+      <h2>최근 게시물</h2>
+      <div class="segment" role="tablist" aria-label="피드 필터">
+        <button class="seg-btn active" role="tab" aria-selected="true" type="button">전체</button>
+        <button class="seg-btn" role="tab" aria-selected="false" type="button">작업물</button>
+        <button class="seg-btn" role="tab" aria-selected="false" type="button">노트</button>
+      </div>
+    </div>
+
+    <section class="feed" aria-label="피드">
+
+      <!-- post 1 -->
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar pa-brand" aria-hidden="true">LF</div>
+          <div class="post-who">
+            <span class="n">Layerframe Studio</span>
+            <span class="t">@layerframe · 2시간 전</span>
+          </div>
+          <span class="post-tag tag-violet"><span class="swatch" aria-hidden="true"></span>릴리즈</span>
+        </div>
+        <div class="post-text">
+          <p class="lead">컬러풀 모던 컴포넌트 킷 v2 공개</p>
+          <p>버튼·인풋·카드에 hover / focus / active 상태를 전부 그렸습니다. 8px 그리드와 CSS 변수 토큰으로 다크 스왑까지 준비 완료. <span class="mention">@design-team</span></p>
+        </div>
+        <div class="post-media media-a" role="img" aria-label="컴포넌트 킷 미리보기">
+          <span class="media-grid" aria-hidden="true"></span>
+          <span class="media-orb mo-1" aria-hidden="true"></span>
+          <span class="media-orb mo-2" aria-hidden="true"></span>
+          <span class="media-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>Kit · 42 컴포넌트</span>
+        </div>
+        <div class="post-actions">
+          <button class="act act-like" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 22l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
+            <span class="num" data-count="1284">1,284</span>
+          </button>
+          <button class="act act-comment" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="num">96</span></button>
+          <button class="act act-save act-save" type="button" aria-label="저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></button>
+          <button class="act act-share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>공유</button>
+        </div>
+      </article>
+
+      <!-- post 2 -->
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar pa-brand" aria-hidden="true">LF</div>
+          <div class="post-who">
+            <span class="n">Layerframe Studio</span>
+            <span class="t">@layerframe · 5시간 전</span>
+          </div>
+          <span class="post-tag tag-teal"><span class="swatch" aria-hidden="true"></span>인사이트</span>
+        </div>
+        <div class="post-text">
+          <p class="lead">이번 주 참여 지표 리포트</p>
+          <p>비비드 컬러 블록을 강조 KPI 한 곳에만 쓰니 클릭률이 눈에 띄게 올랐습니다. 컬러는 장식이 아니라 신호일 때 힘이 세지네요.</p>
+        </div>
+        <div class="post-media media-b" role="img" aria-label="주간 참여 지표 막대 그래프">
+          <span class="media-grid" aria-hidden="true"></span>
+          <div class="media-bars" aria-hidden="true">
+            <span class="bar" style="height:38%"></span>
+            <span class="bar" style="height:56%"></span>
+            <span class="bar" style="height:44%"></span>
+            <span class="bar" style="height:72%"></span>
+            <span class="bar" style="height:60%"></span>
+            <span class="bar" style="height:88%"></span>
+            <span class="bar" style="height:66%"></span>
+          </div>
+          <span class="media-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>참여율 +18%</span>
+        </div>
+        <div class="post-actions">
+          <button class="act act-like" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 22l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
+            <span class="num" data-count="842">842</span>
+          </button>
+          <button class="act act-comment" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="num">54</span></button>
+          <button class="act act-save" type="button" aria-label="저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></button>
+          <button class="act act-share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>공유</button>
+        </div>
+      </article>
+
+      <!-- post 3 -->
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar pa-brand" aria-hidden="true">LF</div>
+          <div class="post-who">
+            <span class="n">Layerframe Studio</span>
+            <span class="t">@layerframe · 어제</span>
+          </div>
+          <span class="post-tag tag-pink"><span class="swatch" aria-hidden="true"></span>작업 과정</span>
+        </div>
+        <div class="post-text">
+          <p class="lead">그라디언트 커버 배너, 세 번의 시안</p>
+          <p>인디고에서 시작해 바이올렛을 지나 틸로 넘어가는 135° 그라디언트로 정착했습니다. 흰 여백이 숨 쉴 공간을 남기는 게 관건이었어요.</p>
+        </div>
+        <div class="post-media media-c" role="img" aria-label="그라디언트 커버 시안">
+          <span class="media-grid" aria-hidden="true"></span>
+          <span class="media-orb mo-1" aria-hidden="true"></span>
+          <span class="media-orb mo-2" aria-hidden="true"></span>
+          <span class="media-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="15" cy="17" r="2.5"/><path d="M12 12a9 9 0 1 0 9 9"/></svg>3 시안 · 팔레트</span>
+        </div>
+        <div class="post-actions">
+          <button class="act act-like liked" type="button" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 22l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
+            <span class="num" data-count="2107">2,107</span>
+          </button>
+          <button class="act act-comment" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="num">173</span></button>
+          <button class="act act-save saved" type="button" aria-label="저장됨"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></button>
+          <button class="act act-share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>공유</button>
+        </div>
+      </article>
+
+      <!-- post 4 -->
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar pa-brand" aria-hidden="true">LF</div>
+          <div class="post-who">
+            <span class="n">Layerframe Studio</span>
+            <span class="t">@layerframe · 2일 전</span>
+          </div>
+          <span class="post-tag tag-amber"><span class="swatch" aria-hidden="true"></span>공지</span>
+        </div>
+        <div class="post-text">
+          <p class="lead">디자인 시스템 오픈 세션 모집</p>
+          <p>토큰 설계부터 상태 스타일링까지, 실무 흐름을 공개로 진행합니다. 자리는 한정. 관심 있으면 아래 링크에서 신청하세요.</p>
+        </div>
+        <div class="post-media media-d" role="img" aria-label="오픈 세션 안내 배너">
+          <span class="media-grid" aria-hidden="true"></span>
+          <span class="media-orb mo-1" aria-hidden="true"></span>
+          <span class="media-orb mo-2" aria-hidden="true"></span>
+          <span class="media-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>7월 20일 · 20석</span>
+        </div>
+        <div class="post-actions">
+          <button class="act act-like" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 22l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
+            <span class="num" data-count="576">576</span>
+          </button>
+          <button class="act act-comment" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span class="num">38</span></button>
+          <button class="act act-save" type="button" aria-label="저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></button>
+          <button class="act act-share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>공유</button>
+        </div>
+      </article>
+
+    </section>
+
+    <footer class="footer">
+      <span class="fbrand"><span class="brand-dot" aria-hidden="true"></span>소셜 프로필 · 컬러풀 모던</span>
+      <span>© 2026 Layerframe · 데모 목업</span>
+    </footer>
+
+  </div>
+
+<script>
+  // 팔로우 토글
+  (function(){
+    var btn = document.getElementById('followBtn');
+    var label = document.getElementById('followLabel');
+    var icon = document.getElementById('followIcon');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      var on = btn.classList.toggle('is-following');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      label.textContent = on ? '팔로잉' : '팔로우';
+      icon.innerHTML = on
+        ? '<path d="m5 13 4 4L19 7"/>'
+        : '<path d="M12 5v14M5 12h14"/>';
+    });
+  })();
+
+  // 좋아요 토글 + 카운트 롤업
+  document.querySelectorAll('.act-like').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var num = btn.querySelector('.num');
+      var base = parseInt(num.getAttribute('data-count'), 10);
+      var liked = btn.classList.toggle('liked');
+      btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+      var svg = btn.querySelector('svg');
+      svg.setAttribute('fill', liked ? 'currentColor' : 'none');
+      var next = liked ? base + 1 : base;
+      num.textContent = next.toLocaleString('en-US');
+    });
+  });
+
+  // 저장 토글
+  document.querySelectorAll('.act-save').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var saved = btn.classList.toggle('saved');
+      var svg = btn.querySelector('svg');
+      svg.setAttribute('fill', saved ? 'currentColor' : 'none');
+      btn.setAttribute('aria-label', saved ? '저장됨' : '저장');
+    });
+  });
+
+  // 세그먼트 탭
+  document.querySelectorAll('.segment').forEach(function(seg){
+    var btns = seg.querySelectorAll('.seg-btn');
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        btns.forEach(function(x){ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+        b.classList.add('active'); b.setAttribute('aria-selected','true');
+      });
+    });
+  });
+</script>
+</body>
+</html>

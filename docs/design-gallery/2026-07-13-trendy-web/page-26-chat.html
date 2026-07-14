@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nova — AI 채팅</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============ 토큰 ============ */
+  :root{
+    /* 팔레트 — 라이트 + 보라·인디고 그라디언트 액센트 */
+    --bg:#FAFAFB;
+    --surface:#FFFFFF;
+    --surface-subtle:#F4F4F7;
+    --border:#E8E8EE;
+    --border-strong:#DEDEE6;
+    --fg-strong:#16161D;
+    --fg:#3A3A44;
+    --fg-muted:#8A8A99;
+    --accent:#7C5CFF;
+    --accent-2:#5B8DEF;
+    --accent-strong:#6A47F5;
+    --accent-soft:#EDE9FF;
+    --on-accent:#FFFFFF;
+    --glow:#9B7BFF;
+    --success:#12B76A;
+    --warning:#F79009;
+    --danger:#F04438;
+    --grad:linear-gradient(135deg,#7C5CFF 0%,#5B8DEF 100%);
+    --grad-hover:linear-gradient(115deg,#7C5CFF 0%,#5B8DEF 100%);
+
+    /* 스페이싱 — 8px 그리드 */
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+
+    /* 반경 */
+    --r-card:16px; --r-ctrl:10px; --r-pill:999px; --r-modal:20px;
+
+    /* 그림자 / 글로우 */
+    --shadow-sm:0 1px 2px rgba(16,16,29,.04);
+    --shadow-card:0 1px 2px rgba(16,16,29,.04),0 0 40px rgba(155,123,255,.10);
+    --shadow-glow:0 1px 2px rgba(16,16,29,.05),0 0 52px rgba(155,123,255,.16);
+    --shadow-float:0 12px 40px rgba(16,16,29,.10),0 2px 8px rgba(16,16,29,.04);
+
+    /* 포커스 링 */
+    --ring:0 0 0 4px var(--accent-soft);
+
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Pretendard','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    color:var(--fg);
+    background:
+      radial-gradient(720px 420px at 78% -8%,rgba(124,92,255,.10),transparent 60%),
+      radial-gradient(680px 400px at 6% 108%,rgba(91,141,239,.08),transparent 60%),
+      var(--bg);
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.005em;
+  }
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ============ 셸 ============ */
+  .wrap{max-width:1200px;margin:0 auto;padding:var(--s6) var(--s5);min-height:100%;display:flex;flex-direction:column;gap:var(--s4)}
+  .app{
+    flex:1;display:grid;grid-template-columns:320px 1fr;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-modal);
+    box-shadow:var(--shadow-float);overflow:hidden;min-height:640px;
+  }
+
+  /* ============ 사이드바 — 대화 리스트 ============ */
+  .side{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);min-width:0}
+  .side-head{padding:var(--s5) var(--s4) var(--s3);display:flex;flex-direction:column;gap:var(--s4)}
+  .brand{display:flex;align-items:center;gap:var(--s3)}
+  .brand-mark{
+    width:36px;height:36px;border-radius:12px;flex:none;
+    background:var(--grad);position:relative;display:grid;place-items:center;
+    box-shadow:0 4px 14px rgba(124,92,255,.35);
+  }
+  .brand-mark svg{width:20px;height:20px;color:#fff}
+  .brand-name{font-size:16px;font-weight:700;color:var(--fg-strong);line-height:1.2;letter-spacing:-.01em}
+  .brand-sub{font-size:12px;color:var(--fg-muted);font-weight:500;letter-spacing:.2px}
+  .brand-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+
+  .btn{
+    font-family:inherit;cursor:pointer;border:1px solid transparent;border-radius:var(--r-ctrl);
+    font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+    transition:background .18s var(--ease),box-shadow .2s var(--ease),border-color .18s,transform .06s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:focus-visible{outline:1px solid var(--accent-strong);outline-offset:2px;box-shadow:var(--ring)}
+  .btn svg{width:18px;height:18px}
+
+  /* primary — 그라디언트 CTA */
+  .btn-primary{
+    background:var(--grad);color:var(--on-accent);height:40px;padding:0 var(--s4);font-size:14px;
+    background-size:140% 140%;box-shadow:0 1px 2px rgba(16,16,29,.06),0 6px 18px rgba(124,92,255,.28);
+  }
+  .btn-primary:hover{background-image:var(--grad-hover);box-shadow:0 1px 2px rgba(16,16,29,.06),0 8px 24px rgba(124,92,255,.36)}
+  .btn-primary:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(16,16,29,.06),0 4px 12px rgba(124,92,255,.30)}
+  .btn-primary.full{width:100%}
+
+  /* icon button (ghost) */
+  .icon-btn{
+    background:transparent;color:var(--fg-muted);width:36px;height:36px;border-radius:var(--r-ctrl);flex:none;
+  }
+  .icon-btn:hover{background:var(--surface-subtle);color:var(--fg)}
+  .icon-btn:active{background:var(--border);transform:translateY(1px)}
+
+  /* 검색 인풋 */
+  .search{position:relative}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--fg-muted);pointer-events:none}
+  .search input{
+    width:100%;height:38px;padding:0 var(--s3) 0 36px;border:1px solid var(--border);border-radius:var(--r-ctrl);
+    background:var(--surface-subtle);color:var(--fg);font-family:inherit;font-size:14px;
+    transition:border-color .18s,background .18s,box-shadow .2s var(--ease);
+  }
+  .search input::placeholder{color:var(--fg-muted)}
+  .search input:hover{border-color:var(--border-strong)}
+  .search input:focus{outline:none;border-color:var(--accent-strong);background:var(--surface);box-shadow:var(--ring)}
+
+  .side-label{padding:var(--s2) var(--s4);font-size:12px;font-weight:600;letter-spacing:.4px;color:var(--fg-muted);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+  .side-label .count{background:var(--surface-subtle);color:var(--fg-muted);border-radius:var(--r-pill);padding:1px 8px;font-size:11px;letter-spacing:0}
+
+  .conv-list{flex:1;overflow-y:auto;padding:var(--s1) var(--s3) var(--s4);display:flex;flex-direction:column;gap:2px}
+
+  .conv{
+    position:relative;width:100%;text-align:left;cursor:pointer;font-family:inherit;
+    display:grid;grid-template-columns:44px 1fr auto;gap:var(--s3);align-items:center;
+    padding:var(--s3);border-radius:12px;border:1px solid transparent;background:transparent;
+    transition:background .16s var(--ease),border-color .16s;
+  }
+  .conv:hover{background:var(--surface-subtle)}
+  .conv:active{background:var(--border)}
+  .conv:focus-visible{outline:1px solid var(--accent-strong);outline-offset:-1px;box-shadow:var(--ring)}
+  .conv[aria-current="true"]{background:var(--accent-soft);border-color:rgba(124,92,255,.18)}
+  /* 좌측 그라디언트 인디케이터 바 */
+  .conv[aria-current="true"]::before{
+    content:"";position:absolute;left:2px;top:10px;bottom:10px;width:3px;border-radius:var(--r-pill);background:var(--grad);
+  }
+
+  .avatar{width:44px;height:44px;border-radius:var(--r-pill);flex:none;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff;position:relative}
+  .avatar.grad{background:var(--grad);box-shadow:0 3px 12px rgba(124,92,255,.35)}
+  .avatar.c1{background:linear-gradient(135deg,#F79009,#F0A64B)}
+  .avatar.c2{background:linear-gradient(135deg,#12B76A,#3AC98B)}
+  .avatar.c3{background:linear-gradient(135deg,#5B8DEF,#6FA0F2)}
+  .avatar.c4{background:linear-gradient(135deg,#8A8A99,#A6A6B2)}
+  .avatar .spark{position:absolute;right:-2px;top:-2px;width:14px;height:14px;color:#fff;filter:drop-shadow(0 1px 2px rgba(124,92,255,.5))}
+  .dot-online{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--success);border:2px solid var(--surface)}
+  .conv[aria-current="true"] .dot-online{border-color:var(--accent-soft)}
+
+  .conv-body{min-width:0;display:flex;flex-direction:column;gap:2px}
+  .conv-top{display:flex;align-items:center;gap:6px;min-width:0}
+  .conv-name{font-size:14px;font-weight:600;color:var(--fg-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pin{width:13px;height:13px;color:var(--accent-strong);flex:none}
+  .conv-role{font-size:11px;color:var(--fg-muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv-preview{font-size:13px;color:var(--fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+  .conv[aria-current="true"] .conv-preview{color:var(--fg)}
+  .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+  .conv-time{font-size:11px;color:var(--fg-muted);white-space:nowrap}
+  .badge-unread{min-width:18px;height:18px;padding:0 5px;border-radius:var(--r-pill);background:var(--grad);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 6px rgba(124,92,255,.4)}
+
+  /* ============ 메인 채팅 ============ */
+  .chat{display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#FDFDFE,var(--bg))}
+
+  .chat-head{
+    display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);
+    border-bottom:1px solid var(--border);background:rgba(255,255,255,.72);backdrop-filter:saturate(140%) blur(8px);
+  }
+  .chat-head .avatar{width:40px;height:40px}
+  .ch-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .ch-title{font-size:16px;font-weight:700;color:var(--fg-strong);letter-spacing:-.01em;display:flex;align-items:center;gap:var(--s2)}
+  .pill-ai{
+    font-size:11px;font-weight:600;letter-spacing:.3px;color:var(--accent-strong);
+    background:var(--accent-soft);border-radius:var(--r-pill);padding:2px 8px;display:inline-flex;align-items:center;gap:4px;
+  }
+  .pill-ai svg{width:11px;height:11px}
+  .ch-status{font-size:12px;color:var(--fg-muted);display:flex;align-items:center;gap:6px;font-weight:500}
+  .live{width:7px;height:7px;border-radius:50%;background:var(--success);position:relative;flex:none}
+  .live::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(18,183,106,.4);animation:pulse 2s var(--ease) infinite}
+  .ch-actions{margin-left:auto;display:flex;gap:var(--s1)}
+
+  /* 메시지 영역 */
+  .messages{flex:1;overflow-y:auto;padding:var(--s5) var(--s5) var(--s4);display:flex;flex-direction:column;gap:var(--s4)}
+  .day-sep{align-self:center;font-size:11px;color:var(--fg-muted);font-weight:600;letter-spacing:.3px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px 12px}
+
+  .row{display:flex;gap:var(--s3);max-width:78%;align-items:flex-end}
+  .row.ai{align-self:flex-start}
+  .row.me{align-self:flex-end;flex-direction:row-reverse}
+  .row .avatar{width:32px;height:32px;font-size:12px;flex:none;margin-bottom:2px}
+  .row.me .avatar{display:none}
+
+  .stack{display:flex;flex-direction:column;gap:var(--s2);min-width:0}
+  .sender{font-size:12px;font-weight:600;color:var(--fg-muted);padding-left:var(--s1);display:flex;align-items:center;gap:6px}
+  .sender .spark{width:12px;height:12px;color:var(--accent)}
+
+  .bubble{
+    padding:var(--s3) var(--s4);font-size:14px;line-height:1.55;border-radius:var(--r-card);
+    animation:rise .4s var(--ease) both;
+  }
+  .bubble.ai{background:var(--surface);color:var(--fg);border:1px solid var(--border);border-bottom-left-radius:6px;box-shadow:var(--shadow-sm)}
+  .bubble.ai.glow{box-shadow:var(--shadow-card)}
+  .bubble.me{background:var(--grad);color:var(--on-accent);border-bottom-right-radius:6px;box-shadow:0 1px 2px rgba(16,16,29,.06),0 8px 20px rgba(124,92,255,.22)}
+  .bubble strong{font-weight:700;color:var(--fg-strong)}
+  .bubble.me strong{color:#fff}
+  .bubble p{margin:0}
+  .bubble p + p{margin-top:var(--s2)}
+
+  /* AI 인사이트 배지 (버블 내부) */
+  .insight{
+    margin-top:var(--s3);padding:var(--s3);border-radius:12px;
+    background:linear-gradient(135deg,rgba(124,92,255,.06),rgba(91,141,239,.05));
+    border:1px solid rgba(124,92,255,.18);display:flex;gap:var(--s2);align-items:flex-start;
+  }
+  .insight .ico{width:24px;height:24px;border-radius:8px;background:var(--grad);display:grid;place-items:center;flex:none}
+  .insight .ico svg{width:14px;height:14px;color:#fff}
+  .insight .txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .insight .lb{font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--accent-strong)}
+  .insight .ds{font-size:13px;color:var(--fg);line-height:1.45}
+
+  .time{font-size:11px;color:var(--fg-muted);padding:0 var(--s1)}
+  .row.me .time{text-align:right}
+  .meta-line{display:flex;align-items:center;gap:6px;padding:0 var(--s1)}
+  .read{font-size:11px;color:var(--accent-strong);font-weight:600;display:inline-flex;align-items:center;gap:3px}
+  .read svg{width:12px;height:12px}
+
+  /* 타이핑 인디케이터 */
+  .typing-row{display:flex;gap:var(--s3);align-self:flex-start;align-items:flex-end;max-width:78%}
+  .typing-row .avatar{width:32px;height:32px;font-size:12px;flex:none;margin-bottom:2px}
+  .typing{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);border-bottom-left-radius:6px;
+    padding:var(--s3) var(--s4);display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);
+  }
+  .dots{display:flex;gap:5px}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--glow);opacity:.5;animation:bounce 1.3s var(--ease) infinite}
+  .dots i:nth-child(2){animation-delay:.18s}
+  .dots i:nth-child(3){animation-delay:.36s}
+  .typing .lb{font-size:12px;color:var(--fg-muted);font-weight:500}
+
+  /* ============ 컴포저 ============ */
+  .composer{border-top:1px solid var(--border);background:rgba(255,255,255,.82);backdrop-filter:blur(8px);padding:var(--s3) var(--s5) var(--s4)}
+
+  /* AI 제안 칩 */
+  .chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3);align-items:center}
+  .chips-lb{font-size:11px;font-weight:600;color:var(--fg-muted);letter-spacing:.2px;display:inline-flex;align-items:center;gap:5px;margin-right:2px}
+  .chips-lb svg{width:13px;height:13px;color:var(--accent)}
+  .chip{
+    font-family:inherit;cursor:pointer;font-size:13px;font-weight:500;color:var(--accent-strong);
+    background:var(--surface);border:1px solid rgba(124,92,255,.28);border-radius:var(--r-pill);
+    padding:6px 14px;display:inline-flex;align-items:center;gap:6px;
+    transition:background .16s var(--ease),border-color .16s,box-shadow .2s var(--ease),transform .06s;
+  }
+  .chip svg{width:13px;height:13px}
+  .chip:hover{background:var(--accent-soft);border-color:rgba(124,92,255,.5);box-shadow:0 0 0 4px rgba(124,92,255,.06)}
+  .chip:active{transform:translateY(1px);background:#E3DBFF}
+  .chip:focus-visible{outline:1px solid var(--accent-strong);outline-offset:2px;box-shadow:var(--ring)}
+
+  /* 입력창 + 전송 */
+  .input-bar{
+    display:flex;align-items:flex-end;gap:var(--s2);background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--r-card);padding:var(--s2);
+    transition:border-color .18s,box-shadow .2s var(--ease);
+  }
+  .input-bar:focus-within{border-color:var(--accent-strong);box-shadow:var(--ring)}
+  .input-bar .icon-btn{width:38px;height:38px;color:var(--fg-muted)}
+  .msg-input{
+    flex:1;border:none;background:transparent;resize:none;outline:none;
+    font-family:inherit;font-size:14px;line-height:1.5;color:var(--fg);
+    padding:9px var(--s1);max-height:120px;min-height:24px;
+  }
+  .msg-input::placeholder{color:var(--fg-muted)}
+  .send{
+    width:40px;height:40px;border-radius:var(--r-ctrl);flex:none;background:var(--grad);color:#fff;
+    border:none;cursor:pointer;display:grid;place-items:center;
+    background-size:140% 140%;box-shadow:0 4px 14px rgba(124,92,255,.3);
+    transition:background .18s var(--ease),box-shadow .2s var(--ease),transform .06s,opacity .18s;
+  }
+  .send svg{width:18px;height:18px}
+  .send:hover{background-image:var(--grad-hover);box-shadow:0 6px 20px rgba(124,92,255,.42)}
+  .send:active{transform:translateY(1px) scale(.97)}
+  .send:focus-visible{outline:1px solid var(--accent-strong);outline-offset:2px;box-shadow:var(--ring)}
+  .send:disabled{background:var(--surface-subtle);background-image:none;color:var(--fg-muted);box-shadow:none;cursor:not-allowed}
+  .composer-hint{margin-top:var(--s2);font-size:11px;color:var(--fg-muted);display:flex;justify-content:space-between;padding:0 var(--s1)}
+  kbd{font-family:inherit;font-size:10px;background:var(--surface-subtle);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:var(--fg);font-weight:600}
+
+  /* ============ 푸터 ============ */
+  .ft{text-align:center;font-size:12px;color:var(--fg-muted);letter-spacing:.2px;padding-bottom:var(--s1)}
+  .ft b{color:var(--fg);font-weight:600}
+
+  /* 스크롤바 */
+  .conv-list::-webkit-scrollbar,.messages::-webkit-scrollbar{width:8px}
+  .conv-list::-webkit-scrollbar-thumb,.messages::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-pill);border:2px solid transparent;background-clip:padding-box}
+  .conv-list::-webkit-scrollbar-thumb:hover,.messages::-webkit-scrollbar-thumb:hover{background:#CFCFD9;background-clip:padding-box}
+
+  /* ============ 애니메이션 ============ */
+  @keyframes pulse{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes sparkle{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.25);opacity:1}}
+  .spark-anim{animation:sparkle 4s var(--ease) infinite}
+
+  /* ============ 반응형 ============ */
+  @media (max-width:900px){
+    .wrap{padding:var(--s4) var(--s3)}
+    .app{grid-template-columns:1fr;min-height:0}
+    .side{display:none}
+    .row,.typing-row{max-width:90%}
+  }
+  @media (max-width:520px){
+    .chips-lb{display:none}
+    .composer-hint{display:none}
+    .row,.typing-row{max-width:94%}
+  }
+
+  /* ============ 모션 최소화 ============ */
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .bubble{opacity:1;transform:none}
+    .dots i{opacity:.7}
+    .live::after{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="app">
+
+      <!-- ============ 사이드바 : 대화 리스트 ============ -->
+      <aside class="side" aria-label="대화 목록">
+        <div class="side-head">
+          <div class="brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l1.9 6.1 6.1 1.9-6.1 1.9L12 18.5l-1.9-6.1L4 10.5l6.1-1.9L12 2.5z" fill="currentColor"/></svg>
+            </span>
+            <span class="brand-txt">
+              <span class="brand-name">Nova</span>
+              <span class="brand-sub">AI 어시스턴트 워크스페이스</span>
+            </span>
+          </div>
+          <button class="btn btn-primary full" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+            새 대화 시작
+          </button>
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2" stroke-linecap="round"/></svg>
+            <input type="search" placeholder="대화·어시스턴트 검색" aria-label="대화 검색" />
+          </div>
+        </div>
+
+        <div class="side-label">최근 대화 <span class="count num">5</span></div>
+
+        <div class="conv-list">
+          <!-- 1 — 선택됨 -->
+          <button class="conv" type="button" aria-current="true">
+            <span class="avatar grad">
+              <svg class="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>
+              N
+              <span class="dot-online" aria-hidden="true"></span>
+            </span>
+            <span class="conv-body">
+              <span class="conv-top">
+                <svg class="pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4h6l-1 5 3 3v2h-4v6l-1 1-1-1v-6H6v-2l3-3-1-5z"/></svg>
+                <span class="conv-name">Nova · 런칭 어시스턴트</span>
+              </span>
+              <span class="conv-preview">세 가지 CTA 문구를 준비했어요 — A/B로 먼저…</span>
+            </span>
+            <span class="conv-meta">
+              <span class="conv-time">지금</span>
+              <span class="badge-unread num">1</span>
+            </span>
+          </button>
+
+          <!-- 2 -->
+          <button class="conv" type="button">
+            <span class="avatar c1">GR<span class="dot-online" aria-hidden="true"></span></span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">그로스 봇</span></span>
+              <span class="conv-role">@growth · 지표 어시스턴트</span>
+              <span class="conv-preview">이번 주 전환율 리포트 요약해뒀어요</span>
+            </span>
+            <span class="conv-meta">
+              <span class="conv-time num">9:24</span>
+              <span class="badge-unread num">2</span>
+            </span>
+          </button>
+
+          <!-- 3 -->
+          <button class="conv" type="button">
+            <span class="avatar c2">DR</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">디자인 리뷰</span></span>
+              <span class="conv-role">시안 피드백</span>
+              <span class="conv-preview">버튼 대비가 조금 약해 보여요. 톤을…</span>
+            </span>
+            <span class="conv-meta"><span class="conv-time">어제</span></span>
+          </button>
+
+          <!-- 4 -->
+          <button class="conv" type="button">
+            <span class="avatar c3">DA</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">데이터 애널리스트</span></span>
+              <span class="conv-role">지표 질의</span>
+              <span class="conv-preview">MAU는 전월 대비 8% 상승했습니다</span>
+            </span>
+            <span class="conv-meta"><span class="conv-time">화요일</span></span>
+          </button>
+
+          <!-- 5 -->
+          <button class="conv" type="button">
+            <span class="avatar c4">OB</span>
+            <span class="conv-body">
+              <span class="conv-top"><span class="conv-name">온보딩 가이드</span></span>
+              <span class="conv-role">신규 멤버</span>
+              <span class="conv-preview">환영해요. 먼저 워크스페이스를 둘러볼까요?</span>
+            </span>
+            <span class="conv-meta"><span class="conv-time">월요일</span></span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ============ 메인 채팅 ============ -->
+      <section class="chat" aria-label="Nova 런칭 어시스턴트와의 대화">
+        <header class="chat-head">
+          <span class="avatar grad" style="width:40px;height:40px">
+            <svg class="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>
+            N
+          </span>
+          <div class="ch-info">
+            <div class="ch-title">
+              런칭 어시스턴트
+              <span class="pill-ai"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>Nova AI</span>
+            </div>
+            <div class="ch-status"><span class="live" aria-hidden="true"></span>온라인 · 보통 몇 초 안에 응답</div>
+          </div>
+          <div class="ch-actions">
+            <button class="btn icon-btn" type="button" aria-label="대화 내 검색">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="btn icon-btn" type="button" aria-label="더보기">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="messages" id="messages">
+          <div class="day-sep">오늘 · 7월 13일</div>
+
+          <!-- 1 — 유저 -->
+          <div class="row me" style="animation-delay:.02s">
+            <div class="stack">
+              <div class="bubble me">다음 주 v3.0 런칭 공지 초안 잡아줘. 톤은 산뜻하고 자신감 있게, 세 문단 정도로.</div>
+              <div class="meta-line" style="justify-content:flex-end">
+                <span class="read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l4 4L18 6M9 15l2 2" stroke-linecap="round" stroke-linejoin="round"/></svg>읽음</span>
+                <span class="time num">오전 9:41</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 — AI (인사이트 포함) -->
+          <div class="row ai">
+            <span class="avatar grad">N</span>
+            <div class="stack">
+              <div class="sender"><svg class="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>Nova</div>
+              <div class="bubble ai glow">
+                <p><strong>세 문단으로 구조를 잡아봤어요.</strong> 오프닝은 새로워진 점을 한 줄로, 본문은 가장 큰 개선 두 가지(속도·협업), 클로징은 바로 써보도록 안내하는 흐름이에요.</p>
+                <p>문단별로 더 다듬어 드릴까요?</p>
+                <div class="insight">
+                  <span class="ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg></span>
+                  <span class="txt">
+                    <span class="lb">AI 인사이트</span>
+                    <span class="ds">지난 공지 대비 평균 문장 길이가 <strong>22% 짧아</strong> 가독성이 좋아졌어요.</span>
+                  </span>
+                </div>
+              </div>
+              <span class="time num">오전 9:41</span>
+            </div>
+          </div>
+
+          <!-- 3 — 유저 -->
+          <div class="row me">
+            <div class="stack">
+              <div class="bubble me">두 번째 문단이 좀 딱딱해. 더 캐주얼하게 바꿔줘.</div>
+              <div class="meta-line" style="justify-content:flex-end">
+                <span class="read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l4 4L18 6M9 15l2 2" stroke-linecap="round" stroke-linejoin="round"/></svg>읽음</span>
+                <span class="time num">오전 9:42</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 — AI -->
+          <div class="row ai">
+            <span class="avatar grad">N</span>
+            <div class="stack">
+              <div class="sender"><svg class="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>Nova</div>
+              <div class="bubble ai">
+                <p>이렇게 풀었어요. <strong>“협업 기능을 대폭 강화했습니다”</strong> 대신 <strong>“이제 팀원과 같은 화면에서 바로 이어 작업할 수 있어요”</strong>로.</p>
+                <p>딱딱한 명사형을 줄이고 말하듯 자연스럽게 바꿨습니다.</p>
+              </div>
+              <span class="time num">오전 9:42</span>
+            </div>
+          </div>
+
+          <!-- 5 — 유저 -->
+          <div class="row me">
+            <div class="stack">
+              <div class="bubble me">좋아. CTA 문구도 세 개만 뽑아줄래?</div>
+              <div class="meta-line" style="justify-content:flex-end">
+                <span class="read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l4 4L18 6M9 15l2 2" stroke-linecap="round" stroke-linejoin="round"/></svg>읽음</span>
+                <span class="time num">오전 9:43</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 — AI -->
+          <div class="row ai">
+            <span class="avatar grad">N</span>
+            <div class="stack">
+              <div class="sender"><svg class="spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>Nova</div>
+              <div class="bubble ai">
+                <p>세 가지 결로 준비했어요.</p>
+                <p><strong>1) 지금 v3.0 시작하기</strong> — 직접적<br/>
+                <strong>2) 새 워크스페이스 열어보기</strong> — 행동 유도<br/>
+                <strong>3) 2분 투어 먼저 보기</strong> — 부담 적게</p>
+                <p>A/B로 <strong>1번과 3번</strong>을 먼저 비교해보길 추천해요.</p>
+              </div>
+              <span class="time num">오전 9:43</span>
+            </div>
+          </div>
+
+          <!-- 타이핑 인디케이터 -->
+          <div class="typing-row" aria-live="polite">
+            <span class="avatar grad">N</span>
+            <div class="typing">
+              <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="lb">Nova가 이어서 정리하고 있어요…</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 컴포저 ============ -->
+        <div class="composer">
+          <div class="chips" role="group" aria-label="AI 추천 답장">
+            <span class="chips-lb"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3z"/></svg>추천</span>
+            <button class="chip" type="button">표로 정리해줘</button>
+            <button class="chip" type="button">영어로 번역</button>
+            <button class="chip" type="button">더 짧게 요약</button>
+          </div>
+
+          <form class="input-bar" id="composer" onsubmit="return false">
+            <button class="btn icon-btn" type="button" aria-label="파일 첨부">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 11.5l-8.5 8.5a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L10 17.4a1.6 1.6 0 01-2.3-2.3l7.7-7.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <textarea class="msg-input" id="msgInput" rows="1" placeholder="Nova에게 메시지 보내기…" aria-label="메시지 입력">표로도 같이 정리해줄 수 있어?</textarea>
+            <button class="btn icon-btn" type="button" aria-label="음성 입력">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4" stroke-linecap="round"/></svg>
+            </button>
+            <button class="send" id="sendBtn" type="submit" aria-label="전송">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+          <div class="composer-hint">
+            <span>Nova는 실수할 수 있어요 — 중요한 내용은 확인해 주세요</span>
+            <span><kbd>Enter</kbd> 전송 · <kbd>Shift + Enter</kbd> 줄바꿈</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="ft"><b>AI 채팅</b> · AI 프로덕트</footer>
+  </div>
+
+  <script>
+    (function(){
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // 스파클 은은한 반짝 — reduced-motion 시 정지
+      if(!reduce){
+        document.querySelectorAll('.brand-mark svg, .avatar .spark, .pill-ai svg').forEach(function(el){
+          el.classList.add('spark-anim');
+          el.style.animationDelay = (Math.random()*3).toFixed(2)+'s';
+        });
+      }
+
+      // 대화 항목 선택
+      var convs = document.querySelectorAll('.conv');
+      convs.forEach(function(c){
+        c.addEventListener('click', function(){
+          convs.forEach(function(x){ x.setAttribute('aria-current','false'); });
+          c.setAttribute('aria-current','true');
+          var b = c.querySelector('.badge-unread'); if(b) b.remove();
+        });
+      });
+
+      // 전송 버튼 활성/비활성
+      var input = document.getElementById('msgInput');
+      var send = document.getElementById('sendBtn');
+      function sync(){
+        var has = input.value.trim().length > 0;
+        send.disabled = !has;
+        input.style.height='auto';
+        input.style.height = Math.min(input.scrollHeight,120)+'px';
+      }
+      input.addEventListener('input', sync);
+      sync();
+
+      // 칩 클릭 → 입력창 채우기
+      document.querySelectorAll('.chip').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          input.value = chip.textContent.trim();
+          sync(); input.focus();
+        });
+      });
+
+      // Enter 전송 / Shift+Enter 줄바꿈 (데모 — 실제 전송 없이 입력만 정리)
+      input.addEventListener('keydown', function(e){
+        if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); if(!send.disabled){ input.value=''; sync(); } }
+      });
+      document.getElementById('composer').addEventListener('submit', function(){
+        if(!send.disabled){ input.value=''; sync(); }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>케어링크 · 도움말 센터</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============================================================
+     케어링크 — Material Design 3 헬프센터
+     프로덕션 마감: 8px 그리드 · 제한된 타입 스케일 · CSS 변수
+     · 상태(hover/focus/active/disabled) 전부 표현 · elevation 위계
+     ============================================================ */
+
+  :root {
+    /* --- 톤 팔레트 (보라 primary + surface 톤) --- */
+    --primary:              #6750A4;
+    --on-primary:           #FFFFFF;
+    --primary-container:    #EADDFF;
+    --on-primary-container: #21005D;
+    --secondary:            #625B71;
+    --secondary-container:  #E8DEF8;
+    --on-secondary-container:#1D192B;
+
+    --surface:              #FEF7FF;
+    --surface-container-low: #F7F2FA;
+    --surface-container:    #F3EDF7;
+    --surface-container-high:#ECE6F0;
+    --surface-container-highest:#E6E0E9;
+
+    --on-surface:           #1D1B20;
+    --on-surface-variant:   #49454F;
+    --outline:              #79747E;
+    --outline-variant:      #CAC4D0;
+
+    --error:                #B3261E;
+    --on-error-container:    #410E0B;
+    --success:              #386A20;
+
+    /* state-layer (hover 8% / focus 12% / pressed 12%) */
+    --state-primary:        103,80,164;   /* rgb of --primary */
+    --state-on-surface:     29,27,32;      /* rgb of --on-surface */
+
+    /* --- elevation dp 그림자 --- */
+    --dp1: 0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+    --dp2: 0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+    --dp4: 0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+    --dp8: 0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+    /* --- 형태 (radius) --- */
+    --r-card: 12px;
+    --r-btn: 8px;
+    --r-fab: 16px;
+    --r-sheet: 28px;
+    --r-pill: 999px;
+
+    /* --- 타입 스케일 (Material type scale) --- */
+    --font: "Pretendard", "Roboto", system-ui, -apple-system, sans-serif;
+    --mono-label: "Roboto", "Pretendard", sans-serif;
+
+    /* --- 스페이싱 8px 그리드 --- */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+    --container: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--on-surface);
+    /* 배경: surface 톤에 은은한 primary 하이라이트 (톤 팔레트 내) */
+    background:
+      radial-gradient(1200px 520px at 78% -8%, rgba(103,80,164,.10), transparent 60%),
+      radial-gradient(900px 480px at -6% 4%, rgba(98,91,113,.08), transparent 55%),
+      var(--surface);
+    background-attachment: fixed;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Body type scale */
+  .body-large  { font-size: 16px; line-height: 24px; letter-spacing: .15px; }
+  .body-medium { font-size: 14px; line-height: 20px; letter-spacing: .25px; }
+  .label-large {
+    font-family: var(--mono-label);
+    font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: .1px;
+  }
+
+  a { color: inherit; }
+
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--sp-6);
+  }
+
+  /* ============================================================
+     TOP APP BAR (dp2, 스티키)
+     ============================================================ */
+  .appbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--surface-container);
+    box-shadow: var(--dp2);
+  }
+  .appbar__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    height: 64px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    text-decoration: none;
+    color: var(--on-surface);
+    padding: var(--sp-2);
+    margin-left: calc(-1 * var(--sp-2));
+    border-radius: var(--r-btn);
+    position: relative;
+  }
+  .brand__mark {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #8A73D6);
+    color: var(--on-primary);
+    display: grid; place-items: center;
+    box-shadow: var(--dp1);
+    flex: 0 0 auto;
+  }
+  .brand__mark svg { width: 22px; height: 22px; }
+  .brand__name {
+    font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.2px;
+  }
+  .brand__name b { color: var(--primary); font-weight: 700; }
+
+  .appbar__nav {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  .navlink {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding-inline: var(--sp-4);
+    border-radius: var(--r-pill);
+    text-decoration: none;
+    color: var(--on-surface-variant);
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    overflow: hidden;
+  }
+  .navlink.is-active {
+    color: var(--on-secondary-container);
+    background: var(--secondary-container);
+  }
+  @media (max-width: 767px) { .navlink--hide { display: none; } }
+
+  /* ============================================================
+     STATE LAYER — 클릭 가능한 모든 요소 공통
+     hover 8% / focus 12% / pressed 12%
+     ============================================================ */
+  .state { position: relative; overflow: hidden; }
+  .state::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 150ms ease;
+    pointer-events: none;
+  }
+  .state:hover::before  { opacity: .08; }
+  .state:active::before { opacity: .12; }
+
+  /* 리플 */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    background: currentColor;
+    opacity: .18;
+    pointer-events: none;
+    animation: ripple 420ms ease-out forwards;
+  }
+  @keyframes ripple {
+    to { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* focus-visible: primary 3px 아웃라인 + offset 2px (그림자만으로 포커스 X) */
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  input:focus-visible,
+  .state:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* ============================================================
+     HERO — 검색바
+     ============================================================ */
+  .hero { padding-block: var(--sp-16) var(--sp-12); }
+  .hero__eyebrow {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 32px; padding-inline: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-pill);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    box-shadow: var(--dp1);
+  }
+  .hero__eyebrow .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--success);
+  }
+  .hero h1 {
+    margin: var(--sp-6) 0 var(--sp-4);
+    font-size: 36px; line-height: 44px; font-weight: 700; letter-spacing: -.4px;
+    max-width: 18ch;
+  }
+  .hero h1 .accent { color: var(--primary); }
+  .hero__sub {
+    margin: 0 0 var(--sp-8);
+    color: var(--on-surface-variant);
+    font-size: 16px; line-height: 24px; letter-spacing: .15px;
+    max-width: 52ch;
+  }
+
+  /* 검색 필드 (border + focus ring + placeholder) */
+  .search {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    max-width: 640px;
+    height: 60px;
+    padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-pill);
+    box-shadow: var(--dp1);
+    transition: box-shadow 150ms ease, border-color 150ms ease;
+  }
+  .search:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--dp2), 0 0 0 4px rgba(var(--state-primary), .16);
+  }
+  .search__icon { color: var(--on-surface-variant); display: grid; place-items: center; flex: 0 0 auto; }
+  .search__icon svg { width: 24px; height: 24px; }
+  .search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font-family: var(--font);
+    font-size: 16px; line-height: 24px; letter-spacing: .15px;
+    color: var(--on-surface);
+    outline: none;
+  }
+  .search input::placeholder { color: var(--on-surface-variant); opacity: 1; }
+
+  /* Buttons */
+  .btn {
+    --_fg: var(--on-primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: var(--sp-2);
+    height: 44px;
+    padding-inline: var(--sp-6);
+    border: 0;
+    border-radius: var(--r-pill);
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    cursor: pointer;
+    color: var(--_fg);
+    white-space: nowrap;
+    transition: box-shadow 150ms ease, background-color 150ms ease;
+  }
+  .btn svg { width: 18px; height: 18px; }
+  .btn--filled {
+    background: var(--primary);
+    box-shadow: var(--dp1);
+  }
+  .btn--filled:hover  { box-shadow: var(--dp2); }
+  .btn--filled:active { box-shadow: var(--dp1); }
+  .search .btn--filled { height: 44px; }
+
+  .btn--tonal {
+    --_fg: var(--on-secondary-container);
+    background: var(--secondary-container);
+  }
+  .btn--outlined {
+    --_fg: var(--primary);
+    background: transparent;
+    border: 1px solid var(--outline);
+  }
+  .btn--outlined:hover { background: rgba(var(--state-primary), .04); }
+  .btn--text {
+    --_fg: var(--primary);
+    background: transparent;
+    padding-inline: var(--sp-4);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    color: rgba(var(--state-on-surface), .38);
+    background: rgba(var(--state-on-surface), .12);
+    box-shadow: none;
+    pointer-events: none;
+  }
+  .btn--outlined:disabled { background: transparent; border-color: rgba(var(--state-on-surface), .12); }
+
+  /* 인기 검색어 칩 */
+  .chips {
+    display: flex; flex-wrap: wrap; gap: var(--sp-2);
+    margin-top: var(--sp-4);
+    max-width: 640px;
+    align-items: center;
+  }
+  .chips__label {
+    color: var(--on-surface-variant);
+    font-size: 14px; letter-spacing: .25px;
+    margin-right: var(--sp-1);
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 34px; padding-inline: var(--sp-3);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-btn);
+    background: var(--surface-container-low);
+    color: var(--on-surface-variant);
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .chip svg { width: 16px; height: 16px; opacity: .7; }
+
+  /* ============================================================
+     SECTION 공통
+     ============================================================ */
+  section.block { padding-block: var(--sp-8); }
+  .section-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -.2px;
+  }
+  .section-head p {
+    margin: var(--sp-2) 0 0;
+    color: var(--on-surface-variant);
+    font-size: 16px; line-height: 24px; letter-spacing: .15px;
+  }
+
+  /* ============================================================
+     CATEGORY CARDS ×4
+     ============================================================ */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-4);
+  }
+  .cat-card {
+    display: flex; flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-6);
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 150ms ease, transform 150ms ease;
+    min-height: 184px;
+  }
+  .cat-card:hover  { box-shadow: var(--dp2); transform: translateY(-2px); }
+  .cat-card:active { box-shadow: var(--dp1); transform: translateY(0); }
+  .cat-card__icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: grid; place-items: center;
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    flex: 0 0 auto;
+  }
+  .cat-card__icon svg { width: 26px; height: 26px; }
+  .cat-card__title {
+    font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.1px;
+    margin: 0;
+  }
+  .cat-card__desc {
+    color: var(--on-surface-variant);
+    font-size: 14px; line-height: 20px; letter-spacing: .25px;
+    margin: calc(-1 * var(--sp-2)) 0 0;
+  }
+  .cat-card__meta {
+    margin-top: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sp-2);
+  }
+  .cat-card__count {
+    display: inline-flex; align-items: baseline; gap: 4px;
+    font-family: var(--mono-label);
+    color: var(--on-surface-variant);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  }
+  .cat-card__count b {
+    font-size: 18px; color: var(--primary); font-weight: 700;
+  }
+  .cat-card__arrow {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+  }
+  .cat-card:hover .cat-card__arrow {
+    background: var(--primary);
+    color: var(--on-primary);
+    transform: translateX(2px);
+  }
+  .cat-card__arrow svg { width: 18px; height: 18px; }
+
+  /* 아이콘 색 변주 (톤 팔레트 내) */
+  .cat-card--b .cat-card__icon { background: var(--secondary-container); color: var(--on-secondary-container); }
+  .cat-card--c .cat-card__icon { background: #DCEFD3; color: var(--success); }
+  .cat-card--d .cat-card__icon { background: #FADCD9; color: var(--on-error-container); }
+
+  /* ============================================================
+     FAQ ACCORDION ×6
+     ============================================================ */
+  .faq-wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-3);
+    max-width: 860px;
+  }
+  .faq-item {
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--r-card);
+    box-shadow: var(--dp1);
+    overflow: hidden;
+    transition: box-shadow 150ms ease, background-color 150ms ease;
+  }
+  .faq-item[open] { box-shadow: var(--dp2); background: var(--surface-container); }
+  .faq-item > summary {
+    list-style: none;
+    display: flex; align-items: center; gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-6);
+    min-height: 64px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .faq-item > summary::-webkit-details-marker { display: none; }
+  .faq-q {
+    display: flex; align-items: center; gap: var(--sp-3);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .faq-tag {
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center;
+    height: 24px; padding-inline: var(--sp-2);
+    border-radius: 6px;
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+    font-family: var(--mono-label);
+    font-size: 12px; font-weight: 500; letter-spacing: .3px;
+  }
+  .faq-qtext {
+    font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: .15px;
+    color: var(--on-surface);
+  }
+  .faq-chevron {
+    flex: 0 0 auto;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--on-surface-variant);
+    transition: transform 250ms cubic-bezier(.2,0,0,1), color 150ms ease, background-color 150ms ease;
+  }
+  .faq-chevron svg { width: 20px; height: 20px; }
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
+
+  /* 답변: 그리드 0fr→1fr 로 부드럽게 열림 (JS 있을 때만 접힘) */
+  .faq-answer {
+    display: grid;
+    grid-template-rows: 1fr;            /* no-JS 폴백: 열려 있음 */
+    transition: grid-template-rows 250ms cubic-bezier(.2,0,0,1);
+  }
+  .js .faq-item:not([open]) .faq-answer { grid-template-rows: 0fr; }
+  .js .faq-item[open] .faq-answer { grid-template-rows: 1fr; }
+  .faq-answer__inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .faq-answer__body {
+    padding: 0 var(--sp-6) var(--sp-6) calc(var(--sp-6) + 64px);
+    color: var(--on-surface-variant);
+    font-size: 14px; line-height: 22px; letter-spacing: .25px;
+  }
+  @media (max-width: 640px) {
+    .faq-answer__body { padding-left: var(--sp-6); }
+  }
+  .faq-answer__body p { margin: 0 0 var(--sp-3); }
+  .faq-answer__body p:last-of-type { margin-bottom: 0; }
+  .faq-answer__body strong { color: var(--on-surface); font-weight: 600; }
+  .faq-answer__body code {
+    font-family: var(--mono-label);
+    background: var(--surface-container-highest);
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 13px;
+  }
+  .faq-note {
+    display: flex; gap: var(--sp-2);
+    margin-top: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-btn);
+    background: var(--surface-container-highest);
+    align-items: flex-start;
+  }
+  .faq-note svg { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 2px; color: var(--primary); }
+  .faq-note.faq-note--warn { background: #FADCD9; }
+  .faq-note.faq-note--warn svg { color: var(--error); }
+  .faq-helpful {
+    display: flex; align-items: center; gap: var(--sp-3);
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--outline-variant);
+    flex-wrap: wrap;
+  }
+  .faq-helpful span {
+    color: var(--on-surface-variant);
+    font-size: 13px; letter-spacing: .25px;
+  }
+  .vote {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 32px; padding-inline: var(--sp-3);
+    border: 1px solid var(--outline);
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: var(--mono-label);
+    font-size: 13px; font-weight: 500; letter-spacing: .1px;
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+  .vote svg { width: 16px; height: 16px; }
+  .vote:hover { border-color: var(--primary); color: var(--primary); }
+  .vote.is-picked {
+    background: var(--primary-container);
+    border-color: transparent;
+    color: var(--on-primary-container);
+  }
+
+  /* ============================================================
+     CONTACT CTA — "여전히 도움이 필요하세요?"
+     ============================================================ */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-sheet);
+    background:
+      radial-gradient(700px 320px at 88% -20%, rgba(255,255,255,.18), transparent 60%),
+      linear-gradient(135deg, var(--primary) 0%, #7A64C0 55%, #8A73D6 100%);
+    color: var(--on-primary);
+    box-shadow: var(--dp4);
+    padding: var(--sp-12);
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: var(--sp-8);
+    align-items: center;
+  }
+  .cta__title {
+    font-size: 28px; line-height: 36px; font-weight: 700; letter-spacing: -.2px;
+    margin: 0 0 var(--sp-3);
+  }
+  .cta__desc {
+    margin: 0 0 var(--sp-6);
+    font-size: 16px; line-height: 24px; letter-spacing: .15px;
+    color: rgba(255,255,255,.86);
+    max-width: 46ch;
+  }
+  .cta__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .btn--on-primary {
+    background: var(--on-primary);
+    color: var(--primary);
+    box-shadow: var(--dp1);
+  }
+  .btn--on-primary:hover { box-shadow: var(--dp2); }
+  .btn--ghost-light {
+    background: rgba(255,255,255,.14);
+    color: var(--on-primary);
+    border: 1px solid rgba(255,255,255,.4);
+  }
+  .btn--ghost-light:hover { background: rgba(255,255,255,.22); }
+
+  .cta__panel {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: var(--r-card);
+    padding: var(--sp-6);
+    display: grid; gap: var(--sp-4);
+  }
+  .cta__channel {
+    display: flex; align-items: center; gap: var(--sp-3);
+  }
+  .cta__channel-ic {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,.18);
+    color: var(--on-primary);
+    flex: 0 0 auto;
+  }
+  .cta__channel-ic svg { width: 22px; height: 22px; }
+  .cta__channel-t { font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: .1px; }
+  .cta__channel-s { font-size: 13px; line-height: 18px; color: rgba(255,255,255,.78); letter-spacing: .25px; }
+  .cta__status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono-label);
+    font-size: 12px; font-weight: 500; letter-spacing: .3px;
+    color: rgba(255,255,255,.9);
+    margin-left: auto;
+  }
+  .cta__status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #B6F0A0;
+    box-shadow: 0 0 0 3px rgba(182,240,160,.28);
+  }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer {
+    margin-top: var(--sp-12);
+    background: var(--surface-container);
+    border-top: 1px solid var(--outline-variant);
+  }
+  .footer__inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sp-4);
+    padding-block: var(--sp-8);
+    flex-wrap: wrap;
+  }
+  .footer__brand {
+    display: flex; align-items: center; gap: var(--sp-3);
+    color: var(--on-surface-variant);
+  }
+  .footer__brand .brand__mark { width: 32px; height: 32px; border-radius: 10px; }
+  .footer__brand .brand__mark svg { width: 18px; height: 18px; }
+  .footer__sig {
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    color: var(--on-surface-variant);
+  }
+  .footer__links { display: flex; gap: var(--sp-6); flex-wrap: wrap; }
+  .footer__links a {
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-size: 14px; letter-spacing: .25px;
+    padding: var(--sp-1) 0;
+  }
+  .footer__links a:hover { color: var(--primary); }
+
+  /* ============================================================
+     FAB — 우하단, primary, dp4 → hover dp8 + scale
+     ============================================================ */
+  .fab {
+    position: fixed;
+    right: var(--sp-6);
+    bottom: var(--sp-6);
+    z-index: 50;
+    display: inline-flex; align-items: center; gap: var(--sp-3);
+    height: 56px;
+    padding-inline: var(--sp-4);
+    border: 0;
+    border-radius: var(--r-fab);
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: var(--dp4);
+    font-family: var(--mono-label);
+    font-size: 14px; font-weight: 500; letter-spacing: .1px;
+    cursor: pointer;
+    transition: box-shadow 200ms cubic-bezier(.2,0,0,1), transform 200ms cubic-bezier(.2,0,0,1);
+  }
+  .fab svg { width: 24px; height: 24px; flex: 0 0 auto; }
+  .fab:hover  { box-shadow: var(--dp8); transform: scale(1.03); }
+  .fab:active { transform: scale(.97); }
+  @media (max-width: 640px) {
+    .fab__label { display: none; }
+    .fab { padding-inline: 0; width: 56px; justify-content: center; }
+  }
+
+  /* ============================================================
+     로드 시퀀스 (stagger)
+     ============================================================ */
+  .rise { opacity: 0; transform: translateY(8px); animation: rise 220ms ease-out forwards; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .fab { opacity: 0; transform: scale(.6); animation: fabPop 250ms cubic-bezier(.2,0,0,1) .9s forwards; }
+  @keyframes fabPop { to { opacity: 1; transform: scale(1); } }
+
+  /* ============================================================
+     반응형
+     ============================================================ */
+  @media (max-width: 1023px) {
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .cta { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .container { padding-inline: var(--sp-4); }
+    .hero { padding-block: var(--sp-12) var(--sp-8); }
+    .hero h1 { font-size: 30px; line-height: 38px; }
+    .search { height: 56px; }
+    .search .btn--filled { padding-inline: var(--sp-4); }
+    .cta { padding: var(--sp-8); }
+  }
+  @media (max-width: 560px) {
+    .cat-grid { grid-template-columns: 1fr; }
+    .cat-card { min-height: 0; }
+    .section-head { flex-direction: column; align-items: flex-start; }
+    .search .btn__text { display: none; }
+    .search .btn--filled { width: 44px; padding-inline: 0; }
+  }
+
+  /* ============================================================
+     접근성 — prefers-reduced-motion
+     stagger·리플 확산·차오름 제거, state-layer 색 변화만 즉시
+     ============================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .rise, .fab { opacity: 1; transform: none; }
+    .ripple { display: none; }
+  }
+
+  html { scroll-behavior: smooth; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP APP BAR -->
+  <header class="appbar">
+    <div class="container appbar__inner">
+      <a class="brand state" href="#top" aria-label="케어링크 홈">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.8 8.6a5.4 5.4 0 0 0-9-4 5.4 5.4 0 0 0-9 4c0 5.2 9 10.4 9 10.4s9-5.2 9-10.4Z"/>
+            <path d="M8 12h2.2l1-2 1.8 4 1-2H16"/>
+          </svg>
+        </span>
+        <span class="brand__name">케어<b>링크</b></span>
+      </a>
+      <nav class="appbar__nav" aria-label="주요 메뉴">
+        <a class="navlink is-active state" href="#top">도움말</a>
+        <a class="navlink navlink--hide state" href="#categories">카테고리</a>
+        <a class="navlink navlink--hide state" href="#faq">자주 묻는 질문</a>
+        <a class="navlink state" href="#contact">문의하기</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <span class="hero__eyebrow rise" style="animation-delay:.02s">
+          <span class="dot" aria-hidden="true"></span>
+          케어링크 도움말 센터 · 평균 응답 6분
+        </span>
+        <h1 class="rise" style="animation-delay:.06s">
+          무엇을 <span class="accent">도와드릴까요?</span>
+        </h1>
+        <p class="hero__sub body-large rise" style="animation-delay:.1s">
+          돌봄 예약, 결제, 계정, 안전까지. 궁금한 점을 검색하거나 아래 카테고리에서 찾아보세요.
+          찾는 답이 없으면 상담팀이 바로 도와드립니다.
+        </p>
+
+        <form class="search rise" role="search" style="animation-delay:.14s" onsubmit="return false;">
+          <span class="search__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+          </span>
+          <label class="sr-only" for="q">도움말 검색</label>
+          <input id="q" type="search" placeholder="무엇을 도와드릴까요? 예: 예약 변경, 환불 기간" autocomplete="off" />
+          <button class="btn btn--filled state" type="submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="btn__text">검색</span>
+          </button>
+        </form>
+
+        <div class="chips rise" style="animation-delay:.18s">
+          <span class="chips__label">많이 찾는 질문</span>
+          <a class="chip state" href="#faq">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+            예약 변경·취소
+          </a>
+          <a class="chip state" href="#faq">환불 가능 기간</a>
+          <a class="chip state" href="#faq">돌봄 매니저 변경</a>
+          <a class="chip state" href="#faq">비밀번호 재설정</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORY CARDS -->
+    <section class="block" id="categories">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>카테고리별로 찾기</h2>
+            <p class="body-large">주제를 고르면 관련 도움말 글을 모아서 보여드립니다.</p>
+          </div>
+          <a class="btn btn--text state" href="#faq">전체 글 보기</a>
+        </div>
+
+        <div class="cat-grid">
+          <!-- A -->
+          <a class="cat-card cat-card--a state rise" href="#faq" style="animation-delay:.04s">
+            <span class="cat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/><path d="M7 14h5"/></svg>
+            </span>
+            <div>
+              <h3 class="cat-card__title">돌봄 예약</h3>
+              <p class="cat-card__desc">예약, 일정 변경, 매니저 배정과 방문 안내.</p>
+            </div>
+            <div class="cat-card__meta">
+              <span class="cat-card__count"><b>18</b> 개 글</span>
+              <span class="cat-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+
+          <!-- B -->
+          <a class="cat-card cat-card--b state rise" href="#faq" style="animation-delay:.08s">
+            <span class="cat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 14h4"/></svg>
+            </span>
+            <div>
+              <h3 class="cat-card__title">결제·환불</h3>
+              <p class="cat-card__desc">요금제, 결제 수단, 환불 정책과 영수증.</p>
+            </div>
+            <div class="cat-card__meta">
+              <span class="cat-card__count"><b>12</b> 개 글</span>
+              <span class="cat-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+
+          <!-- C -->
+          <a class="cat-card cat-card--c state rise" href="#faq" style="animation-delay:.12s">
+            <span class="cat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6l-8-3Z"/></svg>
+            </span>
+            <div>
+              <h3 class="cat-card__title">안전·개인정보</h3>
+              <p class="cat-card__desc">매니저 인증, 보험, 개인정보 보호 원칙.</p>
+            </div>
+            <div class="cat-card__meta">
+              <span class="cat-card__count"><b>9</b> 개 글</span>
+              <span class="cat-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+
+          <!-- D -->
+          <a class="cat-card cat-card--d state rise" href="#faq" style="animation-delay:.16s">
+            <span class="cat-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.2-3.6 4.3-5.5 8-5.5s6.8 1.9 8 5.5"/></svg>
+            </span>
+            <div>
+              <h3 class="cat-card__title">계정·로그인</h3>
+              <p class="cat-card__desc">가입, 비밀번호, 알림 설정과 탈퇴.</p>
+            </div>
+            <div class="cat-card__meta">
+              <span class="cat-card__count"><b>14</b> 개 글</span>
+              <span class="cat-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ ACCORDION -->
+    <section class="block" id="faq">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>자주 묻는 질문</h2>
+            <p class="body-large">가장 많이 들어오는 문의를 모았습니다. 항목을 눌러 답변을 펼쳐 보세요.</p>
+          </div>
+        </div>
+
+        <div class="faq-wrap">
+
+          <!-- Q1 (기본 열림) -->
+          <details class="faq-item" open>
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">예약</span>
+                <span class="faq-qtext">예약한 방문 일정을 변경하거나 취소할 수 있나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>네, 가능합니다. 앱의 <strong>내 예약</strong> 화면에서 해당 방문을 선택한 뒤 <strong>일정 변경</strong> 또는 <strong>취소</strong>를 누르면 됩니다.</p>
+              <p>방문 <strong>24시간 전</strong>까지는 수수료 없이 변경·취소할 수 있어요. 그 이후에는 매니저 이동 준비가 시작되어 일부 비용이 발생할 수 있습니다.</p>
+              <div class="faq-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+                <span>정기 돌봄 이용 중이라면 개별 회차만 변경해도 나머지 일정은 그대로 유지됩니다.</span>
+              </div>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+          <!-- Q2 -->
+          <details class="faq-item">
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">환불</span>
+                <span class="faq-qtext">환불은 언제까지, 어떤 방식으로 받을 수 있나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>결제 후 서비스가 시작되기 전이라면 <strong>전액 환불</strong>됩니다. 이미 일부 방문이 진행된 경우, 남은 회차 기준으로 <strong>일할 계산</strong>하여 환불해 드려요.</p>
+              <p>환불 요청은 <strong>결제일로부터 30일</strong> 이내에 가능하며, 승인 후 원결제 수단으로 <strong>영업일 기준 3~5일</strong> 안에 처리됩니다.</p>
+              <div class="faq-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>영수증과 환불 내역은 <code>설정 › 결제 내역</code>에서 언제든지 내려받을 수 있습니다.</span>
+              </div>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+          <!-- Q3 -->
+          <details class="faq-item">
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">돌봄</span>
+                <span class="faq-qtext">담당 돌봄 매니저를 바꾸고 싶어요. 어떻게 하나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>언제든지 변경할 수 있습니다. <strong>내 돌봄 › 매니저 정보</strong>에서 <strong>매니저 변경 요청</strong>을 누르면 담당 코디 팀이 새 매니저를 추천해 드려요.</p>
+              <p>성향, 요일, 이동 거리 등을 고려해 보통 <strong>1~2일</strong> 안에 후보를 안내합니다. 마음에 드는 분을 고르면 다음 방문부터 바로 배정됩니다.</p>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+          <!-- Q4 -->
+          <details class="faq-item">
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">안전</span>
+                <span class="faq-qtext">돌봄 매니저는 어떻게 검증되나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>모든 매니저는 <strong>신원 확인, 자격증 검증, 대면 인터뷰, 기본 교육 이수</strong>의 4단계를 거쳐 활동합니다. 방문 이력과 이용자 평가도 함께 관리돼요.</p>
+              <p>방문 중에는 <strong>실시간 체크인</strong>으로 도착·종료가 기록되며, 모든 정식 방문은 <strong>배상 책임 보험</strong>이 적용됩니다.</p>
+              <div class="faq-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6l-8-3Z"/><path d="M9 12l2 2 4-4"/></svg>
+                <span>인증 배지는 매니저 프로필의 방패 아이콘으로 확인할 수 있습니다.</span>
+              </div>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+          <!-- Q5 -->
+          <details class="faq-item">
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">계정</span>
+                <span class="faq-qtext">비밀번호를 잊어버렸어요. 어떻게 재설정하나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>로그인 화면에서 <strong>비밀번호 찾기</strong>를 누르고 가입한 이메일 또는 휴대폰 번호를 입력하세요. 인증 코드를 보내 드립니다.</p>
+              <p>코드 확인 후 새 비밀번호를 설정하면 됩니다. 인증 링크는 보안을 위해 <strong>10분</strong> 뒤 만료돼요.</p>
+              <div class="faq-note faq-note--warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                <span>메일이 오지 않으면 스팸함을 확인하거나, 아래 문의하기로 연락 주세요.</span>
+              </div>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+          <!-- Q6 -->
+          <details class="faq-item">
+            <summary class="state">
+              <span class="faq-q">
+                <span class="faq-tag">결제</span>
+                <span class="faq-qtext">이용 요금은 어떻게 청구되고, 결제 수단은 뭐가 되나요?</span>
+              </span>
+              <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </summary>
+            <div class="faq-answer"><div class="faq-answer__inner"><div class="faq-answer__body">
+              <p>정기 돌봄은 <strong>월 단위 자동 결제</strong>, 단건 방문은 <strong>예약 시 즉시 결제</strong>됩니다. 이용 전에 총 금액과 회차를 먼저 확인할 수 있어요.</p>
+              <p>신용·체크카드, 계좌 간편결제, 주요 페이 서비스를 지원합니다. 결제 수단은 <code>설정 › 결제 수단</code>에서 추가하거나 바꿀 수 있습니다.</p>
+              <div class="faq-helpful">
+                <span>이 답변이 도움이 되었나요?</span>
+                <button class="vote state" type="button" data-vote="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11v9H3v-9h4Zm0 0 4.5-8a2 2 0 0 1 2 1.4l.5 3.6H20a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 18.8 20H7"/></svg>도움돼요</button>
+                <button class="vote state" type="button" data-vote="down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 13V4h4v9h-4Zm0 0-4.5 8a2 2 0 0 1-2-1.4l-.5-3.6H4a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 5.2 4H17"/></svg>아니요</button>
+              </div>
+            </div></div></div>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT CTA -->
+    <section class="block" id="contact">
+      <div class="container">
+        <div class="cta">
+          <div class="cta__text">
+            <h2 class="cta__title">여전히 도움이 필요하세요?</h2>
+            <p class="cta__desc">
+              찾으시는 답이 없다면 케어링크 상담팀이 직접 도와드립니다.
+              계정에 로그인하면 예약 내역을 함께 보며 더 빠르게 안내해 드려요.
+            </p>
+            <div class="cta__actions">
+              <button class="btn btn--on-primary state" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v10Z"/></svg>
+                실시간 채팅 시작
+              </button>
+              <button class="btn btn--ghost-light state" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                이메일 문의
+              </button>
+            </div>
+          </div>
+
+          <div class="cta__panel">
+            <div class="cta__channel">
+              <span class="cta__channel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v10Z"/></svg></span>
+              <div>
+                <div class="cta__channel-t">실시간 채팅</div>
+                <div class="cta__channel-s">평일·주말 08–22시 · 평균 6분</div>
+              </div>
+              <span class="cta__status"><span class="dot" aria-hidden="true"></span>연결 가능</span>
+            </div>
+            <div class="cta__channel">
+              <span class="cta__channel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v2.5a2 2 0 0 1-2.2 2 19 19 0 0 1-8.3-3 18.5 18.5 0 0 1-5.7-5.7 19 19 0 0 1-3-8.4A2 2 0 0 1 4.6 2H7a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.7a15 15 0 0 0 5.7 5.7l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7A2 2 0 0 1 22 16.9Z"/></svg></span>
+              <div>
+                <div class="cta__channel-t">전화 상담</div>
+                <div class="cta__channel-s">긴급 방문 문의는 24시간 접수</div>
+              </div>
+              <span class="cta__status"><span class="dot" aria-hidden="true"></span>운영 중</span>
+            </div>
+            <div class="cta__channel">
+              <span class="cta__channel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+              <div>
+                <div class="cta__channel-t">이메일</div>
+                <div class="cta__channel-s">1영업일 이내 답변 · 첨부 가능</div>
+              </div>
+              <span class="cta__status"><span class="dot" aria-hidden="true"></span>접수 중</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6a5.4 5.4 0 0 0-9-4 5.4 5.4 0 0 0-9 4c0 5.2 9 10.4 9 10.4s9-5.2 9-10.4Z"/></svg>
+        </span>
+        <span class="footer__sig">케어링크 · 머티리얼</span>
+      </div>
+      <nav class="footer__links" aria-label="푸터 링크">
+        <a href="#top">도움말 홈</a>
+        <a href="#categories">카테고리</a>
+        <a href="#faq">자주 묻는 질문</a>
+        <a href="#contact">문의하기</a>
+        <a href="#top">이용약관</a>
+        <a href="#top">개인정보 처리방침</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- FAB -->
+  <button class="fab" type="button" aria-label="새 문의 작성">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span class="fab__label">문의 남기기</span>
+  </button>
+
+  <script>
+    // Progressive enhancement: JS 있을 때만 아코디언 접힘 활성화
+    document.documentElement.classList.add('js');
+
+    // 리플 — 모든 .state 클릭 시 클릭 지점에서 원형 확산
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+      document.addEventListener('pointerdown', function (e) {
+        var el = e.target.closest('.state, .fab, .btn, .vote, .cat-card');
+        if (!el) return;
+        var rect = el.getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height);
+        var span = document.createElement('span');
+        span.className = 'ripple';
+        span.style.width = span.style.height = size + 'px';
+        span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        span.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        // overflow 보장을 위해 position 확인
+        var cs = getComputedStyle(el);
+        if (cs.position === 'static') el.style.position = 'relative';
+        if (cs.overflow !== 'hidden') el.style.overflow = 'hidden';
+        el.appendChild(span);
+        span.addEventListener('animationend', function () { span.remove(); });
+      }, { passive: true });
+    }
+
+    // 아코디언 — 한 번에 하나만 열리도록 (Material 단일 확장 패턴)
+    var items = Array.prototype.slice.call(document.querySelectorAll('.faq-item'));
+    items.forEach(function (item) {
+      item.addEventListener('toggle', function () {
+        if (!item.open) return;
+        items.forEach(function (other) {
+          if (other !== item && other.open) other.open = false;
+        });
+      });
+    });
+
+    // 유용성 투표 — 토글 (같은 그룹 내 단일 선택)
+    document.querySelectorAll('.faq-helpful').forEach(function (group) {
+      group.querySelectorAll('.vote').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var picked = btn.classList.contains('is-picked');
+          group.querySelectorAll('.vote').forEach(function (b) { b.classList.remove('is-picked'); });
+          if (!picked) btn.classList.add('is-picked');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

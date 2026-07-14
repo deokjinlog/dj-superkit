@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>롱폼 — 오래 읽는 잡지</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     롱폼 — 에디토리얼 매거진 블로그 홈
+     팔레트/타이포: style-10-editorial
+     마감 기준: production-quality (8px 그리드 · 제한 스케일 ·
+     CSS 변수 · 상태 전부 · focus ring · reduced-motion)
+     ============================================================ */
+
+  :root{
+    /* 색 — 종이 경제지 */
+    --paper:      #FAF7F2;
+    --paper-2:    #F2ECE1;   /* 얕은 면 */
+    --paper-3:    #EAE3D5;   /* 더 얕은 면 */
+    --ink:        #1C1B18;
+    --ink-2:      #4A473F;   /* 본문 보조 */
+    --muted:      #837C6E;   /* 캡션·메타 */
+    --crimson:    #A32638;
+    --crimson-2:  #7E1C2B;   /* hover 진한 진홍 */
+    --crimson-wash:#F3E4E0;  /* 형광펜 hover 배경 */
+    --hairline:   #D8D2C6;
+    --hairline-2: #E6DFD2;
+
+    /* 스페이싱 — 8px 그리드 */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+    --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+    /* 타이포 스케일 — 제한 */
+    --fs-cap:  12px;
+    --fs-sm:   14px;
+    --fs-body: 16px;
+    --fs-lead: 20px;
+    --fs-h3:   24px;
+    --fs-h2:   32px;
+    --fs-h1:   48px;
+
+    /* 서체 역할 */
+    --serif: "Noto Serif KR", Georgia, "Times New Roman", serif;
+    --sans:  "Pretendard", system-ui, -apple-system, sans-serif;
+
+    --container: 1200px;
+    --radius: 0px;            /* 종이 지면 — 라운드 없음 */
+    --ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--crimson);
+    --ease: cubic-bezier(.2,.6,.2,1);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:var(--fs-body);
+    line-height:1.6;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* 페이지 등장 — 일괄 페이드인 하나만 */
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .paper{ animation:rise .4s var(--ease) both; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    html{ scroll-behavior:auto; }
+  }
+  html{ scroll-behavior:smooth; }
+
+  a{ color:inherit; }
+  img{ max-width:100%; }
+
+  .wrap{
+    max-width:var(--container);
+    margin:0 auto;
+    padding:0 var(--s5);
+  }
+  @media (max-width:640px){ .wrap{ padding:0 var(--s4); } }
+
+  .serif{ font-family:var(--serif); }
+  .num{ font-family:var(--serif); font-variant-numeric:tabular-nums; }
+
+  /* 섹션 상단 이중 괘선 — 2px + 1px */
+  .rule-double{
+    border-top:2px solid var(--ink);
+    box-shadow:0 3px 0 -2px var(--ink);   /* 아래 1px 괘선 */
+    padding-top:var(--s4);
+  }
+  .hairline{ border-top:1px solid var(--hairline); }
+
+  /* 카테고리 라벨 — 알약 아님, 텍스트 켈로그 */
+  .kicker{
+    font-family:var(--sans);
+    font-size:var(--fs-cap);
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--crimson);
+  }
+  .kicker--ink{ color:var(--ink); }
+
+  .meta{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:var(--fs-sm);
+    color:var(--muted);
+  }
+
+  /* ============================================================
+     제호 (Masthead) — 신문 제호
+     ============================================================ */
+  .masthead{ padding-top:var(--s6); }
+  .masthead__top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:var(--s4); flex-wrap:wrap;
+    font-size:var(--fs-cap); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted);
+  }
+  .masthead__logo{
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:var(--fs-h1);
+    letter-spacing:-.02em;
+    line-height:1;
+    margin:var(--s4) 0 var(--s2);
+    display:flex; align-items:baseline; gap:var(--s3);
+  }
+  .masthead__logo small{
+    font-family:var(--sans); font-weight:700; font-size:var(--fs-cap);
+    letter-spacing:.24em; color:var(--crimson); align-self:center;
+    text-transform:uppercase;
+  }
+  .masthead__lead{
+    font-family:var(--serif);
+    font-size:var(--fs-lead);
+    font-weight:500;
+    line-height:1.5;
+    color:var(--ink);
+    max-width:62ch;
+    margin:0 0 var(--s5);
+  }
+  .masthead__lead b{ color:var(--crimson); font-weight:700; }
+
+  /* 상단 내비 — 카테고리 + 검색 */
+  .topbar{
+    border-top:2px solid var(--ink);
+    border-bottom:1px solid var(--ink);
+    box-shadow:0 3px 0 -2px var(--ink);
+    display:flex; align-items:center; justify-content:space-between;
+    gap:var(--s5); flex-wrap:wrap;
+    padding:var(--s3) 0;
+    position:sticky; top:0; z-index:20;
+    background:var(--paper);
+  }
+  .nav{ display:flex; gap:var(--s5); flex-wrap:wrap; }
+  .nav a{
+    font-family:var(--serif);
+    font-size:var(--fs-body);
+    text-decoration:none;
+    padding-bottom:2px;
+    border-bottom:1.5px solid transparent;
+    transition:color .15s var(--ease), border-color .15s var(--ease);
+  }
+  .nav a:hover{ color:var(--crimson); border-bottom-color:var(--crimson); }
+  .nav a[aria-current="page"]{ color:var(--crimson); border-bottom-color:var(--crimson); }
+  .nav a:focus-visible{ outline:none; box-shadow:var(--ring); border-radius:1px; }
+
+  /* 검색 인풋 — border + focus ring + placeholder */
+  .search{ position:relative; display:flex; align-items:center; }
+  .search svg{ position:absolute; left:var(--s3); width:16px; height:16px; stroke:var(--muted); pointer-events:none; }
+  .search input{
+    font-family:var(--sans);
+    font-size:var(--fs-sm);
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius);
+    padding:var(--s2) var(--s3) var(--s2) var(--s6);
+    width:200px;
+    transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .search input::placeholder{ color:var(--muted); }
+  .search input:hover{ border-color:var(--muted); }
+  .search input:focus{
+    outline:none;
+    border-color:var(--crimson);
+    box-shadow:0 0 0 3px var(--crimson-wash);
+  }
+
+  /* ============================================================
+     본문 레이아웃 — Grid 페이지 구조
+     ============================================================ */
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 320px;
+    gap:var(--s8);
+    padding:var(--s7) 0 var(--s8);
+    align-items:start;
+  }
+  @media (max-width:1024px){
+    .layout{ grid-template-columns:1fr; gap:var(--s7); }
+  }
+
+  /* ---- 피처 아티클 ---- */
+  .feature{ margin-bottom:var(--s7); }
+  .feature__thumb{
+    /* CSS 도형/그라디언트 — 외부 이미지 없음 */
+    position:relative;
+    height:340px;
+    background:
+      radial-gradient(120% 140% at 82% 18%, rgba(163,38,56,.16), transparent 55%),
+      linear-gradient(155deg, #2A2721 0%, #45362F 46%, #6E3B36 100%);
+    border:1px solid var(--ink);
+    overflow:hidden;
+    margin-bottom:var(--s5);
+  }
+  .feature__thumb::before{
+    /* 판형 괘선 텍스처 */
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(250,247,242,.06) 0 1px, transparent 1px 28px);
+    mix-blend-mode:screen;
+  }
+  .feature__glyph{
+    position:absolute; right:var(--s6); bottom:var(--s5);
+    font-family:var(--serif); font-weight:900; font-size:180px; line-height:.8;
+    color:rgba(250,247,242,.14);
+    letter-spacing:-.04em; user-select:none;
+  }
+  .feature__badge{
+    position:absolute; left:var(--s5); top:var(--s5);
+    display:inline-flex; align-items:center; gap:var(--s2);
+    font-family:var(--sans); font-size:var(--fs-cap); font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:var(--paper);
+    border:1px solid rgba(250,247,242,.5);
+    padding:var(--s1) var(--s3);
+  }
+  .feature__title{
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:var(--fs-h1);
+    line-height:1.12;
+    letter-spacing:-.02em;
+    margin:var(--s3) 0 var(--s4);
+    color:var(--ink);
+  }
+  .feature__title a{ text-decoration:none; }
+  .feature__title a:hover{ color:var(--crimson); }
+  .feature__title a:focus-visible{ outline:none; box-shadow:var(--ring); }
+
+  .feature__excerpt{
+    font-family:var(--serif);
+    font-size:var(--fs-lead);
+    line-height:1.62;
+    color:var(--ink-2);
+    max-width:64ch;
+    margin:0 0 var(--s5);
+  }
+  /* 리드 드롭캡 — 딱 1곳 */
+  .feature__excerpt::first-letter{
+    float:left;
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:76px;
+    line-height:.72;
+    padding:6px var(--s3) 0 0;
+    color:var(--crimson);
+  }
+  .byline{
+    display:flex; align-items:center; gap:var(--s3);
+    padding-top:var(--s4);
+    border-top:1px solid var(--hairline);
+    flex-wrap:wrap;
+  }
+  .byline__mark{
+    width:40px; height:40px; flex:0 0 auto;
+    display:grid; place-items:center;
+    background:var(--ink); color:var(--paper);
+    font-family:var(--serif); font-weight:700; font-size:var(--fs-body);
+    border:1px solid var(--ink);
+  }
+  .byline__who{ font-family:var(--serif); font-weight:700; font-size:var(--fs-sm); }
+  .byline__role{ font-size:var(--fs-cap); color:var(--muted); }
+  .byline__sep{ color:var(--hairline); }
+
+  /* ---- 아티클 그리드 6 ---- */
+  .grid-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:var(--s4); margin-bottom:var(--s5);
+  }
+  .grid-head h2{
+    font-family:var(--serif); font-weight:900; font-size:var(--fs-h2);
+    letter-spacing:-.02em; margin:0;
+  }
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:var(--s6) var(--s5);
+  }
+  @media (max-width:640px){ .cards{ grid-template-columns:1fr; } }
+
+  .card{ display:flex; flex-direction:column; }
+  .card__thumb{
+    position:relative;
+    height:172px;
+    border:1px solid var(--hairline);
+    overflow:hidden;
+    display:grid; place-items:center;
+  }
+  .card__thumb .initial{
+    font-family:var(--serif); font-weight:900; font-size:72px;
+    color:rgba(28,27,24,.24); letter-spacing:-.03em; user-select:none;
+  }
+  .card__thumb::after{
+    content:""; position:absolute; inset:0;
+    background-image:repeating-linear-gradient(90deg, rgba(28,27,24,.05) 0 1px, transparent 1px 24px);
+  }
+  /* 색블록 변주 — 절제된 종이 톤 */
+  .t-ochre{ background:linear-gradient(150deg,#E7D3A8,#D8B879); }
+  .t-slate{ background:linear-gradient(150deg,#CBD2CE,#9FB0AC); }
+  .t-crimson{ background:linear-gradient(150deg,#E7C4C0,#C98A86); }
+  .t-ink{ background:linear-gradient(150deg,#BFBAB0,#8F887A); }
+  .t-teal{ background:linear-gradient(150deg,#BFD3CE,#8FB3AC); }
+  .t-sand{ background:linear-gradient(150deg,#E9DEC8,#CBB994); }
+  .t-ochre .initial,.t-slate .initial,.t-crimson .initial,
+  .t-ink .initial,.t-teal .initial,.t-sand .initial{ color:rgba(28,27,24,.32); }
+
+  .card__body{ padding-top:var(--s3); }
+  .card__cat{ margin-bottom:var(--s2); }
+  .card__title{
+    font-family:var(--serif); font-weight:700; font-size:var(--fs-h3);
+    line-height:1.28; letter-spacing:-.01em; margin:0 0 var(--s2);
+  }
+  .card__title a{ text-decoration:none; }
+  .card__title a:hover{ color:var(--crimson); }
+  .card__title a:focus-visible{ outline:none; box-shadow:var(--ring); }
+  .card__excerpt{ font-size:var(--fs-sm); color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
+  .card__foot{ display:flex; align-items:center; gap:var(--s2); font-family:var(--serif); font-style:italic; font-size:var(--fs-cap); color:var(--muted); }
+  .card__foot .dot{ width:3px; height:3px; background:var(--muted); border-radius:50%; }
+
+  /* 더 보기 버튼 행 */
+  .more{ display:flex; justify-content:center; margin-top:var(--s7); }
+
+  /* ============================================================
+     버튼 — primary / secondary / ghost + 상태 전부
+     ============================================================ */
+  .btn{
+    font-family:var(--sans);
+    font-size:var(--fs-sm); font-weight:700;
+    line-height:1;
+    height:40px;
+    display:inline-flex; align-items:center; justify-content:center; gap:var(--s2);
+    padding:0 var(--s5);
+    border:1px solid var(--crimson);
+    border-radius:var(--radius);
+    background:var(--crimson);
+    color:var(--paper);
+    cursor:pointer;
+    transition:background .15s var(--ease), transform .05s var(--ease), border-color .15s var(--ease);
+  }
+  .btn:hover{ background:var(--crimson-2); border-color:var(--crimson-2); }
+  .btn:active{ transform:translateY(1px); }
+  .btn:focus-visible{ outline:none; box-shadow:var(--ring); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .btn--ghost{
+    background:transparent;
+    color:var(--ink);
+    border-color:var(--ink);
+  }
+  .btn--ghost:hover{ background:var(--paper-2); border-color:var(--ink); }
+  .btn--ghost:active{ transform:translateY(1px); }
+
+  .btn--link{
+    height:auto; padding:0; border:0; background:transparent; color:var(--crimson);
+    font-family:var(--serif); font-weight:700; font-size:var(--fs-body);
+    text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1.5px;
+  }
+  .btn--link:hover{ color:var(--crimson-2); }
+  .btn--link:focus-visible{ outline:none; box-shadow:var(--ring); }
+
+  /* ============================================================
+     사이드바
+     ============================================================ */
+  .sidebar{ display:flex; flex-direction:column; gap:var(--s7); position:sticky; top:72px; }
+  @media (max-width:1024px){ .sidebar{ position:static; } }
+
+  .panel__head{
+    display:flex; align-items:baseline; gap:var(--s3);
+    border-top:2px solid var(--ink);
+    box-shadow:0 3px 0 -2px var(--ink);
+    padding-top:var(--s3);
+    margin-bottom:var(--s4);
+  }
+  .panel__head h3{
+    font-family:var(--serif); font-weight:900; font-size:var(--fs-lead);
+    letter-spacing:-.01em; margin:0;
+  }
+  .panel__head .idx{ font-family:var(--serif); font-weight:700; font-size:var(--fs-cap); color:var(--crimson); }
+
+  /* 뉴스레터 — 인풋 + 버튼 (label · helper · 상태) */
+  .subscribe{ background:var(--paper-2); border:1px solid var(--hairline); padding:var(--s5); }
+  .subscribe h3{ font-family:var(--serif); font-weight:900; font-size:var(--fs-h3); letter-spacing:-.01em; margin:0 0 var(--s2); }
+  .subscribe p{ font-size:var(--fs-sm); color:var(--ink-2); margin:0 0 var(--s4); line-height:1.55; }
+  .field{ display:flex; flex-direction:column; gap:var(--s2); }
+  .field label{ font-size:var(--fs-cap); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .field input{
+    font-family:var(--sans); font-size:var(--fs-sm); color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius);
+    padding:var(--s3) var(--s3);
+    height:40px;
+    transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .field input::placeholder{ color:var(--muted); }
+  .field input:hover{ border-color:var(--muted); }
+  .field input:focus{ outline:none; border-color:var(--crimson); box-shadow:0 0 0 3px var(--crimson-wash); }
+  .field .helper{ font-family:var(--serif); font-style:italic; font-size:var(--fs-cap); color:var(--muted); }
+  .subscribe .btn{ width:100%; margin-top:var(--s3); }
+
+  /* 인기글 5 — 신문 시세표 문법 (수평 괘선만, 숫자 우측 정렬) */
+  table.pop{ width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
+  table.pop caption{ text-align:left; }
+  .pop th{
+    font-family:var(--sans); font-size:var(--fs-cap); font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+    text-align:left; padding:0 0 var(--s2); border-bottom:1px solid var(--ink);
+  }
+  .pop th.n, .pop td.n{ text-align:right; font-family:var(--serif); font-variant-numeric:tabular-nums; }
+  .pop td{ padding:var(--s3) 0; border-bottom:1px solid var(--hairline); vertical-align:baseline; }
+  .pop tr{ transition:background .12s var(--ease); }
+  .pop tbody tr:hover{ background:var(--crimson-wash); }  /* 형광펜 밑줄 느낌 */
+  .pop .rank{ font-family:var(--serif); font-weight:900; font-size:var(--fs-lead); color:var(--crimson); width:32px; }
+  .pop a{ font-family:var(--serif); font-weight:500; text-decoration:none; line-height:1.35; display:block; }
+  .pop a:hover{ color:var(--crimson); }
+  .pop a:focus-visible{ outline:none; box-shadow:var(--ring); }
+  .pop .sub{ font-family:var(--serif); font-style:italic; font-size:var(--fs-cap); color:var(--muted); margin-top:2px; }
+  .pop .delta-up{ color:var(--crimson); }
+  .pop .delta-flat{ color:var(--muted); }
+
+  /* 태그 클라우드 — 알약 아님, 크기 다른 텍스트 링크 (진홍 밑줄) */
+  .cloud{ display:flex; flex-wrap:wrap; gap:var(--s3) var(--s4); align-items:baseline; }
+  .cloud a{
+    font-family:var(--serif);
+    color:var(--ink-2);
+    text-decoration:none;
+    line-height:1.2;
+    border-bottom:1.5px solid transparent;
+    transition:color .12s var(--ease), border-color .12s var(--ease);
+  }
+  .cloud a:hover{ color:var(--crimson); border-bottom-color:var(--crimson); }
+  .cloud a:focus-visible{ outline:none; box-shadow:var(--ring); border-radius:1px; }
+  .cloud a .c{ font-size:var(--fs-cap); color:var(--muted); font-variant-numeric:tabular-nums; }
+  .s-xl{ font-size:26px; font-weight:700; }
+  .s-lg{ font-size:22px; font-weight:700; }
+  .s-md{ font-size:18px; font-weight:500; }
+  .s-sm{ font-size:15px; font-weight:500; }
+
+  /* 편집자 노트 — 작은 컬럼 */
+  .note{ border-left:2px solid var(--crimson); padding:var(--s1) 0 var(--s1) var(--s4); }
+  .note p{ font-family:var(--serif); font-style:italic; font-size:var(--fs-sm); color:var(--ink-2); margin:0; line-height:1.55; }
+
+  /* ============================================================
+     푸터
+     ============================================================ */
+  .foot{
+    border-top:2px solid var(--ink);
+    box-shadow:0 3px 0 -2px var(--ink);
+    margin-top:var(--s8);
+    padding:var(--s7) 0 var(--s8);
+  }
+  .foot__grid{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s5); flex-wrap:wrap; }
+  .foot__logo{ font-family:var(--serif); font-weight:900; font-size:var(--fs-h3); letter-spacing:-.02em; margin:0 0 var(--s2); }
+  .foot__meta{ font-size:var(--fs-cap); color:var(--muted); line-height:1.7; }
+  .foot__tag{ font-family:var(--serif); font-style:italic; font-size:var(--fs-sm); color:var(--muted); }
+  .foot__links{ display:flex; gap:var(--s4); flex-wrap:wrap; }
+  .foot__links a{ font-family:var(--serif); font-size:var(--fs-sm); text-decoration:none; color:var(--ink); border-bottom:1.5px solid transparent; }
+  .foot__links a:hover{ color:var(--crimson); border-bottom-color:var(--crimson); }
+  .foot__links a:focus-visible{ outline:none; box-shadow:var(--ring); }
+
+  /* 접근성 — 스킵 링크 */
+  .skip{ position:absolute; left:-9999px; }
+  .skip:focus{ left:var(--s4); top:var(--s4); z-index:50; background:var(--ink); color:var(--paper); padding:var(--s2) var(--s3); }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+
+<div class="paper">
+  <!-- ========================= 제호 ========================= -->
+  <header class="masthead">
+    <div class="wrap">
+      <div class="masthead__top">
+        <span>제 47호 · 격주 발행</span>
+        <span>2026년 7월 13일 월요일</span>
+      </div>
+      <div class="masthead__logo">
+        롱폼<small>Longform</small>
+      </div>
+      <p class="masthead__lead">
+        오래 읽는 잡지. 이번 호는 <b>느린 읽기</b>를 다룬다 —
+        스크롤을 멈추게 하는 문장, 아카이브의 재발견, 그리고 도시가 기록되는 방식까지.
+      </p>
+    </div>
+
+    <!-- 상단 내비 + 검색 -->
+    <div class="wrap">
+      <nav class="topbar" aria-label="주요 카테고리">
+        <div class="nav">
+          <a href="#" aria-current="page">홈</a>
+          <a href="#">에세이</a>
+          <a href="#">기술</a>
+          <a href="#">도시</a>
+          <a href="#">인터뷰</a>
+          <a href="#">아카이브</a>
+        </div>
+        <form class="search" role="search" onsubmit="return false">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          <input type="search" placeholder="기사·주제 검색" aria-label="기사 검색">
+        </form>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================= 본문 ========================= -->
+  <main id="main" class="wrap">
+    <div class="layout">
+
+      <!-- ---- 왼쪽: 피처 + 그리드 ---- -->
+      <div>
+
+        <!-- 피처 아티클 -->
+        <article class="feature">
+          <div class="feature__thumb" role="img" aria-label="커버스토리 대표 비주얼">
+            <span class="feature__badge">커버스토리</span>
+            <span class="feature__glyph">読</span>
+          </div>
+
+          <div class="kicker">에세이 · 커버스토리</div>
+          <h1 class="feature__title">
+            <a href="#">느리게 읽는 법 — 정보 과잉의 시대에 문장을 붙드는 기술</a>
+          </h1>
+          <p class="feature__excerpt">
+            하루에 스치는 글자 수는 늘었지만, 남는 문장은 줄었다. 우리는 더 많이 읽고
+            더 적게 기억한다. 이 글은 &lsquo;완독&rsquo;이라는 오래된 습관을 다시 꺼내,
+            빠르게 소비되는 텍스트 사이에서 하나의 단락에 머무는 연습을 제안한다 —
+            읽기는 속도가 아니라 밀도의 문제라는 편집부의 오랜 확신에서 출발한다.
+          </p>
+
+          <div class="byline">
+            <span class="byline__mark">L</span>
+            <div>
+              <div class="byline__who">롱폼 편집부</div>
+              <div class="byline__role">글 · 피처 데스크</div>
+            </div>
+            <span class="byline__sep">·</span>
+            <span class="meta">14분 읽기 · 2026.07.13</span>
+            <span style="flex:1"></span>
+            <a class="btn btn--link" href="#">전문 읽기 →</a>
+          </div>
+        </article>
+
+        <!-- 아티클 그리드 6 -->
+        <section aria-labelledby="latest">
+          <div class="grid-head rule-double">
+            <h2 id="latest">최신 기사</h2>
+            <span class="meta">이번 호 · 12편 중 6편</span>
+          </div>
+
+          <div class="cards">
+
+            <!-- 1 -->
+            <article class="card">
+              <div class="card__thumb t-ochre" role="img" aria-label="기술 기사 썸네일"><span class="initial">技</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">기술</div>
+                <h3 class="card__title"><a href="#">브라우저는 어떻게 폰트를 늦지 않게 그리나</a></h3>
+                <p class="card__excerpt">웹 서체 렌더링의 뒤편 — 로딩 전략 하나가 첫인상을 바꾼다.</p>
+                <div class="card__foot"><span>9분 읽기</span><span class="dot"></span><span>07.11</span></div>
+              </div>
+            </article>
+
+            <!-- 2 -->
+            <article class="card">
+              <div class="card__thumb t-slate" role="img" aria-label="도시 기사 썸네일"><span class="initial">都</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">도시</div>
+                <h3 class="card__title"><a href="#">간판이 사라진 거리, 도시는 무엇을 잃었나</a></h3>
+                <p class="card__excerpt">정돈된 파사드 뒤에서 조용히 지워지는 상점들의 기록.</p>
+                <div class="card__foot"><span>11분 읽기</span><span class="dot"></span><span>07.10</span></div>
+              </div>
+            </article>
+
+            <!-- 3 -->
+            <article class="card">
+              <div class="card__thumb t-crimson" role="img" aria-label="인터뷰 기사 썸네일"><span class="initial">問</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">인터뷰</div>
+                <h3 class="card__title"><a href="#">&ldquo;마감은 문장을 정직하게 만든다&rdquo; — 어느 편집장의 방</a></h3>
+                <p class="card__excerpt">20년 차 잡지 편집장이 말하는 기록의 규율에 관하여.</p>
+                <div class="card__foot"><span>16분 읽기</span><span class="dot"></span><span>07.09</span></div>
+              </div>
+            </article>
+
+            <!-- 4 -->
+            <article class="card">
+              <div class="card__thumb t-teal" role="img" aria-label="아카이브 기사 썸네일"><span class="initial">庫</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">아카이브</div>
+                <h3 class="card__title"><a href="#">창간호를 다시 펼치며 — 47호가 지나온 자리</a></h3>
+                <p class="card__excerpt">첫 지면의 오탈자까지, 우리가 남긴 흔적을 되짚는다.</p>
+                <div class="card__foot"><span>7분 읽기</span><span class="dot"></span><span>07.08</span></div>
+              </div>
+            </article>
+
+            <!-- 5 -->
+            <article class="card">
+              <div class="card__thumb t-sand" role="img" aria-label="에세이 기사 썸네일"><span class="initial">静</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">에세이</div>
+                <h3 class="card__title"><a href="#">알림을 끈 하루, 나는 세 편의 글을 끝냈다</a></h3>
+                <p class="card__excerpt">집중을 되찾는 일은 결심이 아니라 환경 설계의 문제였다.</p>
+                <div class="card__foot"><span>8분 읽기</span><span class="dot"></span><span>07.07</span></div>
+              </div>
+            </article>
+
+            <!-- 6 -->
+            <article class="card">
+              <div class="card__thumb t-ink" role="img" aria-label="리뷰 기사 썸네일"><span class="initial">評</span></div>
+              <div class="card__body">
+                <div class="card__cat kicker">리뷰</div>
+                <h3 class="card__title"><a href="#">종이책과 전자책, 기억에 더 오래 남는 쪽은</a></h3>
+                <p class="card__excerpt">두 매체를 4주간 번갈아 읽고 회상률을 기록한 실험 노트.</p>
+                <div class="card__foot"><span>12분 읽기</span><span class="dot"></span><span>07.06</span></div>
+              </div>
+            </article>
+
+          </div>
+
+          <div class="more">
+            <button class="btn btn--ghost" type="button">기사 더 불러오기</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ---- 오른쪽: 사이드바 ---- -->
+      <aside class="sidebar" aria-label="추가 정보">
+
+        <!-- 뉴스레터 구독 -->
+        <section class="subscribe">
+          <h3>격주 편지</h3>
+          <p>매 발행일 아침, 이번 호의 리드 문장과 편집부의 짧은 메모를 보냅니다.</p>
+          <form class="field" onsubmit="return false">
+            <label for="nl">이메일 주소</label>
+            <input id="nl" type="email" placeholder="name@domain.com" autocomplete="email">
+            <span class="helper">언제든 한 번의 클릭으로 구독을 멈출 수 있습니다.</span>
+            <button class="btn" type="submit">구독하기</button>
+          </form>
+        </section>
+
+        <!-- 인기글 5 — 시세표 -->
+        <section aria-labelledby="pop-h">
+          <div class="panel__head">
+            <span class="idx">01</span>
+            <h3 id="pop-h">이번 주 많이 읽은 글</h3>
+          </div>
+          <table class="pop">
+            <caption class="meta" style="margin-bottom:var(--s2)">최근 7일 · 조회수 기준</caption>
+            <thead>
+              <tr>
+                <th scope="col">순위 · 제목</th>
+                <th scope="col" class="n">조회</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;gap:var(--s3)"><span class="rank">1</span><span><a href="#">느리게 읽는 법 — 문장을 붙드는 기술</a><span class="sub">에세이 · 커버스토리</span></span></div></td>
+                <td class="n">8,420<div class="sub delta-up">▲ 신규</div></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;gap:var(--s3)"><span class="rank">2</span><span><a href="#">간판이 사라진 거리, 도시는 무엇을 잃었나</a><span class="sub">도시</span></span></div></td>
+                <td class="n">6,190<div class="sub delta-up">▲ 2</div></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;gap:var(--s3)"><span class="rank">3</span><span><a href="#">종이책과 전자책, 기억에 오래 남는 쪽</a><span class="sub">리뷰</span></span></div></td>
+                <td class="n">5,733<div class="sub delta-flat">— 유지</div></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;gap:var(--s3)"><span class="rank">4</span><span><a href="#">알림을 끈 하루, 세 편의 글을 끝냈다</a><span class="sub">에세이</span></span></div></td>
+                <td class="n">4,908<div class="sub delta-up">▲ 5</div></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;gap:var(--s3)"><span class="rank">5</span><span><a href="#">브라우저는 어떻게 폰트를 늦지 않게 그리나</a><span class="sub">기술</span></span></div></td>
+                <td class="n">4,102<div class="sub delta-flat">— 유지</div></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="meta" style="margin-top:var(--s3)">1위 기사, 발행 사흘 만에 기간 내 최고 조회.</p>
+        </section>
+
+        <!-- 태그 클라우드 -->
+        <section aria-labelledby="tag-h">
+          <div class="panel__head">
+            <span class="idx">02</span>
+            <h3 id="tag-h">주제 아카이브</h3>
+          </div>
+          <nav class="cloud" aria-label="태그 목록">
+            <a class="s-xl" href="#">느린읽기 <span class="c">32</span></a>
+            <a class="s-md" href="#">도시기록 <span class="c">18</span></a>
+            <a class="s-lg" href="#">글쓰기 <span class="c">27</span></a>
+            <a class="s-sm" href="#">아카이브 <span class="c">9</span></a>
+            <a class="s-md" href="#">인터뷰 <span class="c">15</span></a>
+            <a class="s-lg" href="#">집중 <span class="c">24</span></a>
+            <a class="s-sm" href="#">타이포그래피 <span class="c">7</span></a>
+            <a class="s-md" href="#">편집 <span class="c">14</span></a>
+            <a class="s-sm" href="#">종이 <span class="c">6</span></a>
+            <a class="s-lg" href="#">기록 <span class="c">21</span></a>
+            <a class="s-md" href="#">서체 <span class="c">11</span></a>
+            <a class="s-sm" href="#">완독 <span class="c">5</span></a>
+          </nav>
+        </section>
+
+        <!-- 편집자 노트 -->
+        <section aria-labelledby="note-h">
+          <div class="panel__head">
+            <span class="idx">03</span>
+            <h3 id="note-h">편집자의 노트</h3>
+          </div>
+          <div class="note">
+            <p>이번 호를 묶으며 우리는 &lsquo;다 읽지 못한 것&rsquo;의 목록을 함께 실었다.
+            남겨진 문장도 기록의 일부라 믿기 때문이다. — 피처 데스크</p>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+  </main>
+
+  <!-- ========================= 푸터 ========================= -->
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot__grid">
+        <div>
+          <p class="foot__logo">롱폼 <span style="color:var(--crimson)">·</span> Longform</p>
+          <p class="foot__meta">
+            오래 읽는 잡지 · 격주 발행 · 제 47호<br>
+            편집 · 피처 데스크 &nbsp;|&nbsp; 디자인 · 비주얼 데스크
+          </p>
+        </div>
+        <div class="foot__links" aria-label="하단 링크">
+          <a href="#">발행 원칙</a>
+          <a href="#">기고 안내</a>
+          <a href="#">지난 호</a>
+          <a href="#">구독</a>
+        </div>
+      </div>
+      <p class="foot__tag" style="margin-top:var(--s6)">블로그 홈/매거진 · 에디토리얼 매거진</p>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

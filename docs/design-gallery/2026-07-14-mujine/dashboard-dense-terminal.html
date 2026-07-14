@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE 셀러 대시보드 · 고밀도 터미널</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#0A0C10; --panel:#0E1116; --panel-2:#0C0F14; --row-hover:#141922;
+    --amber:#F5A623; --green:#3DDC84; --red:#FF5252; --blue:#4DA3FF;
+    --fg:#C8CDD4; --dim:#7C8494; --dim-2:#5B6472;
+    --border:#1B222C; --border-2:#252d39;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Pretendard Variable", Pretendard, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:var(--mono);
+    font-size:12.5px; line-height:1.42;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  .num{font-variant-numeric:tabular-nums}
+  a{color:inherit; text-decoration:none}
+
+  /* ── shell ── */
+  .term{display:grid; grid-template-columns:208px 1fr; min-height:100vh}
+
+  /* ── sidebar ── */
+  .sidebar{
+    background:var(--panel-2); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  }
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    height:44px; padding:0 12px; border-bottom:1px solid var(--border);
+    font-weight:700; letter-spacing:.14em; font-size:13px; color:var(--fg);
+  }
+  .brand .mk{color:var(--amber)}
+  .brand-full{color:var(--fg)}
+  nav.menu{display:flex; flex-direction:column; padding:8px 0; flex:1; overflow-y:auto}
+  .nav{
+    display:flex; align-items:center; gap:10px;
+    height:32px; padding:0 12px; color:var(--dim);
+    letter-spacing:.02em; position:relative; cursor:pointer;
+    border-left:2px solid transparent;
+  }
+  .nav svg{width:15px; height:15px; flex:0 0 15px; stroke:currentColor; fill:none; stroke-width:1.6}
+  .nav .nav-label{white-space:nowrap}
+  .nav:hover{background:var(--row-hover); color:var(--fg)}
+  .nav:hover .nav-label::before{content:"_"; color:var(--amber)}
+  .nav:focus-visible{outline:1px solid var(--amber); outline-offset:-2px; color:var(--fg)}
+  .nav.active{color:var(--amber); border-left-color:var(--amber); background:#12161d}
+  .nav.active svg{color:var(--amber)}
+  .ws{
+    border-top:1px solid var(--border); padding:8px 12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .ws .avatar{background:#12161d}
+  .ws-text{display:flex; flex-direction:column; line-height:1.25; min-width:0}
+  .ws-text .wt1{color:var(--fg); font-size:11.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ws-text .wt2{color:var(--dim-2); font-size:10px; letter-spacing:.08em; text-transform:uppercase}
+
+  .avatar{
+    width:24px; height:24px; flex:0 0 24px; border-radius:0;
+    border:1px solid var(--border-2); background:var(--panel);
+    display:grid; place-items:center; font-size:10.5px; font-weight:700;
+    letter-spacing:.02em; color:var(--amber);
+  }
+
+  /* ── main column ── */
+  .main{display:flex; flex-direction:column; min-width:0}
+
+  /* status bar (host / uptime / load / clock) */
+  .statusbar{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    height:26px; padding:0 12px; background:#090B0F;
+    border-bottom:1px solid var(--border);
+    font-size:11px; letter-spacing:.02em; color:var(--dim); white-space:nowrap;
+    overflow:hidden;
+  }
+  .statusbar .seg{display:inline-flex; align-items:center; gap:6px; padding:0 12px; border-right:1px solid var(--border)}
+  .statusbar .seg:first-child{padding-left:0}
+  .statusbar .k{color:var(--dim-2); text-transform:uppercase; letter-spacing:.08em}
+  .statusbar .v{color:var(--fg)}
+  .statusbar .dot{width:6px; height:6px; background:var(--green); flex:0 0 6px}
+  .statusbar .push{margin-left:auto; border-right:none; color:var(--amber)}
+
+  /* top bar */
+  .topbar{
+    display:flex; align-items:center; gap:8px;
+    height:48px; padding:0 12px; border-bottom:1px solid var(--border);
+    background:var(--panel);
+  }
+  .search{position:relative; flex:1; max-width:420px; min-width:0}
+  .search svg{position:absolute; left:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; stroke:var(--dim); fill:none; stroke-width:1.6}
+  .search input{
+    width:100%; height:32px; padding:0 10px 0 28px;
+    background:var(--panel-2); border:1px solid var(--border-2); border-radius:0;
+    color:var(--fg); font-family:var(--mono); font-size:12px; letter-spacing:.01em;
+  }
+  .search input::placeholder{color:var(--dim-2)}
+  .search input:hover{border-color:#31394a}
+  .search input:focus{outline:none; border-color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber)}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px;
+    height:32px; padding:0 10px; border-radius:0;
+    border:1px solid var(--border-2); background:var(--panel-2);
+    color:var(--fg); font-family:var(--mono); font-size:11.5px; letter-spacing:.02em;
+    cursor:pointer; white-space:nowrap;
+  }
+  .btn svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.6}
+  .btn:hover{background:var(--row-hover); border-color:#31394a}
+  .btn:focus-visible{outline:1px solid var(--amber); outline-offset:1px}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:#1b1608; border-color:var(--amber); color:var(--amber)}
+  .btn.primary:hover{background:#241d0a}
+  .btn.primary .plus{color:var(--amber)}
+
+  .bell{position:relative; width:32px; height:32px; padding:0; justify-content:center}
+  .bell .badge{
+    position:absolute; top:-4px; right:-4px; min-width:15px; height:15px; padding:0 3px;
+    background:var(--amber); color:#0A0C10; border-radius:0;
+    font-size:9.5px; font-weight:700; display:grid; place-items:center; letter-spacing:0;
+  }
+  .topbar .avatar{cursor:pointer}
+  .topbar .avatar:hover{border-color:var(--amber)}
+
+  /* info banner */
+  .banner{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 12px; border-bottom:1px solid var(--border);
+    background:#0b1420; border-left:2px solid var(--blue);
+    color:var(--fg); font-size:12px;
+  }
+  .banner .tag{color:var(--blue); font-weight:700; letter-spacing:.1em; font-size:10.5px}
+  .banner b{color:var(--amber); font-weight:700}
+
+  /* content grid */
+  .content{
+    flex:1; display:grid; gap:8px; padding:8px 12px;
+    grid-template-columns:1fr 1fr 1fr 1fr;
+    grid-template-areas:
+      "kpi1 kpi2 kpi3 kpi4"
+      "sales sales cat  log"
+      "orders orders goal log"
+      "prompt prompt prompt prompt";
+  }
+
+  /* panel base */
+  .panel{
+    background:var(--panel); border:1px solid var(--border); border-radius:0;
+    display:flex; flex-direction:column; min-width:0;
+  }
+  .phead{
+    display:flex; align-items:center; gap:8px;
+    height:26px; padding:0 10px; border-bottom:1px solid var(--border);
+    text-transform:uppercase; letter-spacing:.1em; font-size:10px; color:var(--dim);
+    white-space:nowrap;
+  }
+  .phead .pidx{color:var(--amber); letter-spacing:0}
+  .phead .plabel{color:var(--fg)}
+  .phead .pmeta{margin-left:auto; color:var(--dim-2); letter-spacing:.04em}
+  .pbody{padding:10px; min-width:0}
+
+  /* KPI */
+  .kpi .pbody{display:flex; flex-direction:column; gap:6px}
+  .kval{font-size:19px; font-weight:700; color:var(--fg); letter-spacing:-.01em; line-height:1.1}
+  .kval .unit{font-size:12px; color:var(--dim); font-weight:400; margin-left:2px}
+  .krow{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .spark{color:var(--dim); font-size:13px; letter-spacing:1px}
+  .delta{font-size:11.5px; letter-spacing:.02em; white-space:nowrap}
+  .delta.up{color:var(--green)}
+  .delta.down{color:var(--red)}
+  .delta.flat{color:var(--dim)}
+  .kmeta{font-size:10px; color:var(--dim-2); text-transform:uppercase; letter-spacing:.08em}
+
+  /* char-bar tables */
+  .rows{display:flex; flex-direction:column; font-size:12px}
+  .brow{
+    display:grid; align-items:center; gap:8px;
+    padding:3px 4px; border-left:2px solid transparent;
+  }
+  .brow:hover{background:var(--row-hover); border-left-color:var(--amber)}
+  .brow .lbl{color:var(--dim); white-space:nowrap}
+  .brow .val{text-align:right; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap}
+  .bar{letter-spacing:.5px; white-space:nowrap; overflow:hidden}
+  .bar .fill{color:var(--fg)}
+  .bar .fill.amber{color:var(--amber)}
+  .bar .fill.green{color:var(--green)}
+  .bar .empty{color:#20262f}
+  .brow .pct{text-align:right; color:var(--dim); white-space:nowrap; font-variant-numeric:tabular-nums}
+  .peak{color:var(--amber); font-size:10px; letter-spacing:.06em}
+
+  /* sales panel columns */
+  .sales .brow{grid-template-columns:26px 52px 1fr 40px}
+  .cat .brow{grid-template-columns:44px 34px 1fr}
+  .chan .brow{grid-template-columns:1fr 42px auto}
+  .chan .bar{letter-spacing:.5px}
+
+  /* goal */
+  .goal .pbody{display:flex; flex-direction:column; gap:8px}
+  .goalbar{font-size:14px; letter-spacing:1px; line-height:1.1}
+  .goal .grid2{display:flex; justify-content:space-between; font-size:11px; color:var(--dim)}
+  .goal .grid2 b{color:var(--green); font-weight:700}
+  .goal .big{font-size:18px; font-weight:700; color:var(--fg)}
+
+  /* orders table */
+  .orders .pbody{padding:0; overflow-x:auto}
+  table.ord{width:100%; border-collapse:collapse; font-size:12px; min-width:560px}
+  table.ord thead th{
+    text-align:left; padding:6px 10px; border-bottom:1px solid var(--border);
+    text-transform:uppercase; letter-spacing:.08em; font-size:10px; color:var(--dim-2);
+    font-weight:500; white-space:nowrap; user-select:none;
+  }
+  table.ord th.r,table.ord td.r{text-align:right}
+  table.ord th.sortable{cursor:pointer}
+  table.ord th.sortable:hover{color:var(--fg)}
+  table.ord th .caret{color:var(--amber)}
+  table.ord tbody td{padding:6px 10px; border-bottom:1px solid #12161c; white-space:nowrap}
+  table.ord tbody tr{border-left:2px solid transparent}
+  table.ord tbody tr:hover{background:var(--row-hover); border-left-color:var(--amber)}
+  table.ord tbody tr.linkhi{background:#161d17; border-left-color:var(--green)}
+  table.ord tbody tr:last-child td{border-bottom:none}
+  .oid{color:var(--blue)}
+  .prod{color:var(--fg)}
+  .amt{color:var(--fg); font-variant-numeric:tabular-nums}
+  .amt.na{color:var(--dim-2)}
+  td.cust{color:var(--dim)}
+
+  .badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; letter-spacing:.01em; white-space:nowrap}
+  .badge .tk{font-size:9.5px; font-weight:700; letter-spacing:.06em; padding:0 3px; border:1px solid currentColor}
+  .badge.ok{color:var(--green)}
+  .badge.ship{color:var(--blue)}
+  .badge.wait{color:var(--amber)}
+  .badge.done{color:#5fb98a}
+  .badge.cxl{color:var(--red)}
+
+  .rowact{color:var(--dim-2); font-size:10.5px; letter-spacing:.04em; opacity:0}
+  table.ord tbody tr:hover .rowact{opacity:1; color:var(--amber); cursor:pointer}
+  table.ord tbody tr:hover .rowact::before{content:"_"}
+
+  /* event log stream (signature) */
+  .log{overflow:hidden}
+  .log .pbody{padding:0; display:flex; flex-direction:column; min-height:0}
+  .logstream{
+    padding:6px 0; overflow:hidden; display:flex; flex-direction:column;
+    font-size:11.5px; line-height:1.5; flex:1;
+  }
+  .logline{
+    display:grid; grid-template-columns:64px 40px 1fr; gap:6px; align-items:baseline;
+    padding:1px 10px; border-left:2px solid transparent; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  .logline:hover{background:var(--row-hover); border-left-color:var(--amber)}
+  .logline.fresh{animation:flash 1.8s ease-out}
+  @keyframes flash{from{background:#1c1608} to{background:transparent}}
+  .logline .ts{color:var(--dim-2)}
+  .logline .lv{font-weight:700; letter-spacing:.04em}
+  .lv.OK{color:var(--green)} .lv.INFO{color:var(--dim)} .lv.WARN{color:var(--amber)} .lv.ERR{color:var(--red)}
+  .logline .msg{color:var(--fg); overflow:hidden; text-overflow:ellipsis}
+  .logline .msg .path,.logline .msg .oid{color:var(--blue)}
+  .logline.dimmed{opacity:.45}
+
+  /* prompt line */
+  .prompt{
+    grid-area:prompt; background:var(--panel-2); border:1px solid var(--border);
+    padding:7px 10px; font-size:12.5px; display:flex; align-items:center; gap:0; white-space:nowrap; overflow:hidden;
+  }
+  .prompt .who{color:var(--green)}
+  .prompt .at{color:var(--dim)}
+  .prompt .path{color:var(--blue)}
+  .prompt .sig{color:var(--dim)}
+  .prompt .cmd{color:var(--fg); margin-left:6px}
+  .cursor{display:inline-block; width:8px; height:14px; background:var(--amber); margin-left:2px; transform:translateY(2px); animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* function key bar */
+  .fkeys{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    height:28px; padding:0 12px; border-top:1px solid var(--border); background:#090B0F;
+    font-size:10.5px; letter-spacing:.04em; color:var(--dim); white-space:nowrap; overflow:hidden;
+  }
+  .fkeys .fk{display:inline-flex; gap:5px; padding:0 12px; border-right:1px solid var(--border)}
+  .fkeys .fk:first-child{padding-left:0}
+  .fkeys .fk b{color:var(--amber); font-weight:700}
+  .fkeys .foot{margin-left:auto; color:var(--dim-2); letter-spacing:.08em; text-transform:uppercase}
+  .fkeys .foot b{color:var(--fg); font-weight:600}
+
+  /* ── responsive ── */
+  @media(max-width:1100px){
+    .content{
+      grid-template-columns:1fr 1fr;
+      grid-template-areas:
+        "kpi1 kpi2"
+        "kpi3 kpi4"
+        "sales sales"
+        "cat cat"
+        "orders orders"
+        "goal log"
+        "prompt prompt";
+    }
+  }
+  @media(max-width:900px){
+    .term{grid-template-columns:52px 1fr}
+    .sidebar{position:sticky}
+    .nav-label,.brand-full,.ws-text{display:none}
+    .brand{justify-content:center; padding:0}
+    .nav{justify-content:center; gap:0; padding:0}
+    .ws{justify-content:center; padding:8px 0}
+  }
+  @media(max-width:640px){
+    .content{
+      grid-template-columns:1fr;
+      grid-template-areas:
+        "kpi1" "kpi2" "kpi3" "kpi4"
+        "sales" "cat" "goal" "orders" "log" "prompt";
+    }
+    .statusbar .seg.opt{display:none}
+    .search{max-width:none}
+    .btn .btn-label{display:none}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    .cursor{animation:none}
+    .logline.fresh{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="term">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="brand"><span class="mk">▚</span><span class="brand-full">MUJINE</span></div>
+    <nav class="menu">
+      <a class="nav active" tabindex="0">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="nav-label">대시보드</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+        <span class="nav-label">주문</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+        <span class="nav-label">상품</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11h5M19.5 8.5v5"/></svg>
+        <span class="nav-label">고객</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13"/><path d="M2.5 10h19M6 15h4"/></svg>
+        <span class="nav-label">정산</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
+        <span class="nav-label">통계</span>
+      </a>
+      <a class="nav" tabindex="0">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <span class="nav-label">설정</span>
+      </a>
+    </nav>
+    <div class="ws">
+      <div class="avatar">CO</div>
+      <div class="ws-text">
+        <span class="wt1">코튼오가닉 셀러</span>
+        <span class="wt2">workspace</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- status bar -->
+    <div class="statusbar">
+      <span class="seg"><span class="dot"></span><span class="v">seller-console</span></span>
+      <span class="seg"><span class="k">host</span><span class="v">mujine@prod-01</span></span>
+      <span class="seg opt"><span class="k">uptime</span><span class="v num" id="uptime">47:12:08</span></span>
+      <span class="seg opt"><span class="k">load</span><span class="v num" id="load">0.42 0.51 0.48</span></span>
+      <span class="seg opt"><span class="k">req/s</span><span class="v num" id="rps">128</span></span>
+      <span class="seg push"><span class="k" style="color:inherit">KST</span><span class="v num" id="clock" style="color:var(--amber)">14:32:07</span></span>
+    </div>
+
+    <!-- top bar -->
+    <header class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="주문·상품 검색" aria-label="주문·상품 검색">
+      </div>
+      <button class="btn"><span class="btn-label">기간</span> <span style="color:var(--dim)">▾</span></button>
+      <button class="btn bell" aria-label="알림 5건"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="badge">5</span></button>
+      <button class="btn primary"><span class="plus">+</span> <span class="btn-label">새 주문</span></button>
+      <div class="avatar" tabindex="0" aria-label="계정 CO">CO</div>
+    </header>
+
+    <!-- info banner -->
+    <div class="banner">
+      <span class="tag">[INFO]</span>
+      <span>정산 예정 — 3일 후 <b>2억 8,400만원</b>이 등록 계좌로 지급됩니다.</span>
+    </div>
+
+    <!-- content -->
+    <div class="content">
+
+      <!-- KPI 1 -->
+      <section class="panel kpi" style="grid-area:kpi1">
+        <div class="phead"><span class="pidx">[1]</span><span class="plabel">총 매출</span><span class="pmeta">MTD</span></div>
+        <div class="pbody">
+          <div class="kval num">1,284,050,000<span class="unit">원</span></div>
+          <div class="krow"><span class="spark">▁▂▄▃▆█▆▇</span><span class="delta up">▲ +8.2%</span></div>
+          <div class="kmeta">vs 전월</div>
+        </div>
+      </section>
+
+      <!-- KPI 2 -->
+      <section class="panel kpi" style="grid-area:kpi2">
+        <div class="phead"><span class="pidx">[2]</span><span class="plabel">신규 주문</span><span class="pmeta">MTD</span></div>
+        <div class="pbody">
+          <div class="kval num">3,472<span class="unit">건</span></div>
+          <div class="krow"><span class="spark">▂▃▃▄▅▅▆▇</span><span class="delta up">▲ +12%</span></div>
+          <div class="kmeta">vs 전월</div>
+        </div>
+      </section>
+
+      <!-- KPI 3 -->
+      <section class="panel kpi" style="grid-area:kpi3">
+        <div class="phead"><span class="pidx">[3]</span><span class="plabel">전환율</span><span class="pmeta">30D</span></div>
+        <div class="pbody">
+          <div class="kval num">3.8<span class="unit">%</span></div>
+          <div class="krow"><span class="spark">▇▆▆▅▄▄▃▃</span><span class="delta down">▼ −0.4%p 하락</span></div>
+          <div class="kmeta">vs 전주</div>
+        </div>
+      </section>
+
+      <!-- KPI 4 -->
+      <section class="panel kpi" style="grid-area:kpi4">
+        <div class="phead"><span class="pidx">[4]</span><span class="plabel">정산 대기</span><span class="pmeta">T+3</span></div>
+        <div class="pbody">
+          <div class="kval num">284,000,000<span class="unit">원</span></div>
+          <div class="krow"><span class="spark">▄▅▄▅▄▄▅▄</span><span class="delta flat">■ 0건 지연</span></div>
+          <div class="kmeta">지급 대기</div>
+        </div>
+      </section>
+
+      <!-- 매출 추이 -->
+      <section class="panel sales" style="grid-area:sales">
+        <div class="phead"><span class="pidx">[5]</span><span class="plabel">최근 8주 매출 추이</span><span class="pmeta">단위 백만원 · 축0 · 피크 6주</span></div>
+        <div class="pbody">
+          <div class="rows">
+            <div class="brow"><span class="lbl">W1</span><span class="val num">820</span><span class="bar"><span class="fill">████████████</span><span class="empty">░░░░░░░░</span></span><span class="pct">61%</span></div>
+            <div class="brow"><span class="lbl">W2</span><span class="val num">910</span><span class="bar"><span class="fill">██████████████</span><span class="empty">░░░░░░</span></span><span class="pct">68%</span></div>
+            <div class="brow"><span class="lbl">W3</span><span class="val num">1,050</span><span class="bar"><span class="fill">████████████████</span><span class="empty">░░░░</span></span><span class="pct">78%</span></div>
+            <div class="brow"><span class="lbl">W4</span><span class="val num">970</span><span class="bar"><span class="fill">██████████████</span><span class="empty">░░░░░░</span></span><span class="pct">72%</span></div>
+            <div class="brow"><span class="lbl">W5</span><span class="val num">1,180</span><span class="bar"><span class="fill">██████████████████</span><span class="empty">░░</span></span><span class="pct">88%</span></div>
+            <div class="brow"><span class="lbl">W6</span><span class="val num">1,340</span><span class="bar"><span class="fill amber">████████████████████</span></span><span class="pct peak">PEAK</span></div>
+            <div class="brow"><span class="lbl">W7</span><span class="val num">1,220</span><span class="bar"><span class="fill">██████████████████</span><span class="empty">░░</span></span><span class="pct">91%</span></div>
+            <div class="brow"><span class="lbl">W8</span><span class="val num">1,284</span><span class="bar"><span class="fill">███████████████████</span><span class="empty">░</span></span><span class="pct">96%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 카테고리 구성비 -->
+      <section class="panel cat" style="grid-area:cat">
+        <div class="phead"><span class="pidx">[6]</span><span class="plabel">카테고리 구성비</span><span class="pmeta">%</span></div>
+        <div class="pbody">
+          <div class="rows">
+            <div class="brow"><span class="lbl">의류</span><span class="val num">38%</span><span class="bar"><span class="fill amber">████████</span><span class="empty">░░░░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">전자</span><span class="val num">24%</span><span class="bar"><span class="fill">█████</span><span class="empty">░░░░░░░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">리빙</span><span class="val num">20%</span><span class="bar"><span class="fill">████</span><span class="empty">░░░░░░░░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">생활</span><span class="val num">12%</span><span class="bar"><span class="fill">██</span><span class="empty">░░░░░░░░░░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">스포츠</span><span class="val num">6%</span><span class="bar"><span class="fill">█</span><span class="empty">░░░░░░░░░░░░░░░░░░░</span></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 이벤트 로그 (signature) -->
+      <section class="panel log" style="grid-area:log">
+        <div class="phead"><span class="pidx">[7]</span><span class="plabel">이벤트 로그 · tail -f</span><span class="pmeta" id="logmeta">live</span></div>
+        <div class="pbody">
+          <div class="logstream" id="logstream" aria-live="polite" aria-label="실시간 이벤트 로그">
+            <div class="logline"><span class="ts num">[14:31:58]</span><span class="lv OK">OK</span><span class="msg">order <span class="oid">#10481</span> 배송중 전환 · courier=CJ대한통운</span></div>
+            <div class="logline" data-oid="10482"><span class="ts num">[14:31:40]</span><span class="lv OK">OK</span><span class="msg">order <span class="oid">#10482</span> 결제완료 · ₩89,000 · 스마트스토어</span></div>
+            <div class="logline"><span class="ts num">[14:31:12]</span><span class="lv INFO">INFO</span><span class="msg">GET <span class="path">/api/orders?status=paid</span> → 200 · 34ms</span></div>
+            <div class="logline" data-oid="10480"><span class="ts num">[14:30:47]</span><span class="lv WARN">WARN</span><span class="msg">order <span class="oid">#10480</span> 결제대기 22분 · 리마인더 발송</span></div>
+            <div class="logline"><span class="ts num">[14:30:19]</span><span class="lv INFO">INFO</span><span class="msg">정산 배치 대기열 등록 · +3d ₩284,000,000</span></div>
+            <div class="logline"><span class="ts num">[14:29:52]</span><span class="lv ERR">ERR</span><span class="msg">webhook <span class="path">/pay/callback</span> → 502 · 재시도 1/3</span></div>
+            <div class="logline dimmed" data-oid="10478"><span class="ts num">[14:29:20]</span><span class="lv ERR">ERR</span><span class="msg">order <span class="oid">#10478</span> 취소 처리 · 환불 ₩46,000</span></div>
+            <div class="logline dimmed"><span class="ts num">[14:28:44]</span><span class="lv INFO">INFO</span><span class="msg">재고 동기화 sku=4,182 · drift 0</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 최근 주문 -->
+      <section class="panel orders" style="grid-area:orders">
+        <div class="phead"><span class="pidx">[8]</span><span class="plabel">최근 주문</span><span class="pmeta">6건 · realtime</span></div>
+        <div class="pbody">
+          <table class="ord">
+            <thead>
+              <tr>
+                <th class="sortable">주문번호 <span class="caret">▾</span></th>
+                <th>고객</th>
+                <th>상품</th>
+                <th class="r sortable">금액</th>
+                <th>상태</th>
+                <th class="r"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-oid="10482">
+                <td class="oid">#10482</td><td class="cust">K.D</td>
+                <td class="prod">프리미엄 오가닉 코튼 반팔티 외2건</td>
+                <td class="r amt num">89,000원</td>
+                <td><span class="badge ok"><span class="tk">OK</span>결제완료</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+              <tr data-oid="10481">
+                <td class="oid">#10481</td><td class="cust">J.S</td>
+                <td class="prod">무선 이어폰 Pro</td>
+                <td class="r amt num">219,000원</td>
+                <td><span class="badge ship"><span class="tk">SHIP</span>배송중</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+              <tr data-oid="10480">
+                <td class="oid">#10480</td><td class="cust">M.L</td>
+                <td class="prod">스테인리스 텀블러</td>
+                <td class="r amt na">—</td>
+                <td><span class="badge wait"><span class="tk">WAIT</span>결제대기</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+              <tr data-oid="10479">
+                <td class="oid">#10479</td><td class="cust">H.K</td>
+                <td class="prod">대나무 칫솔 4개입</td>
+                <td class="r amt num">12,400원</td>
+                <td><span class="badge done"><span class="tk">DONE</span>배송완료</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+              <tr data-oid="10478">
+                <td class="oid">#10478</td><td class="cust">S.C</td>
+                <td class="prod">아로마 캔들 세트</td>
+                <td class="r amt num">46,000원</td>
+                <td><span class="badge cxl"><span class="tk">CXL</span>취소</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+              <tr data-oid="10477">
+                <td class="oid">#10477</td><td class="cust">Y.P</td>
+                <td class="prod">요가 매트</td>
+                <td class="r amt num">39,000원</td>
+                <td><span class="badge ok"><span class="tk">OK</span>결제완료</span></td>
+                <td class="r"><span class="rowact">상세</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 목표 진행률 + 상위 채널 -->
+      <section class="panel goal chan" style="grid-area:goal">
+        <div class="phead"><span class="pidx">[9]</span><span class="plabel">이번 달 목표</span><span class="pmeta">15억</span></div>
+        <div class="pbody">
+          <div class="big num">85.6%</div>
+          <div class="goalbar"><span class="fill green" style="color:var(--green)">██████████████████████████</span><span class="empty">░░░░</span></div>
+          <div class="grid2"><span>달성 <b class="num">12.84억</b></span><span>목표 <span class="num">15억</span></span></div>
+          <div class="phead" style="margin:8px -10px 0; border-top:1px solid var(--border)"><span class="pidx">[10]</span><span class="plabel">상위 채널</span><span class="pmeta">GMV</span></div>
+          <div class="rows" style="margin-top:6px">
+            <div class="brow"><span class="lbl">스마트스토어</span><span class="val num">4.2억</span><span class="bar"><span class="fill amber">████████████████████</span></span></div>
+            <div class="brow"><span class="lbl">쿠팡</span><span class="val num">3.1억</span><span class="bar"><span class="fill">███████████████</span><span class="empty">░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">자사몰</span><span class="val num">2.4억</span><span class="bar"><span class="fill">███████████</span><span class="empty">░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">인스타샵</span><span class="val num">1.8억</span><span class="bar"><span class="fill">█████████</span><span class="empty">░░░░░░░░░░░</span></span></div>
+            <div class="brow"><span class="lbl">카카오</span><span class="val num">0.9억</span><span class="bar"><span class="fill">████</span><span class="empty">░░░░░░░░░░░░░░░░</span></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- prompt line -->
+      <div class="prompt">
+        <span class="who">co@mujine</span><span class="at">:</span><span class="path">~/dashboard</span><span class="sig">$</span><span class="cmd">watch orders --live --status=all</span><span class="cursor" aria-hidden="true"></span>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- function key bar -->
+    <footer class="fkeys">
+      <span class="fk"><b>F1</b> 도움말</span>
+      <span class="fk"><b>F2</b> 주문</span>
+      <span class="fk"><b>F3</b> 상품</span>
+      <span class="fk"><b>F4</b> 정산</span>
+      <span class="fk"><b>F5</b> 새로고침</span>
+      <span class="foot"><b>MUJINE 대시보드</b> · 고밀도 터미널</span>
+    </footer>
+
+  </div><!-- /main -->
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── live clock + uptime + jittering metrics ── */
+  var clockEl = document.getElementById("clock");
+  var upEl = document.getElementById("uptime");
+  var loadEl = document.getElementById("load");
+  var rpsEl = document.getElementById("rps");
+  var t = 14*3600 + 32*60 + 7;      // 14:32:07
+  var up = 47*3600 + 12*60 + 8;     // 47:12:08
+  var base = [0.42,0.51,0.48];
+
+  function two(n){ return (n<10?"0":"")+n; }
+  function fmtClock(s){ s%=86400; return two((s/3600|0))+":"+two((s/60|0)%60)+":"+two(s%60); }
+  function fmtUp(s){ return two((s/3600|0))+":"+two((s/60|0)%60)+":"+two(s%60); }
+
+  if(!reduce){
+    setInterval(function(){
+      t++; up++;
+      clockEl.textContent = fmtClock(t);
+      upEl.textContent = fmtUp(up);
+    },1000);
+    setInterval(function(){
+      var l = base.map(function(b){ return (b + (Math.random()*0.06-0.03)).toFixed(2); });
+      loadEl.textContent = l.join(" ");
+      rpsEl.textContent = (124 + (Math.random()*10|0));
+    },3000);
+  }
+
+  /* ── log stream ── */
+  var stream = document.getElementById("logstream");
+  var meta = document.getElementById("logmeta");
+  var templates = [
+    {lv:"OK",  h:'order <span class="oid">#10477</span> 결제완료 · ₩39,000 · 카카오', oid:"10477"},
+    {lv:"INFO",h:'GET <span class="path">/api/orders?page=1</span> → 200 · 28ms'},
+    {lv:"OK",  h:'order <span class="oid">#10479</span> 배송완료 · ₩12,400', oid:"10479"},
+    {lv:"WARN",h:'전환율 3.8% · 전주比 −0.4%p'},
+    {lv:"INFO",h:'채널 스냅샷 갱신 · 스마트스토어 ₩420,000,000'},
+    {lv:"ERR", h:'webhook <span class="path">/pay/callback</span> → 502 · 재시도 2/3'},
+    {lv:"OK",  h:'order <span class="oid">#10482</span> 정산 매칭 · ₩89,000', oid:"10482"},
+    {lv:"INFO",h:'재고 동기화 sku=4,182 · drift 0'},
+    {lv:"WARN",h:'order <span class="oid">#10480</span> 결제대기 · 리마인더 재발송', oid:"10480"},
+    {lv:"INFO",h:'POST <span class="path">/api/settlement/batch</span> → 202 · queued'},
+    {lv:"OK",  h:'order <span class="oid">#10481</span> 송장 등록 · CJ대한통운', oid:"10481"}
+  ];
+  var ti = 0;
+
+  function tsNow(){
+    if(reduce) return "[14:32:07]";
+    return "["+fmtClock(t)+"]";
+  }
+
+  function pushLog(){
+    var tpl = templates[ti % templates.length]; ti++;
+    var line = document.createElement("div");
+    line.className = "logline fresh";
+    if(tpl.oid) line.setAttribute("data-oid", tpl.oid);
+    line.innerHTML =
+      '<span class="ts num">'+tsNow()+'</span>'+
+      '<span class="lv '+tpl.lv+'">'+tpl.lv+'</span>'+
+      '<span class="msg">'+tpl.h+'</span>';
+    stream.insertBefore(line, stream.firstChild);
+    bindLogHover(line);
+    // cap 8, dim tail
+    while(stream.children.length > 8){ stream.removeChild(stream.lastChild); }
+    var kids = stream.children;
+    for(var i=0;i<kids.length;i++){
+      kids[i].classList.toggle("dimmed", i >= kids.length-2);
+    }
+  }
+
+  if(!reduce){
+    function loop(){
+      var wait = 6000 + Math.random()*6000; // 6~12s
+      setTimeout(function(){ pushLog(); loop(); }, wait);
+    }
+    setTimeout(loop, 2600);
+  } else {
+    meta.textContent = "paused";
+  }
+
+  /* ── log ↔ order-row link highlight (data 연결감) ── */
+  function rowFor(oid){ return document.querySelector('table.ord tbody tr[data-oid="'+oid+'"]'); }
+  function bindLogHover(line){
+    var oid = line.getAttribute("data-oid");
+    if(!oid) return;
+    line.addEventListener("mouseenter", function(){ var r=rowFor(oid); if(r) r.classList.add("linkhi"); });
+    line.addEventListener("mouseleave", function(){ var r=rowFor(oid); if(r) r.classList.remove("linkhi"); });
+  }
+  Array.prototype.forEach.call(stream.children, bindLogHover);
+
+  /* reverse: order row hover highlights matching log lines */
+  Array.prototype.forEach.call(document.querySelectorAll('table.ord tbody tr[data-oid]'), function(r){
+    var oid = r.getAttribute("data-oid");
+    r.addEventListener("mouseenter", function(){
+      Array.prototype.forEach.call(stream.querySelectorAll('[data-oid="'+oid+'"]'), function(l){ l.style.background="var(--row-hover)"; l.style.borderLeftColor="var(--amber)"; });
+    });
+    r.addEventListener("mouseleave", function(){
+      Array.prototype.forEach.call(stream.querySelectorAll('[data-oid="'+oid+'"]'), function(l){ l.style.background=""; l.style.borderLeftColor=""; });
+    });
+  });
+})();
+</script>
+</body>
+</html>

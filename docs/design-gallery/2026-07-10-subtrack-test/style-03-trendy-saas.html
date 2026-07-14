@@ -1,0 +1,762 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SubTrack — 구독 관리 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root {
+    --bg: #FBFAFF;
+    --violet: #7C5CFF;
+    --pink: #FF8FC0;
+    --mint: #5EE6C8;
+    --ink: #17143A;
+    --muted: #7B7897;
+    --grad: linear-gradient(90deg, #7C5CFF 0%, #FF8FC0 100%);
+    --surface: #FFFFFF;
+    --card-shadow: 0 10px 30px rgba(23, 20, 58, .06);
+    --card-shadow-hover: 0 20px 40px rgba(124, 92, 255, .15);
+    --radius-lg: 26px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+    --ease: cubic-bezier(.22, .61, .36, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* L0 — 배경 파스텔 블롭 2개 */
+  .blob {
+    position: fixed;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    opacity: .55;
+  }
+  .blob--violet {
+    top: -160px;
+    right: -120px;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle at 35% 35%, rgba(124, 92, 255, .55), rgba(124, 92, 255, 0) 70%);
+  }
+  .blob--mint {
+    bottom: -180px;
+    left: -140px;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle at 60% 40%, rgba(94, 230, 200, .5), rgba(94, 230, 200, 0) 70%);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 28px 64px;
+  }
+
+  /* ── 헤더 ── */
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    animation: headIn .4s var(--ease) both;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--grad);
+    box-shadow: 0 8px 20px rgba(124, 92, 255, .28);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+  .brand-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+  }
+  .brand-sub {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+  .live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-radius: 999px;
+    box-shadow: var(--card-shadow);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 0 rgba(94, 230, 200, .55);
+    animation: breathe 2s var(--ease) infinite;
+  }
+  .live-chip .live-label { color: var(--muted); font-weight: 500; }
+
+  /* ── KPI 그리드 ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .kpi {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 20px;
+    box-shadow: var(--card-shadow);
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+    overflow: hidden;
+    cursor: default;
+    outline: none;
+    animation: cardUp .5s var(--ease) both;
+  }
+  .kpi::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--grad);
+    opacity: .0;
+    transition: opacity .2s var(--ease);
+  }
+  .kpi:nth-child(1) { animation-delay: .10s; }
+  .kpi:nth-child(2) { animation-delay: .16s; }
+  .kpi:nth-child(3) { animation-delay: .22s; }
+  .kpi:nth-child(4) { animation-delay: .28s; }
+  .kpi:hover, .kpi:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+  .kpi:hover::before, .kpi:focus-visible::before { opacity: 1; }
+
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+  }
+  .kpi-value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    line-height: 1;
+  }
+  .kpi-num {
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+  .kpi-unit {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-delta.up   { color: #1E9E85; background: rgba(94, 230, 200, .18); }
+  .kpi-delta.down { color: #6B54D6; background: rgba(124, 92, 255, .12); }
+  .kpi-delta .arrow { font-size: 11px; }
+
+  /* ── 패널 공통 ── */
+  .panel {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow);
+    padding: 26px 26px 22px;
+    margin-bottom: 22px;
+    animation: cardUp .5s var(--ease) both;
+    animation-delay: .34s;
+  }
+  .panel--table { animation-delay: .42s; }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .panel-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .panel-cap {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── 차트 ── */
+  .chart {
+    display: flex;
+    gap: 14px;
+  }
+  .chart-y {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    padding-bottom: 26px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 26px;
+  }
+  .chart-plot {
+    position: relative;
+    flex: 1;
+    height: 240px;
+  }
+  .grid-lines {
+    position: absolute;
+    inset: 0 0 26px 0;
+    z-index: 0;
+  }
+  .grid-lines span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(23, 20, 58, .05);
+  }
+  .bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 3%;
+  }
+  .bar-col {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .bar-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+    transition: color .2s var(--ease), font-weight .2s var(--ease), transform .2s var(--ease);
+  }
+  .bar-track {
+    width: 100%;
+    max-width: 46px;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .bar-fill {
+    width: 100%;
+    border-radius: 12px 12px 6px 6px;
+    background: rgba(124, 92, 255, .5);
+    transform-origin: bottom center;
+    transform: scaleY(0);
+    animation: barGrow .5s var(--ease) forwards;
+    outline: none;
+    cursor: default;
+    transition: filter .2s var(--ease);
+  }
+  .bar-col:nth-child(1) .bar-fill { animation-delay: .40s; }
+  .bar-col:nth-child(2) .bar-fill { animation-delay: .44s; }
+  .bar-col:nth-child(3) .bar-fill { animation-delay: .48s; }
+  .bar-col:nth-child(4) .bar-fill { animation-delay: .52s; }
+  .bar-col:nth-child(5) .bar-fill { animation: barGrowPeak .6s var(--ease) forwards; animation-delay: .56s; }
+  .bar-col:nth-child(6) .bar-fill { animation-delay: .60s; }
+
+  .bar-fill.is-peak {
+    background: var(--grad);
+    box-shadow: 0 10px 22px rgba(124, 92, 255, .28);
+  }
+  .bar-label {
+    position: absolute;
+    bottom: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+  .bar-col:hover .bar-fill, .bar-fill:focus-visible {
+    background: var(--grad);
+    filter: saturate(1.15);
+  }
+  .bar-col:hover .bar-value, .bar-fill:focus-visible + .bar-value {
+    color: var(--violet);
+    font-weight: 800;
+    transform: translateY(-2px);
+  }
+
+  /* ── 테이블 ── */
+  .table-scroll { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 0 16px 14px;
+  }
+  thead th.num, tbody td.num { text-align: right; }
+  tbody tr {
+    transition: background .18s var(--ease);
+  }
+  tbody tr:not(:last-child) td {
+    border-bottom: 1px solid rgba(23, 20, 58, .05);
+  }
+  tbody td {
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    vertical-align: middle;
+  }
+  tbody td.num {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+  tbody td.date { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 600; }
+  tbody tr:hover { background: rgba(124, 92, 255, .05); }
+  tbody tr:hover .svc-name { color: var(--violet); }
+
+  .svc {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .svc-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+  }
+  .svc-name { font-weight: 700; transition: color .18s var(--ease); }
+
+  .cat {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    background: rgba(23, 20, 58, .05);
+    color: var(--muted);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .badge .bdot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .badge--active   { background: rgba(94, 230, 200, .16);  color: #17836E; }
+  .badge--active .bdot { background: var(--mint); animation: breathe 2s var(--ease) infinite; }
+  .badge--renew    { background: rgba(124, 92, 255, .12);  color: #5A45C4; }
+  .badge--renew .bdot  { background: var(--violet); }
+  .badge--problem  { background: rgba(255, 92, 138, .14);  color: #D63A66; }
+  .badge--problem .bdot { background: #FF5C8A; }
+  .badge--idle     { background: rgba(123, 120, 151, .12); color: #6E6B85; }
+  .badge--idle .bdot   { background: var(--muted); }
+
+  /* ── 푸터 ── */
+  .foot {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+  .foot .dot-sep { margin: 0 8px; opacity: .5; }
+
+  /* ── 반응형 ── */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 32px 20px 56px; }
+    .chart-plot { height: 200px; }
+  }
+  @media (max-width: 560px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-num { font-size: 36px; }
+    .brand-name { font-size: 23px; }
+  }
+
+  /* ── 애니메이션 ── */
+  @keyframes headIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes cardUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+  }
+  @keyframes barGrowPeak {
+    0%   { transform: scaleY(0); }
+    78%  { transform: scaleY(1.05); }
+    90%  { transform: scaleY(.98); }
+    100% { transform: scaleY(1); }
+  }
+  @keyframes breathe {
+    0%   { box-shadow: 0 0 0 0 rgba(94, 230, 200, .55); }
+    70%  { box-shadow: 0 0 0 7px rgba(94, 230, 200, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(94, 230, 200, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .bar-fill { transform: scaleY(1) !important; }
+    .head, .kpi, .panel { opacity: 1 !important; transform: none !important; }
+    .live-dot, .badge--active .bdot { box-shadow: none !important; }
+  }
+</style>
+
+<div class="blob blob--violet" aria-hidden="true"></div>
+<div class="blob blob--mint" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <header class="head">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div>
+        <div class="brand-name">SubTrack</div>
+        <div class="brand-sub">구독 관리 대시보드</div>
+      </div>
+    </div>
+    <div class="live-chip">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span class="live-label">갱신</span>
+      <span>2026-07-10 15:10</span>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <article class="kpi" tabindex="0">
+      <div class="kpi-label">월 구독료 합계</div>
+      <div class="kpi-value">
+        <span class="kpi-num" data-target="187400">187,400</span>
+        <span class="kpi-unit">원</span>
+      </div>
+      <span class="kpi-delta up"><span class="arrow">▲</span>전월 대비 +8.2%</span>
+    </article>
+
+    <article class="kpi" tabindex="0">
+      <div class="kpi-label">활성 구독</div>
+      <div class="kpi-value">
+        <span class="kpi-num" data-target="23">23</span>
+        <span class="kpi-unit">건</span>
+      </div>
+      <span class="kpi-delta up"><span class="arrow">▲</span>+3건</span>
+    </article>
+
+    <article class="kpi" tabindex="0">
+      <div class="kpi-label">이번달 갱신 예정</div>
+      <div class="kpi-value">
+        <span class="kpi-num" data-target="7">7</span>
+        <span class="kpi-unit">건</span>
+      </div>
+      <span class="kpi-delta down"><span class="arrow">▼</span>−1건</span>
+    </article>
+
+    <article class="kpi" tabindex="0">
+      <div class="kpi-label">미사용 (3개월+)</div>
+      <div class="kpi-value">
+        <span class="kpi-num" data-target="4">4</span>
+        <span class="kpi-unit">건</span>
+      </div>
+      <span class="kpi-delta down"><span class="arrow">▼</span>−2건 해지</span>
+    </article>
+  </section>
+
+  <!-- 차트 -->
+  <section class="panel" aria-label="최근 6개월 월 구독료 추이">
+    <div class="panel-head">
+      <div class="panel-title">최근 6개월 월 구독료</div>
+      <div class="panel-cap">단위: 만원 · 5월 피크 18.9</div>
+    </div>
+    <div class="chart">
+      <div class="chart-y" aria-hidden="true">
+        <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
+      </div>
+      <div class="chart-plot">
+        <div class="grid-lines" aria-hidden="true">
+          <span style="bottom:25%"></span>
+          <span style="bottom:50%"></span>
+          <span style="bottom:75%"></span>
+          <span style="bottom:100%"></span>
+        </div>
+        <div class="bars" role="list">
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">14.2</div>
+            <div class="bar-track"><div class="bar-fill" tabindex="0" style="height:71%" aria-label="1월 14.2만원"></div></div>
+            <div class="bar-label">1월</div>
+          </div>
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">15.1</div>
+            <div class="bar-track"><div class="bar-fill" tabindex="0" style="height:75.5%" aria-label="2월 15.1만원"></div></div>
+            <div class="bar-label">2월</div>
+          </div>
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">16.8</div>
+            <div class="bar-track"><div class="bar-fill" tabindex="0" style="height:84%" aria-label="3월 16.8만원"></div></div>
+            <div class="bar-label">3월</div>
+          </div>
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">17.3</div>
+            <div class="bar-track"><div class="bar-fill" tabindex="0" style="height:86.5%" aria-label="4월 17.3만원"></div></div>
+            <div class="bar-label">4월</div>
+          </div>
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">18.9</div>
+            <div class="bar-track"><div class="bar-fill is-peak" tabindex="0" style="height:94.5%" aria-label="5월 18.9만원 피크"></div></div>
+            <div class="bar-label">5월</div>
+          </div>
+          <div class="bar-col" role="listitem">
+            <div class="bar-value">18.7</div>
+            <div class="bar-track"><div class="bar-fill" tabindex="0" style="height:93.5%" aria-label="6월 18.7만원"></div></div>
+            <div class="bar-label">6월</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 테이블 -->
+  <section class="panel panel--table" aria-label="구독 서비스 목록">
+    <div class="panel-head">
+      <div class="panel-title">구독 서비스</div>
+      <div class="panel-cap">총 6개 서비스</div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>서비스</th>
+            <th class="num">요금</th>
+            <th>다음결제</th>
+            <th>카테고리</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#7C5CFF" aria-hidden="true">넷</span>
+                <span class="svc-name">넷플릭스</span>
+              </div>
+            </td>
+            <td class="num">17,000원</td>
+            <td class="date">07-15</td>
+            <td><span class="cat">엔터</span></td>
+            <td><span class="badge badge--active"><span class="bdot" aria-hidden="true"></span>활성</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#E85D8A" aria-hidden="true">유</span>
+                <span class="svc-name">유튜브 프리미엄</span>
+              </div>
+            </td>
+            <td class="num">14,900원</td>
+            <td class="date">07-22</td>
+            <td><span class="cat">엔터</span></td>
+            <td><span class="badge badge--active"><span class="bdot" aria-hidden="true"></span>활성</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#17143A" aria-hidden="true">노</span>
+                <span class="svc-name">노션</span>
+              </div>
+            </td>
+            <td class="num">12,000원</td>
+            <td class="date">07-18</td>
+            <td><span class="cat">생산성</span></td>
+            <td><span class="badge badge--renew"><span class="bdot" aria-hidden="true"></span>갱신예정</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#2FB89C" aria-hidden="true">A</span>
+                <span class="svc-name">어도비 CC</span>
+              </div>
+            </td>
+            <td class="num">24,000원</td>
+            <td class="date">07-09</td>
+            <td><span class="cat">디자인</span></td>
+            <td><span class="badge badge--problem"><span class="bdot" aria-hidden="true"></span>문제 · 결제실패</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#5A45C4" aria-hidden="true">G</span>
+                <span class="svc-name">챗GPT Plus</span>
+              </div>
+            </td>
+            <td class="num">29,000원</td>
+            <td class="date">07-11</td>
+            <td><span class="cat">AI</span></td>
+            <td><span class="badge badge--active"><span class="bdot" aria-hidden="true"></span>활성</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="svc">
+                <span class="svc-mark" style="background:#7B7897" aria-hidden="true">멜</span>
+                <span class="svc-name">멜론</span>
+              </div>
+            </td>
+            <td class="num">10,900원</td>
+            <td class="date">07-25</td>
+            <td><span class="cat">음악</span></td>
+            <td><span class="badge badge--idle"><span class="bdot" aria-hidden="true"></span>미사용</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    STYLE 03 <span class="dot-sep">·</span> 트렌디 SaaS
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var nums = document.querySelectorAll(".kpi-num");
+
+    // 카운트업은 연출만 담당 — 최종 숫자는 이미 HTML 에 존재.
+    if (reduce || !("requestAnimationFrame" in window)) return;
+
+    function ease(p) { return 1 - Math.pow(1 - p, 3); }
+
+    function run(el) {
+      var target = parseFloat(el.getAttribute("data-target"));
+      if (isNaN(target)) return;
+      var dur = 800;
+      var t0 = null;
+      el.textContent = "0";
+      function step(ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min((ts - t0) / dur, 1);
+        var val = Math.round(target * ease(p));
+        el.textContent = val.toLocaleString("ko-KR");
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toLocaleString("ko-KR");
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    for (var i = 0; i < nums.length; i++) run(nums[i]);
+  })();
+</script>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowly 디자인 갤러리 — SaaS 랜딩페이지 시안 9종</title>
+<style>
+  :root{
+    --bg:#0b0c10; --panel:#14161c; --panel-2:#1b1e26;
+    --line:#282c36; --text:#f2f4f8; --muted:#9aa3b2; --accent:#6c8cff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+
+  header.top{
+    max-width:1240px;margin:0 auto;padding:56px 24px 8px;
+  }
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:20px}
+  h1{font-size:clamp(28px,4.5vw,44px);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  h1 .thin{color:var(--muted);font-weight:400}
+  .lead{color:var(--muted);font-size:16px;line-height:1.7;max-width:660px;margin:0}
+  .fixed-note{
+    max-width:1240px;margin:22px auto 0;padding:0 24px;
+  }
+  .fixed-inner{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-radius:16px;padding:18px 20px;
+    display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .fixed-inner .tag{flex:0 0 auto;font-size:12px;font-weight:700;color:#0b0c10;background:var(--accent);
+    border-radius:8px;padding:5px 10px;letter-spacing:.02em}
+  .fixed-inner p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+  .fixed-inner b{color:var(--text);font-weight:600}
+
+  .grid{
+    max-width:1240px;margin:32px auto 40px;padding:0 24px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:22px}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    display:flex;flex-direction:column;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+  .card:hover{transform:translateY(-4px);border-color:var(--accent);
+    box-shadow:0 18px 40px -18px rgba(108,140,255,.55)}
+
+  .thumb{position:relative;height:300px;overflow:hidden;background:#fff;border-bottom:1px solid var(--line)}
+  .thumb iframe{position:absolute;top:0;left:0;width:1280px;height:960px;border:0;
+    transform:scale(.36);transform-origin:top left;pointer-events:none}
+  /* 카드 폭에 맞춰 프리뷰 스케일 미세조정 */
+  @media(min-width:1100px){ .thumb iframe{transform:scale(.315)} }
+  .thumb .num{position:absolute;top:12px;left:12px;z-index:2;
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    font-size:14px;font-weight:700;color:#fff;background:rgba(11,12,16,.82);
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(4px)}
+  .thumb .open{position:absolute;bottom:12px;right:12px;z-index:2;
+    font-size:12px;font-weight:600;color:var(--text);background:rgba(11,12,16,.82);
+    border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 12px;
+    backdrop-filter:blur(4px);opacity:0;transform:translateY(6px);transition:.18s ease}
+  .card:hover .open{opacity:1;transform:translateY(0)}
+
+  .meta{padding:16px 18px 18px}
+  .meta h3{margin:0 0 5px;font-size:17px;letter-spacing:-.01em}
+  .meta p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.6}
+
+  footer.bottom{max-width:1240px;margin:0 auto;padding:8px 24px 64px;color:var(--muted);font-size:13px;line-height:1.8}
+  footer.bottom code{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-size:12.5px}
+  footer.bottom b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="kicker">Design Gallery · 2026-07-10</span>
+  <h1>Flowly 디자인 시안 <span class="thin">9종 비교</span></h1>
+  <p class="lead">팀 협업·프로젝트 관리 SaaS 랜딩페이지. 아홉 개 시안 모두 <b style="color:var(--text)">같은 카피·같은 섹션</b>을 쓰고, <b style="color:var(--text)">디자인 언어만</b> 다릅니다. 그래야 내용이 아니라 디자인을 비교하게 됩니다.</p>
+</header>
+
+<div class="fixed-note">
+  <div class="fixed-inner">
+    <span class="tag">고정 콘텐츠</span>
+    <p><b>Flowly</b> · Hero "팀의 모든 일이, 한 곳에서 흐르게" · 핵심 기능 3개(칸반 보드 · 스마트 타임라인 · 규칙 자동화) · 요금제 3개(Free ₩0 / Pro ₩12,000 / Business ₩24,000) · 마무리 CTA.</p>
+  </div>
+</div>
+
+<main class="grid">
+
+  <a class="card" href="01-minimal.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">01</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="01-minimal.html" title="미니멀" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>미니멀</h3><p>넓은 여백, 흑백 + 액센트 1개, 큰 타이포, 절제</p></div>
+  </a>
+
+  <a class="card" href="02-brutalism.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">02</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="02-brutalism.html" title="브루탈리즘" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>브루탈리즘</h3><p>날것, 굵은 보더, 모노스페이스, 원색, 비대칭</p></div>
+  </a>
+
+  <a class="card" href="03-editorial.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">03</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="03-editorial.html" title="에디토리얼" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>에디토리얼 (잡지)</h3><p>세리프, 멀티컬럼 그리드, 큰 헤드라인, 여백 리듬</p></div>
+  </a>
+
+  <a class="card" href="04-dark-premium.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">04</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="04-dark-premium.html" title="다크 프리미엄" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>다크 프리미엄</h3><p>딥 다크 배경, 글로우·네온 액센트, 유리 카드</p></div>
+  </a>
+
+  <a class="card" href="05-playful.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">05</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="05-playful.html" title="플레이풀" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>플레이풀</h3><p>밝은 색, 둥근 모서리, 이모지 일러스트, 경쾌</p></div>
+  </a>
+
+  <a class="card" href="06-corporate.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">06</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="06-corporate.html" title="코퍼릿 SaaS" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>코퍼릿 / SaaS</h3><p>깔끔, 블루 계열, 카드 그리드, 신뢰감</p></div>
+  </a>
+
+  <a class="card" href="07-glassmorphism.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">07</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="07-glassmorphism.html" title="글래스모피즘" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>글래스모피즘</h3><p>반투명 블러 패널, 그라데이션 배경, 깊이감</p></div>
+  </a>
+
+  <a class="card" href="08-retro-y2k.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">08</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="08-retro-y2k.html" title="레트로 Y2K" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>레트로 / Y2K</h3><p>네온, 픽셀·그리드, 90s~00s 감성</p></div>
+  </a>
+
+  <a class="card" href="09-neumorphism.html" target="_blank" rel="noopener">
+    <div class="thumb"><span class="num">09</span><span class="open">새 탭에서 열기 ↗</span>
+      <iframe src="09-neumorphism.html" title="뉴모피즘" loading="lazy" scrolling="no"></iframe></div>
+    <div class="meta"><h3>뉴모피즘</h3><p>소프트 섀도, 단색 배경, 부드러운 입체</p></div>
+  </a>
+
+</main>
+
+<footer class="bottom">
+  <p>카드를 클릭하면 새 탭에서 전체 화면으로 열립니다. 마음에 드는 <b>1~2개 번호</b>를 골라 주세요 — 그 방향 안에서 색·타이포·레이아웃을 미세하게 바꾼 <b>변주 3~4개</b>를 만들어 최종 1개를 정하고, 거기서 <b>디자인 토큰</b>(<code>design-system.md</code>)을 뽑아 이후 기획·구현의 기준으로 삼습니다.</p>
+</footer>
+
+</body>
+</html>

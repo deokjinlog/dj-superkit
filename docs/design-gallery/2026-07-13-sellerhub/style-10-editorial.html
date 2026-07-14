@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>셀러허브 · 데일리 에디션</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F2;
+    --paper-2:#F4EFE7;
+    --ink:#1C1B18;
+    --ink-soft:#4A4740;
+    --crimson:#A32638;
+    --hair:#D8D2C6;
+    --hair-strong:#C4BCAC;
+    --up:#2F6A46;
+    --gold:#6E5A2E;
+    --blue:#21528F;
+    --serif:'Noto Serif KR','Nanum Myeongjo',serif;
+    --sans:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Roboto,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .num{font-family:var(--serif);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  a{color:var(--crimson);text-decoration:underline;text-underline-offset:2px;}
+
+  /* ---------- Layout ---------- */
+  .layout{display:flex;min-height:100vh;}
+  @media (prefers-reduced-motion:no-preference){
+    .layout{animation:fade 400ms ease both;}
+  }
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:216px;
+    flex:0 0 216px;
+    background:var(--paper);
+    border-right:1px solid var(--hair);
+    padding:22px 18px;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .brand{
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:23px;
+    letter-spacing:-0.5px;
+    padding-bottom:16px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:2px;
+  }
+  .brand::after{content:"";display:block;height:1px;background:var(--ink);margin-top:2px;}
+  .brand small{display:block;font-family:var(--sans);font-weight:500;font-size:10px;letter-spacing:2px;color:var(--ink-soft);margin-top:6px;}
+  .nav{list-style:none;margin:22px 0 0;padding:0;flex:1;}
+  .nav li{margin:2px 0;}
+  .nav a{
+    display:flex;align-items:center;gap:11px;
+    padding:9px 10px;
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:14px;
+    border-left:3px solid transparent;
+  }
+  .nav a svg{width:19px;height:19px;flex:0 0 19px;}
+  .nav a:hover{background:var(--paper-2);color:var(--ink);}
+  .nav a.active{
+    color:var(--ink);
+    font-weight:700;
+    border-left:3px solid var(--crimson);
+    background:var(--paper-2);
+  }
+  .nav a.active svg{color:var(--crimson);}
+  .userbox{
+    display:flex;align-items:center;gap:10px;
+    padding-top:14px;
+    border-top:1px solid var(--hair);
+  }
+  .avatar{
+    width:36px;height:36px;flex:0 0 36px;
+    display:grid;place-items:center;
+    background:var(--ink);color:var(--paper);
+    font-family:var(--serif);font-weight:700;font-size:13px;
+    /* radius 0 — 각진 아바타 */
+  }
+  .userbox .who{font-size:13px;font-weight:600;line-height:1.2;}
+  .userbox .who small{display:block;font-weight:400;font-size:11px;color:var(--ink-soft);}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--hair);
+    display:flex;align-items:center;gap:14px;
+    padding:12px 26px;
+  }
+  .search{
+    flex:1;max-width:420px;
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--hair-strong);
+    padding:8px 12px;
+    background:var(--paper);
+  }
+  .search svg{width:16px;height:16px;color:var(--ink-soft);flex:0 0 16px;}
+  .search input{
+    border:0;background:transparent;outline:none;
+    font-family:var(--sans);font-size:14px;color:var(--ink);width:100%;
+  }
+  .search input::placeholder{color:#9A9384;}
+  .topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+  .icon-btn{
+    position:relative;
+    width:38px;height:38px;
+    display:grid;place-items:center;
+    border:1px solid var(--hair-strong);
+    background:var(--paper);cursor:pointer;color:var(--ink);
+  }
+  .icon-btn svg{width:19px;height:19px;}
+  .badge{
+    position:absolute;top:-7px;right:-7px;
+    min-width:18px;height:18px;padding:0 4px;
+    display:grid;place-items:center;
+    background:var(--crimson);color:#fff;
+    font-family:var(--serif);font-weight:700;font-size:11px;
+    font-variant-numeric:tabular-nums;
+  }
+  .btn{
+    font-family:var(--sans);font-size:13px;
+    padding:9px 15px;cursor:pointer;
+    border:1px solid var(--ink);
+    background:var(--paper);color:var(--ink);
+  }
+  .btn:hover{background:var(--paper-2);}
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-primary:hover{background:#000;}
+
+  .controls{
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:14px 26px;
+    border-bottom:1px solid var(--hair);
+    background:var(--paper);
+  }
+  .tabs{display:flex;gap:4px;}
+  .tab{
+    font-family:var(--sans);font-size:13px;
+    padding:7px 14px;cursor:pointer;
+    border:0;background:transparent;color:var(--ink-soft);
+    border-bottom:2px solid transparent;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab.active{color:var(--ink);font-weight:700;border-bottom:2px solid var(--crimson);}
+  .filter{
+    margin-left:auto;
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--hair-strong);
+    padding:8px 12px;font-size:13px;cursor:pointer;background:var(--paper);
+  }
+  .filter select{
+    border:0;background:transparent;font-family:var(--sans);font-size:13px;color:var(--ink);
+    outline:none;cursor:pointer;
+  }
+
+  /* ---------- Page ---------- */
+  .page{padding:30px 26px 60px;max-width:1200px;width:100%;margin:0 auto;}
+
+  /* Masthead / hero */
+  .masthead{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:6px;}
+  .masthead-rule{display:flex;justify-content:space-between;align-items:center;
+    font-size:11px;letter-spacing:2px;color:var(--ink-soft);text-transform:uppercase;
+    border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:14px;}
+  .masthead-rule .num{letter-spacing:1px;}
+  .nameplate{
+    font-family:var(--serif);font-weight:900;
+    font-size:clamp(40px,7vw,76px);line-height:0.98;letter-spacing:-2px;margin:0;
+  }
+  .masthead-meta{
+    font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink-soft);
+    margin-top:10px;
+  }
+  .lead{
+    font-family:var(--serif);font-weight:500;
+    font-size:clamp(19px,2.3vw,25px);line-height:1.5;
+    margin:18px 0 0;max-width:56ch;
+  }
+  .lead .dropcap{
+    float:left;font-family:var(--serif);font-weight:900;color:var(--crimson);
+    font-size:76px;line-height:0.72;margin:6px 12px 0 0;
+  }
+  .lead .num{font-weight:700;}
+
+  /* Section scaffolding */
+  section{margin-top:38px;}
+  .rule2{border-top:2px solid var(--ink);height:3px;border-bottom:1px solid var(--ink);}
+  .sec-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding:10px 0 8px;border-bottom:1px solid var(--hair);margin-bottom:20px;
+  }
+  .kicker{
+    font-family:var(--serif);font-weight:700;font-size:21px;letter-spacing:-0.4px;margin:0;
+  }
+  .kicker .em{color:var(--crimson);}
+  .dateline{
+    font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-soft);
+    text-align:right;
+  }
+
+  /* Banner */
+  .banner{
+    display:flex;align-items:flex-start;gap:14px;
+    border-top:1px solid var(--hair-strong);
+    border-bottom:1px solid var(--hair-strong);
+    border-left:3px solid var(--crimson);
+    background:var(--paper-2);
+    padding:13px 18px;margin-top:22px;
+  }
+  .banner .tag{
+    font-family:var(--serif);font-weight:700;font-size:12px;letter-spacing:1px;
+    color:var(--crimson);text-transform:uppercase;padding-top:1px;flex:0 0 auto;
+  }
+  .banner p{margin:0;font-size:14.5px;}
+  .banner .num{font-weight:700;}
+
+  /* Grid */
+  .grid12{display:grid;grid-template-columns:repeat(12,1fr);gap:26px;}
+  .col-7{grid-column:span 7;}
+  .col-5{grid-column:span 5;}
+  .col-6{grid-column:span 6;}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    border-top:1px solid var(--hair);}
+  .kpi{
+    padding:20px 22px;border-bottom:1px solid var(--hair);
+  }
+  .kpi:not(:last-child){border-right:1px solid var(--hair);}
+  .kpi:first-child{padding-left:0;}
+  .kpi-label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12px;color:var(--ink-soft);letter-spacing:0.5px;margin-bottom:8px;
+  }
+  .kpi-label .spark{width:74px;height:24px;}
+  .kpi-fig{font-family:var(--serif);font-weight:700;font-variant-numeric:tabular-nums;
+    font-size:clamp(30px,3.6vw,46px);line-height:1.02;letter-spacing:-1px;}
+  .kpi-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;font-variant-numeric:tabular-nums;}
+  .chg{font-family:var(--serif);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;margin-top:9px;display:inline-block;}
+  .chg.up{color:var(--up);}
+  .chg.down{color:var(--crimson);}
+  .chg.flat{color:var(--ink-soft);}
+  .kpi-story{
+    font-family:var(--serif);font-size:14px;line-height:1.4;color:var(--ink);
+    margin-top:11px;padding-top:11px;border-top:1px solid var(--hair);
+  }
+  .kpi-story .em{color:var(--crimson);font-weight:700;}
+
+  /* Chart card */
+  .panel{padding:0;}
+  .panel-cap{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-soft);
+    line-height:1.45;margin-top:14px;padding-top:10px;border-top:1px solid var(--hair);}
+  .panel-cap .em{font-style:normal;font-weight:700;color:var(--ink);}
+
+  .seg{display:inline-flex;border:1px solid var(--ink);margin-bottom:16px;}
+  .seg button{
+    font-family:var(--sans);font-size:12px;padding:6px 14px;cursor:pointer;
+    background:var(--paper);color:var(--ink-soft);border:0;
+  }
+  .seg button + button{border-left:1px solid var(--ink);}
+  .seg button.active{background:var(--ink);color:var(--paper);font-weight:700;}
+
+  .chart-wrap{position:relative;}
+  .chart-area{position:relative;height:172px;margin-left:44px;}
+  .gridline{position:absolute;left:0;right:0;border-top:1px solid var(--hair);}
+  .gridline.base{border-top:1px solid var(--ink);}
+  .gridline span{position:absolute;left:-44px;top:-8px;width:38px;text-align:right;
+    font-family:var(--serif);font-size:10.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .grid.count{display:none;}
+  .chart[data-mode="count"] .grid.amount{display:none;}
+  .chart[data-mode="count"] .grid.count{display:block;}
+  .bars{position:absolute;inset:0;display:flex;align-items:flex-end;gap:9px;}
+  .bar-col{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%;}
+  .bar-fill{width:78%;margin:0 auto;background:var(--ink);}
+  .bar-col.peak .bar-fill{background:var(--crimson);}
+  .bar-val{position:absolute;top:-17px;left:0;right:0;text-align:center;
+    font-family:var(--serif);font-size:10.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .bar-col.peak .bar-val{color:var(--crimson);font-weight:700;}
+  .bars-x{display:flex;gap:9px;margin:8px 0 0 44px;}
+  .bars-x span{flex:1;text-align:center;font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .chart[data-mode="count"] .bars.amount,.chart[data-mode="count"] .cap.amount{display:none;}
+  .bars.count,.cap.count{display:none;}
+  .chart[data-mode="count"] .bars.count{display:flex;}
+  .chart[data-mode="count"] .cap.count{display:block;}
+
+  /* Donut */
+  .donut-row{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+  .donut{flex:0 0 auto;}
+  .donut svg{display:block;transform:rotate(-90deg);}
+  .legend{list-style:none;margin:0;padding:0;flex:1;min-width:150px;}
+  .legend li{display:flex;align-items:center;gap:9px;
+    padding:7px 0;border-bottom:1px solid var(--hair);font-size:13.5px;}
+  .legend li:last-child{border-bottom:0;}
+  .sw{width:11px;height:11px;flex:0 0 11px;}
+  .legend .nm{flex:1;}
+  .legend .pc{font-family:var(--serif);font-weight:700;font-variant-numeric:tabular-nums;}
+
+  /* Goal */
+  .goal-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-soft);}
+  .goal-fig{font-family:var(--serif);font-weight:900;font-size:clamp(34px,4.6vw,52px);
+    line-height:1;letter-spacing:-1px;margin:6px 0 4px;font-variant-numeric:tabular-nums;}
+  .goal-fig small{font-family:var(--serif);font-weight:700;font-size:0.4em;color:var(--crimson);margin-left:10px;}
+  .goal-track{position:relative;height:16px;background:var(--paper-2);border:1px solid var(--hair-strong);margin:16px 0 6px;}
+  .goal-fill{position:absolute;left:0;top:0;bottom:0;background:var(--crimson);}
+  .goal-scale{display:flex;justify-content:space-between;font-family:var(--serif);font-size:11px;
+    color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+
+  /* Channels */
+  .chan{list-style:none;margin:0;padding:0;}
+  .chan li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair);}
+  .chan li:last-child{border-bottom:0;}
+  .chan-av{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;
+    font-family:var(--serif);font-weight:700;font-size:13px;color:var(--paper);background:var(--ink);}
+  .chan-mid{flex:1;min-width:0;}
+  .chan-nm{font-size:13.5px;font-weight:600;}
+  .chan-bar{height:4px;background:var(--paper-2);margin-top:5px;}
+  .chan-bar i{display:block;height:100%;background:var(--crimson);}
+  .chan-val{font-family:var(--serif);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;flex:0 0 auto;}
+
+  /* Table */
+  .table-scroll{overflow-x:auto;border-top:2px solid var(--ink);}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  thead th{
+    font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:0.5px;
+    color:var(--ink-soft);text-transform:uppercase;
+    text-align:left;padding:11px 12px;border-bottom:1px solid var(--ink);
+    white-space:nowrap;
+  }
+  thead th.rt{text-align:right;}
+  .sort{cursor:pointer;user-select:none;background:none;border:0;font:inherit;color:inherit;
+    letter-spacing:inherit;text-transform:inherit;font-weight:700;padding:0;display:inline-flex;align-items:center;gap:4px;}
+  .sort .arw{font-size:9px;color:var(--hair-strong);line-height:1;}
+  .sort.on .arw{color:var(--crimson);}
+  tbody td{padding:12px;border-bottom:1px solid var(--hair);font-size:14px;vertical-align:middle;}
+  tbody td.rt{text-align:right;font-family:var(--serif);font-variant-numeric:tabular-nums;font-size:15px;}
+  tbody tr:hover{background:rgba(163,38,56,0.055);}
+  tbody tr:hover td{box-shadow:inset 0 -2px 0 rgba(163,38,56,0.35);}
+  .prod{display:flex;align-items:center;gap:12px;min-width:0;}
+  .thumb{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;
+    font-family:var(--serif);font-weight:700;font-size:12px;background:var(--paper-2);
+    color:var(--ink);border:1px solid var(--hair-strong);}
+  .prod-nm{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+  .muted{color:#8A8272;}
+  .status{display:inline-flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap;font-size:13.5px;}
+  .status i{width:9px;height:9px;flex:0 0 9px;}
+  .st-sell{color:var(--up);} .st-sell i{background:var(--up);}
+  .st-done{color:var(--blue);} .st-done i{background:var(--blue);}
+  .st-out{color:var(--crimson);} .st-out i{background:var(--crimson);}
+  .st-prep{color:var(--gold);} .st-prep i{background:var(--gold);}
+  .row-act{text-align:right;width:1%;white-space:nowrap;}
+  .row-act a{opacity:0;font-size:12px;font-weight:700;transition:opacity .12s;}
+  tr:hover .row-act a{opacity:1;}
+
+  /* Activity */
+  .feed{list-style:none;margin:0;padding:0;border-top:1px solid var(--hair);}
+  .feed li{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--hair);align-items:baseline;}
+  .feed time{font-family:var(--serif);font-weight:700;font-size:14px;color:var(--crimson);
+    font-variant-numeric:tabular-nums;flex:0 0 52px;}
+  .feed .ft{font-size:14px;}
+  .feed .ft .num{font-weight:700;}
+
+  /* Footer */
+  .foot{margin-top:52px;border-top:2px solid var(--ink);padding-top:14px;
+    font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .foot .num{font-style:normal;letter-spacing:1px;}
+
+  /* ---------- Responsive: sidebar 접힘 (≤900px) ---------- */
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    .sidebar{
+      width:100%;flex:0 0 auto;height:auto;position:static;
+      flex-direction:row;align-items:center;gap:6px;
+      border-right:0;border-bottom:1px solid var(--hair);
+      padding:12px 16px;overflow-x:auto;
+    }
+    .brand{padding-bottom:0;border-bottom:0;margin-bottom:0;font-size:19px;flex:0 0 auto;padding-right:12px;border-right:1px solid var(--hair);margin-right:6px;}
+    .brand::after{display:none;}
+    .brand small{display:none;}
+    .nav{display:flex;flex:1;margin:0;gap:2px;}
+    .nav li{margin:0;}
+    .nav a{padding:8px;border-left:0;border-bottom:2px solid transparent;}
+    .nav a.active{border-left:0;border-bottom:2px solid var(--crimson);background:transparent;}
+    .nav .nav-label{display:none;}
+    .userbox{border-top:0;padding-top:0;flex:0 0 auto;}
+    .userbox .who{display:none;}
+    .grid12{gap:22px;}
+    .col-7,.col-5,.col-6{grid-column:span 12;}
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .kpi{border-right:0 !important;padding-left:0;padding-right:0;}
+    .kpi:nth-child(odd){border-right:1px solid var(--hair) !important;padding-right:22px;}
+    .kpi:nth-child(even){padding-left:22px;}
+  }
+  @media (max-width:560px){
+    .kpis{grid-template-columns:1fr;}
+    .kpi{border-right:0 !important;padding-left:0 !important;padding-right:0 !important;}
+    .topbar{flex-wrap:wrap;}
+    .search{order:3;max-width:none;flex:1 1 100%;}
+    .prod-nm{max-width:160px;}
+    .btn .lbl{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="brand">셀러허브<small>SELLER HUB</small></div>
+    <ul class="nav">
+      <li><a href="#" class="active" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="nav-label">대시보드</span></a></li>
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16l-1.2 13H5.2z"/><path d="M8 7a4 4 0 0 1 8 0"/></svg><span class="nav-label">주문</span></a></li>
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span class="nav-label">상품</span></a></li>
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14"/><path d="M3 9.5h18"/><path d="M6.5 15h4"/></svg><span class="nav-label">정산</span></a></li>
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg><span class="nav-label">고객</span></a></li>
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span class="nav-label">설정</span></a></li>
+    </ul>
+    <div class="userbox">
+      <div class="avatar">KD</div>
+      <div class="who">김덕진<small>셀러 · 프리미엄</small></div>
+    </div>
+  </aside>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="text" placeholder="상품·주문 검색" aria-label="상품·주문 검색">
+      </label>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="알림 5건">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19.5a2 2 0 0 0 4 0"/></svg>
+          <span class="badge num">5</span>
+        </button>
+        <div class="avatar" title="김덕진">KD</div>
+        <button class="btn" aria-label="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="15" height="15" style="vertical-align:-2px"><path d="M20 11a8 8 0 1 0-1.5 5.2"/><path d="M20 4.5V11h-6"/></svg> <span class="lbl">새로고침</span></button>
+        <button class="btn btn-primary">리포트 내보내기</button>
+      </div>
+    </div>
+
+    <!-- Tabs + filter -->
+    <div class="controls">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab">오늘</button>
+        <button class="tab" role="tab">이번 주</button>
+        <button class="tab active" role="tab" aria-selected="true">이번 달</button>
+        <button class="tab" role="tab">올해</button>
+      </div>
+      <label class="filter">
+        <select aria-label="채널 필터">
+          <option>전체 채널</option>
+          <option>스마트스토어</option>
+          <option>쿠팡</option>
+          <option>자사몰</option>
+          <option>인스타샵</option>
+          <option>카카오</option>
+        </select>
+        <span aria-hidden="true">▾</span>
+      </label>
+    </div>
+
+    <!-- Page -->
+    <main class="page">
+
+      <!-- ===== Masthead / Hero ===== -->
+      <header class="masthead">
+        <div class="masthead-rule">
+          <span>이커머스 셀러 통합 대시보드</span>
+          <span class="num">제 128 호 · 2026.07.13</span>
+        </div>
+        <h1 class="nameplate">셀러허브</h1>
+        <div class="masthead-meta">데일리 셀러 리포트 · 2026년 7월 13일 월요일 · 전체 채널판</div>
+        <p class="lead"><span class="dropcap">오</span>늘 셀러허브의 누적 매출은 <span class="num">128억</span>을 넘어섰다. 신규 주문은 <span class="num">3,472</span>건으로 두 자릿수 늘었지만, 전환율만 <span class="num">0.4</span>%포인트 뒷걸음쳤다. 사흘 뒤 <span class="num">2억 8,400만원</span>의 정산이 예정돼 있다.</p>
+      </header>
+
+      <!-- ===== Banner ===== -->
+      <div class="banner" role="note">
+        <span class="tag">공지</span>
+        <p><strong>정산 예정</strong> — 3일 후 <span class="num">2억 8,400만원</span>이 등록 계좌로 지급됩니다.</p>
+      </div>
+
+      <!-- ===== KPI ===== -->
+      <section aria-label="핵심 지표">
+        <div class="rule2"></div>
+        <div class="sec-head">
+          <h2 class="kicker">한눈에 보는 <span class="em">오늘의 장부</span></h2>
+          <span class="dateline">이번 달 · 전체 채널 기준</span>
+        </div>
+
+        <div class="kpis">
+          <!-- 총 매출 -->
+          <div class="kpi">
+            <div class="kpi-label"><span>총 매출</span>
+              <svg class="spark" viewBox="0 0 88 28" fill="none" preserveAspectRatio="none"><polyline points="2,23 16,19 30,20 44,14 58,15 72,8 86,4" stroke="#2F6A46" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-fig">128억 4,050만</div>
+            <div class="kpi-sub">12,840,500,000원</div>
+            <span class="chg up">▲ 8.2%</span>
+            <p class="kpi-story">지난주보다 <span class="em">8.2%</span> 뛰며 128억선을 처음 넘어섰다.</p>
+          </div>
+          <!-- 신규 주문 -->
+          <div class="kpi">
+            <div class="kpi-label"><span>신규 주문</span>
+              <svg class="spark" viewBox="0 0 88 28" fill="none" preserveAspectRatio="none"><polyline points="2,21 16,19 30,16 44,17 58,11 72,9 86,5" stroke="#1C1B18" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-fig">3,472<span style="font-size:.42em;font-weight:500;"> 건</span></div>
+            <div class="kpi-sub">이번 달 누적 주문</div>
+            <span class="chg up">▲ 12%</span>
+            <p class="kpi-story">주문이 <span class="em">12%</span> 늘어, 네 지표 중 증가폭이 가장 크다.</p>
+          </div>
+          <!-- 전환율 -->
+          <div class="kpi">
+            <div class="kpi-label"><span>전환율</span>
+              <svg class="spark" viewBox="0 0 88 28" fill="none" preserveAspectRatio="none"><polyline points="2,6 16,7 30,10 44,9 58,13 72,16 86,20" stroke="#A32638" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-fig">3.8<span style="font-size:.5em;font-weight:500;">%</span></div>
+            <div class="kpi-sub">방문 대비 구매 전환</div>
+            <span class="chg down">▼ 0.4%p</span>
+            <p class="kpi-story">전환율만 <span class="em">0.4%p</span> 꺾여, 유일한 하락 지표다.</p>
+          </div>
+          <!-- 정산 대기 -->
+          <div class="kpi">
+            <div class="kpi-label"><span>정산 대기</span>
+              <svg class="spark" viewBox="0 0 88 28" fill="none" preserveAspectRatio="none"><polyline points="2,15 16,14 30,15 44,13 58,15 72,14 86,14" stroke="#4A4740" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="kpi-fig">2억 8,400만</div>
+            <div class="kpi-sub">284,000,000원</div>
+            <span class="chg flat">— 지연 0건</span>
+            <p class="kpi-story">대기 <span class="em">2.84억</span>, 지연 건 없이 사흘 뒤 지급 예정.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Charts ===== -->
+      <section aria-label="매출 동향과 구성비">
+        <div class="rule2"></div>
+        <div class="sec-head">
+          <h2 class="kicker">매출은 어디서 <span class="em">오르내렸나</span></h2>
+          <span class="dateline">최근 8주 추이 · 카테고리 구성비</span>
+        </div>
+
+        <div class="grid12">
+          <!-- (a) 8주 추이 -->
+          <div class="col-7 panel">
+            <div class="seg" role="tablist" aria-label="지표 전환">
+              <button class="active" data-seg="amount" aria-pressed="true">금액</button>
+              <button data-seg="count" aria-pressed="false">건수</button>
+            </div>
+
+            <div class="chart" id="chart" data-mode="amount">
+              <div class="chart-wrap">
+                <div class="chart-area">
+                  <!-- 금액 gridlines (축 0) -->
+                  <div class="grid amount">
+                    <div class="gridline" style="bottom:143.3px"><span>1,200</span></div>
+                    <div class="gridline" style="bottom:95.5px"><span>800</span></div>
+                    <div class="gridline" style="bottom:47.8px"><span>400</span></div>
+                    <div class="gridline base" style="bottom:0"><span>0</span></div>
+                  </div>
+                  <!-- 건수 gridlines (축 0) -->
+                  <div class="grid count">
+                    <div class="gridline" style="bottom:153.1px"><span>4,000</span></div>
+                    <div class="gridline" style="bottom:114.8px"><span>3,000</span></div>
+                    <div class="gridline" style="bottom:76.6px"><span>2,000</span></div>
+                    <div class="gridline" style="bottom:38.3px"><span>1,000</span></div>
+                    <div class="gridline base" style="bottom:0"><span>0</span></div>
+                  </div>
+
+                  <!-- 금액 막대 -->
+                  <div class="bars amount">
+                    <div class="bar-col"><span class="bar-val">820</span><div class="bar-fill" style="height:98px"></div></div>
+                    <div class="bar-col"><span class="bar-val">910</span><div class="bar-fill" style="height:109px"></div></div>
+                    <div class="bar-col"><span class="bar-val">1,050</span><div class="bar-fill" style="height:125px"></div></div>
+                    <div class="bar-col"><span class="bar-val">970</span><div class="bar-fill" style="height:116px"></div></div>
+                    <div class="bar-col"><span class="bar-val">1,180</span><div class="bar-fill" style="height:141px"></div></div>
+                    <div class="bar-col peak"><span class="bar-val">1,340</span><div class="bar-fill" style="height:160px"></div></div>
+                    <div class="bar-col"><span class="bar-val">1,220</span><div class="bar-fill" style="height:146px"></div></div>
+                    <div class="bar-col"><span class="bar-val">1,284</span><div class="bar-fill" style="height:153px"></div></div>
+                  </div>
+                  <!-- 건수 막대 -->
+                  <div class="bars count">
+                    <div class="bar-col"><span class="bar-val">2,980</span><div class="bar-fill" style="height:114px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,240</span><div class="bar-fill" style="height:124px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,610</span><div class="bar-fill" style="height:138px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,380</span><div class="bar-fill" style="height:129px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,900</span><div class="bar-fill" style="height:149px"></div></div>
+                    <div class="bar-col peak"><span class="bar-val">4,180</span><div class="bar-fill" style="height:160px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,950</span><div class="bar-fill" style="height:151px"></div></div>
+                    <div class="bar-col"><span class="bar-val">3,720</span><div class="bar-fill" style="height:142px"></div></div>
+                  </div>
+                </div>
+                <div class="bars-x">
+                  <span>1주</span><span>2주</span><span>3주</span><span>4주</span><span>5주</span><span>6주</span><span>7주</span><span>8주</span>
+                </div>
+              </div>
+              <p class="panel-cap cap amount"><span class="em">6주차 1,340백만원</span>, 8주를 통틀어 최고치. 6·7·8주 연속으로 1,000선 위를 지켰다. <span style="color:var(--ink-soft)">단위: 백만원</span></p>
+              <p class="panel-cap cap count"><span class="em">6주차 4,180건</span>, 주문 건수도 매출과 같은 6주차에 정점을 찍었다. <span style="color:var(--ink-soft)">단위: 건</span></p>
+            </div>
+          </div>
+
+          <!-- (b) 카테고리 도넛 -->
+          <div class="col-5 panel">
+            <div class="donut-row">
+              <div class="donut" aria-hidden="true">
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                  <g>
+                    <circle cx="75" cy="75" r="60" fill="none" stroke="#A32638" stroke-width="22" stroke-dasharray="143.26 377" stroke-dashoffset="0"/>
+                    <circle cx="75" cy="75" r="60" fill="none" stroke="#1C1B18" stroke-width="22" stroke-dasharray="90.48 377" stroke-dashoffset="-143.26"/>
+                    <circle cx="75" cy="75" r="60" fill="none" stroke="#7C5E3B" stroke-width="22" stroke-dasharray="75.40 377" stroke-dashoffset="-233.74"/>
+                    <circle cx="75" cy="75" r="60" fill="none" stroke="#A8894C" stroke-width="22" stroke-dasharray="45.24 377" stroke-dashoffset="-309.14"/>
+                    <circle cx="75" cy="75" r="60" fill="none" stroke="#C2B9A8" stroke-width="22" stroke-dasharray="22.62 377" stroke-dashoffset="-354.38"/>
+                  </g>
+                </svg>
+              </div>
+              <ul class="legend">
+                <li><span class="sw" style="background:#A32638"></span><span class="nm">의류</span><span class="pc">38%</span></li>
+                <li><span class="sw" style="background:#1C1B18"></span><span class="nm">전자</span><span class="pc">24%</span></li>
+                <li><span class="sw" style="background:#7C5E3B"></span><span class="nm">리빙</span><span class="pc">20%</span></li>
+                <li><span class="sw" style="background:#A8894C"></span><span class="nm">생활</span><span class="pc">12%</span></li>
+                <li><span class="sw" style="background:#C2B9A8"></span><span class="nm">스포츠</span><span class="pc">6%</span></li>
+              </ul>
+            </div>
+            <p class="panel-cap"><span class="em">의류가 전체의 38%</span>로 가장 큰 비중. 상위 3개 카테고리(의류·전자·리빙)가 82%를 차지한다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Goal + Channels ===== -->
+      <section aria-label="목표 진행률과 상위 채널">
+        <div class="rule2"></div>
+        <div class="sec-head">
+          <h2 class="kicker">목표까지 <span class="em">남은 거리</span></h2>
+          <span class="dateline">이번 달 목표 · 상위 채널</span>
+        </div>
+
+        <div class="grid12">
+          <!-- 목표 진행률 -->
+          <div class="col-5 panel">
+            <div class="goal-top"><span>이번 달 매출 목표</span><span class="num">150억</span></div>
+            <div class="goal-fig">128.4억<small>85.6%</small></div>
+            <div class="goal-track" role="progressbar" aria-valuenow="85.6" aria-valuemin="0" aria-valuemax="100" aria-label="목표 진행률 85.6%">
+              <div class="goal-fill" style="width:85.6%"></div>
+            </div>
+            <div class="goal-scale"><span>0</span><span>75억</span><span>150억</span></div>
+            <p class="panel-cap">목표 <span class="em">150억</span> 중 128.4억 달성. 남은 <span class="em">21.6억</span>, 목표까지 14.4% 남았다.</p>
+          </div>
+
+          <!-- 상위 채널 -->
+          <div class="col-7 panel">
+            <ul class="chan">
+              <li><span class="chan-av">스</span><div class="chan-mid"><div class="chan-nm">스마트스토어</div><div class="chan-bar"><i style="width:100%"></i></div></div><span class="chan-val">4.2억</span></li>
+              <li><span class="chan-av">쿠</span><div class="chan-mid"><div class="chan-nm">쿠팡</div><div class="chan-bar"><i style="width:73.8%"></i></div></div><span class="chan-val">3.1억</span></li>
+              <li><span class="chan-av">자</span><div class="chan-mid"><div class="chan-nm">자사몰</div><div class="chan-bar"><i style="width:57.1%"></i></div></div><span class="chan-val">2.4억</span></li>
+              <li><span class="chan-av">인</span><div class="chan-mid"><div class="chan-nm">인스타샵</div><div class="chan-bar"><i style="width:42.9%"></i></div></div><span class="chan-val">1.8억</span></li>
+              <li><span class="chan-av">카</span><div class="chan-mid"><div class="chan-nm">카카오</div><div class="chan-bar"><i style="width:21.4%"></i></div></div><span class="chan-val">0.9억</span></li>
+            </ul>
+            <p class="panel-cap"><span class="em">스마트스토어</span>가 상위 5개 채널 거래액 합(12.4억)의 34%를 홀로 책임진다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Table ===== -->
+      <section aria-label="상품 실적">
+        <div class="rule2"></div>
+        <div class="sec-head">
+          <h2 class="kicker">상품별 <span class="em">실적 시세표</span></h2>
+          <span class="dateline">재고·판매·상태 · 6개 품목</span>
+        </div>
+
+        <div class="table-scroll">
+          <table id="ptable">
+            <thead>
+              <tr>
+                <th><button class="sort" data-key="0" data-type="text">상품 <span class="arw">▲▼</span></button></th>
+                <th><button class="sort" data-key="1" data-type="text">카테고리 <span class="arw">▲▼</span></button></th>
+                <th class="rt"><button class="sort" data-key="2" data-type="num">재고 <span class="arw">▲▼</span></button></th>
+                <th class="rt"><button class="sort on" data-key="3" data-type="num" data-dir="desc">판매 <span class="arw">▼</span></button></th>
+                <th><button class="sort" data-key="4" data-type="text">상태 <span class="arw">▲▼</span></button></th>
+                <th class="row-act" aria-label="액션"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="prod"><span class="thumb">프리</span><span class="prod-nm" title="[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</span></div></td>
+                <td>의류</td>
+                <td class="rt" data-v="1240">1,240</td>
+                <td class="rt" data-v="856">856</td>
+                <td><span class="status st-sell"><i></i>판매중</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+              <tr>
+                <td><div class="prod"><span class="thumb">무선</span><span class="prod-nm" title="무선 블루투스 이어폰 Pro">무선 블루투스 이어폰 Pro</span></div></td>
+                <td>전자</td>
+                <td class="rt" data-v="0"><span class="st-out" style="font-family:var(--serif)">0</span></td>
+                <td class="rt" data-v="2103">2,103</td>
+                <td><span class="status st-out"><i></i>품절</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+              <tr>
+                <td><div class="prod"><span class="thumb">스테</span><span class="prod-nm" title="스테인리스 텀블러 500ml">스테인리스 텀블러 500ml</span></div></td>
+                <td>리빙</td>
+                <td class="rt" data-v="340">340</td>
+                <td class="rt muted" data-v="-1">—</td>
+                <td><span class="status st-prep"><i></i>준비중</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+              <tr>
+                <td><div class="prod"><span class="thumb">친환</span><span class="prod-nm" title="친환경 대나무 칫솔 4개입">친환경 대나무 칫솔 4개입</span></div></td>
+                <td>생활</td>
+                <td class="rt" data-v="5820">5,820</td>
+                <td class="rt" data-v="1472">1,472</td>
+                <td><span class="status st-sell"><i></i>판매중</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+              <tr>
+                <td><div class="prod"><span class="thumb">아로</span><span class="prod-nm" title="아로마 캔들 세트">아로마 캔들 세트</span></div></td>
+                <td>리빙</td>
+                <td class="rt" data-v="88">88</td>
+                <td class="rt" data-v="640">640</td>
+                <td><span class="status st-done"><i></i>정산완료</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+              <tr>
+                <td><div class="prod"><span class="thumb">요가</span><span class="prod-nm" title="요가 매트 6mm 논슬립">요가 매트 6mm 논슬립</span></div></td>
+                <td>스포츠</td>
+                <td class="rt" data-v="210">210</td>
+                <td class="rt" data-v="95">95</td>
+                <td><span class="status st-prep"><i></i>준비중</span></td>
+                <td class="row-act"><a href="#">상세</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== Activity ===== -->
+      <section aria-label="실시간 활동">
+        <div class="rule2"></div>
+        <div class="sec-head">
+          <h2 class="kicker">지금 <span class="em">벌어지는 일</span></h2>
+          <span class="dateline">실시간 활동 로그</span>
+        </div>
+        <ul class="feed">
+          <li><time>14:02</time><span class="ft">새 주문 <span class="num">#10482</span> — <span class="num">89,000원</span> 결제 완료</span></li>
+          <li><time>13:45</time><span class="ft">정산 완료 — 리빙 카테고리 <span class="num">1,240만원</span> 지급</span></li>
+          <li><time>11:20</time><span class="ft" style="color:var(--crimson);font-weight:600">재고 부족 — 무선 블루투스 이어폰 Pro</span></li>
+          <li><time>09:05</time><span class="ft">신규 리뷰 <span class="num">3건</span> 등록</span></li>
+        </ul>
+      </section>
+
+      <!-- ===== Footer ===== -->
+      <footer class="foot">
+        <span>셀러허브 데일리 에디션 · 데이터는 예시입니다</span>
+        <span class="num">STYLE 10 · 에디토리얼 매거진</span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ---- 세그먼트 전환 (금액 / 건수) : 실패해도 기본 '금액' 뷰 유지 ----
+  try{
+    var chart=document.getElementById('chart');
+    var segBtns=document.querySelectorAll('.seg button');
+    segBtns.forEach(function(b){
+      b.addEventListener('click',function(){
+        segBtns.forEach(function(x){x.classList.remove('active');x.setAttribute('aria-pressed','false');});
+        b.classList.add('active');b.setAttribute('aria-pressed','true');
+        chart.setAttribute('data-mode',b.getAttribute('data-seg'));
+      });
+    });
+  }catch(e){}
+
+  // ---- 표 정렬 : 실패해도 기본 순서 유지 ----
+  try{
+    var table=document.getElementById('ptable');
+    var tbody=table.tBodies[0];
+    document.querySelectorAll('.sort').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var key=+btn.getAttribute('data-key');
+        var type=btn.getAttribute('data-type');
+        var cur=btn.getAttribute('data-dir');
+        var dir=cur==='asc'?'desc':'asc';
+        document.querySelectorAll('.sort').forEach(function(s){
+          s.classList.remove('on');s.removeAttribute('data-dir');
+          var a=s.querySelector('.arw'); if(a) a.textContent='▲▼';
+        });
+        btn.classList.add('on');btn.setAttribute('data-dir',dir);
+        var arw=btn.querySelector('.arw'); if(arw) arw.textContent=dir==='asc'?'▲':'▼';
+        var rows=Array.prototype.slice.call(tbody.rows);
+        rows.sort(function(ra,rb){
+          var ca=ra.cells[key], cb=rb.cells[key];
+          var va,vb;
+          if(type==='num'){
+            va=parseFloat(ca.getAttribute('data-v')); vb=parseFloat(cb.getAttribute('data-v'));
+            if(isNaN(va))va=-Infinity; if(isNaN(vb))vb=-Infinity;
+            return dir==='asc'?va-vb:vb-va;
+          }else{
+            va=ca.textContent.trim(); vb=cb.textContent.trim();
+            return dir==='asc'?va.localeCompare(vb,'ko'):vb.localeCompare(va,'ko');
+          }
+        });
+        rows.forEach(function(r){tbody.appendChild(r);});
+      });
+    });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

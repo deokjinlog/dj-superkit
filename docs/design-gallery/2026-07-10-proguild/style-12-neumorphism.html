@@ -1,0 +1,682 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ProGuild — e스포츠 팀 관제 대시보드</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap"
+/>
+
+<style>
+  /* ===== 뉴모피즘 소프트 — 광원은 항상 좌상단 ===== */
+  :root {
+    --bg: #e4e9f2;         /* 배경 = 카드 = 동일 색 (뉴모피즘 전제) */
+    --text: #3d4a5c;       /* 본문 (4.5:1 확보) */
+    --muted: #4f5766;      /* 보조 라벨 (여전히 진하게) */
+    --point: #4a7cff;      /* 포인트 블루 */
+    --problem: #e36868;    /* 문제 계열 */
+
+    --hi: #ffffff;         /* 좌상단 하이라이트 */
+    --sh: #c3cad6;         /* 우하단 그림자 (회색빛 유지) */
+
+    --raise: -8px -8px 16px var(--hi), 8px 8px 16px var(--sh);
+    --raise-lift: -10px -10px 20px var(--hi), 10px 10px 20px var(--sh);
+    --inset: inset -8px -8px 16px var(--hi), inset 8px 8px 16px var(--sh);
+    --inset-soft: inset -5px -5px 10px var(--hi), inset 5px 5px 10px var(--sh);
+
+    /* 상태 4종 — 낮은 대비 유지하면서 굵은 글씨로 식별 */
+    --s-done: #1e7a4c;     /* 주전확정 (완료계열) */
+    --s-active: #2e56be;   /* 활성 (진행계열) */
+    --s-problem: #b03a3a;  /* 폼저하 (문제계열) */
+    --s-wait: #4f5766;     /* 로테이션대기 (대기계열) */
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    font-family: "Pretendard", system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 40px) 48px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    animation: fadeIn 400ms ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ===== 헤더 ===== */
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: clamp(24px, 4vw, 40px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    box-shadow: var(--raise);
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--point);
+  }
+
+  h1 {
+    margin: 0;
+    font-family: "Quicksand", "Pretendard", sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 4.5vw, 38px);
+    letter-spacing: 0.3px;
+    color: var(--text);
+  }
+
+  .subtitle {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: var(--bg);
+    box-shadow: var(--inset-soft);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .updated .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--point);
+    box-shadow: 0 0 0 3px rgba(74, 124, 255, 0.16);
+  }
+  .updated time {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 섹션 제목 ===== */
+  .sec-title {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    text-transform: none;
+  }
+
+  /* ===== KPI 그리드 (볼록 = 최상위 위계) ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(16px, 2.4vw, 26px);
+    margin-bottom: clamp(28px, 4vw, 44px);
+  }
+
+  .kpi {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 22px;
+    padding: 22px 22px 20px;
+    box-shadow: var(--raise);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: box-shadow 150ms ease, transform 150ms ease;
+  }
+  .kpi:hover { box-shadow: var(--raise-lift); }         /* 살짝 떠오름 */
+  .kpi:active { box-shadow: var(--inset); transform: translateY(0); } /* 요철 반전 = 눌림 */
+
+  .kpi-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .kpi-value {
+    font-family: "Quicksand", "Pretendard", sans-serif;
+    font-weight: 700;
+    font-size: clamp(30px, 4.4vw, 40px);
+    line-height: 1.05;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-value .unit {
+    font-size: 0.5em;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--raise);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-delta.up { color: var(--s-done); }
+  .kpi-delta.rank { color: var(--s-active); }
+
+  /* ===== 패널 (오목 = 담는 그릇) ===== */
+  .panel {
+    background: var(--bg);
+    border-radius: 26px;
+    box-shadow: var(--inset);
+    padding: clamp(20px, 3vw, 30px);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(20px, 3vw, 30px);
+    align-items: start;
+  }
+
+  /* ===== 차트 (오목한 트랙 안에서 차오른다) ===== */
+  .chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .chart-head .cap {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .chart {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(8px, 1.4vw, 16px);
+    min-height: 236px;
+  }
+
+  .bar-col {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    color: var(--text);
+  }
+
+  .bar-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    transition: color 150ms ease;
+  }
+
+  .bar-track {
+    position: relative;
+    width: 100%;
+    max-width: 46px;
+    height: 176px;
+    border-radius: 14px;
+    background: var(--bg);
+    box-shadow: var(--inset-soft);           /* 오목한 홈 */
+    display: flex;
+    align-items: flex-end;
+    padding: 6px;
+    transition: box-shadow 150ms ease;
+  }
+
+  .bar-fill {
+    width: 100%;
+    height: var(--h);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #7ea0ff 0%, var(--point) 100%);
+    box-shadow: -3px -3px 6px rgba(255, 255, 255, 0.55),
+                3px 3px 7px rgba(58, 92, 190, 0.32);
+    animation: fillUp 700ms cubic-bezier(0.22, 0.7, 0.3, 1) both;
+    transition: filter 150ms ease, box-shadow 150ms ease;
+  }
+  @keyframes fillUp {
+    from { height: 0; }
+    to   { height: var(--h); }
+  }
+
+  /* 막대 hover → 포인트 블루 점등 */
+  .bar-col:hover .bar-fill { filter: brightness(1.12) saturate(1.15); }
+  .bar-col:hover .bar-val { color: var(--point); }
+  /* 막대 press → 홈이 더 깊게 눌린다 (요철 반전) */
+  .bar-col:active .bar-track { box-shadow: var(--inset); }
+  .bar-col:active .bar-fill { box-shadow: inset 2px 2px 4px rgba(58, 92, 190, 0.4); }
+
+  .bar-col.peak .bar-fill {
+    background: linear-gradient(180deg, #5f8bff 0%, #2f5fe0 100%);
+  }
+  .bar-col.peak .bar-val { color: #2e56be; } /* crit #3: 대비 보정 */
+
+  .peak-tag {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--raise);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #2e56be; /* crit #3: 포인트 블루는 대비 부족 → 진한 블루로 보정 */
+    white-space: nowrap;
+  }
+
+  .bar-week {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 테이블 (오목한 웰 + 볼록한 행) ===== */
+  .table-scroll { overflow-x: auto; }
+  .roster {
+    min-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .roster .row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.8fr 0.9fr 1.25fr;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 16px;
+  }
+
+  .roster .head {
+    padding-top: 0;
+    padding-bottom: 12px;
+  }
+  .roster .head span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+
+  .roster .rowbtn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    cursor: pointer;
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 15px 16px;
+    box-shadow: var(--raise);                /* 볼록한 행 = 경계선 없이 분리 */
+    transition: box-shadow 150ms ease;
+  }
+  .roster .rowbtn:hover { box-shadow: var(--raise-lift); }
+  .roster .rowbtn:active { box-shadow: var(--inset); }   /* 요철 반전 */
+
+  .player {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .pos {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .kda {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .form {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .form .arrow { font-size: 11px; }
+  .form.up { color: var(--s-done); }
+  .form.flat { color: var(--s-wait); }
+  .form.down { color: var(--s-problem); }
+
+  /* 상태 알약 — 볼록 (문제 상태만 오목 + 붉은 텍스트) */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--raise);
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status.done { color: var(--s-done); }
+  .status.active { color: var(--s-active); }
+  .status.wait { color: var(--s-wait); }
+  .status.problem {
+    color: var(--s-problem);
+    box-shadow: var(--inset-soft);           /* 문제 = 오목 */
+  }
+
+  /* ===== 푸터 ===== */
+  footer.foot {
+    margin-top: 34px;
+    display: flex;
+    justify-content: center;
+  }
+  .foot .stamp {
+    padding: 11px 20px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--inset-soft);
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+  }
+
+  /* ===== 포커스 (그림자만으로 식별 불가 → 아웃라인) ===== */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--point);
+    outline-offset: 3px;
+  }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .updated { width: 100%; justify-content: center; }
+  }
+
+  /* ===== 접근성: 모션 축소 (눌림 반응은 유지) ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .wrap { animation: none; }
+    .bar-fill { animation: none; }
+    * { transition-duration: 0.001ms !important; }
+  }
+</style>
+
+<div class="wrap">
+  <!-- 헤더 -->
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">PG</div>
+      <div>
+        <h1>ProGuild</h1>
+        <p class="subtitle">e스포츠 팀 관제 대시보드</p>
+      </div>
+    </div>
+    <div class="updated">
+      <span class="dot" aria-hidden="true"></span>
+      <span>갱신 시각</span>
+      <time datetime="2026-07-10T16:00">2026-07-10 16:00</time>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <h2 class="sec-title">핵심 지표</h2>
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <button type="button" class="kpi">
+      <span class="kpi-label">시즌 승률</span>
+      <span class="kpi-value">68.4<span class="unit">%</span></span>
+      <span class="kpi-delta up">전주 대비 +3.2%p</span>
+    </button>
+
+    <button type="button" class="kpi">
+      <span class="kpi-label">리그 순위</span>
+      <span class="kpi-value">2<span class="unit">위</span></span>
+      <span class="kpi-delta rank">▲ 1계단</span>
+    </button>
+
+    <button type="button" class="kpi">
+      <span class="kpi-label">누적 상금</span>
+      <span class="kpi-value" style="font-size: clamp(24px, 3.4vw, 31px)">1억 8,400만원</span>
+      <span class="kpi-delta up">+2,300만원</span>
+    </button>
+
+    <button type="button" class="kpi">
+      <span class="kpi-label">다음 경기</span>
+      <span class="kpi-value">D-2</span>
+      <span class="kpi-delta">vs 팀 이클립스</span>
+    </button>
+  </section>
+
+  <!-- 차트 + 테이블 -->
+  <div class="grid-2">
+    <!-- 차트 -->
+    <section class="panel" aria-label="최근 8주 승률 추이">
+      <div class="chart-head">
+        <h2 class="sec-title" style="margin: 0">최근 8주 승률</h2>
+        <span class="cap">단위 %</span>
+      </div>
+      <div class="chart" role="img"
+        aria-label="최근 8주 승률 추이. 1주 52%, 2주 58%, 3주 61%, 4주 55%, 5주 64%, 6주 71%로 피크, 7주 67%, 8주 68%.">
+        <button type="button" class="bar-col" aria-label="1주 52%">
+          <span class="bar-val">52</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 30%; animation-delay: 0ms"></span></span>
+          <span class="bar-week">1주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="2주 58%">
+          <span class="bar-val">58</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 45%; animation-delay: 60ms"></span></span>
+          <span class="bar-week">2주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="3주 61%">
+          <span class="bar-val">61</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 52.5%; animation-delay: 120ms"></span></span>
+          <span class="bar-week">3주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="4주 55%">
+          <span class="bar-val">55</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 37.5%; animation-delay: 180ms"></span></span>
+          <span class="bar-week">4주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="5주 64%">
+          <span class="bar-val">64</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 60%; animation-delay: 240ms"></span></span>
+          <span class="bar-week">5주</span>
+        </button>
+        <button type="button" class="bar-col peak" aria-label="6주 71%, 피크">
+          <span class="bar-val">71</span>
+          <span class="bar-track">
+            <span class="peak-tag">피크</span>
+            <span class="bar-fill" style="--h: 77.5%; animation-delay: 300ms"></span>
+          </span>
+          <span class="bar-week">6주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="7주 67%">
+          <span class="bar-val">67</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 67.5%; animation-delay: 360ms"></span></span>
+          <span class="bar-week">7주</span>
+        </button>
+        <button type="button" class="bar-col" aria-label="8주 68%">
+          <span class="bar-val">68</span>
+          <span class="bar-track"><span class="bar-fill" style="--h: 70%; animation-delay: 420ms"></span></span>
+          <span class="bar-week">8주</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 테이블 -->
+    <section class="panel" aria-label="선수 로스터">
+      <h2 class="sec-title" style="margin: 0 0 16px">선수 로스터</h2>
+      <div class="table-scroll">
+        <div class="roster" role="table" aria-label="선수 로스터">
+          <div class="row head" role="row">
+            <span role="columnheader">선수</span>
+            <span role="columnheader">포지션</span>
+            <span role="columnheader">KDA</span>
+            <span role="columnheader">폼</span>
+            <span role="columnheader">상태</span>
+          </div>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">블레이즈</span>
+              <span class="pos" role="cell">엔트리</span>
+              <span class="kda" role="cell">1.42</span>
+              <span role="cell"><span class="form up"><span class="arrow">▲</span>상승</span></span>
+              <span role="cell"><span class="status done">주전확정</span></span>
+            </span>
+          </button>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">프로스트</span>
+              <span class="pos" role="cell">서포터</span>
+              <span class="kda" role="cell">0.98</span>
+              <span role="cell"><span class="form flat"><span class="arrow">–</span>유지</span></span>
+              <span role="cell"><span class="status active">활성</span></span>
+            </span>
+          </button>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">레이븐</span>
+              <span class="pos" role="cell">스나이퍼</span>
+              <span class="kda" role="cell">1.67</span>
+              <span role="cell"><span class="form up"><span class="arrow">▲</span>상승</span></span>
+              <span role="cell"><span class="status done">주전확정</span></span>
+            </span>
+          </button>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">노바</span>
+              <span class="pos" role="cell">리퍼</span>
+              <span class="kda" role="cell">0.71</span>
+              <span role="cell"><span class="form down"><span class="arrow">▼</span>하락</span></span>
+              <span role="cell"><span class="status problem">폼저하</span></span>
+            </span>
+          </button>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">쿼츠</span>
+              <span class="pos" role="cell">인게이저</span>
+              <span class="kda" role="cell">1.15</span>
+              <span role="cell"><span class="form flat"><span class="arrow">–</span>유지</span></span>
+              <span role="cell"><span class="status active">활성</span></span>
+            </span>
+          </button>
+
+          <button type="button" class="rowbtn">
+            <span class="row" role="row" style="padding: 0">
+              <span class="player" role="cell">에코</span>
+              <span class="pos" role="cell">플렉스</span>
+              <span class="kda" role="cell">1.03</span>
+              <span role="cell"><span class="form flat"><span class="arrow">–</span>유지</span></span>
+              <span role="cell"><span class="status wait">로테이션대기</span></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span class="stamp">STYLE 12 · 뉴모피즘 소프트</span>
+  </footer>
+</div>
+
+<script>
+  /* 진행 강화용(선택) — 실패해도 화면은 완전. 막대 클릭 시 강조 토글. */
+  (function () {
+    try {
+      var bars = document.querySelectorAll(".bar-col");
+      bars.forEach(function (b) {
+        b.addEventListener("click", function () {
+          bars.forEach(function (o) { o.classList.remove("peak"); });
+          if (!b.getAttribute("aria-label").includes("6주")) {
+            b.classList.add("peak");
+          } else {
+            b.classList.add("peak");
+          }
+        });
+      });
+    } catch (e) {
+      /* no-op: JS 실패 시에도 정적 화면 유지 */
+    }
+  })();
+</script>

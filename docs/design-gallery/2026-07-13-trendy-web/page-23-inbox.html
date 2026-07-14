@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vecta · 인박스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;620&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     Vecta — 다크 프로 미니멀 인박스
+     팔레트/타이포/형태 = style-26, 마감 = production-quality
+     ============================================================ */
+  :root {
+    /* 표면 — 저채도 다크 */
+    --bg:            #0E0E11;
+    --surface:       #131317;
+    --surface-raised:#17171C;
+    --surface-hover: #1C1C22;
+    /* 헤어라인 */
+    --border:        #232326;
+    --border-strong: #2E2E33;
+    /* 텍스트 3단 위계 */
+    --fg:            #EDEDEF;
+    --fg-secondary:  #A0A0A8;
+    --fg-tertiary:   #6E6E76;
+    /* 액센트 (저채도 인디고 하나) */
+    --accent:        #8B8BF5;
+    --accent-quiet:  rgba(139,139,245,.12);
+    --accent-line:   rgba(139,139,245,.28);
+    /* 상태색 — 억제 */
+    --success:       #4E9A76;
+    --warning:       #C7A15A;
+    --danger:        #C96A6A;
+    --success-bg:    rgba(78,154,118,.12);
+    --warning-bg:    rgba(199,161,90,.12);
+    --danger-bg:     rgba(201,106,106,.12);
+
+    /* 8px 그리드 */
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+    --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-12:48px;
+
+    /* radius */
+    --r-window:12px; --r-card:10px; --r-ctrl:8px; --r-sm:6px; --r-pill:999px;
+
+    /* elevation — 팝오버 전용, 아주 얕게 */
+    --shadow-pop: 0 8px 24px rgba(0,0,0,.4);
+
+    --ease: cubic-bezier(.4,0,.2,1);
+
+    --font-ui: "Inter", "Pretendard", -apple-system, system-ui, sans-serif;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  html { -webkit-text-size-adjust:100%; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--bg);
+    color: var(--fg);
+    line-height:1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: var(--sp-6);
+    /* 배경에 아주 미세한 톤 변화 — 색 아닌 밝기만 */
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, rgba(139,139,245,.04), transparent 60%);
+  }
+
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+
+  /* ---------- 앱 셸 (윈도우 프레임) ---------- */
+  .shell {
+    width:100%;
+    max-width:1440px;
+    height: min(880px, calc(100vh - 48px));
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius: var(--r-window);
+    overflow:hidden;
+    display:grid;
+    grid-template-rows: 56px 1fr;
+    animation: shellIn 220ms var(--ease) both;
+  }
+  @keyframes shellIn { from{opacity:0} to{opacity:1} }
+
+  /* ---------- 상단바 ---------- */
+  .topbar {
+    display:flex;
+    align-items:center;
+    gap: var(--sp-4);
+    padding: 0 var(--sp-5);
+    border-bottom:1px solid var(--border);
+    background: var(--surface);
+  }
+  .brand { display:flex; align-items:center; gap: var(--sp-3); min-width:0; }
+  .logo {
+    width:26px; height:26px; border-radius: var(--r-sm);
+    display:grid; place-items:center; flex-shrink:0;
+    background: linear-gradient(160deg, var(--surface-raised), #101014);
+    border:1px solid var(--border-strong);
+  }
+  .logo svg { width:15px; height:15px; color: var(--accent); }
+  .brand-name {
+    font-size:15px; font-weight:600; letter-spacing:-0.01em; color:var(--fg);
+    display:flex; align-items:center; gap: var(--sp-2);
+  }
+  .ws-switch {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; color:var(--fg-tertiary);
+    padding: 3px var(--sp-2); border-radius: var(--r-sm);
+    border:1px solid transparent; background:transparent;
+    cursor:pointer; transition: background 120ms var(--ease), color 120ms var(--ease);
+    font-family:inherit;
+  }
+  .ws-switch:hover { background: var(--surface-hover); color: var(--fg-secondary); }
+  .ws-switch svg { width:12px; height:12px; }
+
+  .topbar-search { margin-left: auto; }
+  .search {
+    position:relative; width: 420px; max-width: 42vw;
+  }
+  .search svg.lead {
+    position:absolute; left:10px; top:50%; transform:translateY(-50%);
+    width:15px; height:15px; color:var(--fg-tertiary); pointer-events:none;
+  }
+  .search input {
+    width:100%; height:34px;
+    background: var(--surface-raised);
+    border:1px solid var(--border);
+    border-radius: var(--r-ctrl);
+    color: var(--fg);
+    font-family:inherit; font-size:13px;
+    padding: 0 var(--sp-3) 0 32px;
+    transition: border-color 150ms var(--ease), background 150ms var(--ease);
+  }
+  .search input::placeholder { color: var(--fg-tertiary); }
+  .search input:hover { border-color: var(--border-strong); }
+  .search input:focus { outline:none; border-color: var(--accent); background: var(--surface); }
+  .search kbd {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    font-family:inherit; font-size:11px; color:var(--fg-tertiary);
+    border:1px solid var(--border); border-radius:5px;
+    padding: 1px 6px; background: var(--surface); line-height:1.4;
+  }
+
+  .topbar-actions { display:flex; align-items:center; gap: var(--sp-2); }
+
+  /* ---------- 아이콘 버튼 ---------- */
+  .icon-btn {
+    width:32px; height:32px; border-radius: var(--r-sm);
+    display:grid; place-items:center;
+    background:transparent; border:1px solid transparent;
+    color: var(--fg-secondary); cursor:pointer;
+    transition: background 120ms var(--ease), color 120ms var(--ease), transform 80ms var(--ease);
+    position:relative;
+  }
+  .icon-btn svg { width:16px; height:16px; }
+  .icon-btn:hover { background: var(--surface-hover); color: var(--fg); }
+  .icon-btn:active { transform: scale(.94); background: var(--border); }
+  .icon-btn.is-active { color: var(--accent); background: var(--accent-quiet); }
+
+  /* 툴팁 */
+  [data-tip]{ position:relative; }
+  [data-tip]::after{
+    content: attr(data-tip);
+    position:absolute; top:calc(100% + 6px); left:50%;
+    transform: translate(-50%, -4px);
+    background: var(--surface-raised); color: var(--fg);
+    border:1px solid var(--border-strong); border-radius: var(--r-sm);
+    padding: 4px 8px; font-size:11px; white-space:nowrap;
+    box-shadow: var(--shadow-pop);
+    opacity:0; pointer-events:none;
+    transition: opacity 120ms var(--ease), transform 120ms var(--ease);
+    z-index:40;
+  }
+  [data-tip]:hover::after{ opacity:1; transform: translate(-50%, 0); }
+
+  /* 계정 아바타 */
+  .account {
+    width:28px; height:28px; border-radius: var(--r-sm);
+    display:grid; place-items:center;
+    font-size:11px; font-weight:600; color: var(--fg);
+    background: linear-gradient(160deg, #20202a, #16161b);
+    border:1px solid var(--border-strong);
+    cursor:pointer; margin-left: 2px;
+    transition: border-color 120ms var(--ease);
+  }
+  .account:hover { border-color: var(--accent-line); }
+
+  /* ---------- 본문 3컬럼 ---------- */
+  .body {
+    display:grid;
+    grid-template-columns: 240px 372px 1fr;
+    min-height:0;
+  }
+  .col { min-height:0; overflow-y:auto; overflow-x:hidden; }
+  .col::-webkit-scrollbar { width:10px; }
+  .col::-webkit-scrollbar-thumb { background: var(--border); border-radius:99px; border:3px solid var(--surface); }
+  .col::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* ---------- 좌: 폴더 사이드바 ---------- */
+  .sidebar {
+    border-right:1px solid var(--border);
+    background: var(--surface);
+    padding: var(--sp-4) var(--sp-3) var(--sp-4);
+    display:flex; flex-direction:column; gap: var(--sp-5);
+  }
+
+  /* 새 메일 primary 버튼 */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap: var(--sp-2);
+    height:36px; padding: 0 var(--sp-4);
+    border-radius: var(--r-ctrl);
+    font-family:inherit; font-size:13px; font-weight:600;
+    letter-spacing:-0.01em; cursor:pointer;
+    border:1px solid transparent;
+    transition: background 120ms var(--ease), border-color 120ms var(--ease),
+                color 120ms var(--ease), transform 80ms var(--ease), filter 80ms var(--ease);
+  }
+  .btn svg { width:15px; height:15px; }
+  .btn:active { transform: scale(.98); }
+
+  .btn-primary {
+    background: var(--accent); color:#0C0C14;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:active { filter: brightness(.96); }
+
+  .btn-secondary {
+    background: var(--surface-raised); color: var(--fg);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover { background: var(--surface-hover); border-color: var(--fg-tertiary); }
+  .btn-secondary:active { filter: brightness(.96); }
+
+  .btn-ghost {
+    background: transparent; color: var(--fg-secondary);
+    border-color: transparent;
+  }
+  .btn-ghost:hover { background: var(--surface-hover); color: var(--fg); }
+
+  .btn:disabled, .btn[aria-disabled="true"] {
+    opacity:.45; cursor:not-allowed; filter:none; transform:none;
+  }
+
+  .btn-block { width:100%; }
+
+  /* 폴더 네비 */
+  .nav-group { display:flex; flex-direction:column; gap:2px; }
+  .nav-label {
+    font-size:11px; font-weight:500; text-transform:uppercase;
+    letter-spacing:0.06em; color: var(--fg-tertiary);
+    padding: 0 var(--sp-2); margin-bottom: var(--sp-2);
+  }
+  .nav-item {
+    position:relative;
+    display:flex; align-items:center; gap: var(--sp-3);
+    height:34px; padding: 0 var(--sp-2);
+    border-radius: var(--r-ctrl);
+    color: var(--fg-secondary); font-size:13px;
+    text-decoration:none; cursor:pointer;
+    border:1px solid transparent; background:transparent;
+    font-family:inherit; text-align:left; width:100%;
+    transition: background 120ms var(--ease), color 120ms var(--ease);
+  }
+  .nav-item svg { width:16px; height:16px; flex-shrink:0; color: var(--fg-tertiary); transition: color 120ms var(--ease); }
+  .nav-item .nav-text { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .nav-item .nav-count { font-size:12px; color: var(--fg-tertiary); }
+  /* hover: 좌측 2px 액센트 바 */
+  .nav-item::before{
+    content:""; position:absolute; left:0; top:7px; bottom:7px;
+    width:0; border-radius:2px; background: var(--accent);
+    transition: width 120ms var(--ease);
+  }
+  .nav-item:hover { background: var(--surface-hover); color: var(--fg); }
+  .nav-item:hover svg { color: var(--fg-secondary); }
+  .nav-item:hover::before { width:2px; }
+  .nav-item.is-active {
+    background: var(--surface-raised); color: var(--fg); font-weight:500;
+  }
+  .nav-item.is-active svg { color: var(--accent); }
+  .nav-item.is-active::before { width:2px; }
+  .nav-item.is-active .nav-count { color: var(--accent); font-weight:600; }
+
+  /* 라벨 점 */
+  .label-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .label-dot.l-product { background: var(--accent); }
+  .label-dot.l-billing { background: var(--success); }
+  .label-dot.l-security { background: var(--danger); }
+  .label-dot.l-deploy  { background: var(--warning); }
+
+  /* 저장 용량 미터 */
+  .storage { margin-top:auto; padding: var(--sp-3) var(--sp-2) 0; }
+  .storage-top { display:flex; justify-content:space-between; font-size:12px; margin-bottom: var(--sp-2); }
+  .storage-top .s-label { color: var(--fg-secondary); }
+  .storage-top .s-val { color: var(--fg-tertiary); }
+  .meter { height:5px; background: var(--surface-raised); border-radius:99px; overflow:hidden; border:1px solid var(--border); }
+  .meter > i { display:block; height:100%; width:62%; border-radius:99px;
+    background: linear-gradient(90deg, var(--accent), #6f6fe0); }
+  .storage-note { font-size:11px; color: var(--fg-tertiary); margin-top:6px; }
+
+  /* ---------- 중: 메시지 리스트 ---------- */
+  .list {
+    border-right:1px solid var(--border);
+    background: var(--surface);
+    display:flex; flex-direction:column;
+  }
+  .list-head {
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: var(--sp-4) var(--sp-4) var(--sp-3);
+    background: var(--surface);
+    border-bottom:1px solid var(--border);
+  }
+  .list-head .lh-title { display:flex; align-items:baseline; gap: var(--sp-2); }
+  .list-head h2 { font-size:15px; font-weight:600; letter-spacing:-0.01em; }
+  .list-head .lh-count { font-size:12px; color: var(--fg-tertiary); }
+  .list-head .lh-tools { display:flex; align-items:center; gap: 2px; }
+
+  .segbar {
+    display:flex; gap: var(--sp-1); padding: var(--sp-2) var(--sp-4);
+    border-bottom:1px solid var(--border); background: var(--surface);
+  }
+  .seg {
+    font-family:inherit; font-size:12px; font-weight:500;
+    color: var(--fg-tertiary); background:transparent;
+    border:1px solid transparent; border-radius: var(--r-sm);
+    padding: 4px var(--sp-3); cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px;
+    transition: background 120ms var(--ease), color 120ms var(--ease);
+  }
+  .seg:hover { background: var(--surface-hover); color: var(--fg-secondary); }
+  .seg.is-active { background: var(--surface-raised); color: var(--fg); }
+  .seg .seg-badge {
+    font-size:11px; color:#0C0C14; background: var(--accent);
+    border-radius:99px; padding: 0 6px; font-weight:600;
+  }
+
+  .msg-list { display:flex; flex-direction:column; }
+
+  .msg {
+    position:relative; display:grid;
+    grid-template-columns: 36px 1fr; gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom:1px solid var(--border);
+    background:transparent; cursor:pointer; text-align:left;
+    font-family:inherit; color:inherit; width:100%;
+    transition: background 120ms var(--ease);
+  }
+  /* hover/selected 좌측 2px 액센트 바 */
+  .msg::before{
+    content:""; position:absolute; left:0; top:0; bottom:0;
+    width:0; background: var(--accent);
+    transition: width 120ms var(--ease);
+  }
+  .msg:hover { background: var(--surface-hover); }
+  .msg:hover::before { width:2px; }
+  .msg.is-selected { background: var(--surface-hover); }
+  .msg.is-selected::before { width:2px; }
+
+  .avatar {
+    width:36px; height:36px; border-radius: var(--r-sm);
+    display:grid; place-items:center; flex-shrink:0;
+    font-size:12px; font-weight:600; letter-spacing:-0.01em;
+    color: var(--fg-secondary);
+    background: radial-gradient(120% 120% at 30% 20%, var(--surface-hover), #101014);
+    border:1px solid var(--border-strong);
+  }
+  .msg.is-unread .avatar { color: var(--fg); }
+
+  .msg-body { min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .msg-top { display:flex; align-items:baseline; gap: var(--sp-2); }
+  .sender { font-size:13px; color: var(--fg-secondary); font-weight:500;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .msg.is-unread .sender { color: var(--fg); font-weight:600; }
+  .handle { font-size:12px; color: var(--fg-tertiary); flex-shrink:0; }
+  .msg-meta { margin-left:auto; display:flex; align-items:center; gap: var(--sp-2); flex-shrink:0; }
+  .time { font-size:12px; color: var(--fg-tertiary); }
+  .unread-dot { width:7px; height:7px; border-radius:50%; background: var(--accent); }
+  .msg:not(.is-unread) .unread-dot { visibility:hidden; }
+
+  .subject {
+    font-size:13px; color: var(--fg-secondary);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .msg.is-unread .subject { color: var(--fg); font-weight:500; }
+  .preview {
+    font-size:12px; color: var(--fg-tertiary); line-height:1.45;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .msg-chips { display:flex; align-items:center; gap: var(--sp-2); margin-top:5px; }
+  .chip {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; color: var(--fg-secondary);
+    border:1px solid var(--border); border-radius: var(--r-sm);
+    padding: 1px 7px; background: var(--surface-raised);
+  }
+  .chip .label-dot { width:6px; height:6px; }
+  .chip.flag { color: var(--warning); border-color: rgba(199,161,90,.3); background: var(--warning-bg); }
+  .chip svg { width:12px; height:12px; }
+
+  /* ---------- 우: 상세 미리보기 ---------- */
+  .detail { background: var(--surface); display:flex; flex-direction:column; }
+  .detail-head {
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5);
+    border-bottom:1px solid var(--border);
+    background: var(--surface);
+  }
+  .detail-head .dh-tools { margin-left:auto; display:flex; align-items:center; gap:2px; }
+  .detail-head .dh-crumb { font-size:12px; color: var(--fg-tertiary); display:flex; align-items:center; gap: var(--sp-2); }
+  .detail-head .dh-crumb svg { width:14px; height:14px; }
+
+  .detail-scroll { padding: var(--sp-6) var(--sp-8); }
+  @media (max-width:1300px){ .detail-scroll{ padding: var(--sp-6); } }
+
+  .thread-subject {
+    font-size:20px; font-weight:600; letter-spacing:-0.01em;
+    line-height:1.4; color: var(--fg); margin-bottom: var(--sp-4);
+  }
+  .thread-tags { display:flex; flex-wrap:wrap; gap: var(--sp-2); margin-bottom: var(--sp-6); }
+
+  .msg-card {
+    border:1px solid var(--border); border-radius: var(--r-card);
+    background: var(--surface-raised);
+    padding: var(--sp-5);
+  }
+  .from-row { display:flex; align-items:center; gap: var(--sp-3); margin-bottom: var(--sp-5); }
+  .from-row .avatar { width:40px; height:40px; font-size:13px; color: var(--fg); }
+  .from-meta { min-width:0; flex:1; }
+  .from-name { font-size:14px; font-weight:600; color: var(--fg); letter-spacing:-0.01em; }
+  .from-sub { font-size:12px; color: var(--fg-tertiary); display:flex; gap:6px; flex-wrap:wrap; }
+  .from-time { font-size:12px; color: var(--fg-tertiary); white-space:nowrap; }
+
+  .status-strip {
+    display:flex; align-items:center; gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border:1px solid var(--border); border-radius: var(--r-ctrl);
+    background: var(--surface);
+    margin-bottom: var(--sp-5);
+  }
+  .badge {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:600; letter-spacing:-0.01em;
+    padding: 3px var(--sp-2); border-radius: var(--r-sm);
+    border:1px solid transparent;
+  }
+  .badge svg { width:12px; height:12px; }
+  .badge.ok { color: var(--success); background: var(--success-bg); border-color: rgba(78,154,118,.28); }
+  .badge.warn { color: var(--warning); background: var(--warning-bg); border-color: rgba(199,161,90,.28); }
+  .status-strip .ss-text { font-size:13px; color: var(--fg-secondary); }
+
+  .prose { font-size:14px; color: var(--fg-secondary); line-height:1.62; }
+  .prose p { margin-bottom: var(--sp-4); }
+  .prose strong { color: var(--fg); font-weight:600; }
+  .prose code {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size:12.5px; color: var(--fg);
+    background: var(--surface); border:1px solid var(--border);
+    border-radius:5px; padding: 1px 6px;
+  }
+
+  /* 메타 정의 리스트 */
+  .meta-grid {
+    margin: var(--sp-5) 0;
+    border:1px solid var(--border); border-radius: var(--r-ctrl);
+    overflow:hidden;
+  }
+  .meta-row {
+    display:grid; grid-template-columns: 128px 1fr;
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom:1px solid var(--border);
+    align-items:center;
+  }
+  .meta-row:last-child { border-bottom:none; }
+  .meta-key { font-size:12px; color: var(--fg-tertiary); }
+  .meta-val { font-size:13px; color: var(--fg); }
+  .meta-val.mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size:12.5px; }
+
+  /* 커밋 리스트 */
+  .commit-list { margin: var(--sp-5) 0 var(--sp-2); display:flex; flex-direction:column; gap: var(--sp-2); }
+  .commit-list .cl-title {
+    font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    color: var(--fg-tertiary); font-weight:500; margin-bottom: var(--sp-2);
+  }
+  .commit {
+    display:flex; align-items:center; gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border:1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--surface);
+    transition: border-color 120ms var(--ease), background 120ms var(--ease);
+  }
+  .commit:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+  .commit .c-hash {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size:12px; color: var(--accent); flex-shrink:0;
+  }
+  .commit .c-text { font-size:13px; color: var(--fg-secondary); min-width:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+  .commit .c-time { font-size:12px; color: var(--fg-tertiary); flex-shrink:0; }
+
+  /* 액션 바 */
+  .action-bar {
+    display:flex; align-items:center; gap: var(--sp-2);
+    margin-top: var(--sp-6); padding-top: var(--sp-5);
+    border-top:1px solid var(--border);
+  }
+  .action-bar .spacer { margin-left:auto; }
+
+  /* 답장 컴포저 */
+  .composer {
+    margin-top: var(--sp-6);
+    border:1px solid var(--border); border-radius: var(--r-card);
+    background: var(--surface-raised);
+    transition: border-color 150ms var(--ease);
+  }
+  .composer:focus-within { border-color: var(--accent); }
+  .composer .c-head {
+    display:flex; align-items:center; gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom:1px solid var(--border);
+    font-size:12px; color: var(--fg-tertiary);
+  }
+  .composer .c-head svg { width:14px; height:14px; }
+  .composer textarea {
+    width:100%; min-height:88px; resize:vertical;
+    background:transparent; border:none; outline:none;
+    color: var(--fg); font-family:inherit; font-size:14px; line-height:1.6;
+    padding: var(--sp-4);
+  }
+  .composer textarea::placeholder { color: var(--fg-tertiary); }
+  .composer .c-foot {
+    display:flex; align-items:center; gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    border-top:1px solid var(--border);
+  }
+  .composer .c-foot .spacer { margin-left:auto; }
+  .send-hint { font-size:11px; color: var(--fg-tertiary); }
+
+  /* ---------- focus-visible: 액센트 2px 링 ---------- */
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+  .msg:focus-visible, .nav-item:focus-visible { outline-offset:-2px; }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width:1160px){
+    .body { grid-template-columns: 208px 320px 1fr; }
+    .search { width:320px; }
+  }
+  @media (max-width:900px){
+    body { padding:0; }
+    .shell { height:100vh; max-width:none; border:none; border-radius:0; }
+    .body { grid-template-columns: 200px 1fr; }
+    .detail { display:none; }
+  }
+  @media (max-width:640px){
+    .body { grid-template-columns: 1fr; }
+    .sidebar { display:none; }
+    .topbar-search { display:none; }
+    .search { width:100%; max-width:none; }
+  }
+
+  /* ---------- 접근성: 모션 축소 ---------- */
+  @media (prefers-reduced-motion: reduce){
+    * { animation-duration:.001ms !important; animation-iteration-count:1 !important;
+        transition-duration:.001ms !important; }
+    .msg::before, .nav-item::before { transition:none; }
+  }
+
+  /* 등장 stagger — 리스트 행 */
+  @media (prefers-reduced-motion: no-preference){
+    .msg { animation: rowIn 260ms var(--ease) both; }
+    .msg:nth-child(1){animation-delay:0ms}
+    .msg:nth-child(2){animation-delay:24ms}
+    .msg:nth-child(3){animation-delay:48ms}
+    .msg:nth-child(4){animation-delay:72ms}
+    .msg:nth-child(5){animation-delay:96ms}
+    .msg:nth-child(6){animation-delay:120ms}
+    .msg:nth-child(7){animation-delay:144ms}
+    .msg:nth-child(8){animation-delay:168ms}
+    @keyframes rowIn { from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
+    .nav-item { animation: fadeIn 240ms var(--ease) both; }
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .footer-mark {
+    position:fixed; bottom:10px; left:50%; transform:translateX(-50%);
+    font-size:11px; color: var(--fg-tertiary);
+    letter-spacing:0.02em; pointer-events:none; z-index:60;
+    background: rgba(14,14,17,.6); padding: 3px 10px; border-radius:99px;
+    border:1px solid var(--border);
+  }
+  @media (max-width:900px){ .footer-mark{ display:none; } }
+</style>
+</head>
+<body>
+
+<!-- 아이콘 스프라이트 (stroke 1.5 일관) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="_base" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 5l8 14 8-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 12h4l2 3h6l2-3h4M3 12l3-7h12l3 7M3 12v6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.6 1-5.8L3.5 9.7l5.9-.9L12 3.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8zM3 4h18v4H3V4zM10 12h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M4 4h7l9 9-7 7-9-9V4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 6h16M9 6V4h6v2M6 6l1 14h10l1-14M10 10v6M14 10v6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3l9-16zM12 10v5M12 17.5v.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2 2 0 0 0-2.8-2.8L5 17v3zM14.5 6.5l3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h9a6 6 0 0 1 6 6v1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-forward" viewBox="0 0 24 24"><path d="M15 7l5 5-5 5M20 12h-9a6 6 0 0 0-6 6v1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11l-8.5 8.5a4 4 0 0 1-5.7-5.7L14 5.5a2.6 2.6 0 0 1 3.7 3.7L9.5 17.5a1.2 1.2 0 0 1-1.7-1.7L15 8.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3zM9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="18" r="2.2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 8.2v7.6M8 6.5h6.5a2 2 0 0 1 2 2V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-7-6 16-3-6-7-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M7 5v14M7 5l-3 3M7 5l3 3M17 19V5M17 19l-3-3M17 19l3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2 3.5L17 11H6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M11 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-4 4V5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+</svg>
+
+<main class="shell" role="application" aria-label="Vecta 인박스">
+
+  <!-- 상단바 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"><svg><use href="#i-logo"/></svg></span>
+      <span class="brand-name">Vecta</span>
+      <button class="ws-switch" type="button">제품팀 워크스페이스 <svg><use href="#i-chevron"/></svg></button>
+    </div>
+
+    <div class="topbar-search">
+      <div class="search">
+        <svg class="lead"><use href="#i-search"/></svg>
+        <input type="search" placeholder="메일, 발신자, 라벨 검색" aria-label="검색">
+        <kbd>/</kbd>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="icon-btn is-active" type="button" data-tip="안 읽음만 보기" aria-label="안 읽음만 보기"><svg><use href="#i-filter"/></svg></button>
+      <button class="icon-btn" type="button" data-tip="설정" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
+      <div class="account" title="계정" aria-label="계정 GP">GP</div>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- 좌: 폴더 사이드바 -->
+    <nav class="col sidebar" aria-label="폴더">
+      <button class="btn btn-primary btn-block" type="button">
+        <svg><use href="#i-edit"/></svg> 새 메일
+      </button>
+
+      <div class="nav-group">
+        <button class="nav-item is-active" type="button">
+          <svg><use href="#i-inbox"/></svg>
+          <span class="nav-text">받은편지함</span>
+          <span class="nav-count tnum">6</span>
+        </button>
+        <button class="nav-item" type="button">
+          <svg><use href="#i-flag"/></svg>
+          <span class="nav-text">중요</span>
+          <span class="nav-count tnum">2</span>
+        </button>
+        <button class="nav-item" type="button">
+          <svg><use href="#i-star"/></svg>
+          <span class="nav-text">별표</span>
+          <span class="nav-count tnum">4</span>
+        </button>
+        <button class="nav-item" type="button">
+          <svg><use href="#i-archive"/></svg>
+          <span class="nav-text">보관</span>
+          <span class="nav-count tnum">128</span>
+        </button>
+        <button class="nav-item" type="button">
+          <svg><use href="#i-alert"/></svg>
+          <span class="nav-text">스팸</span>
+          <span class="nav-count tnum">1</span>
+        </button>
+        <button class="nav-item" type="button">
+          <svg><use href="#i-trash"/></svg>
+          <span class="nav-text">휴지통</span>
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">라벨</div>
+        <button class="nav-item" type="button">
+          <span class="label-dot l-product" style="margin:0 2px"></span>
+          <span class="nav-text">제품</span>
+          <span class="nav-count tnum">12</span>
+        </button>
+        <button class="nav-item" type="button">
+          <span class="label-dot l-billing" style="margin:0 2px"></span>
+          <span class="nav-text">결제</span>
+          <span class="nav-count tnum">3</span>
+        </button>
+        <button class="nav-item" type="button">
+          <span class="label-dot l-deploy" style="margin:0 2px"></span>
+          <span class="nav-text">배포</span>
+          <span class="nav-count tnum">9</span>
+        </button>
+        <button class="nav-item" type="button">
+          <span class="label-dot l-security" style="margin:0 2px"></span>
+          <span class="nav-text">보안</span>
+          <span class="nav-count tnum">2</span>
+        </button>
+      </div>
+
+      <div class="storage">
+        <div class="storage-top">
+          <span class="s-label">저장 용량</span>
+          <span class="s-val tnum">9.3 / 15 GB</span>
+        </div>
+        <div class="meter"><i></i></div>
+        <p class="storage-note">보관함 정리로 공간을 확보할 수 있습니다.</p>
+      </div>
+    </nav>
+
+    <!-- 중: 메시지 리스트 -->
+    <section class="col list" aria-label="메시지 목록">
+      <div class="list-head">
+        <div class="lh-title">
+          <h2>받은편지함</h2>
+          <span class="lh-count tnum">8개 · 안 읽음 3</span>
+        </div>
+        <div class="lh-tools">
+          <button class="icon-btn" type="button" data-tip="정렬" aria-label="정렬"><svg><use href="#i-sort"/></svg></button>
+          <button class="icon-btn" type="button" data-tip="필터" aria-label="필터"><svg><use href="#i-filter"/></svg></button>
+        </div>
+      </div>
+
+      <div class="segbar" role="tablist" aria-label="분류">
+        <button class="seg is-active" type="button" role="tab" aria-selected="true">전체</button>
+        <button class="seg" type="button" role="tab" aria-selected="false">안 읽음 <span class="seg-badge tnum">3</span></button>
+        <button class="seg" type="button" role="tab" aria-selected="false">멘션</button>
+        <button class="seg" type="button" role="tab" aria-selected="false">첨부</button>
+      </div>
+
+      <div class="msg-list">
+
+        <!-- 1 -->
+        <button class="msg is-unread" type="button">
+          <span class="avatar">S</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Stripe</span>
+              <span class="handle">billing</span>
+              <span class="msg-meta"><span class="time tnum">09:42</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">7월 인보이스 결제 완료</span>
+            <span class="preview">₩1,284,000 결제가 정상 처리되었습니다. 영수증 PDF가 첨부되어 있습니다.</span>
+            <span class="msg-chips">
+              <span class="chip"><span class="label-dot l-billing"></span>결제</span>
+              <span class="chip"><svg><use href="#i-clip"/></svg>1</span>
+            </span>
+          </span>
+        </button>
+
+        <!-- 2 (선택) -->
+        <button class="msg is-unread is-selected" type="button" aria-current="true">
+          <span class="avatar">V</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Vercel</span>
+              <span class="handle">deploys</span>
+              <span class="msg-meta"><span class="time tnum">09:15</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">프로덕션 배포 성공 — vecta-web</span>
+            <span class="preview">커밋 4f9c2a1 이(가) Production 에 반영되었습니다. 빌드 52초.</span>
+            <span class="msg-chips">
+              <span class="chip"><span class="label-dot l-deploy"></span>배포</span>
+            </span>
+          </span>
+        </button>
+
+        <!-- 3 -->
+        <button class="msg is-unread" type="button">
+          <span class="avatar">GH</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">GitHub</span>
+              <span class="handle">security</span>
+              <span class="msg-meta"><span class="time tnum">08:57</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">새 기기에서 로그인 감지</span>
+            <span class="preview">서울, KR 에서 새 로그인이 있었습니다. 본인이 아니라면 즉시 세션을 종료하세요.</span>
+            <span class="msg-chips">
+              <span class="chip flag"><svg><use href="#i-flag"/></svg>중요</span>
+              <span class="chip"><span class="label-dot l-security"></span>보안</span>
+            </span>
+          </span>
+        </button>
+
+        <!-- 4 -->
+        <button class="msg" type="button">
+          <span class="avatar">L</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Linear</span>
+              <span class="handle">notifications</span>
+              <span class="msg-meta"><span class="time tnum">어제</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">이슈 3건이 In Review 로 이동</span>
+            <span class="preview">VEC-142, VEC-143, VEC-147 이(가) 리뷰 대기 상태로 전환되었습니다.</span>
+          </span>
+        </button>
+
+        <!-- 5 -->
+        <button class="msg" type="button">
+          <span class="avatar">F</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Figma</span>
+              <span class="handle">comments</span>
+              <span class="msg-meta"><span class="time tnum">어제</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">디자인 파일에 코멘트 2건</span>
+            <span class="preview">받은편지함 목업에 새 코멘트가 달렸습니다. 제품팀 확인 요청.</span>
+            <span class="msg-chips">
+              <span class="chip"><span class="label-dot l-product"></span>제품</span>
+              <span class="chip"><svg><use href="#i-comment"/></svg>2</span>
+            </span>
+          </span>
+        </button>
+
+        <!-- 6 -->
+        <button class="msg" type="button">
+          <span class="avatar">SE</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Sentry</span>
+              <span class="handle">alerts</span>
+              <span class="msg-meta"><span class="time tnum">어제</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">오류율 경보 — checkout 서비스</span>
+            <span class="preview">지난 15분간 오류율이 2.4% 로 상승했습니다. 임계값은 1% 입니다.</span>
+            <span class="msg-chips">
+              <span class="chip flag"><svg><use href="#i-flag"/></svg>중요</span>
+            </span>
+          </span>
+        </button>
+
+        <!-- 7 -->
+        <button class="msg" type="button">
+          <span class="avatar">N</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Notion</span>
+              <span class="handle">workspace</span>
+              <span class="msg-meta"><span class="time tnum">화요일</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">주간 회고 문서가 공유되었습니다</span>
+            <span class="preview">이번 스프린트 회고 노트가 워크스페이스에 게시되었습니다.</span>
+          </span>
+        </button>
+
+        <!-- 8 -->
+        <button class="msg" type="button">
+          <span class="avatar">DD</span>
+          <span class="msg-body">
+            <span class="msg-top">
+              <span class="sender">Datadog</span>
+              <span class="handle">monitors</span>
+              <span class="msg-meta"><span class="time tnum">월요일</span><span class="unread-dot"></span></span>
+            </span>
+            <span class="subject">지연 시간 경보 해제</span>
+            <span class="preview">api-gateway p95 지연이 정상 범위로 복귀했습니다.</span>
+          </span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- 우: 상세 미리보기 -->
+    <section class="col detail" aria-label="메일 상세">
+      <div class="detail-head">
+        <span class="dh-crumb"><svg><use href="#i-inbox"/></svg> 받은편지함 <svg style="width:12px;height:12px"><use href="#i-chevron"/></svg> 배포</span>
+        <div class="dh-tools">
+          <button class="icon-btn" type="button" data-tip="별표" aria-label="별표"><svg><use href="#i-star"/></svg></button>
+          <button class="icon-btn" type="button" data-tip="보관" aria-label="보관"><svg><use href="#i-archive"/></svg></button>
+          <button class="icon-btn" type="button" data-tip="라벨" aria-label="라벨"><svg><use href="#i-tag"/></svg></button>
+          <button class="icon-btn" type="button" data-tip="더보기" aria-label="더보기"><svg><use href="#i-more"/></svg></button>
+        </div>
+      </div>
+
+      <div class="col detail-scroll">
+        <h1 class="thread-subject">프로덕션 배포 성공 — vecta-web</h1>
+        <div class="thread-tags">
+          <span class="chip"><span class="label-dot l-deploy"></span>배포</span>
+          <span class="chip"><svg><use href="#i-branch"/></svg>main</span>
+          <span class="chip"><svg><use href="#i-clock"/></svg>오늘 09:15</span>
+        </div>
+
+        <article class="msg-card">
+          <div class="from-row">
+            <span class="avatar">V</span>
+            <div class="from-meta">
+              <div class="from-name">Vercel</div>
+              <div class="from-sub"><span>deploys@vercel.com</span><span>·</span><span>받는 사람: 제품팀</span></div>
+            </div>
+            <span class="from-time tnum">오늘 09:15</span>
+          </div>
+
+          <div class="status-strip">
+            <span class="badge ok"><svg><use href="#i-shield"/></svg>성공</span>
+            <span class="ss-text"><strong style="color:var(--fg)">vecta-web</strong> 프로젝트가 Production 환경에 배포되었습니다.</span>
+          </div>
+
+          <div class="prose">
+            <p><strong>vecta-web</strong> 의 최신 커밋이 프로덕션에 성공적으로 반영되었습니다. 전체 빌드는 <code>52s</code> 만에 완료되었고, 헬스 체크 3종이 모두 통과했습니다.</p>
+            <p>배포 URL 은 자동으로 프로덕션 도메인에 연결되었으며, 이전 배포는 즉시 롤백 가능한 상태로 보관됩니다. 문제가 감지되면 대시보드에서 한 번의 클릭으로 이전 버전으로 되돌릴 수 있습니다.</p>
+          </div>
+
+          <div class="meta-grid" role="group" aria-label="배포 상세">
+            <div class="meta-row"><span class="meta-key">환경</span><span class="meta-val">Production</span></div>
+            <div class="meta-row"><span class="meta-key">브랜치</span><span class="meta-val mono">main</span></div>
+            <div class="meta-row"><span class="meta-key">커밋</span><span class="meta-val mono">4f9c2a1</span></div>
+            <div class="meta-row"><span class="meta-key">빌드 시간</span><span class="meta-val tnum">52초</span></div>
+            <div class="meta-row"><span class="meta-key">헬스 체크</span><span class="meta-val"><span class="badge ok" style="font-size:11px"><svg><use href="#i-shield"/></svg>3 / 3 통과</span></span></div>
+          </div>
+
+          <div class="commit-list">
+            <div class="cl-title">이번 배포에 포함된 변경</div>
+            <div class="commit">
+              <span class="c-hash tnum">4f9c2a1</span>
+              <span class="c-text">인박스 목록 가상 스크롤 적용</span>
+              <span class="c-time tnum">2시간 전</span>
+            </div>
+            <div class="commit">
+              <span class="c-hash tnum">a1e7b0d</span>
+              <span class="c-text">읽음 상태 동기화 레이스 조건 수정</span>
+              <span class="c-time tnum">3시간 전</span>
+            </div>
+            <div class="commit">
+              <span class="c-hash tnum">c92f4a8</span>
+              <span class="c-text">다크 테마 헤어라인 대비 조정</span>
+              <span class="c-time tnum">5시간 전</span>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button class="btn btn-primary" type="button"><svg><use href="#i-reply"/></svg>답장</button>
+            <button class="btn btn-secondary" type="button"><svg><use href="#i-forward"/></svg>전달</button>
+            <button class="btn btn-ghost" type="button"><svg><use href="#i-archive"/></svg>보관</button>
+            <span class="spacer"></span>
+            <button class="btn btn-secondary" type="button"><svg><use href="#i-ext"/></svg>대시보드 열기</button>
+          </div>
+
+          <div class="composer">
+            <div class="c-head"><svg><use href="#i-reply"/></svg> Vercel 에게 답장</div>
+            <textarea id="reply" placeholder="답장을 입력하세요…" aria-label="답장 내용"></textarea>
+            <div class="c-foot">
+              <button class="icon-btn" type="button" data-tip="첨부" aria-label="첨부"><svg><use href="#i-clip"/></svg></button>
+              <span class="send-hint">Cmd+Enter 로 보내기</span>
+              <span class="spacer"></span>
+              <button class="btn btn-primary" id="send" type="button" aria-disabled="true" disabled><svg><use href="#i-send"/></svg>보내기</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="footer-mark">인박스 · 다크 프로 미니멀</div>
+
+<script>
+  (function(){
+    // 리스트 행 선택 — 선택 이동 + 읽음 처리
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.msg'));
+    rows.forEach(function(row){
+      row.addEventListener('click', function(){
+        rows.forEach(function(r){ r.classList.remove('is-selected'); r.removeAttribute('aria-current'); });
+        row.classList.add('is-selected');
+        row.setAttribute('aria-current','true');
+        row.classList.remove('is-unread');
+        var dot = row.querySelector('.unread-dot');
+        if (dot) dot.style.visibility = 'hidden';
+      });
+    });
+
+    // 답장 컴포저 — 입력 시 보내기 활성화 (disabled → enabled 상태 시연)
+    var ta = document.getElementById('reply');
+    var send = document.getElementById('send');
+    if (ta && send){
+      var sync = function(){
+        var has = ta.value.trim().length > 0;
+        send.disabled = !has;
+        if (has) send.removeAttribute('aria-disabled');
+        else send.setAttribute('aria-disabled','true');
+      };
+      ta.addEventListener('input', sync);
+    }
+  })();
+</script>
+
+</body>
+</html>

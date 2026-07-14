@@ -1,0 +1,659 @@
+<title>Flowly — 글래스모피즘</title>
+<style>
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-bg-strong: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.35);
+    --glass-shadow: 0 8px 32px rgba(20, 10, 60, 0.35);
+    --text-light: #ffffff;
+    --text-light-soft: rgba(255, 255, 255, 0.78);
+    --text-dark: #201235;
+    --text-dark-soft: rgba(32, 18, 53, 0.68);
+    --accent: #7dd8ff;
+    --accent-2: #c9a6ff;
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    color: var(--text-light);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 130, 220, 0.55), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(120, 190, 255, 0.55), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(160, 100, 255, 0.5), transparent 50%),
+      linear-gradient(135deg, #3a1c71 0%, #5b3ca8 25%, #4568dc 55%, #b06ab3 80%, #ff8fd0 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.55;
+    position: relative;
+  }
+
+  /* floating blurred color blobs for extra depth behind glass */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.75;
+  }
+  .blob-a {
+    width: 420px; height: 420px;
+    top: -120px; left: -100px;
+    background: radial-gradient(circle, #ff9ee0, transparent 70%);
+  }
+  .blob-b {
+    width: 480px; height: 480px;
+    top: 20%; right: -160px;
+    background: radial-gradient(circle, #7ce0ff, transparent 70%);
+  }
+  .blob-c {
+    width: 500px; height: 500px;
+    bottom: -180px; left: 20%;
+    background: radial-gradient(circle, #b48cff, transparent 70%);
+  }
+  .blob-d {
+    width: 320px; height: 320px;
+    bottom: 10%; right: 5%;
+    background: radial-gradient(circle, #ffe08a, transparent 70%);
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- NAV ---------- */
+  header.nav-shell {
+    position: sticky;
+    top: 16px;
+    z-index: 50;
+    padding: 0 16px;
+  }
+
+  nav.glass {
+    max-width: 1180px;
+    margin: 16px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .logo {
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .logo .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7dd8ff, #c9a6ff);
+    box-shadow: 0 0 12px rgba(125, 216, 255, 0.9);
+  }
+
+  .nav-menu {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.92rem;
+    color: var(--text-light-soft);
+  }
+  .nav-menu a:hover { color: #fff; }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff9ee0, #7dd8ff);
+    color: #221033;
+    box-shadow: 0 6px 20px rgba(255, 130, 220, 0.4);
+    font-size: 0.92rem;
+  }
+  .btn-primary:hover { box-shadow: 0 10px 28px rgba(255, 130, 220, 0.55); }
+
+  .btn-primary-lg {
+    padding: 16px 34px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff9ee0, #7dd8ff);
+    color: #221033;
+    font-size: 1.05rem;
+    box-shadow: 0 10px 30px rgba(255, 130, 220, 0.45);
+  }
+  .btn-primary-lg:hover { box-shadow: 0 16px 40px rgba(255, 130, 220, 0.6); }
+
+  .btn-ghost {
+    padding: 15px 30px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #fff;
+    font-size: 1rem;
+  }
+  .btn-ghost:hover { background: var(--glass-bg-strong); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    padding: 110px 0 90px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    font-size: 0.85rem;
+    color: var(--text-light-soft);
+    margin-bottom: 28px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  }
+  .badge .spark { color: #ffe08a; }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin: 0 0 24px;
+    line-height: 1.15;
+    background: linear-gradient(120deg, #ffffff 0%, #ffffff 40%, #dfe9ff 60%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 40px rgba(120, 90, 255, 0.35);
+  }
+
+  .hero p.subhead {
+    max-width: 640px;
+    margin: 0 auto 42px;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-light-soft);
+  }
+
+  .hero-ctas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .link-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #fff;
+    padding: 15px 8px;
+  }
+  .link-demo .play {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+  }
+  .link-demo:hover .play { background: var(--glass-bg-strong); }
+
+  /* hero visual mock */
+  .hero-visual {
+    margin: 70px auto 0;
+    max-width: 920px;
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: var(--glass-shadow);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .hero-visual .mini-card {
+    padding: 18px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.25);
+    text-align: left;
+    font-size: 0.85rem;
+    color: var(--text-light-soft);
+  }
+  .hero-visual .mini-card strong {
+    display: block;
+    color: #fff;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .mini-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+
+  /* ---------- SECTIONS shared ---------- */
+  section { padding: 90px 0; position: relative; }
+
+  .section-head {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .section-head h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: #fff;
+  }
+
+  /* ---------- FEATURES ---------- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+  }
+
+  .feature-card {
+    padding: 34px 28px;
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 55%);
+    pointer-events: none;
+  }
+  .feature-card:hover {
+    transform: translateY(-8px);
+    background: var(--glass-bg-strong);
+    box-shadow: 0 20px 50px rgba(20, 10, 60, 0.45);
+  }
+
+  .feature-icon {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(125,216,255,0.5), rgba(201,166,255,0.5));
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+
+  .feature-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: #fff;
+  }
+  .feature-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-light-soft);
+  }
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+    align-items: stretch;
+  }
+
+  .price-card {
+    position: relative;
+    padding: 36px 28px;
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .price-card:hover { transform: translateY(-6px); }
+
+  .price-card.featured {
+    background: linear-gradient(160deg, rgba(255,158,224,0.28), rgba(125,216,255,0.22));
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 20px 60px rgba(180, 100, 255, 0.45);
+    transform: scale(1.04);
+  }
+  .price-card.featured:hover { transform: scale(1.04) translateY(-6px); }
+
+  .price-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff9ee0, #ffe08a);
+    color: #221033;
+    font-size: 0.78rem;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(255, 160, 130, 0.5);
+    white-space: nowrap;
+  }
+
+  .price-card h3 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-light-soft);
+  }
+  .price-amount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 6px 0 4px;
+    color: #fff;
+  }
+  .price-amount span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-light-soft);
+  }
+  .price-card ul {
+    list-style: none;
+    margin: 26px 0 30px;
+    padding: 0;
+    flex-grow: 1;
+  }
+  .price-card li {
+    padding: 9px 0;
+    font-size: 0.92rem;
+    color: var(--text-light-soft);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .price-card li::before {
+    content: "✓";
+    color: var(--accent);
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .price-card .btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+  }
+  .price-card .btn-outline {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    backdrop-filter: blur(10px);
+  }
+  .price-card .btn-outline:hover { background: var(--glass-bg-strong); }
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta {
+    text-align: center;
+  }
+  .final-cta-panel {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 70px 40px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgba(255,158,224,0.22), rgba(125,216,255,0.18));
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: var(--glass-shadow);
+  }
+  .final-cta-panel h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    margin: 0 0 16px;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .final-cta-panel p {
+    color: var(--text-light-soft);
+    margin: 0 0 36px;
+    font-size: 1.05rem;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 40px 0 60px;
+    text-align: center;
+  }
+  footer .glass-footer {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 18px 28px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    font-size: 0.85rem;
+    color: var(--text-light-soft);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+  }
+  footer a:hover { color: #fff; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 900px) {
+    .nav-menu { display: none; }
+    .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero-visual { grid-template-columns: 1fr; }
+    .price-card.featured { transform: none; }
+    .price-card.featured:hover { transform: translateY(-6px); }
+  }
+
+  @media (max-width: 480px) {
+    nav.glass { flex-wrap: wrap; border-radius: 24px; padding: 16px; }
+    .nav-right { width: 100%; justify-content: center; }
+    .hero { padding: 80px 0 60px; }
+    .hero-visual { padding: 18px; }
+    .final-cta-panel { padding: 48px 20px; }
+  }
+</style>
+
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
+<div class="blob blob-c"></div>
+<div class="blob blob-d"></div>
+
+<header class="nav-shell">
+  <nav class="glass">
+    <div class="logo"><span class="dot"></span>Flowly</div>
+    <ul class="nav-menu">
+      <li><a href="#features">기능</a></li>
+      <li><a href="#pricing">요금제</a></li>
+      <li><a href="#customers">고객사</a></li>
+      <li><a href="#login">로그인</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="#start" class="btn btn-primary">무료로 시작</a>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="badge"><span class="spark">✦</span> 이미 12,000+ 팀이 Flowly로 일합니다</span>
+    <h1>팀의 모든 일이,<br />한 곳에서 흐르게</h1>
+    <p class="subhead">흩어진 할 일·문서·대화를 하나로. 누가 무엇을 언제까지 하는지 한눈에 봅니다.</p>
+    <div class="hero-ctas">
+      <a href="#start" class="btn btn-primary-lg">무료로 시작하기</a>
+      <a href="#demo" class="link-demo"><span class="play">▶</span> 2분 데모 보기</a>
+    </div>
+
+    <div class="hero-visual">
+      <div class="mini-card">
+        <strong><span class="mini-dot" style="background:#7dd8ff"></span>진행 중</strong>
+        디자인 시스템 정리 · 3명 참여
+      </div>
+      <div class="mini-card">
+        <strong><span class="mini-dot" style="background:#ff9ee0"></span>마감 임박</strong>
+        Q3 로드맵 리뷰 · D-2
+      </div>
+      <div class="mini-card">
+        <strong><span class="mini-dot" style="background:#ffe08a"></span>자동화 실행됨</strong>
+        상태 변경 → 담당자 알림 완료
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-head">
+      <h2>흐름을 만드는 3가지</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🗂️</div>
+        <h3>칸반 보드</h3>
+        <p>드래그 한 번으로 진행 상황을 정리하세요. 누가 뭘 맡고 있는지 실시간으로 보입니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📆</div>
+        <h3>스마트 타임라인</h3>
+        <p>마감과 의존 관계를 한 화면에. 일정이 밀리기 전에 위험을 미리 봅니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>규칙 자동화</h3>
+        <p>반복 작업은 규칙에 맡기세요. 상태가 바뀌면 알림과 담당 배정이 자동으로.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="section-head">
+      <h2>팀 크기에 맞게</h2>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Free</h3>
+        <div class="price-amount">₩0</div>
+        <ul>
+          <li>최대 5명</li>
+          <li>보드 3개</li>
+          <li>기본 통합</li>
+        </ul>
+        <a href="#start" class="btn btn-outline">무료로 시작</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-badge">가장 인기</span>
+        <h3>Pro</h3>
+        <div class="price-amount">₩12,000<span> /인·월</span></div>
+        <ul>
+          <li>무제한 보드</li>
+          <li>타임라인</li>
+          <li>자동화</li>
+          <li>우선순위 정렬</li>
+        </ul>
+        <a href="#start" class="btn btn-primary">Pro 시작하기</a>
+      </div>
+      <div class="price-card">
+        <h3>Business</h3>
+        <div class="price-amount">₩24,000<span> /인·월</span></div>
+        <ul>
+          <li>SSO</li>
+          <li>고급 권한</li>
+          <li>감사 로그</li>
+          <li>전담 지원</li>
+        </ul>
+        <a href="#contact" class="btn btn-outline">영업팀 문의</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <div class="final-cta-panel">
+      <h2>오늘부터 팀의 흐름을 바꿔보세요</h2>
+      <p>14일 무료 체험. 카드 등록 없이 시작합니다.</p>
+      <a href="#start" class="btn btn-primary-lg">무료로 시작하기</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="glass-footer">
+      <span>© 2026 Flowly</span>
+      <a href="#terms">이용약관</a>
+      <a href="#privacy">개인정보</a>
+      <a href="#contact">문의</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>셀러허브 — SELLER COMMAND CONSOLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#050810;
+  --cyan:#00E5FF;
+  --magenta:#FF2D78;
+  --amber:#FFB62E;
+  --teal:#3DE8B0;
+  --text:#C9EEF7;
+  --muted:#5D8FA3;
+  --frame2:#0A6E82;
+  --cut:14px;
+  --clip: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  --clip-sm: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+  --mono:'Share Tech Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --disp:'Orbitron', 'Pretendard', sans-serif;
+  --sans:'Pretendard', system-ui, sans-serif;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background:
+    radial-gradient(120% 90% at 50% 28%, #08101E 0%, #050B15 42%, #030509 100%),
+    var(--bg);
+  min-height:100vh;
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.tnum{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+.mono{ font-family:var(--mono); }
+
+/* ============ FULLSCREEN OVERLAYS (scanlines + vignette) ============ */
+.fx-scanlines,.fx-sweep,.fx-vignette{
+  position:fixed; inset:0; pointer-events:none; z-index:9000;
+}
+.fx-scanlines{
+  background:repeating-linear-gradient(0deg, rgba(0,229,255,.5) 0 1px, transparent 1px 3px);
+  opacity:.03;
+  mix-blend-mode:screen;
+}
+.fx-sweep{
+  background:linear-gradient(180deg, transparent 0%, rgba(0,229,255,.10) 46%, rgba(0,229,255,.16) 50%, rgba(0,229,255,.10) 54%, transparent 100%);
+  height:22vh; top:-22vh;
+  animation:sweep 8s linear infinite;
+}
+@keyframes sweep{ 0%{ transform:translateY(0);} 100%{ transform:translateY(130vh);} }
+.fx-vignette{
+  background:radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,.45) 82%, rgba(0,0,0,.72) 100%);
+  z-index:9001;
+}
+
+/* ============ LAYOUT SHELL ============ */
+.hud{ display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* ---------- SIDEBAR ---------- */
+.side{
+  width:224px; flex:0 0 224px;
+  border-right:1px solid rgba(0,229,255,.14);
+  background:linear-gradient(180deg, rgba(6,14,26,.72), rgba(4,9,17,.86));
+  display:flex; flex-direction:column;
+  padding:20px 14px 16px;
+  position:sticky; top:0; height:100vh;
+}
+.brand{ display:flex; align-items:center; gap:10px; padding:4px 6px 20px; }
+.brand__mark{
+  width:30px; height:30px; flex:0 0 30px;
+  background:linear-gradient(150deg, var(--cyan), var(--frame2));
+  clip-path:polygon(0 0,100% 0,100% 72%,72% 100%,0 100%);
+  display:grid; place-items:center;
+  color:#031018; font-family:var(--disp); font-weight:900; font-size:13px;
+  box-shadow:0 0 14px rgba(0,229,255,.4);
+}
+.brand__name{ font-family:var(--disp); font-weight:900; font-size:15px; letter-spacing:.06em; color:#EAFBFF; text-transform:uppercase; }
+.brand__name b{ color:var(--cyan); }
+.brand__sub{ font-family:var(--mono); font-size:9px; color:var(--muted); letter-spacing:.14em; margin-top:2px; }
+
+.nav{ display:flex; flex-direction:column; gap:3px; margin-top:6px; }
+.nav__label{ font-family:var(--mono); font-size:9px; letter-spacing:.22em; color:var(--muted); padding:6px 8px 8px; }
+.nav a{
+  display:flex; align-items:center; gap:11px;
+  padding:9px 10px; text-decoration:none; color:var(--muted);
+  font-size:13px; font-weight:500; letter-spacing:-.01em;
+  border-left:2px solid transparent; position:relative;
+  transition:color .15s, background .15s;
+}
+.nav a svg{ width:17px; height:17px; flex:0 0 17px; stroke:currentColor; }
+.nav a:hover{ color:var(--text); background:rgba(0,229,255,.05); }
+.nav a.is-active{
+  color:#EAFBFF; border-left-color:var(--cyan);
+  background:linear-gradient(90deg, rgba(0,229,255,.14), rgba(0,229,255,.02));
+}
+.nav a.is-active svg{ stroke:var(--cyan); filter:drop-shadow(0 0 5px rgba(0,229,255,.6)); }
+.nav a.is-active::after{
+  content:''; position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:5px; height:5px; background:var(--cyan); box-shadow:0 0 8px var(--cyan);
+  animation:blink 1.4s steps(1) infinite;
+}
+.side__user{
+  margin-top:auto; display:flex; align-items:center; gap:10px;
+  padding:11px 8px; border-top:1px solid rgba(0,229,255,.12);
+}
+.avatar{
+  display:grid; place-items:center; flex:0 0 auto;
+  background:linear-gradient(150deg, rgba(0,229,255,.28), rgba(10,110,130,.35));
+  border:1px solid rgba(0,229,255,.5);
+  clip-path:polygon(0 0,100% 0,100% 74%,74% 100%,0 100%);
+  color:#EAFBFF; font-family:var(--mono); font-weight:400;
+}
+.avatar.sq{ width:34px; height:34px; font-size:12px; }
+.side__user .meta b{ display:block; font-size:13px; color:var(--text); font-weight:600; }
+.side__user .meta span{ font-family:var(--mono); font-size:9px; color:var(--muted); letter-spacing:.1em; }
+
+/* ---------- MAIN ---------- */
+.main{ flex:1 1 auto; min-width:0; padding:0 clamp(14px,2.4vw,30px) 40px; }
+
+/* boot status strip */
+.bootline{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:12px 2px 4px; font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+}
+.bootline .init{
+  color:var(--cyan); white-space:nowrap; overflow:hidden;
+  border-right:2px solid var(--cyan);
+  width:0; animation:type 0.5s steps(22) 0.05s forwards, caretoff .1s 0.7s forwards;
+}
+@keyframes type{ to{ width:20.5em; } }
+@keyframes caretoff{ to{ border-right-color:transparent; } }
+.bootline .online{
+  display:inline-flex; align-items:center; gap:7px; color:var(--teal);
+  opacity:0; animation:fadein .4s 1.4s forwards;
+}
+.bootline .online .dot{ width:7px; height:7px; background:var(--teal); box-shadow:0 0 9px var(--teal); animation:blink 1.4s steps(1) 1.4s infinite; }
+.bootline .seq{ color:var(--muted); margin-left:auto; }
+
+/* ---------- TOP BAR ---------- */
+.topbar{
+  display:flex; align-items:center; gap:14px;
+  padding:8px 0 16px; flex-wrap:wrap;
+}
+.search{
+  position:relative; flex:1 1 300px; min-width:200px; max-width:440px;
+}
+.search svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:var(--muted); }
+.search input{
+  width:100%; padding:10px 12px 10px 34px;
+  background:rgba(6,16,28,.8); color:var(--text);
+  border:1px solid rgba(0,229,255,.2);
+  clip-path:var(--clip-sm);
+  font-family:var(--sans); font-size:13px; outline:none;
+}
+.search input::placeholder{ color:var(--muted); }
+.search input:focus{ border-color:var(--cyan); box-shadow:0 0 14px rgba(0,229,255,.18); }
+
+.topbar__spacer{ flex:1 1 auto; }
+.iconbtn{
+  position:relative; width:38px; height:38px; display:grid; place-items:center;
+  background:rgba(6,16,28,.7); border:1px solid rgba(0,229,255,.2);
+  clip-path:var(--clip-sm); cursor:pointer; color:var(--text);
+  transition:border-color .15s, box-shadow .15s;
+}
+.iconbtn:hover{ border-color:var(--cyan); box-shadow:0 0 12px rgba(0,229,255,.22); }
+.iconbtn svg{ width:18px; height:18px; stroke:currentColor; }
+.badge{
+  position:absolute; top:-6px; right:-6px; min-width:17px; height:17px; padding:0 4px;
+  background:var(--magenta); color:#fff; font-family:var(--mono); font-size:10px;
+  display:grid; place-items:center; clip-path:polygon(0 0,100% 0,100% 66%,66% 100%,0 100%);
+  box-shadow:0 0 10px rgba(255,45,120,.6);
+}
+.btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 16px; font-family:var(--sans); font-size:12.5px; font-weight:600;
+  letter-spacing:.01em; cursor:pointer; border:1px solid transparent;
+  clip-path:var(--clip-sm); text-decoration:none; white-space:nowrap;
+  transition:box-shadow .15s, transform .1s;
+}
+.btn svg{ width:15px; height:15px; stroke:currentColor; }
+.btn--primary{
+  background:linear-gradient(150deg, var(--cyan), var(--frame2));
+  color:#021016; box-shadow:0 0 16px rgba(0,229,255,.28);
+}
+.btn--primary:hover{ box-shadow:0 0 24px rgba(0,229,255,.5); }
+.btn--ghost{
+  background:rgba(6,16,28,.6); color:var(--text); border-color:rgba(0,229,255,.28);
+}
+.btn--ghost:hover{ border-color:var(--cyan); box-shadow:0 0 12px rgba(0,229,255,.2); }
+.btn:active{ transform:translateY(1px); }
+
+/* ---------- TABS + FILTER ---------- */
+.controls{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.tabs{ display:flex; gap:2px; padding:3px; background:rgba(6,16,28,.6); border:1px solid rgba(0,229,255,.14); clip-path:var(--clip-sm); }
+.tabs button{
+  padding:7px 15px; background:transparent; border:none; cursor:pointer;
+  font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--muted);
+  clip-path:var(--clip-sm); transition:color .15s, background .15s;
+}
+.tabs button:hover{ color:var(--text); }
+.tabs button.is-active{
+  color:#031018; background:linear-gradient(150deg, var(--cyan), #12A8C4);
+  box-shadow:0 0 12px rgba(0,229,255,.4);
+}
+.dropdown{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+  background:rgba(6,16,28,.6); border:1px solid rgba(0,229,255,.2);
+  clip-path:var(--clip-sm); font-size:12.5px; color:var(--text); cursor:pointer;
+}
+.dropdown:hover{ border-color:var(--cyan); }
+.dropdown svg{ width:12px; height:12px; stroke:var(--cyan); }
+
+/* ---------- BANNER ---------- */
+.banner{
+  display:flex; align-items:center; gap:13px; padding:12px 16px 12px 14px;
+  background:linear-gradient(100deg, rgba(0,229,255,.10), rgba(0,229,255,.02));
+  border:1px solid rgba(0,229,255,.28); border-left:3px solid var(--cyan);
+  clip-path:var(--clip-sm); margin-bottom:18px;
+}
+.banner .ico{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; color:var(--cyan); }
+.banner .ico svg{ width:20px; height:20px; stroke:var(--cyan); filter:drop-shadow(0 0 6px rgba(0,229,255,.5)); }
+.banner p{ margin:0; font-size:13px; color:var(--text); }
+.banner p b{ color:var(--cyan); font-family:var(--mono); font-weight:400; letter-spacing:.02em; }
+.banner .tag{ margin-left:auto; font-family:var(--mono); font-size:9.5px; letter-spacing:.16em; color:var(--muted); white-space:nowrap; }
+
+/* ============ PANELS (border sandwich) ============ */
+.panel{
+  background:linear-gradient(155deg, rgba(0,229,255,.5), rgba(10,110,130,.28) 46%, rgba(0,229,255,.12));
+  clip-path:var(--clip); padding:1px;
+  box-shadow:0 8px 30px rgba(0,0,0,.5), 0 0 16px rgba(0,229,255,.05);
+  position:relative;
+}
+.panel__in{
+  position:relative; height:100%;
+  background:linear-gradient(158deg, rgba(12,24,40,.95), rgba(6,12,22,.97));
+  clip-path:var(--clip);
+  padding:16px 16px 15px;
+}
+/* corner brackets */
+.panel__in::before,.panel__in::after{
+  content:''; position:absolute; width:11px; height:11px; pointer-events:none;
+  transition:all .18s ease;
+}
+.panel__in::before{ top:6px; left:6px; border-top:1px solid var(--cyan); border-left:1px solid var(--cyan); }
+.panel__in::after{ bottom:6px; right:6px; border-bottom:1px solid var(--cyan); border-right:1px solid var(--cyan); }
+.panel.is-module:hover .panel__in::before{ top:3px; left:3px; box-shadow:-2px -2px 6px rgba(0,229,255,.4); }
+.panel.is-module:hover .panel__in::after{ bottom:3px; right:3px; box-shadow:2px 2px 6px rgba(0,229,255,.4); }
+.panel.is-module:hover{ box-shadow:0 8px 34px rgba(0,0,0,.5), 0 0 26px rgba(0,229,255,.18); }
+/* top-left glow marker */
+.panel::before{
+  content:''; position:absolute; top:8px; left:8px; width:4px; height:4px; z-index:3;
+  background:var(--cyan); box-shadow:0 0 8px var(--cyan);
+}
+
+.phead{ display:flex; align-items:center; gap:9px; margin-bottom:12px; flex-wrap:wrap; }
+.phead h3{ margin:0; font-family:var(--disp); font-weight:700; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:#DFF6FC; }
+.phead .kr{ font-family:var(--sans); font-size:11px; color:var(--muted); font-weight:500; letter-spacing:0; }
+.phead .r{ margin-left:auto; font-family:var(--mono); font-size:9.5px; color:var(--muted); letter-spacing:.1em; }
+
+/* ============ GRID ============ */
+.grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+.col-3{ grid-column:span 3; } .col-4{ grid-column:span 4; }
+.col-6{ grid-column:span 6; } .col-8{ grid-column:span 8; } .col-12{ grid-column:span 12; }
+
+/* ---------- KPI MODULE ---------- */
+.kpi{ display:flex; gap:12px; align-items:stretch; }
+.kpi__bar{ flex:0 0 4px; width:4px; align-self:stretch; background:linear-gradient(180deg, var(--cyan), rgba(0,229,255,.05)); box-shadow:0 0 10px rgba(0,229,255,.35); }
+.kpi.warn .kpi__bar{ background:linear-gradient(180deg, var(--magenta), rgba(255,45,120,.05)); box-shadow:0 0 10px rgba(255,45,120,.4); }
+.kpi.hold .kpi__bar{ background:linear-gradient(180deg, var(--amber), rgba(255,182,46,.05)); box-shadow:0 0 10px rgba(255,182,46,.35); }
+.kpi__body{ flex:1 1 auto; min-width:0; }
+.kpi__top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.kpi__label{ font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; color:var(--muted); text-transform:uppercase; }
+.arc-mini{ width:52px; height:30px; flex:0 0 52px; }
+.kpi__val{
+  font-family:var(--mono); font-weight:400; color:#EAFBFF; line-height:1.05;
+  margin:9px 0 2px; letter-spacing:-.01em; white-space:nowrap;
+  font-size:clamp(20px,2.2vw,31px);
+}
+.kpi__val .u{ font-size:.5em; color:var(--muted); margin-left:3px; letter-spacing:.05em; }
+.kpi--big .kpi__val{ font-size:clamp(17px,1.85vw,25px); }
+.kpi__foot{ display:flex; align-items:center; gap:9px; margin-top:5px; }
+.delta{ display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; white-space:nowrap; }
+.delta svg{ width:11px; height:11px; }
+.delta.up{ color:var(--cyan); }
+.delta.down{ color:var(--magenta); }
+.delta.flat{ color:var(--amber); }
+.kpi.warn .delta.down{ animation:warnpulse 1.4s ease-in-out 1.4s infinite; }
+.spark{ margin-left:auto; width:88px; height:26px; flex:0 0 88px; }
+
+/* ---------- REVENUE BAR CHART ---------- */
+.chart-wrap{ display:flex; gap:14px; }
+.yaxis{ display:flex; flex-direction:column; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--muted); text-align:right; padding-bottom:22px; height:230px; letter-spacing:.02em; }
+.plot{ flex:1 1 auto; position:relative; height:230px; min-width:0; }
+.gridlines{ position:absolute; inset:0 0 22px 0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
+.gridlines span{ height:1px; background:rgba(0,229,255,.07); }
+.bars{ position:absolute; inset:0 0 0 0; display:flex; align-items:flex-end; gap:clamp(6px,1.4vw,20px); padding-bottom:22px; }
+.barcol{ flex:1 1 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; position:relative; cursor:crosshair; }
+.bar{
+  width:100%; max-width:32px; background:linear-gradient(180deg, rgba(0,229,255,.95), rgba(0,229,255,.25));
+  box-shadow:0 0 12px rgba(0,229,255,.28); position:relative;
+  transform-origin:bottom; animation:grow .7s cubic-bezier(.2,1.3,.5,1) both;
+}
+.barcol.peak .bar{ background:linear-gradient(180deg, var(--magenta), rgba(255,45,120,.25)); box-shadow:0 0 16px rgba(255,45,120,.45); }
+.barcol .cap{ position:absolute; top:-16px; font-family:var(--mono); font-size:9.5px; color:var(--muted); opacity:0; white-space:nowrap; animation:fadein .3s 1.25s both; }
+.barcol.peak .cap{ color:var(--magenta); }
+.barcol .wk{ position:absolute; bottom:0; font-family:var(--mono); font-size:9px; color:var(--muted); }
+.barcol:hover .bar{ filter:brightness(1.25); box-shadow:0 0 22px rgba(0,229,255,.55); }
+.barcol:hover .cap{ opacity:1; color:#EAFBFF; z-index:4; }
+.crosshair{ position:absolute; left:-2px; right:-2px; height:1px; background:var(--cyan); box-shadow:0 0 8px var(--cyan); opacity:0; pointer-events:none; }
+.barcol:hover .crosshair{ opacity:.7; }
+.seg{ display:inline-flex; padding:2px; background:rgba(6,16,28,.7); border:1px solid rgba(0,229,255,.18); clip-path:var(--clip-sm); }
+.seg button{ padding:4px 12px; background:transparent; border:none; cursor:pointer; font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--muted); clip-path:var(--clip-sm); }
+.seg button.is-active{ color:#031018; background:var(--cyan); }
+
+/* ---------- DONUT ---------- */
+.donut-wrap{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.donut{ width:128px; height:128px; flex:0 0 128px; position:relative; }
+.donut svg{ width:100%; height:100%; transform:rotate(-90deg); }
+.donut__center{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
+.donut__center b{ font-family:var(--mono); font-size:20px; color:#EAFBFF; display:block; }
+.donut__center span{ font-family:var(--mono); font-size:8.5px; letter-spacing:.14em; color:var(--muted); }
+.legend{ flex:1 1 120px; display:flex; flex-direction:column; gap:7px; min-width:0; margin:0; padding:0; }
+.legend li{ display:flex; align-items:center; gap:8px; list-style:none; font-size:12px; }
+.legend .sw{ width:9px; height:9px; flex:0 0 9px; box-shadow:0 0 6px currentColor; }
+.legend .nm{ color:var(--text); }
+.legend .pc{ margin-left:auto; font-family:var(--mono); color:#DFF6FC; }
+
+/* ---------- GOAL HERO RING ---------- */
+.hero{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:6px 0 2px; }
+.ring{ width:min(220px,58vw); aspect-ratio:1; position:relative; }
+.ring svg{ width:100%; height:100%; }
+.ring .rot{ transform-origin:110px 110px; animation:spin 12s linear infinite; }
+.ring .scanline{ transform-origin:110px 110px; animation:scan .95s cubic-bezier(.4,0,.3,1) 1.15s 1 both, spin 12s linear 2.1s infinite; }
+.ring__center{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; }
+.ring__center .pct{ font-family:var(--mono); font-size:38px; color:#EAFBFF; line-height:1; text-shadow:0 0 18px rgba(0,229,255,.4); }
+.ring__center .amt{ font-family:var(--mono); font-size:12px; color:var(--cyan); margin-top:6px; letter-spacing:.02em; }
+.ring__center .lb{ font-family:var(--mono); font-size:8.5px; color:var(--muted); letter-spacing:.14em; margin-top:3px; }
+.hero__caption{ font-size:12px; color:var(--muted); margin-top:6px; text-align:center; }
+.hero__caption b{ color:var(--text); }
+
+/* ---------- TOP CHANNELS ---------- */
+.chan{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:11px; }
+.chan li{ display:flex; align-items:center; gap:11px; }
+.chan .avatar.sq{ width:30px; height:30px; font-size:10px; }
+.chan .cbody{ flex:1 1 auto; min-width:0; }
+.chan .crow{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.chan .nm{ font-size:12.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chan .val{ font-family:var(--mono); font-size:12.5px; color:#DFF6FC; }
+.chan .track{ height:3px; margin-top:5px; background:rgba(0,229,255,.08); }
+.chan .fill{ height:100%; background:linear-gradient(90deg, var(--frame2), var(--cyan)); box-shadow:0 0 8px rgba(0,229,255,.4); }
+
+/* ---------- TABLE ---------- */
+.tbl-scroll{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; min-width:640px; }
+thead th{
+  text-align:left; font-family:var(--mono); font-size:9.5px; letter-spacing:.12em;
+  color:var(--muted); text-transform:uppercase; padding:0 12px 11px; font-weight:400;
+  border-bottom:1px solid rgba(0,229,255,.16);
+}
+thead th.num{ text-align:right; }
+.sort{ display:inline-flex; align-items:center; gap:5px; cursor:pointer; }
+.sort svg{ width:9px; height:9px; stroke:var(--muted); }
+.sort.act svg{ stroke:var(--cyan); }
+tbody td{ padding:12px; border-bottom:1px solid rgba(0,229,255,.06); font-size:13px; vertical-align:middle; }
+tbody tr{ position:relative; transition:background .15s; }
+tbody tr:hover{ background:rgba(0,229,255,.05); }
+tbody tr::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+  background:var(--cyan); box-shadow:0 0 8px var(--cyan);
+  transform:scaleY(0); transform-origin:top; transition:transform .18s;
+}
+tbody tr:hover::before{ transform:scaleY(1); }
+.prod{ display:flex; align-items:center; gap:11px; min-width:0; }
+.thumb{
+  width:34px; height:34px; flex:0 0 34px; display:grid; place-items:center;
+  font-family:var(--mono); font-size:11px; color:#DFF6FC;
+  background:linear-gradient(150deg, rgba(0,229,255,.16), rgba(10,110,130,.28));
+  border:1px solid rgba(0,229,255,.3);
+  clip-path:polygon(0 0,100% 0,100% 76%,76% 100%,0 100%);
+}
+.pname{ min-width:0; max-width:340px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+.num{ text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; color:#DFF6FC; }
+.num.zero{ color:var(--magenta); }
+.num.miss{ color:var(--muted); }
+.cat{ font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:.03em; }
+
+.status{ display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; padding:4px 9px; clip-path:var(--clip-sm); border:1px solid; white-space:nowrap; }
+.status .d{ width:6px; height:6px; }
+.status.sell{ color:var(--cyan); border-color:rgba(0,229,255,.4); background:rgba(0,229,255,.07); }
+.status.sell .d{ background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+.status.done{ color:var(--amber); border-color:rgba(255,182,46,.4); background:rgba(255,182,46,.07); }
+.status.done .d{ background:var(--amber); box-shadow:0 0 6px var(--amber); }
+.status.out{ color:var(--magenta); border-color:rgba(255,45,120,.42); background:rgba(255,45,120,.08); }
+.status.out .d{ background:var(--magenta); box-shadow:0 0 6px var(--magenta); animation:warnpulse 1.4s ease-in-out 1.4s infinite; }
+.status.prep{ color:var(--muted); border-color:rgba(93,143,163,.4); background:rgba(93,143,163,.08); }
+.status.prep .d{ background:var(--muted); }
+.rowact{ text-align:right; }
+.rowact .btn--ghost{ padding:5px 12px; font-size:11px; opacity:0; transform:translateX(6px); transition:opacity .15s, transform .15s; }
+tbody tr:hover .rowact .btn--ghost{ opacity:1; transform:translateX(0); }
+
+/* ---------- ACTIVITY FEED ---------- */
+.feed{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.feed li{ display:flex; gap:12px; padding:11px 0; border-bottom:1px solid rgba(0,229,255,.06); }
+.feed li:last-child{ border-bottom:none; }
+.feed .t{ font-family:var(--mono); font-size:10.5px; color:var(--cyan); flex:0 0 42px; padding-top:1px; letter-spacing:.02em; }
+.feed .marker{ position:relative; flex:0 0 auto; width:0; }
+.feed .marker::before{ content:''; position:absolute; left:-1px; top:4px; width:6px; height:6px; background:var(--cyan); box-shadow:0 0 6px var(--cyan); clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%); }
+.feed .fbody{ flex:1 1 auto; min-width:0; margin-left:6px; }
+.feed .fbody b{ display:block; font-size:12.5px; color:var(--text); font-weight:500; }
+.feed .fbody span{ font-family:var(--mono); font-size:11px; color:var(--muted); }
+.feed .fbody span em{ font-style:normal; color:var(--cyan); }
+.feed li.alert .marker::before{ background:var(--magenta); box-shadow:0 0 6px var(--magenta); }
+.feed li.alert .fbody span em{ color:var(--magenta); }
+
+/* ---------- FOOTER ---------- */
+.foot{
+  margin-top:26px; padding:16px 4px 0; border-top:1px solid rgba(0,229,255,.12);
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--muted);
+}
+.foot .sig{ color:var(--cyan); }
+
+/* ============ ANIMATIONS ============ */
+@keyframes blink{ 0%,49%{ opacity:1; } 50%,100%{ opacity:.15; } }
+@keyframes warnpulse{ 0%,100%{ opacity:1; } 50%{ opacity:.5; } }
+@keyframes fadein{ to{ opacity:1; } }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes scan{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+@keyframes grow{ 0%{ transform:scaleY(0); } 78%{ transform:scaleY(1.04); } 100%{ transform:scaleY(1); } }
+@keyframes poweron{ 0%{ opacity:0; transform:translateY(8px); } 100%{ opacity:1; transform:translateY(0); } }
+@keyframes glitch{
+  0%{ transform:translate(0); text-shadow:none; }
+  15%{ transform:translate(-2px,0); text-shadow:2px 0 var(--magenta), -2px 0 var(--cyan); }
+  30%{ transform:translate(2px,0); text-shadow:-2px 0 var(--magenta), 2px 0 var(--cyan); }
+  45%{ transform:translate(0); text-shadow:none; }
+  100%{ transform:translate(0); text-shadow:none; }
+}
+@keyframes arcgrow{ from{ stroke-dasharray:0 100; } }
+@keyframes ringgrow{ from{ stroke-dasharray:0 100; } }
+
+.brand__name{ animation:glitch .34s steps(2) .3s 1 both; }
+.panel.is-module{ opacity:0; animation:poweron .4s ease-out both; }
+.grid.kpis .panel.is-module:nth-child(1){ animation-delay:.50s; }
+.grid.kpis .panel.is-module:nth-child(2){ animation-delay:.59s; }
+.grid.kpis .panel.is-module:nth-child(3){ animation-delay:.68s; }
+.grid.kpis .panel.is-module:nth-child(4){ animation-delay:.77s; }
+
+.arc-mini .fg{ animation:arcgrow .6s ease-out .62s both; }
+.donut circle.seg-c{ opacity:0; animation:fadein .4s both; }
+.donut circle.seg-c:nth-of-type(2){ animation-delay:.95s; }
+.donut circle.seg-c:nth-of-type(3){ animation-delay:1.03s; }
+.donut circle.seg-c:nth-of-type(4){ animation-delay:1.11s; }
+.donut circle.seg-c:nth-of-type(5){ animation-delay:1.19s; }
+.donut circle.seg-c:nth-of-type(6){ animation-delay:1.27s; }
+.ring .prog{ animation:ringgrow 1s cubic-bezier(.2,1.2,.4,1) 1.15s both; }
+.ring__center .pct, .ring__center .amt{ opacity:0; animation:fadein .5s 1.25s forwards; }
+
+/* stagger bar grow */
+.barcol:nth-child(1) .bar{ animation-delay:.90s; }
+.barcol:nth-child(2) .bar{ animation-delay:.96s; }
+.barcol:nth-child(3) .bar{ animation-delay:1.02s; }
+.barcol:nth-child(4) .bar{ animation-delay:1.08s; }
+.barcol:nth-child(5) .bar{ animation-delay:1.14s; }
+.barcol:nth-child(6) .bar{ animation-delay:1.20s; }
+.barcol:nth-child(7) .bar{ animation-delay:1.26s; }
+.barcol:nth-child(8) .bar{ animation-delay:1.32s; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1180px){
+  .col-8{ grid-column:span 12; } .col-4{ grid-column:span 6; } .col-3{ grid-column:span 6; }
+}
+@media (max-width:900px){
+  .side{ width:58px; flex:0 0 58px; padding:16px 8px; }
+  .brand__name,.brand__sub,.nav__label,.nav a span,.side__user .meta{ display:none; }
+  .nav a{ justify-content:center; padding:11px 0; }
+  .nav a.is-active::after{ display:none; }
+  .brand{ justify-content:center; padding:4px 0 18px; }
+  .side__user{ justify-content:center; }
+  .col-4,.col-3,.col-6{ grid-column:span 12; }
+  .kpi__val{ font-size:26px; }
+}
+@media (max-width:560px){
+  .bootline .init{ animation:none; width:auto; border-right:none; }
+  .topbar__spacer{ display:none; }
+  .pname{ max-width:170px; }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion:reduce){
+  *{ animation:none !important; transition:none !important; }
+  .fx-sweep{ display:none; }
+  .panel.is-module{ opacity:1 !important; }
+  .bootline .init{ width:auto !important; border-right:none !important; }
+  .bootline .online{ opacity:1 !important; }
+  .barcol .cap{ opacity:1 !important; }
+  .bar{ transform:none !important; }
+  .donut circle.seg-c{ opacity:1 !important; }
+  .ring .scanline{ opacity:0 !important; }
+  .ring__center .pct,.ring__center .amt{ opacity:1 !important; }
+  .brand__name{ animation:none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="fx-scanlines" aria-hidden="true"></div>
+<div class="fx-sweep" aria-hidden="true"></div>
+<div class="fx-vignette" aria-hidden="true"></div>
+
+<div class="hud">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="side">
+    <div class="brand">
+      <div class="brand__mark">SH</div>
+      <div>
+        <div class="brand__name">셀러<b>허브</b></div>
+        <div class="brand__sub">COMMAND CONSOLE</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="주 메뉴">
+      <div class="nav__label">NAVIGATION</div>
+      <a href="#" class="is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>주문</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M20.6 12 12 20.6a2 2 0 0 1-2.8 0l-5.8-5.8a2 2 0 0 1 0-2.8L11 3.4a2 2 0 0 1 1.4-.6H19a2 2 0 0 1 2 2v6.6a2 2 0 0 1-.4 1.4z"/><circle cx="16" cy="8" r="1.3"/></svg>
+        <span>상품</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9 8h4.5a2 2 0 0 1 0 4H9m0 0h6M9 16h6M9 8v8"/></svg>
+        <span>정산</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+        <span>고객</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a1.6 1.6 0 0 0-1.5-1H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 3 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 3h.1A1.6 1.6 0 0 0 10 1.5V1a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 15 3a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 9v.1a1.6 1.6 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+
+    <div class="side__user">
+      <div class="avatar sq">KD</div>
+      <div class="meta">
+        <b>김덕진</b>
+        <span>OPERATOR</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <div class="bootline">
+      <span class="init">SYSTEM INITIALIZING...</span>
+      <span class="online"><span class="dot"></span>ALL SYSTEMS ONLINE</span>
+      <span class="seq">SEQ · 07.13 · <span id="clock">14:02:57</span> KST</span>
+    </div>
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+        <input type="text" placeholder="상품·주문 검색" aria-label="상품·주문 검색">
+      </div>
+      <div class="topbar__spacer"></div>
+      <button class="iconbtn" aria-label="알림 5건">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="badge mono">5</span>
+      </button>
+      <div class="avatar sq" title="김덕진">KD</div>
+      <button class="btn btn--ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v4h-4"/></svg>
+        새로고침
+      </button>
+      <button class="btn btn--primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        리포트 내보내기
+      </button>
+    </header>
+
+    <!-- TABS + FILTER -->
+    <div class="controls">
+      <div class="tabs" role="tablist" aria-label="기간">
+        <button role="tab">오늘</button>
+        <button role="tab">이번 주</button>
+        <button role="tab" class="is-active" aria-selected="true">이번 달</button>
+        <button role="tab">올해</button>
+      </div>
+      <button class="dropdown" aria-haspopup="listbox">
+        전체 채널
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- BANNER -->
+    <div class="banner" role="status">
+      <div class="ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>
+      </div>
+      <p><b>정산 예정</b> — 3일 후 <b>2억 8,400만원</b>이 등록 계좌로 지급됩니다.</p>
+      <span class="tag mono">SETTLEMENT · T-3D</span>
+    </div>
+
+    <!-- ============ KPI MODULES ============ -->
+    <div class="grid kpis" style="margin-bottom:14px;">
+
+      <!-- KPI 1: 총 매출 -->
+      <div class="panel is-module col-3">
+        <div class="panel__in">
+          <div class="kpi kpi--big">
+            <div class="kpi__bar"></div>
+            <div class="kpi__body">
+              <div class="kpi__top">
+                <span class="kpi__label">총 매출</span>
+                <svg class="arc-mini" viewBox="0 0 52 30" aria-hidden="true">
+                  <path d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="rgba(0,229,255,.12)" stroke-width="3"/>
+                  <path class="fg" pathLength="100" d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round" stroke-dasharray="86 14"/>
+                </svg>
+              </div>
+              <div class="kpi__val tnum">12,840,500,000<span class="u">원</span></div>
+              <div class="kpi__foot">
+                <span class="delta up">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 15l6-6 6 6"/></svg>8.2%
+                </span>
+                <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,22 14,20 28,16 42,18 57,12 71,8 85,11 100,5" fill="none" stroke="var(--cyan)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 2: 신규 주문 -->
+      <div class="panel is-module col-3">
+        <div class="panel__in">
+          <div class="kpi">
+            <div class="kpi__bar"></div>
+            <div class="kpi__body">
+              <div class="kpi__top">
+                <span class="kpi__label">신규 주문</span>
+                <svg class="arc-mini" viewBox="0 0 52 30" aria-hidden="true">
+                  <path d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="rgba(0,229,255,.12)" stroke-width="3"/>
+                  <path class="fg" pathLength="100" d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round" stroke-dasharray="78 22"/>
+                </svg>
+              </div>
+              <div class="kpi__val tnum">3,472<span class="u">건</span></div>
+              <div class="kpi__foot">
+                <span class="delta up">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 15l6-6 6 6"/></svg>12%
+                </span>
+                <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,20 14,18 28,19 42,14 57,15 71,10 85,9 100,6" fill="none" stroke="var(--cyan)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 3: 전환율 (하락 · 경고) -->
+      <div class="panel is-module col-3">
+        <div class="panel__in">
+          <div class="kpi warn">
+            <div class="kpi__bar"></div>
+            <div class="kpi__body">
+              <div class="kpi__top">
+                <span class="kpi__label">전환율</span>
+                <svg class="arc-mini" viewBox="0 0 52 30" aria-hidden="true">
+                  <path d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="rgba(255,45,120,.14)" stroke-width="3"/>
+                  <path class="fg" pathLength="100" d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="var(--magenta)" stroke-width="3" stroke-linecap="round" stroke-dasharray="38 62"/>
+                </svg>
+              </div>
+              <div class="kpi__val tnum">3.8<span class="u">%</span></div>
+              <div class="kpi__foot">
+                <span class="delta down">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>0.4%p 하락
+                </span>
+                <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,8 14,10 28,9 42,13 57,12 71,16 85,15 100,19" fill="none" stroke="var(--magenta)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 4: 정산 대기 -->
+      <div class="panel is-module col-3">
+        <div class="panel__in">
+          <div class="kpi hold kpi--big">
+            <div class="kpi__bar"></div>
+            <div class="kpi__body">
+              <div class="kpi__top">
+                <span class="kpi__label">정산 대기</span>
+                <svg class="arc-mini" viewBox="0 0 52 30" aria-hidden="true">
+                  <path d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="rgba(255,182,46,.14)" stroke-width="3"/>
+                  <path class="fg" pathLength="100" d="M4 27 A 22 22 0 0 1 48 27" fill="none" stroke="var(--amber)" stroke-width="3" stroke-linecap="round" stroke-dasharray="92 8"/>
+                </svg>
+              </div>
+              <div class="kpi__val tnum">284,000,000<span class="u">원</span></div>
+              <div class="kpi__foot">
+                <span class="delta flat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>지연 0건
+                </span>
+                <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,15 14,14 28,16 42,15 57,15 71,14 85,15 100,14" fill="none" stroke="var(--amber)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CHARTS ROW ============ -->
+    <div class="grid" style="margin-bottom:14px;">
+
+      <!-- Revenue bar chart -->
+      <div class="panel is-module col-8">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>REVENUE TRAJECTORY</h3>
+            <span class="kr">최근 8주 매출 추이 · 백만원</span>
+            <div class="seg" role="group" aria-label="지표 선택" style="margin-left:auto;">
+              <button class="is-active" aria-pressed="true">금액</button>
+              <button aria-pressed="false">건수</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="yaxis tnum" aria-hidden="true">
+              <span>1,400</span><span>1,050</span><span>700</span><span>350</span><span>0</span>
+            </div>
+            <div class="plot">
+              <div class="gridlines" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+              <div class="bars">
+                <div class="barcol" title="1주 820"><span class="cap tnum">820</span><div class="crosshair"></div><div class="bar" style="height:58.6%"></div><span class="wk">1주</span></div>
+                <div class="barcol" title="2주 910"><span class="cap tnum">910</span><div class="crosshair"></div><div class="bar" style="height:65%"></div><span class="wk">2주</span></div>
+                <div class="barcol" title="3주 1,050"><span class="cap tnum">1,050</span><div class="crosshair"></div><div class="bar" style="height:75%"></div><span class="wk">3주</span></div>
+                <div class="barcol" title="4주 970"><span class="cap tnum">970</span><div class="crosshair"></div><div class="bar" style="height:69.3%"></div><span class="wk">4주</span></div>
+                <div class="barcol" title="5주 1,180"><span class="cap tnum">1,180</span><div class="crosshair"></div><div class="bar" style="height:84.3%"></div><span class="wk">5주</span></div>
+                <div class="barcol peak" title="6주 1,340 피크"><span class="cap tnum">1,340 ◂ 피크</span><div class="crosshair"></div><div class="bar" style="height:95.7%"></div><span class="wk">6주</span></div>
+                <div class="barcol" title="7주 1,220"><span class="cap tnum">1,220</span><div class="crosshair"></div><div class="bar" style="height:87.1%"></div><span class="wk">7주</span></div>
+                <div class="barcol" title="8주 1,284"><span class="cap tnum">1,284</span><div class="crosshair"></div><div class="bar" style="height:91.7%"></div><span class="wk">8주</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category donut -->
+      <div class="panel is-module col-4">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>CATEGORY MIX</h3>
+            <span class="kr">카테고리 구성비</span>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg viewBox="0 0 120 120" role="img" aria-label="카테고리 구성비: 의류 38%, 전자 24%, 리빙 20%, 생활 12%, 스포츠 6%">
+                <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(0,229,255,.06)" stroke-width="15"/>
+                <circle class="seg-c" cx="60" cy="60" r="42" fill="none" stroke="var(--cyan)" stroke-width="15" pathLength="100" stroke-dasharray="38 62" stroke-dashoffset="0"/>
+                <circle class="seg-c" cx="60" cy="60" r="42" fill="none" stroke="var(--magenta)" stroke-width="15" pathLength="100" stroke-dasharray="24 76" stroke-dashoffset="-38"/>
+                <circle class="seg-c" cx="60" cy="60" r="42" fill="none" stroke="var(--amber)" stroke-width="15" pathLength="100" stroke-dasharray="20 80" stroke-dashoffset="-62"/>
+                <circle class="seg-c" cx="60" cy="60" r="42" fill="none" stroke="var(--teal)" stroke-width="15" pathLength="100" stroke-dasharray="12 88" stroke-dashoffset="-82"/>
+                <circle class="seg-c" cx="60" cy="60" r="42" fill="none" stroke="var(--muted)" stroke-width="15" pathLength="100" stroke-dasharray="6 94" stroke-dashoffset="-94"/>
+              </svg>
+              <div class="donut__center">
+                <b class="tnum">5</b>
+                <span>SEGMENTS</span>
+              </div>
+            </div>
+            <ul class="legend">
+              <li><span class="sw" style="background:var(--cyan);color:var(--cyan)"></span><span class="nm">의류</span><span class="pc tnum">38%</span></li>
+              <li><span class="sw" style="background:var(--magenta);color:var(--magenta)"></span><span class="nm">전자</span><span class="pc tnum">24%</span></li>
+              <li><span class="sw" style="background:var(--amber);color:var(--amber)"></span><span class="nm">리빙</span><span class="pc tnum">20%</span></li>
+              <li><span class="sw" style="background:var(--teal);color:var(--teal)"></span><span class="nm">생활</span><span class="pc tnum">12%</span></li>
+              <li><span class="sw" style="background:var(--muted);color:var(--muted)"></span><span class="nm">스포츠</span><span class="pc tnum">6%</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HERO RING + CHANNELS + FEED ============ -->
+    <div class="grid" style="margin-bottom:14px;">
+
+      <!-- Goal hero ring -->
+      <div class="panel is-module col-4">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>MONTHLY TARGET</h3>
+            <span class="kr">이번 달 목표 진행률</span>
+          </div>
+          <div class="hero">
+            <div class="ring">
+              <svg viewBox="0 0 220 220" role="img" aria-label="이번 달 목표 진행률 85.6퍼센트">
+                <g class="rot">
+                  <circle cx="110" cy="110" r="102" fill="none" stroke="rgba(0,229,255,.16)" stroke-width="1" stroke-dasharray="2 8"/>
+                </g>
+                <circle cx="110" cy="110" r="92" fill="none" stroke="rgba(0,229,255,.10)" stroke-width="1"/>
+                <circle cx="110" cy="110" r="80" fill="none" stroke="rgba(0,229,255,.10)" stroke-width="9"/>
+                <g transform="rotate(-90 110 110)">
+                  <circle class="prog" cx="110" cy="110" r="80" fill="none" stroke="var(--cyan)" stroke-width="9" stroke-linecap="round"
+                          pathLength="100" stroke-dasharray="85.6 14.4" style="filter:drop-shadow(0 0 8px rgba(0,229,255,.5))"/>
+                </g>
+                <g class="scanline">
+                  <line x1="110" y1="110" x2="110" y2="22" stroke="var(--cyan)" stroke-width="1.4" opacity=".55"/>
+                </g>
+              </svg>
+              <div class="ring__center">
+                <span class="pct tnum">85.6%</span>
+                <span class="amt tnum">128.4억 / 150억</span>
+                <span class="lb">SCAN COMPLETE</span>
+              </div>
+            </div>
+            <p class="hero__caption">이번 달 목표 <b>150억</b> 중 <b>128.4억</b> 달성</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top channels -->
+      <div class="panel is-module col-4">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>TOP CHANNELS</h3>
+            <span class="kr">상위 채널</span>
+            <span class="r">TOP 5</span>
+          </div>
+          <ul class="chan">
+            <li>
+              <div class="avatar sq">스</div>
+              <div class="cbody">
+                <div class="crow"><span class="nm">스마트스토어</span><span class="val tnum">4.2억</span></div>
+                <div class="track"><div class="fill" style="width:100%"></div></div>
+              </div>
+            </li>
+            <li>
+              <div class="avatar sq">쿠</div>
+              <div class="cbody">
+                <div class="crow"><span class="nm">쿠팡</span><span class="val tnum">3.1억</span></div>
+                <div class="track"><div class="fill" style="width:74%"></div></div>
+              </div>
+            </li>
+            <li>
+              <div class="avatar sq">자</div>
+              <div class="cbody">
+                <div class="crow"><span class="nm">자사몰</span><span class="val tnum">2.4억</span></div>
+                <div class="track"><div class="fill" style="width:57%"></div></div>
+              </div>
+            </li>
+            <li>
+              <div class="avatar sq">인</div>
+              <div class="cbody">
+                <div class="crow"><span class="nm">인스타샵</span><span class="val tnum">1.8억</span></div>
+                <div class="track"><div class="fill" style="width:43%"></div></div>
+              </div>
+            </li>
+            <li>
+              <div class="avatar sq">카</div>
+              <div class="cbody">
+                <div class="crow"><span class="nm">카카오</span><span class="val tnum">0.9억</span></div>
+                <div class="track"><div class="fill" style="width:21%"></div></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="panel is-module col-4">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>ACTIVITY LOG</h3>
+            <span class="kr">활동 피드</span>
+            <span class="r">LIVE</span>
+          </div>
+          <ul class="feed">
+            <li>
+              <span class="t">14:02</span><span class="marker" aria-hidden="true"></span>
+              <div class="fbody"><b>새 주문</b><span>#10482 · <em>89,000원</em></span></div>
+            </li>
+            <li>
+              <span class="t">13:45</span><span class="marker" aria-hidden="true"></span>
+              <div class="fbody"><b>정산 완료</b><span>리빙 · <em>1,240만원</em></span></div>
+            </li>
+            <li class="alert">
+              <span class="t">11:20</span><span class="marker" aria-hidden="true"></span>
+              <div class="fbody"><b>재고 부족</b><span>무선 이어폰 Pro</span></div>
+            </li>
+            <li>
+              <span class="t">09:05</span><span class="marker" aria-hidden="true"></span>
+              <div class="fbody"><b>신규 리뷰</b><span><em>3건</em></span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PRODUCT TABLE ============ -->
+    <div class="grid">
+      <div class="panel col-12">
+        <div class="panel__in">
+          <div class="phead">
+            <h3>PRODUCT MATRIX</h3>
+            <span class="kr">상품 현황</span>
+            <span class="r">6 UNITS</span>
+          </div>
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th><span class="sort act">상품 <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg></span></th>
+                  <th><span class="sort">카테고리 <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg></span></th>
+                  <th class="num"><span class="sort">재고 <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg></span></th>
+                  <th class="num"><span class="sort">판매 <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M6 9l6-6 6 6"/><path d="M6 15l6 6 6-6"/></svg></span></th>
+                  <th>상태</th>
+                  <th class="num"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">한</div><span class="pname" title="[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</span></div></td>
+                  <td class="cat">의류</td>
+                  <td class="num tnum">1,240</td>
+                  <td class="num tnum">856</td>
+                  <td><span class="status sell"><span class="d"></span>판매중</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">무</div><span class="pname" title="무선 블루투스 이어폰 Pro">무선 블루투스 이어폰 Pro</span></div></td>
+                  <td class="cat">전자</td>
+                  <td class="num tnum zero">0</td>
+                  <td class="num tnum">2,103</td>
+                  <td><span class="status out"><span class="d"></span>품절</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">스</div><span class="pname" title="스테인리스 텀블러 500ml">스테인리스 텀블러 500ml</span></div></td>
+                  <td class="cat">리빙</td>
+                  <td class="num tnum">340</td>
+                  <td class="num tnum miss">—</td>
+                  <td><span class="status prep"><span class="d"></span>준비중</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">친</div><span class="pname" title="친환경 대나무 칫솔 4개입">친환경 대나무 칫솔 4개입</span></div></td>
+                  <td class="cat">생활</td>
+                  <td class="num tnum">5,820</td>
+                  <td class="num tnum">1,472</td>
+                  <td><span class="status sell"><span class="d"></span>판매중</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">아</div><span class="pname" title="아로마 캔들 세트">아로마 캔들 세트</span></div></td>
+                  <td class="cat">리빙</td>
+                  <td class="num tnum">88</td>
+                  <td class="num tnum">640</td>
+                  <td><span class="status done"><span class="d"></span>정산완료</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+                <tr>
+                  <td><div class="prod"><div class="thumb" aria-hidden="true">요</div><span class="pname" title="요가 매트 6mm 논슬립">요가 매트 6mm 논슬립</span></div></td>
+                  <td class="cat">스포츠</td>
+                  <td class="num tnum">210</td>
+                  <td class="num tnum">95</td>
+                  <td><span class="status prep"><span class="d"></span>준비중</span></td>
+                  <td class="rowact"><button class="btn btn--ghost">상세</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="sig">STYLE 01 · SF 게임 HUD</span>
+      <span>셀러허브 COMMAND CONSOLE · SESSION KD-0713</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  // Live clock — degrades to the static HTML value if anything fails
+  try{
+    var el = document.getElementById('clock');
+    if(el){
+      var pad = function(n){ return (n<10?'0':'')+n; };
+      var tick = function(){
+        var d = new Date();
+        el.textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+      };
+      tick(); setInterval(tick, 1000);
+    }
+  }catch(e){}
+
+  // Segment / tab toggles — visual state only, chart data unchanged
+  try{
+    var groups = document.querySelectorAll('.seg, .tabs');
+    groups.forEach(function(g){
+      g.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){
+          g.querySelectorAll('button').forEach(function(x){
+            x.classList.remove('is-active');
+            if(x.hasAttribute('aria-pressed')) x.setAttribute('aria-pressed','false');
+            if(x.hasAttribute('aria-selected')) x.removeAttribute('aria-selected');
+          });
+          this.classList.add('is-active');
+          if(this.hasAttribute('aria-pressed')) this.setAttribute('aria-pressed','true');
+          if(g.classList.contains('tabs')) this.setAttribute('aria-selected','true');
+        });
+      });
+    });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

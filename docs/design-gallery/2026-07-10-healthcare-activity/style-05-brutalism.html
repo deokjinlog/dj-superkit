@@ -1,0 +1,773 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핏펄스 FitPulse — 오늘의 활동 리포트 (STYLE 05 · 브루탈리즘)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap">
+<style>
+  :root{
+    --ink:#000000;
+    --paper:#FFFFFF;
+    --red:#FF3B00;
+    --blue:#0037FF;
+    --yellow:#FFE600;
+    --bw:4px;
+    --sh:#000000;
+  }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height:1.4;
+    overflow-x:hidden;
+  }
+  .disp{ font-family:'Archivo Black','Pretendard',sans-serif; letter-spacing:-0.01em; }
+  .num{ font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+  a{ color:inherit; }
+  :focus-visible{ outline:4px solid var(--blue); outline-offset:2px; }
+
+  .wrap{ max-width:1240px; margin:0 auto; padding:0 20px; }
+
+  /* ===== 브루탈 하드 박스 유틸 ===== */
+  .brute{
+    background:var(--paper);
+    border:var(--bw) solid var(--ink);
+    box-shadow:8px 8px 0 var(--sh);
+    transition:transform 80ms linear, box-shadow 80ms linear;
+  }
+  .brute:hover{ transform:translate(4px,4px); box-shadow:4px 4px 0 var(--sh); }
+  .brute:active{ transform:translate(8px,8px); box-shadow:0 0 0 var(--sh); }
+  @media (prefers-reduced-motion: reduce){
+    .brute{ transition:background-color 80ms linear !important; }
+    .brute:hover, .brute:active{ transform:none !important; box-shadow:8px 8px 0 var(--sh) !important; }
+  }
+
+  .tag{
+    display:inline-block;
+    border:3px solid var(--ink);
+    padding:4px 10px;
+    font-weight:800;
+    font-size:14px;
+  }
+
+  .tilt{ display:inline-block; }
+  .tilt-inner{ display:block; }
+
+  /* ===== 헤더 ===== */
+  header.top{
+    background:var(--ink);
+    color:var(--paper);
+    border-bottom:var(--bw) solid var(--ink);
+  }
+  header.top .bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:16px 20px;
+    flex-wrap:wrap;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .mark{
+    width:40px; height:40px;
+    background:var(--red);
+    border:3px solid var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-size:20px;
+    color:var(--paper);
+    flex:none;
+  }
+  .brand .names{ display:flex; flex-direction:column; }
+  .brand .names .kr{ font-family:'Archivo Black','Pretendard',sans-serif; font-weight:900; font-size:18px; letter-spacing:0; }
+  .brand .names .en{ font-size:11px; letter-spacing:0.18em; color:#bbb; text-transform:uppercase; }
+  .top-title{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:15px;
+    border-left:3px solid var(--yellow);
+    padding-left:12px;
+  }
+  .top-meta{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:13px; color:#ddd;
+  }
+  .top-meta b{ color:var(--paper); font-weight:800; }
+  .dot-live{
+    display:inline-block; width:8px; height:8px; background:var(--yellow); margin-right:6px;
+  }
+
+  /* ===== 히어로 ===== */
+  .hero{
+    background:var(--yellow);
+    border-bottom:var(--bw) solid var(--ink);
+    padding:36px 0 30px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  .hero-score-label{
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-bottom:2px;
+  }
+  .hero-score-row{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .hero-score{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-size:clamp(120px, 19vw, 240px);
+    line-height:0.78;
+    color:var(--ink);
+  }
+  .hero-score-unit{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:clamp(26px, 4vw, 44px);
+    padding-bottom:0.12em;
+  }
+  .hero-delta{
+    background:var(--blue);
+    color:var(--paper);
+    border:3px solid var(--ink);
+    padding:8px 14px;
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:18px;
+    transform:rotate(-1deg);
+    margin-bottom:14px;
+  }
+  .hero-delta .tilt-inner{ transform:rotate(1deg); }
+  .hero-msg{
+    margin-top:18px;
+    background:var(--paper);
+    border:var(--bw) solid var(--ink);
+    box-shadow:8px 8px 0 var(--ink);
+    padding:16px 18px;
+    font-size:16px;
+    font-weight:700;
+    max-width:560px;
+  }
+  .hero-msg .cue{
+    display:block;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:0.14em;
+    color:var(--red);
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+
+  .rings{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .ring-card{
+    background:var(--paper);
+    border:var(--bw) solid var(--ink);
+    box-shadow:8px 8px 0 var(--ink);
+    padding:14px;
+    flex:1 1 140px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .ring-card svg{ display:block; }
+  .ring-pct{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-size:26px;
+  }
+  .ring-label{
+    font-size:13px;
+    font-weight:800;
+    text-align:center;
+  }
+
+  /* ===== 섹션 공통 ===== */
+  section.sect{ padding:40px 0; border-bottom:var(--bw) solid var(--ink); }
+  .sect-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .sect-num{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-size:34px;
+    background:var(--ink);
+    color:var(--paper);
+    padding:2px 12px;
+  }
+  .sect-title{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:24px;
+  }
+  .sect-sub{ font-size:13px; font-weight:700; color:#555; }
+
+  /* ===== KPI ===== */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .kpi-card{ padding:18px; display:flex; flex-direction:column; gap:10px; }
+  .kpi-name{ font-size:14px; font-weight:800; letter-spacing:0.02em; }
+  .kpi-val-row{ display:flex; align-items:baseline; gap:6px; }
+  .kpi-val{ font-family:'Archivo Black','Pretendard',sans-serif; font-size:44px; line-height:1; }
+  .kpi-unit{ font-size:15px; font-weight:800; }
+  .kpi-delta{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border:3px solid var(--ink); font-size:13px; font-weight:800; width:fit-content; }
+  .kpi-delta.up{ background:var(--blue); color:var(--paper); }
+  .kpi-delta.down{ background:var(--red); color:var(--ink); }
+  .kpi-extra{ font-size:12.5px; font-weight:700; color:#444; border-top:2px solid var(--ink); padding-top:8px; }
+
+  /* ===== 차트 ===== */
+  .chart-grid{
+    display:grid;
+    grid-template-columns:1.5fr 1fr;
+    gap:20px;
+    align-items:stretch;
+  }
+  .chart-card{ padding:20px; position:relative; }
+  .chart-title{ font-family:'Archivo Black','Pretendard',sans-serif; font-weight:900; font-size:16px; margin-bottom:4px; }
+  .chart-sub{ font-size:12px; font-weight:700; color:#555; margin-bottom:18px; }
+
+  .steps-chart{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    height:220px;
+    border-left:var(--bw) solid var(--ink);
+    border-bottom:var(--bw) solid var(--ink);
+    padding:0 4px;
+    position:relative;
+  }
+  .steps-chart .col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    position:relative;
+  }
+  .steps-chart .bar{
+    width:100%;
+    max-width:34px;
+    background:var(--blue);
+    border:3px solid var(--ink);
+  }
+  .steps-chart .col.peak .bar{ background:var(--red); }
+  .steps-chart .peaktag{
+    position:absolute;
+    top:-46px;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:11px;
+    padding:4px 6px;
+    white-space:nowrap;
+    transform:rotate(-2deg);
+  }
+  .steps-chart .peaktag .tilt-inner{ transform:rotate(2deg); display:block; }
+  .steps-chart .hr{ font-size:11px; font-weight:800; margin-top:6px; }
+  .steps-chart .val{ font-size:10.5px; font-weight:800; margin-bottom:4px; }
+
+  .hrzone{ display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+  .hrzone-bar{
+    display:flex;
+    width:100%;
+    height:40px;
+    border:3px solid var(--ink);
+    overflow:hidden;
+  }
+  .hrzone-seg{
+    height:100%;
+    border-right:2px solid var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:800;
+  }
+  .hrzone-seg:last-child{ border-right:none; }
+  .hrzone-legend{ display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; font-size:12px; font-weight:700; }
+  .hrzone-legend li{ display:flex; align-items:center; gap:6px; list-style:none; }
+  .hrzone-legend .sw{ width:12px; height:12px; border:2px solid var(--ink); flex:none; }
+  .hrzone-callout{
+    margin-top:10px;
+    background:var(--red);
+    color:var(--ink);
+    border:3px solid var(--ink);
+    padding:8px 10px;
+    font-size:12.5px;
+    font-weight:800;
+    display:inline-block;
+    transform:rotate(1deg);
+  }
+  .hrzone-callout .tilt-inner{ transform:rotate(-1deg); display:block; }
+
+  /* ===== 주간 스트립 ===== */
+  .week-strip{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:12px;
+  }
+  .week-day{
+    border:3px solid var(--ink);
+    padding:10px 6px 12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    position:relative;
+    background:var(--paper);
+  }
+  .week-day .date{ font-size:12px; font-weight:800; }
+  .week-day .barwrap{ height:120px; display:flex; align-items:flex-end; width:100%; justify-content:center; }
+  .week-day .bar{ width:60%; background:var(--blue); border:3px solid var(--ink); }
+  .week-day.max .bar{ background:var(--yellow); }
+  .week-day.today{ border-width:4px; border-color:var(--red); box-shadow:6px 6px 0 var(--ink); }
+  .week-day .steps{ font-size:11.5px; font-weight:800; }
+  .week-day .flag{
+    position:absolute;
+    top:-14px;
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:10px;
+    padding:3px 6px;
+    border:2px solid var(--ink);
+    white-space:nowrap;
+  }
+  .week-day.max .flag{ background:var(--yellow); transform:rotate(-2deg); }
+  .week-day.max .flag .tilt-inner{ transform:rotate(2deg); display:block; }
+  .week-day.today .flag{ background:var(--red); color:var(--ink); transform:rotate(2deg); }
+  .week-day.today .flag .tilt-inner{ transform:rotate(-2deg); display:block; }
+
+  /* ===== 미션 테이블 ===== */
+  .table-wrap{ overflow-x:auto; border:var(--bw) solid var(--ink); }
+  table.mission{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+    font-size:14px;
+  }
+  table.mission thead th{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    text-align:left;
+    padding:12px 12px;
+    white-space:nowrap;
+  }
+  table.mission tbody td{
+    padding:12px;
+    border-top:2px solid var(--ink);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  table.mission tbody tr{ transition:background-color 80ms linear; }
+  table.mission tbody tr:hover{ background:var(--yellow); }
+  table.mission td.num, table.mission th.num{ text-align:right; }
+  .status-pill{
+    display:inline-block;
+    border:3px solid var(--ink);
+    padding:4px 10px;
+    font-size:12px;
+    font-weight:800;
+  }
+  .status-pill.done{ background:var(--blue); color:var(--paper); }
+  .status-pill.progress{ background:var(--yellow); color:var(--ink); }
+  .status-pill.wait{ background:var(--paper); color:var(--ink); border-style:dashed; }
+  .status-pill.warn{ background:var(--red); color:var(--ink); }
+  /* 주의 행 — 원색 색면 블록으로 과감히 강조 */
+  table.mission tbody tr.attn{ background:var(--red); }
+  table.mission tbody tr.attn td{ font-weight:800; border-top:2px solid var(--ink); }
+  table.mission tbody tr.attn .status-pill.warn{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  table.mission tbody tr.attn:hover{ background:var(--yellow); }
+  table.mission tbody tr.attn:hover .status-pill.warn{ background:var(--red); color:var(--ink); }
+
+  /* ===== 업적 배지 ===== */
+  .badges-sect{ background:var(--ink); }
+  .badges-sect .sect-num{ background:var(--paper); color:var(--ink); }
+  .badges-sect .sect-title{ color:var(--paper); }
+  .badges-sect .sect-sub{ color:#aaa; }
+  .badge-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  .badge-card{
+    border:4px solid var(--paper);
+    box-shadow:8px 8px 0 var(--yellow);
+    padding:22px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:transform 80ms linear, box-shadow 80ms linear;
+  }
+  .badge-card:hover{ transform:translate(4px,4px); box-shadow:4px 4px 0 var(--yellow); }
+  .badge-card:active{ transform:translate(8px,8px); box-shadow:0 0 0 var(--yellow); }
+  @media (prefers-reduced-motion: reduce){
+    .badge-card{ transition:background-color 80ms linear !important; }
+    .badge-card:hover, .badge-card:active{ transform:none !important; box-shadow:8px 8px 0 var(--yellow) !important; }
+  }
+  .badge-card.c1{ background:var(--paper); color:var(--ink); }
+  .badge-card.c2{ background:var(--yellow); color:var(--ink); }
+  .badge-card.c3{ background:var(--red); color:var(--ink); }
+  .badge-icon{ font-family:'Archivo Black','Pretendard',sans-serif; font-size:34px; transform:rotate(-1deg); display:inline-block; }
+  .badge-icon .tilt-inner{ transform:rotate(1deg); display:block; }
+  .badge-title{ font-family:'Archivo Black','Pretendard',sans-serif; font-weight:900; font-size:16px; }
+  .badge-desc{ font-size:13px; font-weight:700; }
+
+  /* ===== 푸터 ===== */
+  footer.bottom{
+    background:var(--ink);
+    color:var(--paper);
+    padding:24px 0;
+  }
+  footer.bottom .bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    font-size:12.5px;
+  }
+  footer.bottom .stylebadge{
+    font-family:'Archivo Black','Pretendard',sans-serif;
+    font-weight:900;
+    background:var(--yellow);
+    color:var(--ink);
+    padding:6px 12px;
+    font-size:13px;
+  }
+  footer.bottom .fine{ color:#999; }
+
+  /* ===== 반응형 ===== */
+  @media (max-width:900px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .kpi-grid{ grid-template-columns:repeat(2, 1fr); }
+    .chart-grid{ grid-template-columns:1fr; }
+    .badge-grid{ grid-template-columns:1fr; }
+    .week-strip{ grid-template-columns:repeat(4, 1fr); }
+    .week-strip .week-day:nth-child(n+5){ grid-column:span 1; }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .week-strip{ grid-template-columns:repeat(2, 1fr); }
+    .hero-score{ font-size:96px; }
+    header.top .bar{ padding:14px 16px; }
+  }
+</style>
+
+<header class="top">
+  <div class="wrap bar">
+    <div class="brand">
+      <div class="mark">F</div>
+      <div class="names">
+        <span class="kr disp">핏펄스</span>
+        <span class="en">FitPulse</span>
+      </div>
+      <span class="top-title">오늘의 활동 리포트</span>
+    </div>
+    <div class="top-meta">
+      <span><b>핏메이트</b> · 연속 기록 <b class="num">12일</b></span>
+      <span><span class="dot-live"></span>갱신 <b class="num">2026-07-10 08:42</b> · 동기화 완료</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 2. 히어로 요약 밴드 -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="hero-score-label">종합 활동 점수</div>
+        <div class="hero-score-row">
+          <span class="hero-score disp num">87</span>
+          <span class="hero-score-unit disp">점</span>
+        </div>
+        <div class="hero-delta tilt">
+          <span class="tilt-inner num">전일 대비 +6점</span>
+        </div>
+        <div class="hero-msg">
+          <span class="cue">코칭 메시지</span>
+          "목표까지 <span class="num">1,568</span>걸음 남았어요. 저녁 산책이면 충분해요."
+        </div>
+      </div>
+      <div class="rings">
+        <div class="ring-card">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#000" stroke-width="10"/>
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#FF3B00" stroke-width="10"
+                    stroke-linecap="butt"
+                    stroke-dasharray="251.3" stroke-dashoffset="40.2"
+                    transform="rotate(-90 48 48)"/>
+          </svg>
+          <div class="ring-pct disp num">84%</div>
+          <div class="ring-label">걷기</div>
+        </div>
+        <div class="ring-card">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#000" stroke-width="10"/>
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#0037FF" stroke-width="10"
+                    stroke-linecap="butt"
+                    stroke-dasharray="251.3" stroke-dashoffset="15.1"
+                    transform="rotate(-90 48 48)"/>
+          </svg>
+          <div class="ring-pct disp num">94%</div>
+          <div class="ring-label">운동</div>
+        </div>
+        <div class="ring-card">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#000" stroke-width="10"/>
+            <circle cx="48" cy="48" r="40" fill="none" stroke="#FFE600" stroke-width="10"
+                    stroke-linecap="butt"
+                    stroke-dasharray="251.3" stroke-dashoffset="62.8"
+                    transform="rotate(-90 48 48)"/>
+          </svg>
+          <div class="ring-pct disp num">75%</div>
+          <div class="ring-label">스탠드</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. KPI 카드 6장 -->
+  <section class="sect">
+    <div class="wrap">
+      <div class="sect-head">
+        <span class="sect-num disp">03</span>
+        <span class="sect-title">핵심 지표</span>
+        <span class="sect-sub">전일 · 전주 대비 증감</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card brute">
+          <div class="kpi-name">걸음 수</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">8,432</span><span class="kpi-unit">걸음</span></div>
+          <span class="kpi-delta up">▲ 전일 +12.3%</span>
+          <div class="kpi-extra">목표 10,000보의 84%</div>
+        </div>
+        <div class="kpi-card brute">
+          <div class="kpi-name">활동 칼로리</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">512</span><span class="kpi-unit">kcal</span></div>
+          <span class="kpi-delta up">▲ 전일 +8.1%</span>
+          <div class="kpi-extra">목표 700kcal의 73%</div>
+        </div>
+        <div class="kpi-card brute">
+          <div class="kpi-name">운동 시간</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">47</span><span class="kpi-unit">분</span></div>
+          <span class="kpi-delta up">▲ 전일 +15.2%</span>
+          <div class="kpi-extra">목표 50분의 94%</div>
+        </div>
+        <div class="kpi-card brute">
+          <div class="kpi-name">평균 심박수</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">72</span><span class="kpi-unit">bpm</span></div>
+          <span class="kpi-delta down">▼ 전일 −2.7%</span>
+          <div class="kpi-extra">안정 범위</div>
+        </div>
+        <div class="kpi-card brute">
+          <div class="kpi-name">수면 점수</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">82</span><span class="kpi-unit">점</span></div>
+          <span class="kpi-delta up">▲ 전주 +4.0%</span>
+          <div class="kpi-extra">6시간 48분</div>
+        </div>
+        <div class="kpi-card brute">
+          <div class="kpi-name">스트레스 지수</div>
+          <div class="kpi-val-row"><span class="kpi-val disp num">34</span><span class="kpi-unit">—</span></div>
+          <span class="kpi-delta down">▼ 전일 −11.0%</span>
+          <div class="kpi-extra">낮음 (양호)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 차트 2개 -->
+  <section class="sect">
+    <div class="wrap">
+      <div class="sect-head">
+        <span class="sect-num disp">04</span>
+        <span class="sect-title">활동 추이</span>
+        <span class="sect-sub">시간대별 걸음 수 · 심박존 분포</span>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card brute">
+          <div class="chart-title disp">시간대별 걸음 수</div>
+          <div class="chart-sub">오늘 · 9개 구간</div>
+          <div class="steps-chart">
+            <div class="col"><span class="val num">320</span><div class="bar" style="height:14.9%"></div><span class="hr">06시</span></div>
+            <div class="col"><span class="val num">1,240</span><div class="bar" style="height:57.9%"></div><span class="hr">08시</span></div>
+            <div class="col"><span class="val num">680</span><div class="bar" style="height:31.8%"></div><span class="hr">10시</span></div>
+            <div class="col"><span class="val num">1,520</span><div class="bar" style="height:71.0%"></div><span class="hr">12시</span></div>
+            <div class="col"><span class="val num">540</span><div class="bar" style="height:25.2%"></div><span class="hr">14시</span></div>
+            <div class="col"><span class="val num">890</span><div class="bar" style="height:41.6%"></div><span class="hr">16시</span></div>
+            <div class="col peak">
+              <span class="peaktag tilt"><span class="tilt-inner">PEAK · 저녁 운동</span></span>
+              <span class="val num">2,140</span><div class="bar" style="height:100%"></div><span class="hr">18시</span>
+            </div>
+            <div class="col"><span class="val num">780</span><div class="bar" style="height:36.4%"></div><span class="hr">20시</span></div>
+            <div class="col"><span class="val num">322</span><div class="bar" style="height:15.0%"></div><span class="hr">22시</span></div>
+          </div>
+        </div>
+        <div class="chart-card brute">
+          <div class="chart-title disp">심박존 분포</div>
+          <div class="chart-sub">오늘 · 구간별 시간(분)</div>
+          <div class="hrzone">
+            <div class="hrzone-bar">
+              <div class="hrzone-seg" style="width:66.02%; background:#FFFFFF;" title="휴식 612분"></div>
+              <div class="hrzone-seg" style="width:18.77%; background:#E5E5E5;" title="워밍업 174분"></div>
+              <div class="hrzone-seg" style="width:9.93%; background:#9C9C9C; color:#fff;" title="지방연소 92분">92</div>
+              <div class="hrzone-seg" style="width:4.42%; background:#FF3B00;" title="유산소 41분">41</div>
+              <div class="hrzone-seg" style="width:0.86%; background:#000000;"></div>
+            </div>
+            <ul class="hrzone-legend">
+              <li><span class="sw" style="background:#FFFFFF;"></span>휴식 &lt;90bpm · <span class="num">612분</span></li>
+              <li><span class="sw" style="background:#E5E5E5;"></span>워밍업 90–108 · <span class="num">174분</span></li>
+              <li><span class="sw" style="background:#9C9C9C;"></span>지방연소 108–126 · <span class="num">92분</span></li>
+              <li><span class="sw" style="background:#FF3B00;"></span>유산소 126–144 · <span class="num">41분</span></li>
+              <li><span class="sw" style="background:#000000;"></span>최대 144+ · <span class="num">8분</span></li>
+            </ul>
+            <div class="hrzone-callout tilt">
+              <span class="tilt-inner">유산소 존 41분 = 목표 30분 초과 달성</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 최근 7일 걸음 스트립 -->
+  <section class="sect">
+    <div class="wrap">
+      <div class="sect-head">
+        <span class="sect-num disp">05</span>
+        <span class="sect-title">최근 7일</span>
+        <span class="sect-sub">걸음 수 · 주간 최고 7/7</span>
+      </div>
+      <div class="week-strip">
+        <div class="week-day"><span class="date">7/4</span><div class="barwrap"><div class="bar" style="height:57.1%"></div></div><span class="steps num">5,210</span></div>
+        <div class="week-day"><span class="date">7/5</span><div class="barwrap"><div class="bar" style="height:84.2%"></div></div><span class="steps num">7,680</span></div>
+        <div class="week-day"><span class="date">7/6</span><div class="barwrap"><div class="bar" style="height:76.1%"></div></div><span class="steps num">6,940</span></div>
+        <div class="week-day max">
+          <span class="flag tilt"><span class="tilt-inner">주간 최고</span></span>
+          <span class="date">7/7</span><div class="barwrap"><div class="bar" style="height:100%"></div></div><span class="steps num">9,120</span>
+        </div>
+        <div class="week-day"><span class="date">7/8</span><div class="barwrap"><div class="bar" style="height:81.7%"></div></div><span class="steps num">7,450</span></div>
+        <div class="week-day"><span class="date">7/9</span><div class="barwrap"><div class="bar" style="height:87.8%"></div></div><span class="steps num">8,010</span></div>
+        <div class="week-day today">
+          <span class="flag tilt"><span class="tilt-inner">오늘</span></span>
+          <span class="date">7/10</span><div class="barwrap"><div class="bar" style="height:92.5%"></div></div><span class="steps num">8,432</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 오늘의 건강 미션 테이블 -->
+  <section class="sect">
+    <div class="wrap">
+      <div class="sect-head">
+        <span class="sect-num disp">06</span>
+        <span class="sect-title">오늘의 건강 미션</span>
+        <span class="sect-sub">8개 미션 진행 현황</span>
+      </div>
+      <div class="table-wrap">
+        <table class="mission">
+          <thead>
+            <tr>
+              <th>시각</th><th>활동</th><th>목표</th><th>현재</th><th class="num">달성률</th><th class="num">소비</th><th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">07:10</td><td>모닝 스트레칭</td><td class="num">15분</td><td class="num">15분</td><td class="num">100%</td><td class="num">38 kcal</td>
+              <td><span class="status-pill done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="num">08:30</td><td>출근 걷기</td><td class="num">3,000보</td><td class="num">3,240보</td><td class="num">108%</td><td class="num">96 kcal</td>
+              <td><span class="status-pill done">완료</span></td>
+            </tr>
+            <tr>
+              <td class="num">12:20</td><td>점심 산책</td><td class="num">2,000보</td><td class="num">1,520보</td><td class="num">76%</td><td class="num">54 kcal</td>
+              <td><span class="status-pill progress">진행중</span></td>
+            </tr>
+            <tr>
+              <td class="num">14:00</td><td>수분 섭취</td><td class="num">2.0 L</td><td class="num">1.2 L</td><td class="num">60%</td><td class="num">—</td>
+              <td><span class="status-pill progress">진행중</span></td>
+            </tr>
+            <tr>
+              <td class="num">16:30</td><td>근력 운동</td><td class="num">3 세트</td><td class="num">0 세트</td><td class="num">0%</td><td class="num">—</td>
+              <td><span class="status-pill wait">대기</span></td>
+            </tr>
+            <tr>
+              <td class="num">18:00</td><td>저녁 러닝</td><td class="num">5.0 km</td><td class="num">4.2 km</td><td class="num">84%</td><td class="num">312 kcal</td>
+              <td><span class="status-pill progress">진행중</span></td>
+            </tr>
+            <tr>
+              <td class="num">21:00</td><td>명상</td><td class="num">10분</td><td class="num">10분</td><td class="num">100%</td><td class="num">8 kcal</td>
+              <td><span class="status-pill done">완료</span></td>
+            </tr>
+            <tr class="attn">
+              <td class="num">22:30</td><td>심박존 유지</td><td class="num">20분</td><td class="num">6분</td><td class="num">30%</td><td class="num">—</td>
+              <td><span class="status-pill warn">주의</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 업적 배지 3종 -->
+  <section class="sect badges-sect">
+    <div class="wrap">
+      <div class="sect-head">
+        <span class="sect-num disp">07</span>
+        <span class="sect-title">업적 배지</span>
+        <span class="sect-sub">이번 주 획득</span>
+      </div>
+      <div class="badge-grid">
+        <div class="badge-card c1">
+          <span class="badge-icon tilt"><span class="tilt-inner">●12</span></span>
+          <div class="badge-title disp">연속 12일 목표 달성</div>
+          <div class="badge-desc">12일째 데일리 골 완료</div>
+        </div>
+        <div class="badge-card c2">
+          <span class="badge-icon tilt"><span class="tilt-inner">▲★</span></span>
+          <div class="badge-title disp">이번 주 최고 걸음</div>
+          <div class="badge-desc">7/7 <span class="num">9,120</span>걸음 기록</div>
+        </div>
+        <div class="badge-card c3">
+          <span class="badge-icon tilt"><span class="tilt-inner">♥3</span></span>
+          <div class="badge-title disp">유산소 존 목표 3회</div>
+          <div class="badge-desc">이번 주 유산소 목표 3회 달성</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="bottom">
+  <div class="wrap bar">
+    <span class="stylebadge disp">STYLE 05 · 브루탈리즘</span>
+    <span>핏펄스 (FitPulse) · 가상의 건강 활동 트래커</span>
+    <span class="fine">데이터 기준 2026-07-10 08:42</span>
+  </div>
+</footer>

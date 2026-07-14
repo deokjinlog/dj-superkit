@@ -1,0 +1,692 @@
+<title>Flowly — 뉴모피즘</title>
+<style>
+  :root {
+    --bg: #e4e7ec;
+    --bg-light-shadow: #ffffff;
+    --bg-dark-shadow: #b8bdc9;
+    --text-main: #33394a;
+    --text-sub: #626a7d;
+    --text-faint: #838ba0;
+    --accent: #6c72e0;
+    --accent-dark: #565cc7;
+    --accent-soft: #d9daf7;
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--text-main);
+    font-family: "Segoe UI", "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  img, svg { max-width: 100%; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* --- Neumorphic primitives --- */
+  .neu-flat {
+    background: var(--bg);
+    box-shadow:
+      9px 9px 18px var(--bg-dark-shadow),
+      -9px -9px 18px var(--bg-light-shadow);
+  }
+
+  .neu-convex {
+    background: linear-gradient(145deg, #eaedf3, #dde0e7);
+    box-shadow:
+      9px 9px 18px var(--bg-dark-shadow),
+      -9px -9px 18px var(--bg-light-shadow);
+  }
+
+  .neu-pressed {
+    background: var(--bg);
+    box-shadow:
+      inset 6px 6px 12px var(--bg-dark-shadow),
+      inset -6px -6px 12px var(--bg-light-shadow);
+  }
+
+  .neu-btn {
+    border: none;
+    background: var(--bg);
+    color: var(--text-main);
+    border-radius: var(--radius-sm);
+    padding: 14px 28px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    box-shadow:
+      6px 6px 12px var(--bg-dark-shadow),
+      -6px -6px 12px var(--bg-light-shadow);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .neu-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .neu-btn:active {
+    box-shadow:
+      inset 4px 4px 8px var(--bg-dark-shadow),
+      inset -4px -4px 8px var(--bg-light-shadow);
+    transform: translateY(0);
+  }
+
+  .neu-btn--accent {
+    background: linear-gradient(145deg, #7378e6, #6157cf);
+    color: #ffffff;
+    box-shadow:
+      6px 6px 14px #b3b6d9,
+      -6px -6px 14px #ffffff;
+  }
+
+  .neu-btn--accent:active {
+    box-shadow:
+      inset 3px 3px 8px #4b45a8,
+      inset -3px -3px 8px #8a8ff0;
+  }
+
+  .neu-btn--ghost {
+    background: transparent;
+    box-shadow: none;
+    color: var(--text-sub);
+    padding: 14px 12px;
+  }
+
+  .neu-btn--ghost:active {
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* --- Header / Nav --- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg);
+    padding: 14px 0;
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--text-main);
+  }
+
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    box-shadow:
+      5px 5px 10px var(--bg-dark-shadow),
+      -5px -5px 10px var(--bg-light-shadow);
+  }
+
+  .logo-mark svg { width: 20px; height: 20px; display: block; }
+
+  nav.menu {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: var(--bg);
+    padding: 6px;
+    border-radius: 18px;
+    box-shadow:
+      inset 4px 4px 8px var(--bg-dark-shadow),
+      inset -4px -4px 8px var(--bg-light-shadow);
+  }
+
+  nav.menu a {
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    color: var(--text-sub);
+    font-weight: 600;
+    transition: box-shadow 0.15s ease, color 0.15s ease;
+  }
+
+  nav.menu a:hover {
+    color: var(--text-main);
+    box-shadow:
+      3px 3px 7px var(--bg-dark-shadow),
+      -3px -3px 7px var(--bg-light-shadow);
+  }
+
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+  .menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg);
+    box-shadow:
+      5px 5px 10px var(--bg-dark-shadow),
+      -5px -5px 10px var(--bg-light-shadow);
+  }
+
+  /* --- Hero --- */
+  .hero {
+    padding: 72px 0 88px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-dark);
+    background: var(--bg);
+    box-shadow:
+      inset 3px 3px 7px var(--bg-dark-shadow),
+      inset -3px -3px 7px var(--bg-light-shadow);
+    margin-bottom: 28px;
+  }
+
+  .badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  h1.headline {
+    font-size: clamp(2.1rem, 5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 22px;
+    color: var(--text-main);
+  }
+
+  .sub {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--text-sub);
+    max-width: 640px;
+    margin: 0 auto 40px;
+  }
+
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .hero-visual {
+    margin: 64px auto 0;
+    max-width: 760px;
+    padding: 28px;
+    border-radius: var(--radius-lg);
+  }
+
+  .hero-visual-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .hv-card {
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    text-align: left;
+  }
+
+  .hv-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .hv-bar {
+    height: 8px;
+    border-radius: 999px;
+    margin-top: 10px;
+  }
+
+  .hv-bar.pressed { }
+
+  /* --- Sections --- */
+  section { padding: 80px 0; }
+
+  .section-head {
+    text-align: center;
+    margin-bottom: 52px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+    font-weight: 800;
+    margin: 0 0 12px;
+    color: var(--text-main);
+  }
+
+  .section-head p {
+    color: var(--text-sub);
+    margin: 0;
+  }
+
+  /* Features */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+
+  .feature-card {
+    border-radius: var(--radius-lg);
+    padding: 36px 30px;
+  }
+
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-size: 1.6rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--text-main);
+  }
+
+  .feature-card p {
+    color: var(--text-sub);
+    margin: 0;
+    font-size: 0.96rem;
+  }
+
+  /* Pricing */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .plan-card {
+    border-radius: var(--radius-lg);
+    padding: 38px 32px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .plan-card.featured {
+    background: linear-gradient(160deg, #eef0f8, #dfe1f0);
+    box-shadow:
+      10px 10px 20px var(--bg-dark-shadow),
+      -10px -10px 20px var(--bg-light-shadow),
+      inset 0 0 0 2px rgba(108, 114, 224, 0.18);
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -14px;
+    right: 28px;
+    background: linear-gradient(145deg, #7378e6, #6157cf);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 999px;
+    box-shadow: 4px 4px 10px var(--bg-dark-shadow);
+  }
+
+  .plan-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-sub);
+    margin-bottom: 6px;
+  }
+
+  .plan-price {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .plan-price span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-faint);
+  }
+
+  .plan-list {
+    margin: 26px 0 30px;
+    flex-grow: 1;
+  }
+
+  .plan-list li {
+    padding: 10px 0;
+    color: var(--text-sub);
+    font-size: 0.94rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .plan-list li::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    border-radius: 8px;
+    margin-top: 1px;
+    background: var(--bg);
+    box-shadow:
+      inset 2px 2px 5px var(--bg-dark-shadow),
+      inset -2px -2px 5px var(--bg-light-shadow);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c72e0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 11px;
+  }
+
+  .plan-card .neu-btn { width: 100%; text-align: center; }
+
+  /* Closing CTA */
+  .closing {
+    text-align: center;
+  }
+
+  .closing-card {
+    border-radius: var(--radius-lg);
+    padding: 64px 32px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .closing h2 {
+    font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+    font-weight: 800;
+    margin: 0 0 14px;
+    color: var(--text-main);
+  }
+
+  .closing p {
+    color: var(--text-sub);
+    margin: 0 0 32px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px 0 56px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+  }
+
+  footer .flinks {
+    margin-top: 12px;
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  footer .flinks a { color: var(--text-sub); }
+  footer .flinks a:hover { color: var(--accent-dark); }
+
+  /* --- Responsive --- */
+  @media (max-width: 900px) {
+    .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero-visual-grid { grid-template-columns: 1fr; }
+    nav.menu { display: none; }
+    .menu-toggle { display: flex; }
+  }
+
+  @media (max-width: 480px) {
+    .cta-row { flex-direction: column; }
+    .cta-row .neu-btn, .cta-row a { width: 100%; }
+    section { padding: 56px 0; }
+    .hero { padding: 48px 0 56px; }
+    .closing-card { padding: 44px 20px; }
+  }
+
+  /* --- Dark mode (kept soft neumorphic, dark tone) --- */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #2b2f3a;
+      --bg-light-shadow: #363b48;
+      --bg-dark-shadow: #1f222b;
+      --text-main: #eef0f6;
+      --text-sub: #b7bccb;
+      --text-faint: #8b90a3;
+      --accent: #8b90f5;
+      --accent-dark: #aeb2f9;
+      --accent-soft: #3a3d6b;
+    }
+    .neu-convex { background: linear-gradient(145deg, #313644, #262a34); }
+    .plan-card.featured { background: linear-gradient(160deg, #323748, #262a35); }
+    .plan-list li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b90f5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #2b2f3a;
+    --bg-light-shadow: #363b48;
+    --bg-dark-shadow: #1f222b;
+    --text-main: #eef0f6;
+    --text-sub: #b7bccb;
+    --text-faint: #8b90a3;
+    --accent: #8b90f5;
+    --accent-dark: #aeb2f9;
+    --accent-soft: #3a3d6b;
+  }
+  :root[data-theme="dark"] .neu-convex { background: linear-gradient(145deg, #313644, #262a34); }
+  :root[data-theme="dark"] .plan-card.featured { background: linear-gradient(160deg, #323748, #262a35); }
+  :root[data-theme="dark"] .plan-list li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b90f5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E"); }
+
+  :root[data-theme="light"] {
+    --bg: #e4e7ec;
+    --bg-light-shadow: #ffffff;
+    --bg-dark-shadow: #b8bdc9;
+    --text-main: #33394a;
+    --text-sub: #626a7d;
+    --text-faint: #838ba0;
+    --accent: #6c72e0;
+    --accent-dark: #565cc7;
+    --accent-soft: #d9daf7;
+  }
+</style>
+
+<header>
+  <div class="wrap nav-inner">
+    <div class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6c72e0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12c2-4 6-4 8 0s6 4 8 0" />
+        </svg>
+      </span>
+      Flowly
+    </div>
+    <nav class="menu">
+      <a href="#features">기능</a>
+      <a href="#pricing">요금제</a>
+      <a href="#customers">고객사</a>
+      <a href="#login">로그인</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="neu-btn neu-btn--accent" type="button">무료로 시작</button>
+      <button class="menu-toggle" type="button" aria-label="메뉴 열기">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#33394a" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="badge"><span class="dot"></span> 이미 12,000+ 팀이 Flowly로 일합니다</div>
+      <h1 class="headline">팀의 모든 일이,<br />한 곳에서 흐르게</h1>
+      <p class="sub">흩어진 할 일·문서·대화를 하나로. 누가 무엇을 언제까지 하는지 한눈에 봅니다.</p>
+      <div class="cta-row">
+        <button class="neu-btn neu-btn--accent" type="button">무료로 시작하기</button>
+        <button class="neu-btn neu-btn--ghost" type="button">▶ 2분 데모 보기</button>
+      </div>
+
+      <div class="hero-visual neu-flat">
+        <div class="hero-visual-grid">
+          <div class="hv-card neu-convex">
+            <div class="hv-icon neu-pressed">📋</div>
+            <div class="hv-bar neu-pressed" style="width: 80%;"></div>
+            <div class="hv-bar neu-pressed" style="width: 55%;"></div>
+          </div>
+          <div class="hv-card neu-convex">
+            <div class="hv-icon neu-pressed">📆</div>
+            <div class="hv-bar neu-pressed" style="width: 65%;"></div>
+            <div class="hv-bar neu-pressed" style="width: 40%;"></div>
+          </div>
+          <div class="hv-card neu-convex">
+            <div class="hv-icon neu-pressed">⚙️</div>
+            <div class="hv-bar neu-pressed" style="width: 70%;"></div>
+            <div class="hv-bar neu-pressed" style="width: 50%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>흐름을 만드는 3가지</h2>
+        <p>업무의 시작부터 끝까지, 끊김 없이 이어집니다.</p>
+      </div>
+      <div class="features-grid">
+        <article class="feature-card neu-flat">
+          <div class="feature-icon neu-pressed">🗂️</div>
+          <h3>칸반 보드</h3>
+          <p>드래그 한 번으로 진행 상황을 정리하세요. 누가 뭘 맡고 있는지 실시간으로 보입니다.</p>
+        </article>
+        <article class="feature-card neu-flat">
+          <div class="feature-icon neu-pressed">📈</div>
+          <h3>스마트 타임라인</h3>
+          <p>마감과 의존 관계를 한 화면에. 일정이 밀리기 전에 위험을 미리 봅니다.</p>
+        </article>
+        <article class="feature-card neu-flat">
+          <div class="feature-icon neu-pressed">🔁</div>
+          <h3>규칙 자동화</h3>
+          <p>반복 작업은 규칙에 맡기세요. 상태가 바뀌면 알림과 담당 배정이 자동으로.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>팀 크기에 맞게</h2>
+        <p>필요한 만큼만, 부담 없이 시작하세요.</p>
+      </div>
+      <div class="pricing-grid">
+        <article class="plan-card neu-flat">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">₩0</div>
+          <ul class="plan-list">
+            <li>최대 5명</li>
+            <li>보드 3개</li>
+            <li>기본 통합</li>
+          </ul>
+          <button class="neu-btn" type="button">무료로 시작</button>
+        </article>
+
+        <article class="plan-card featured">
+          <span class="plan-badge">가장 인기</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">₩12,000 <span>/인·월</span></div>
+          <ul class="plan-list">
+            <li>무제한 보드</li>
+            <li>타임라인</li>
+            <li>자동화</li>
+            <li>우선순위 정렬</li>
+          </ul>
+          <button class="neu-btn neu-btn--accent" type="button">Pro 시작하기</button>
+        </article>
+
+        <article class="plan-card neu-flat">
+          <div class="plan-name">Business</div>
+          <div class="plan-price">₩24,000 <span>/인·월</span></div>
+          <ul class="plan-list">
+            <li>SSO</li>
+            <li>고급 권한</li>
+            <li>감사 로그</li>
+            <li>전담 지원</li>
+          </ul>
+          <button class="neu-btn" type="button">영업팀 문의</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <div class="closing-card neu-flat">
+        <h2>오늘부터 팀의 흐름을 바꿔보세요</h2>
+        <p>14일 무료 체험. 카드 등록 없이 시작합니다.</p>
+        <button class="neu-btn neu-btn--accent" type="button">무료로 시작하기</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 Flowly</div>
+    <div class="flinks">
+      <a href="#terms">이용약관</a>
+      <a href="#privacy">개인정보</a>
+      <a href="#contact">문의</a>
+    </div>
+  </div>
+</footer>

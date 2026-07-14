@@ -1,0 +1,705 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FleetOps · 배송 관제 대시보드</title>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<style>
+  :root {
+    --bg: #e4e9f2;
+    --ink: #3d4a5c;
+    --blue: #4a7cff;
+    --danger: #e36868;
+    --hi: #ffffff;
+    --lo: #c3cad6;
+
+    --r: 20px;
+    /* 볼록 (raised) : 밝은 좌상단 / 어두운 우하단 */
+    --raise: -8px -8px 16px var(--hi), 8px 8px 16px var(--lo);
+    --raise-sm: -5px -5px 10px var(--hi), 5px 5px 10px var(--lo);
+    /* 오목 (inset) : 어두운 좌상단 안쪽 / 밝은 우하단 안쪽 */
+    --press: inset 8px 8px 16px var(--lo), inset -8px -8px 16px var(--hi);
+    --press-sm: inset 5px 5px 10px var(--lo), inset -5px -5px 10px var(--hi);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Pretendard", -apple-system, system-ui, sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    padding: clamp(20px, 4vw, 56px);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 3.4vw, 42px);
+  }
+
+  /* ---------- 헤더 ---------- */
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .mark {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    background: var(--bg);
+    box-shadow: var(--raise);
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+
+  .mark span {
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    background: var(--blue);
+    box-shadow: -3px -3px 6px rgba(255, 255, 255, 0.5),
+      3px 3px 7px rgba(74, 124, 255, 0.35);
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: clamp(24px, 3.2vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .brand p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--ink) 55%, var(--bg));
+  }
+
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--press);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .stamp .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    box-shadow: 0 0 0 4px rgba(74, 124, 255, 0.18);
+  }
+
+  .stamp b {
+    font-weight: 700;
+  }
+
+  /* ---------- KPI (볼록) ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(18px, 2.4vw, 28px);
+  }
+
+  .kpi {
+    background: var(--bg);
+    border-radius: var(--r);
+    box-shadow: var(--raise);
+    padding: 24px 24px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 0.28s ease, transform 0.28s ease;
+  }
+
+  .kpi:hover {
+    box-shadow: var(--press);
+    transform: translateY(1px);
+  }
+
+  .kpi .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--ink) 60%, var(--bg));
+  }
+
+  .kpi .ic {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    background: var(--bg);
+    box-shadow: var(--raise-sm);
+    display: grid;
+    place-items: center;
+    margin-bottom: 2px;
+  }
+
+  .kpi .ic svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .kpi .value {
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .kpi .value small {
+    font-size: 0.5em;
+    font-weight: 600;
+    margin-left: 2px;
+    color: color-mix(in srgb, var(--ink) 60%, var(--bg));
+  }
+
+  .kpi.alert .value {
+    color: var(--danger);
+  }
+
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--press-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+
+  .delta.up {
+    color: var(--blue);
+  }
+  .delta.flat {
+    color: color-mix(in srgb, var(--ink) 62%, var(--bg));
+  }
+  .delta.good {
+    color: var(--blue);
+  }
+
+  .delta .arw {
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  /* ---------- 섹션 카드 (오목) ---------- */
+  .panel {
+    background: var(--bg);
+    border-radius: calc(var(--r) + 6px);
+    box-shadow: var(--press);
+    padding: clamp(24px, 3vw, 36px);
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 26px;
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .panel-head .sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--ink) 55%, var(--bg));
+  }
+
+  /* ---------- 차트 (오목 트랙 + 볼록 바) ---------- */
+  .chart {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(8px, 1.6vw, 20px);
+    height: 260px;
+    padding: 20px 6px 0;
+  }
+
+  .col {
+    flex: 1 1 0;
+    min-width: 34px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .col .cap {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--ink) 72%, var(--bg));
+  }
+
+  .bar {
+    width: 100%;
+    max-width: 46px;
+    border-radius: 14px 14px 12px 12px;
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--blue) 78%, #ffffff),
+      var(--blue)
+    );
+    box-shadow: -5px -5px 10px var(--hi), 5px 5px 12px var(--lo),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.45);
+    transform-origin: bottom;
+    animation: grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .col.peak .bar {
+    background: linear-gradient(160deg, #7a9cff, var(--blue));
+    box-shadow: -5px -5px 10px var(--hi), 5px 5px 14px var(--lo),
+      0 0 0 4px rgba(74, 124, 255, 0.14),
+      inset 2px 2px 5px rgba(255, 255, 255, 0.5);
+  }
+
+  .col.peak .cap {
+    color: var(--blue);
+  }
+
+  .peak-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--blue);
+    background: var(--bg);
+    box-shadow: var(--press-sm);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  @keyframes grow {
+    from {
+      transform: scaleY(0);
+      opacity: 0.4;
+    }
+    to {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+
+  .chart-scroll {
+    overflow-x: auto;
+  }
+
+  /* ---------- 테이블 (오목 패널) ---------- */
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, var(--ink) 55%, var(--bg));
+    padding: 0 20px 4px;
+    text-transform: none;
+  }
+
+  thead th:last-child,
+  tbody td:last-child {
+    text-align: right;
+  }
+
+  tbody tr {
+    background: var(--bg);
+    box-shadow: var(--raise-sm);
+    border-radius: 16px;
+    transition: box-shadow 0.25s ease;
+  }
+
+  tbody tr:hover {
+    box-shadow: var(--press-sm);
+  }
+
+  tbody td {
+    padding: 18px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    border-radius: 16px 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  tbody td:last-child {
+    border-radius: 0 16px 16px 0;
+    font-weight: 700;
+  }
+
+  .dest {
+    color: color-mix(in srgb, var(--ink) 88%, var(--bg));
+  }
+
+  .driver {
+    color: color-mix(in srgb, var(--ink) 66%, var(--bg));
+    font-weight: 600;
+  }
+
+  /* ---------- 상태 뱃지 (팔레트 내 색 + 요철로 4종 구분) ---------- */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: var(--bg);
+  }
+
+  .tag .d {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* 배송중 — 포인트 블루 · 볼록(진행 중) */
+  .tag.move {
+    color: var(--blue);
+    box-shadow: var(--raise-sm);
+  }
+  .tag.move .d {
+    background: var(--blue);
+    box-shadow: 0 0 0 3px rgba(74, 124, 255, 0.16);
+  }
+
+  /* 완료 — 중립 · 오목(눌려서 마감된 느낌) */
+  .tag.done {
+    color: var(--ink);
+    box-shadow: var(--press-sm);
+  }
+  .tag.done .d {
+    background: var(--ink);
+  }
+
+  /* 지연 — 위험 레드 · 볼록 + 부드러운 맥동 */
+  .tag.late {
+    color: var(--danger);
+    box-shadow: var(--raise-sm);
+  }
+  .tag.late .d {
+    background: var(--danger);
+    box-shadow: 0 0 0 3px rgba(227, 104, 104, 0.18);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 3px rgba(227, 104, 104, 0.18);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(227, 104, 104, 0.05);
+    }
+  }
+
+  /* 픽업대기 — 중립 저채도 · 볼록(대기/유휴) */
+  .tag.wait {
+    color: color-mix(in srgb, var(--ink) 58%, var(--bg));
+    box-shadow: var(--raise-sm);
+  }
+  .tag.wait .d {
+    background: color-mix(in srgb, var(--ink) 55%, var(--bg));
+  }
+
+  /* ---------- 푸터 ---------- */
+  .foot {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: color-mix(in srgb, var(--ink) 52%, var(--bg));
+    padding: 4px 0 2px;
+  }
+
+  .foot .chip {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--bg);
+    box-shadow: var(--press-sm);
+  }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 900px) {
+    .kpis {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .kpis {
+      grid-template-columns: 1fr;
+    }
+    .stamp {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+    .bar {
+      transform: none;
+      opacity: 1;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <!-- 헤더 -->
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><span></span></div>
+      <div>
+        <h1>FleetOps</h1>
+        <p>배송 · 플릿 관제 대시보드</p>
+      </div>
+    </div>
+    <div class="stamp">
+      <span class="dot"></span>
+      <span>갱신 <b class="num">2026-07-10 14:32</b></span>
+    </div>
+  </header>
+
+  <!-- KPI 카드 (볼록) -->
+  <section class="kpis">
+    <article class="kpi">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a7cff" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7h11v8H3z" /><path d="M14 10h4l3 3v2h-7z" />
+          <circle cx="7" cy="17" r="1.6" /><circle cx="17.5" cy="17" r="1.6" />
+        </svg>
+      </div>
+      <div class="label">오늘 배송</div>
+      <div class="value num">1,284<small>건</small></div>
+      <span class="delta up"><span class="arw">▲</span><span class="num">+12.4%</span></span>
+    </article>
+
+    <article class="kpi">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a7cff" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.4 2.4 4.6-5" />
+        </svg>
+      </div>
+      <div class="label">정시 배송률</div>
+      <div class="value num">96.2<small>%</small></div>
+      <span class="delta up"><span class="arw">▲</span><span class="num">+0.8%p</span></span>
+    </article>
+
+    <article class="kpi">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4a7cff" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 16V9l3-3h6v10" /><path d="M13 10h4l3 3v3h-7z" />
+          <circle cx="7.5" cy="17.5" r="1.7" /><circle cx="17" cy="17.5" r="1.7" />
+        </svg>
+      </div>
+      <div class="label">운행 중 차량</div>
+      <div class="value num">87<small>대</small></div>
+      <span class="delta flat"><span class="arw">▼</span><span class="num">-2대</span></span>
+    </article>
+
+    <article class="kpi alert">
+      <div class="ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e36868" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 4l8.5 15h-17z" /><path d="M12 10v4" /><path d="M12 17h.01" />
+        </svg>
+      </div>
+      <div class="label">지연 · 이슈</div>
+      <div class="value num">14<small>건</small></div>
+      <span class="delta good"><span class="arw">▼</span><span class="num">-5건 해결</span></span>
+    </article>
+  </section>
+
+  <!-- 시간대별 차트 (오목 트랙) -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>시간대별 배송량</h2>
+      <span class="sub">2시간 단위 · 06시–22시</span>
+    </div>
+    <div class="chart-scroll">
+      <div class="chart">
+        <div class="col">
+          <div class="cap num">42</div>
+          <div class="bar" style="height: 18.3%"></div>
+          <div class="cap">06시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">95</div>
+          <div class="bar" style="height: 41.3%"></div>
+          <div class="cap">08시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">160</div>
+          <div class="bar" style="height: 69.6%"></div>
+          <div class="cap">10시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">210</div>
+          <div class="bar" style="height: 91.3%"></div>
+          <div class="cap">12시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">188</div>
+          <div class="bar" style="height: 81.7%"></div>
+          <div class="cap">14시</div>
+        </div>
+        <div class="col peak">
+          <div class="peak-tag">피크 230</div>
+          <div class="bar" style="height: 100%"></div>
+          <div class="cap">16시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">205</div>
+          <div class="bar" style="height: 89.1%"></div>
+          <div class="cap">18시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">172</div>
+          <div class="bar" style="height: 74.8%"></div>
+          <div class="cap">20시</div>
+        </div>
+        <div class="col">
+          <div class="cap num">120</div>
+          <div class="bar" style="height: 52.2%"></div>
+          <div class="cap">22시</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 배송 현황 테이블 (오목 패널) -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>배송 현황</h2>
+      <span class="sub">실시간 운송장 6건</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>운송장번호</th>
+            <th>목적지</th>
+            <th>담당 기사</th>
+            <th>상태</th>
+            <th>예정시각</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">T-20931</td>
+            <td class="dest">성수동 물류센터</td>
+            <td class="driver">김민준</td>
+            <td><span class="tag move"><span class="d"></span>배송중</span></td>
+            <td class="num">14:20</td>
+          </tr>
+          <tr>
+            <td class="num">T-20930</td>
+            <td class="dest">판교 테크노밸리</td>
+            <td class="driver">이서연</td>
+            <td><span class="tag done"><span class="d"></span>완료</span></td>
+            <td class="num">13:55</td>
+          </tr>
+          <tr>
+            <td class="num">T-20929</td>
+            <td class="dest">인천 남동공단</td>
+            <td class="driver">박지훈</td>
+            <td><span class="tag late"><span class="d"></span>지연</span></td>
+            <td class="num">13:40</td>
+          </tr>
+          <tr>
+            <td class="num">T-20928</td>
+            <td class="dest">강남 파이낸스센터</td>
+            <td class="driver">최유진</td>
+            <td><span class="tag move"><span class="d"></span>배송중</span></td>
+            <td class="num">14:05</td>
+          </tr>
+          <tr>
+            <td class="num">T-20927</td>
+            <td class="dest">김포 골드밸리</td>
+            <td class="driver">정우성</td>
+            <td><span class="tag done"><span class="d"></span>완료</span></td>
+            <td class="num">13:10</td>
+          </tr>
+          <tr>
+            <td class="num">T-20926</td>
+            <td class="dest">수원 영통지점</td>
+            <td class="driver">한소희</td>
+            <td><span class="tag wait"><span class="d"></span>픽업대기</span></td>
+            <td class="num">15:00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="chip">STYLE 12 · 뉴모피즘 소프트</span>
+  </footer>
+</div>

@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProGuild 관제 리포트 · 2026-07-10</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F2;
+    --ink:#1C1B18;
+    --crimson:#A32638;
+    --hair:#D8D2C6;
+    --ink-soft:#6B665C;
+    --st-done:#2E6B4F;   /* 주전확정 · 완료계열 */
+    --st-active:#2F5D8A; /* 활성 · 진행계열 */
+    --st-warn:#A32638;   /* 폼저하 · 문제계열 */
+    --st-wait:#8A8172;   /* 로테이션대기 · 대기계열 */
+    --serif:"Noto Serif KR", serif;
+    --sans:"Pretendard", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .num{font-variant-numeric:tabular-nums}
+
+  .page{
+    max-width:1120px;
+    margin:0 auto;
+    padding:48px 32px 72px;
+    animation:fade .4s ease both;
+  }
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion: reduce){
+    .page{animation:none}
+  }
+
+  /* ── 제호(masthead) ── */
+  .masthead-rule{border-top:2px solid var(--ink)}
+  .masthead-rule::after{content:"";display:block;border-top:1px solid var(--ink);margin-top:3px}
+  .masthead{
+    display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:22px 0 14px;
+  }
+  .masthead h1{
+    margin:0;
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:clamp(46px,7vw,74px);
+    letter-spacing:-.01em;
+    line-height:.98;
+  }
+  .masthead .edition{
+    font-family:var(--sans);
+    font-size:12px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .masthead .edition .stamp{
+    display:block;
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:.02em;
+    text-transform:none;
+    color:var(--ink);
+    margin-top:4px;
+  }
+  .under-rule{border-top:1px solid var(--ink);margin-bottom:26px}
+
+  /* ── 리드 ── */
+  .lead{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(21px,2.6vw,29px);
+    line-height:1.5;
+    max-width:62ch;
+    margin:0 0 8px;
+  }
+  .lead::first-letter{
+    float:left;
+    font-family:var(--serif);
+    font-weight:900;
+    font-size:4.3em;
+    line-height:.82;
+    padding:6px 12px 0 0;
+    color:var(--crimson);
+  }
+  .byline{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 40px;
+  }
+
+  /* ── 섹션 괘선 ── */
+  .sec-head{margin:0 0 20px}
+  .sec-rule{border-top:2px solid var(--ink)}
+  .sec-rule::after{content:"";display:block;border-top:1px solid var(--ink);margin-top:3px}
+  .sec-label{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--crimson);
+    padding-top:10px;
+  }
+
+  /* ── KPI ── */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--hair);
+  }
+  .kpi{
+    padding:22px 22px 26px;
+    border-bottom:1px solid var(--hair);
+  }
+  .kpi + .kpi{border-left:1px solid var(--hair)}
+  .kpi .label{
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .kpi .value{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(44px,5vw,56px);
+    line-height:1;
+    letter-spacing:-.01em;
+    display:block;
+  }
+  .kpi .delta{
+    font-family:var(--sans);
+    font-size:15px;
+    font-weight:600;
+    margin-top:8px;
+    color:var(--crimson);
+  }
+  .kpi .delta.flat{color:var(--ink-soft)}
+  .kpi .take{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:15px;
+    line-height:1.5;
+    color:var(--ink);
+    margin:14px 0 0;
+    padding-top:12px;
+    border-top:1px solid var(--hair);
+  }
+  .kpi .take b{color:var(--crimson);font-weight:700}
+
+  /* ── 차트 ── */
+  .chart-wrap{margin-top:6px}
+  figure{margin:0}
+  .chart{
+    width:100%;
+    height:auto;
+    display:block;
+    font-family:var(--sans);
+  }
+  .chart .grid-line{stroke:var(--hair);stroke-width:1}
+  .chart .base-line{stroke:var(--ink);stroke-width:1}
+  .chart .series{fill:none;stroke:var(--crimson);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+  .chart .area{fill:var(--crimson);opacity:.06}
+  .chart .dot{fill:var(--paper);stroke:var(--crimson);stroke-width:2}
+  .chart .dot-peak{fill:var(--crimson);stroke:var(--paper);stroke-width:2}
+  .chart .ax{fill:var(--ink-soft);font-size:13px;font-variant-numeric:tabular-nums}
+  .chart .ax-x{text-anchor:middle}
+  .chart .ax-y{text-anchor:end}
+  .chart .peak-label{fill:var(--crimson);font-family:var(--serif);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .chart .val{fill:var(--ink);font-size:12px;font-variant-numeric:tabular-nums;text-anchor:middle}
+  figcaption{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:14px;
+    padding-top:10px;
+    border-top:1px solid var(--hair);
+  }
+  figcaption b{font-style:normal;font-weight:700;color:var(--crimson)}
+
+  /* ── 표(시세표) ── */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:var(--sans);
+  }
+  caption{
+    caption-side:top;
+    text-align:left;
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink-soft);
+    padding-bottom:12px;
+  }
+  thead th{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:left;
+    padding:8px 14px;
+    border-bottom:2px solid var(--ink);
+    white-space:nowrap;
+  }
+  thead th.r{text-align:right}
+  tbody td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--hair);
+    font-size:15px;
+    vertical-align:middle;
+  }
+  tbody td.name{font-family:var(--serif);font-weight:700;font-size:16px}
+  tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr:hover td{background:rgba(163,38,56,.07)}
+  .form-up{color:var(--crimson);font-weight:600}
+  .form-down{color:var(--st-active);font-weight:600}
+  .form-hold{color:var(--ink-soft)}
+  .st{display:inline-flex;align-items:center;gap:8px;font-weight:600;white-space:nowrap}
+  .st .swatch{width:11px;height:11px;flex:0 0 11px;display:inline-block}
+  .st-done{color:var(--st-done)} .st-done .swatch{background:var(--st-done)}
+  .st-active{color:var(--st-active)} .st-active .swatch{background:var(--st-active)}
+  .st-warn{color:var(--st-warn)} .st-warn .swatch{background:var(--st-warn)}
+  .st-wait{color:var(--st-wait)} .st-wait .swatch{background:var(--st-wait)}
+
+  /* ── 각주·푸터 ── */
+  .footnote{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:34px;
+    padding-top:14px;
+    border-top:1px solid var(--hair);
+  }
+  footer{
+    margin-top:44px;
+    padding-top:16px;
+    border-top:2px solid var(--ink);
+    font-family:var(--sans);
+    font-size:12px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  a{color:var(--crimson);text-decoration:underline;text-underline-offset:2px}
+
+  /* ── 반응형 ── */
+  @media (max-width:900px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .kpi + .kpi{border-left:none}
+    .kpi:nth-child(even){border-left:1px solid var(--hair)}
+  }
+  @media (max-width:560px){
+    .page{padding:32px 20px 56px}
+    .kpi-grid{grid-template-columns:1fr}
+    .kpi:nth-child(even){border-left:none}
+  }
+  .block{margin-bottom:52px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 제호 -->
+  <header>
+    <div class="masthead-rule"></div>
+    <div class="masthead">
+      <h1>ProGuild</h1>
+      <div class="edition">
+        e-Sports 관제 리포트
+        <span class="stamp num">2026-07-10 16:00 갱신</span>
+      </div>
+    </div>
+    <div class="under-rule"></div>
+
+    <p class="lead">승률은 오르고 순위는 한 계단 뛰었다. 이클립스전을 이틀 앞둔 프로길드는 최근 여덟 주 흐름에서 6주차 71%를 정점으로 60%대 후반 안정 국면에 들어섰다.</p>
+    <p class="byline">— 관제 데스크, 2026-07-10 16:00 스냅숏 기준</p>
+  </header>
+
+  <!-- KPI -->
+  <section class="block">
+    <div class="sec-head">
+      <div class="sec-rule"></div>
+      <div class="sec-label">오늘의 지표</div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <p class="label">시즌 승률</p>
+        <span class="value num">68.4%</span>
+        <div class="delta num">전주 대비 +3.2%p</div>
+        <p class="take">승률, 전주보다 <b>3.2%p</b> 올라 60%대 후반에 안착.</p>
+      </div>
+      <div class="kpi">
+        <p class="label">리그 순위</p>
+        <span class="value num">2위</span>
+        <div class="delta num">▲ 1계단</div>
+        <p class="take">순위, <b>한 계단</b> 올라서며 선두를 사정권에.</p>
+      </div>
+      <div class="kpi">
+        <p class="label">누적 상금</p>
+        <span class="value num">1억 8,400만원</span>
+        <div class="delta num">+2,300만원</div>
+        <p class="take">상금, 이번 주 <b>2,300만원</b> 보태 1억 8,400만원.</p>
+      </div>
+      <div class="kpi">
+        <p class="label">다음 경기</p>
+        <span class="value num">D-2</span>
+        <div class="delta flat">vs 팀 이클립스</div>
+        <p class="take">이클립스전, 단 <b>이틀</b> 앞으로.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 차트 -->
+  <section class="block chart-wrap">
+    <div class="sec-head">
+      <div class="sec-rule"></div>
+      <div class="sec-label">최근 8주 승률 추이 (%)</div>
+    </div>
+    <figure>
+      <svg class="chart" viewBox="0 0 820 340" role="img" aria-label="최근 8주 승률 추이. 1주 52, 2주 58, 3주 61, 4주 55, 5주 64, 6주 71 최고치, 7주 67, 8주 68 퍼센트.">
+        <!-- 가로 그리드 -->
+        <line class="grid-line" x1="40" y1="71.67" x2="800" y2="71.67"></line>
+        <line class="grid-line" x1="40" y1="155" x2="800" y2="155"></line>
+        <line class="grid-line" x1="40" y1="238.33" x2="800" y2="238.33"></line>
+        <line class="base-line" x1="40" y1="280" x2="800" y2="280"></line>
+        <!-- y 라벨 -->
+        <text class="ax ax-y" x="32" y="76">70</text>
+        <text class="ax ax-y" x="32" y="159">60</text>
+        <text class="ax ax-y" x="32" y="242">50</text>
+        <!-- 면적 -->
+        <path class="area" d="M40,221.67 L145.71,171.67 L251.43,146.67 L357.14,196.67 L462.86,121.67 L568.57,63.33 L674.29,96.67 L780,88.33 L780,280 L40,280 Z"></path>
+        <!-- 선 -->
+        <polyline class="series" points="40,221.67 145.71,171.67 251.43,146.67 357.14,196.67 462.86,121.67 568.57,63.33 674.29,96.67 780,88.33"></polyline>
+        <!-- 값 라벨 -->
+        <text class="val" x="40" y="210">52</text>
+        <text class="val" x="145.71" y="160">58</text>
+        <text class="val" x="251.43" y="135">61</text>
+        <text class="val" x="357.14" y="185">55</text>
+        <text class="val" x="462.86" y="110">64</text>
+        <text class="val" x="674.29" y="85">67</text>
+        <text class="val" x="780" y="77">68</text>
+        <!-- 점 -->
+        <circle class="dot" cx="40" cy="221.67" r="4"></circle>
+        <circle class="dot" cx="145.71" cy="171.67" r="4"></circle>
+        <circle class="dot" cx="251.43" cy="146.67" r="4"></circle>
+        <circle class="dot" cx="357.14" cy="196.67" r="4"></circle>
+        <circle class="dot" cx="462.86" cy="121.67" r="4"></circle>
+        <circle class="dot-peak" cx="568.57" cy="63.33" r="5.5"></circle>
+        <circle class="dot" cx="674.29" cy="96.67" r="4"></circle>
+        <circle class="dot" cx="780" cy="88.33" r="4"></circle>
+        <!-- 피크 주석 -->
+        <text class="peak-label" x="568.57" y="46" text-anchor="middle">71% 최고치</text>
+        <!-- x 라벨 -->
+        <text class="ax ax-x" x="40" y="304">1주</text>
+        <text class="ax ax-x" x="145.71" y="304">2주</text>
+        <text class="ax ax-x" x="251.43" y="304">3주</text>
+        <text class="ax ax-x" x="357.14" y="304">4주</text>
+        <text class="ax ax-x" x="462.86" y="304">5주</text>
+        <text class="ax ax-x" x="568.57" y="304">6주</text>
+        <text class="ax ax-x" x="674.29" y="304">7주</text>
+        <text class="ax ax-x" x="780" y="304">8주</text>
+      </svg>
+      <figcaption><b>6주차 71%</b>, 기간 내 최고치 — 이후 두 주 연속 60%대 후반을 지키며 상승세를 다졌다.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 표 -->
+  <section class="block">
+    <div class="sec-head">
+      <div class="sec-rule"></div>
+      <div class="sec-label">선수 로스터 시세표</div>
+    </div>
+    <table>
+      <caption>주전·로테이션 6인 · KDA는 최근 경기 누적, 폼과 상태는 관제 판정 기준.</caption>
+      <thead>
+        <tr>
+          <th scope="col">선수</th>
+          <th scope="col">포지션</th>
+          <th scope="col" class="r">KDA</th>
+          <th scope="col">폼</th>
+          <th scope="col">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">블레이즈</td>
+          <td>엔트리</td>
+          <td class="r">1.42</td>
+          <td><span class="form-up">상승</span></td>
+          <td><span class="st st-done"><span class="swatch"></span>주전확정</span></td>
+        </tr>
+        <tr>
+          <td class="name">프로스트</td>
+          <td>서포터</td>
+          <td class="r">0.98</td>
+          <td><span class="form-hold">유지</span></td>
+          <td><span class="st st-active"><span class="swatch"></span>활성</span></td>
+        </tr>
+        <tr>
+          <td class="name">레이븐</td>
+          <td>스나이퍼</td>
+          <td class="r">1.67</td>
+          <td><span class="form-up">상승</span></td>
+          <td><span class="st st-done"><span class="swatch"></span>주전확정</span></td>
+        </tr>
+        <tr>
+          <td class="name">노바</td>
+          <td>리퍼</td>
+          <td class="r">0.71</td>
+          <td><span class="form-down">하락</span></td>
+          <td><span class="st st-warn"><span class="swatch"></span>폼저하</span></td>
+        </tr>
+        <tr>
+          <td class="name">쿼츠</td>
+          <td>인게이저</td>
+          <td class="r">1.15</td>
+          <td><span class="form-hold">유지</span></td>
+          <td><span class="st st-active"><span class="swatch"></span>활성</span></td>
+        </tr>
+        <tr>
+          <td class="name">에코</td>
+          <td>플렉스</td>
+          <td class="r">1.03</td>
+          <td><span class="form-hold">유지</span></td>
+          <td><span class="st st-wait"><span class="swatch"></span>로테이션대기</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="footnote">폼저하로 분류된 노바(KDA 0.71)는 다음 이클립스전 로스터 재검토 대상이다. 상태 색은 주전확정·활성·폼저하·로테이션대기 네 갈래로 나뉜다.</p>
+  </section>
+
+  <footer>STYLE 10 · 에디토리얼 매거진</footer>
+
+</div>
+</body>
+</html>

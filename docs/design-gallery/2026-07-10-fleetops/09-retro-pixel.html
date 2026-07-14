@@ -1,0 +1,490 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FleetOps — 배송 관제 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1C2C;
+    --panel:#29366F;
+    --green:#38B764;
+    --yellow:#FFCD75;
+    --red:#B13E53;
+    --text:#F4F4F4;
+    --pixel:4px;
+    --dither:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Crect%20width='8'%20height='8'%20fill='%231A1C2C'/%3E%3Crect%20width='2'%20height='2'%20fill='%2329366F'/%3E%3Crect%20x='4'%20y='4'%20width='2'%20height='2'%20fill='%2329366F'/%3E%3C/svg%3E");
+    --brick:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%3E%3Cpath%20d='M0%200H16M0%200V16'%20stroke='%231A1C2C'%20stroke-width='2'%20fill='none'/%3E%3C/svg%3E");
+    --scan:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='4'%20height='4'%3E%3Crect%20y='0'%20width='4'%20height='1'%20fill='%231A1C2C'/%3E%3C/svg%3E");
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;border-radius:0;}
+
+  html{background:var(--bg);}
+
+  body{
+    background-color:var(--bg);
+    background-image:var(--dither);
+    color:var(--text);
+    font-family:"Pretendard",system-ui,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:none;
+    padding:32px 20px 64px;
+    min-height:100vh;
+    font-feature-settings:"tnum" 1;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* CRT scanline overlay */
+  .scanlines{
+    position:fixed;
+    inset:0;
+    background-image:var(--scan);
+    opacity:.18;
+    pointer-events:none;
+    z-index:99;
+    mix-blend-mode:normal;
+  }
+
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  .pixelfont{
+    font-family:"Press Start 2P","Pretendard",monospace;
+    line-height:1.5;
+    letter-spacing:.5px;
+  }
+
+  /* ---- notched pixel panel frame ---- */
+  .panel{
+    background-color:var(--panel);
+    padding:20px 20px;
+    box-shadow:
+      0 calc(-1 * var(--pixel)) 0 0 var(--bg),
+      0 var(--pixel) 0 0 var(--bg),
+      calc(-1 * var(--pixel)) 0 0 0 var(--bg),
+      var(--pixel) 0 0 0 var(--bg),
+      inset 0 calc(-1 * var(--pixel)) 0 0 rgba(26,28,44,.55);
+    position:relative;
+  }
+  /* corner pixel studs */
+  .panel::before,.panel::after{
+    content:"";
+    position:absolute;
+    width:var(--pixel);
+    height:var(--pixel);
+    background:var(--text);
+  }
+  .panel::before{top:0;left:0;}
+  .panel::after{bottom:0;right:0;}
+
+  /* ================= HEADER ================= */
+  header.top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+    padding:22px 20px;
+  }
+  .brand{display:flex;align-items:center;gap:16px;}
+  .logo{
+    width:44px;height:44px;
+    background:var(--green);
+    box-shadow:
+      0 calc(-1 * var(--pixel)) 0 0 var(--yellow),
+      0 var(--pixel) 0 0 var(--red),
+      calc(-1 * var(--pixel)) 0 0 0 var(--yellow),
+      var(--pixel) 0 0 0 var(--red);
+    display:grid;place-items:center;
+    color:var(--bg);
+    font-size:16px;
+  }
+  .brand h1{
+    font-size:18px;
+    color:var(--yellow);
+  }
+  .brand .tag{
+    display:block;
+    font-size:11px;
+    color:var(--text);
+    margin-top:8px;
+    letter-spacing:1px;
+  }
+  .refresh{
+    text-align:right;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .live{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:9px;color:var(--green);
+  }
+  .live .dot{
+    width:10px;height:10px;background:var(--green);
+    animation:blink 1s steps(1) infinite;
+  }
+  .refresh .time{font-size:9px;color:var(--text);}
+  .refresh .time b{color:var(--yellow);}
+
+  @keyframes blink{50%{opacity:.15;}}
+
+  /* ================= KPI ================= */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:28px;
+  }
+  .kpi{padding:18px 16px;}
+  .kpi .label{
+    font-size:9px;
+    color:var(--text);
+    letter-spacing:.5px;
+    margin-bottom:16px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .kpi .icon{width:12px;height:12px;display:inline-block;}
+  .kpi .value{
+    font-size:22px;
+    color:var(--text);
+    display:flex;align-items:baseline;gap:4px;
+  }
+  .kpi .value .unit{font-size:11px;color:var(--text);}
+  .kpi .delta{
+    margin-top:14px;
+    font-size:9px;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 8px;
+    background:var(--bg);
+  }
+  .delta.up{color:var(--green);}
+  .delta.warn{color:var(--yellow);}
+  .delta.dn{color:var(--red);}
+  .delta .arrow{width:8px;height:8px;display:inline-block;}
+
+  /* ================= MAIN GRID ================= */
+  .main-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  .section-title{
+    font-size:11px;
+    color:var(--yellow);
+    margin-bottom:20px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-title .marker{
+    width:12px;height:12px;background:var(--red);
+  }
+
+  /* ================= CHART (SIGNATURE: pixel block bars) ================= */
+  .chart{padding:22px 18px 16px;}
+  .chart-area{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:6px;
+    height:230px;
+    padding:0 2px;
+    border-bottom:var(--pixel) solid var(--text);
+    margin-bottom:0;
+  }
+  .col{
+    flex:1 1 0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+    min-width:0;
+  }
+  .val{
+    font-size:8px;
+    color:var(--text);
+    margin-bottom:6px;
+    white-space:nowrap;
+  }
+  .bar{
+    width:100%;
+    max-width:34px;
+    background-color:var(--green);
+    background-image:var(--brick);
+    background-size:16px 16px;
+    box-shadow:
+      inset 0 var(--pixel) 0 0 rgba(244,244,244,.35),
+      inset calc(-1 * var(--pixel)) 0 0 0 rgba(26,28,44,.45);
+    transition:height .4s steps(8);
+  }
+  .bar.peak{
+    background-color:var(--yellow);
+  }
+  .bar.peak-flag{position:relative;}
+  .axis{
+    display:flex;
+    justify-content:space-between;
+    gap:6px;
+    padding:12px 2px 0;
+  }
+  .axis .col-lbl{
+    flex:1 1 0;
+    text-align:center;
+    font-size:8px;
+    color:var(--text);
+    min-width:0;
+  }
+  .axis .col-lbl.peak-lbl{color:var(--yellow);}
+  .legend{
+    display:flex;gap:18px;margin-top:16px;flex-wrap:wrap;
+    font-size:9px;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:8px;}
+  .legend .sw{width:12px;height:12px;display:inline-block;}
+
+  /* ================= TABLE ================= */
+  .table-panel{padding:22px 18px 18px;}
+  .tbl-scroll{overflow-x:auto;}
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0 8px;
+    min-width:480px;
+  }
+  thead th{
+    font-family:"Press Start 2P",monospace;
+    font-size:8px;
+    color:var(--yellow);
+    text-align:left;
+    padding:0 10px 12px;
+    letter-spacing:.5px;
+  }
+  tbody td{
+    padding:12px 10px;
+    font-size:13px;
+    color:var(--text);
+    background:var(--bg);
+    vertical-align:middle;
+  }
+  tbody td.wb{
+    font-family:"Press Start 2P",monospace;
+    font-size:9px;
+    color:var(--green);
+  }
+  tbody td.time{
+    font-variant-numeric:tabular-nums;
+    color:var(--yellow);
+    font-size:12px;
+  }
+  tbody tr td:first-child{
+    box-shadow:inset var(--pixel) 0 0 0 var(--panel);
+  }
+
+  /* ---- SIGNATURE: status badges as game item slots ---- */
+  .slot{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px 6px 6px;
+    background:var(--bg);
+    box-shadow:
+      0 calc(-1 * var(--pixel)) 0 0 var(--panel),
+      0 var(--pixel) 0 0 var(--panel),
+      calc(-1 * var(--pixel)) 0 0 0 var(--panel),
+      var(--pixel) 0 0 0 var(--panel);
+    font-size:10px;
+    white-space:nowrap;
+  }
+  .slot .gem{
+    width:14px;height:14px;flex:none;
+    box-shadow:inset 0 2px 0 0 rgba(244,244,244,.4),
+               inset 0 -2px 0 0 rgba(26,28,44,.5);
+  }
+  .slot.ing .gem{background:var(--yellow);}     /* 배송중 */
+  .slot.ing{color:var(--yellow);}
+  .slot.done .gem{background:var(--green);}      /* 완료 */
+  .slot.done{color:var(--green);}
+  .slot.late .gem{background:var(--red);}        /* 지연 */
+  .slot.late{color:var(--red);}
+  .slot.wait .gem{background:var(--text);}       /* 픽업대기 */
+  .slot.wait{color:var(--text);}
+
+  /* ================= FOOTER ================= */
+  footer.foot{
+    margin-top:40px;
+    text-align:center;
+    font-size:8px;
+    color:var(--panel);
+  }
+  footer.foot b{color:var(--text);}
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width:900px){
+    .main-grid{grid-template-columns:1fr;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .brand h1{font-size:15px;}
+  }
+  @media (max-width:520px){
+    .kpi-grid{grid-template-columns:1fr;}
+    body{padding:20px 12px 48px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+    .live .dot{opacity:1;}
+  }
+</style>
+
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <!-- ============ HEADER ============ -->
+  <header class="top panel">
+    <div class="brand">
+      <div class="logo pixelfont" aria-hidden="true">▶</div>
+      <div>
+        <h1 class="pixelfont">FLEETOPS</h1>
+        <span class="tag">배송 플릿 관제 대시보드</span>
+      </div>
+    </div>
+    <div class="refresh">
+      <span class="live pixelfont"><span class="dot"></span>LIVE</span>
+      <span class="time pixelfont">갱신 <b>2026-07-10 14:32</b></span>
+    </div>
+  </header>
+
+  <!-- ============ KPI ============ -->
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <div class="kpi panel">
+      <div class="label"><span class="icon" style="background:var(--green)"></span>오늘 배송</div>
+      <div class="value pixelfont">1,284<span class="unit">건</span></div>
+      <div class="delta up pixelfont"><span class="arrow" style="background:var(--green)"></span>전일 대비 +12.4%</div>
+    </div>
+
+    <div class="kpi panel">
+      <div class="label"><span class="icon" style="background:var(--green)"></span>정시 배송률</div>
+      <div class="value pixelfont">96.2<span class="unit">%</span></div>
+      <div class="delta up pixelfont"><span class="arrow" style="background:var(--green)"></span>+0.8%p</div>
+    </div>
+
+    <div class="kpi panel">
+      <div class="label"><span class="icon" style="background:var(--yellow)"></span>운행 중 차량</div>
+      <div class="value pixelfont">87<span class="unit">대</span></div>
+      <div class="delta warn pixelfont"><span class="arrow" style="background:var(--yellow)"></span>-2대</div>
+    </div>
+
+    <div class="kpi panel">
+      <div class="label"><span class="icon" style="background:var(--red)"></span>지연·이슈</div>
+      <div class="value pixelfont">14<span class="unit">건</span></div>
+      <div class="delta up pixelfont"><span class="arrow" style="background:var(--green)"></span>-5건 해결</div>
+    </div>
+  </section>
+
+  <!-- ============ MAIN GRID ============ -->
+  <div class="main-grid">
+
+    <!-- ---- CHART (SIGNATURE) ---- -->
+    <section class="chart panel" aria-label="시간대별 배송량">
+      <div class="section-title pixelfont"><span class="marker"></span>시간대별 배송량</div>
+
+      <div class="chart-area" role="img"
+           aria-label="시간대별 배송량. 06시 42, 08시 95, 10시 160, 12시 210, 14시 188, 16시 230 피크, 18시 205, 20시 172, 22시 120.">
+        <div class="col"><span class="val pixelfont">42</span><div class="bar" style="height:18.3%"></div></div>
+        <div class="col"><span class="val pixelfont">95</span><div class="bar" style="height:41.3%"></div></div>
+        <div class="col"><span class="val pixelfont">160</span><div class="bar" style="height:69.6%"></div></div>
+        <div class="col"><span class="val pixelfont">210</span><div class="bar" style="height:91.3%"></div></div>
+        <div class="col"><span class="val pixelfont">188</span><div class="bar" style="height:81.7%"></div></div>
+        <div class="col"><span class="val pixelfont">230</span><div class="bar peak" style="height:100%"></div></div>
+        <div class="col"><span class="val pixelfont">205</span><div class="bar" style="height:89.1%"></div></div>
+        <div class="col"><span class="val pixelfont">172</span><div class="bar" style="height:74.8%"></div></div>
+        <div class="col"><span class="val pixelfont">120</span><div class="bar" style="height:52.2%"></div></div>
+      </div>
+
+      <div class="axis" aria-hidden="true">
+        <span class="col-lbl pixelfont">06</span>
+        <span class="col-lbl pixelfont">08</span>
+        <span class="col-lbl pixelfont">10</span>
+        <span class="col-lbl pixelfont">12</span>
+        <span class="col-lbl pixelfont">14</span>
+        <span class="col-lbl pixelfont peak-lbl">16★</span>
+        <span class="col-lbl pixelfont">18</span>
+        <span class="col-lbl pixelfont">20</span>
+        <span class="col-lbl pixelfont">22</span>
+      </div>
+
+      <div class="legend pixelfont">
+        <span><span class="sw" style="background:var(--green)"></span>배송량</span>
+        <span><span class="sw" style="background:var(--yellow)"></span>피크 (16시)</span>
+      </div>
+    </section>
+
+    <!-- ---- TABLE ---- -->
+    <section class="table-panel panel" aria-label="배송 현황">
+      <div class="section-title pixelfont"><span class="marker"></span>배송 현황</div>
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>운송장</th>
+              <th>목적지</th>
+              <th>기사</th>
+              <th>상태</th>
+              <th>예정</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="wb">T-20931</td>
+              <td>성수동 물류센터</td>
+              <td>김민준</td>
+              <td><span class="slot ing pixelfont"><span class="gem"></span>배송중</span></td>
+              <td class="time">14:20</td>
+            </tr>
+            <tr>
+              <td class="wb">T-20930</td>
+              <td>판교 테크노밸리</td>
+              <td>이서연</td>
+              <td><span class="slot done pixelfont"><span class="gem"></span>완료</span></td>
+              <td class="time">13:55</td>
+            </tr>
+            <tr>
+              <td class="wb">T-20929</td>
+              <td>인천 남동공단</td>
+              <td>박지훈</td>
+              <td><span class="slot late pixelfont"><span class="gem"></span>지연</span></td>
+              <td class="time">13:40</td>
+            </tr>
+            <tr>
+              <td class="wb">T-20928</td>
+              <td>강남 파이낸스센터</td>
+              <td>최유진</td>
+              <td><span class="slot ing pixelfont"><span class="gem"></span>배송중</span></td>
+              <td class="time">14:05</td>
+            </tr>
+            <tr>
+              <td class="wb">T-20927</td>
+              <td>김포 골드밸리</td>
+              <td>정우성</td>
+              <td><span class="slot done pixelfont"><span class="gem"></span>완료</span></td>
+              <td class="time">13:10</td>
+            </tr>
+            <tr>
+              <td class="wb">T-20926</td>
+              <td>수원 영통지점</td>
+              <td>한소희</td>
+              <td><span class="slot wait pixelfont"><span class="gem"></span>픽업대기</span></td>
+              <td class="time">15:00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="foot pixelfont">STYLE <b>09</b> · <b>레트로 픽셀</b></footer>
+
+</div>

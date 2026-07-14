@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptHub · AI 프로덕트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* palette — light bg + purple/indigo accent */
+    --bg:#FAFAFB;
+    --surface:#FFFFFF;
+    --surface-subtle:#F4F4F7;
+    --border:#E8E8EE;
+    --border-strong:#DEDEE6;
+
+    --fg-strong:#16161D;
+    --fg:#3A3A44;
+    --fg-muted:#5E5E6B;   /* darkened from #8A8A99 for AA 4.5:1 */
+    --fg-faint:#8A8A99;   /* decorative only */
+
+    --accent-a:#7C5CFF;
+    --accent-b:#5B8DEF;
+    --accent-strong:#6A47F5;
+    --accent-ink:#5A3EC8;  /* accent text on soft bg */
+    --accent-soft:#EDE9FF;
+    --on-accent:#FFFFFF;
+    --glow:155,123,255;
+
+    --claude-bg:#EDE9FF;
+    --claude-fg:#5A3EC8;
+    --gpt-bg:#E4F5EC;
+    --gpt-fg:#066B41;
+
+    --success:#12B76A;
+    --warning:#F79009;
+    --danger:#F04438;
+
+    --grad:linear-gradient(135deg,var(--accent-a),var(--accent-b));
+    --grad-hover:linear-gradient(115deg,var(--accent-a),var(--accent-b));
+
+    --r-card:16px;
+    --r-ctrl:10px;
+    --r-pill:999px;
+
+    --shadow-flat:0 1px 2px rgba(16,16,29,.05);
+    --shadow-glow:0 0 40px rgba(var(--glow),.10), 0 1px 2px rgba(16,16,29,.04);
+    --shadow-glow-hi:0 0 52px rgba(var(--glow),.17), 0 6px 18px rgba(16,16,29,.07);
+    --shadow-pop:0 8px 24px rgba(16,16,29,.10);
+
+    --ring:0 0 0 4px var(--accent-soft), 0 0 0 1px var(--accent-strong);
+
+    --sidebar-w:248px;
+    --topbar-h:64px;
+    --maxw:1280px;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme]){
+      --bg:#0D0D12;
+      --surface:#16161D;
+      --surface-subtle:#1E1E27;
+      --border:#2A2A34;
+      --border-strong:#33333F;
+      --fg-strong:#F4F4F7;
+      --fg:#D3D3DC;
+      --fg-muted:#9A9AA8;
+      --fg-faint:#6E6E7C;
+      --accent-soft:#241E4A;
+      --accent-ink:#C6B6FF;
+      --claude-bg:#241E4A;
+      --claude-fg:#C6B6FF;
+      --gpt-bg:#12312257;
+      --gpt-fg:#5FD39A;
+      --shadow-flat:0 1px 2px rgba(0,0,0,.4);
+      --shadow-glow:0 0 44px rgba(var(--glow),.14), 0 1px 2px rgba(0,0,0,.4);
+      --shadow-glow-hi:0 0 60px rgba(var(--glow),.22), 0 6px 18px rgba(0,0,0,.5);
+      --shadow-pop:0 8px 24px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D0D12;--surface:#16161D;--surface-subtle:#1E1E27;--border:#2A2A34;--border-strong:#33333F;
+    --fg-strong:#F4F4F7;--fg:#D3D3DC;--fg-muted:#9A9AA8;--fg-faint:#6E6E7C;
+    --accent-soft:#241E4A;--accent-ink:#C6B6FF;--claude-bg:#241E4A;--claude-fg:#C6B6FF;
+    --gpt-bg:#123122;--gpt-fg:#5FD39A;
+    --shadow-flat:0 1px 2px rgba(0,0,0,.4);
+    --shadow-glow:0 0 44px rgba(var(--glow),.14), 0 1px 2px rgba(0,0,0,.4);
+    --shadow-glow-hi:0 0 60px rgba(var(--glow),.22), 0 6px 18px rgba(0,0,0,.5);
+    --shadow-pop:0 8px 24px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--fg);
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-0.01em}
+  svg{display:block}
+  button{font-family:inherit;cursor:pointer;color:inherit}
+  a{color:inherit;text-decoration:none}
+
+  :focus-visible{outline:none;box-shadow:var(--ring);border-radius:8px}
+
+  /* ---------- layout ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:var(--sidebar-w) 1fr;
+    min-height:100vh;
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    position:sticky;top:0;align-self:start;height:100vh;
+    display:flex;flex-direction:column;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:20px 16px;
+    gap:24px;
+    overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px}
+  .brand__mark{
+    width:36px;height:36px;border-radius:10px;background:var(--grad);
+    display:grid;place-items:center;color:#fff;flex-shrink:0;
+    box-shadow:0 0 22px rgba(var(--glow),.35);
+  }
+  .brand__name{font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--fg-strong)}
+  .brand .sparkle{color:#fff;position:absolute;width:12px;height:12px;top:2px;right:2px}
+  .brand__mark{position:relative}
+
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav__label{
+    font-size:12px;font-weight:500;letter-spacing:0.4px;text-transform:uppercase;
+    color:var(--fg-faint);padding:4px 12px;margin-bottom:2px;
+  }
+  .nav__item{
+    display:flex;align-items:center;gap:12px;
+    padding:9px 12px;border-radius:var(--r-ctrl);
+    color:var(--fg-muted);font-weight:500;font-size:14px;
+    position:relative;background:none;border:none;width:100%;text-align:left;
+    transition:background .15s ease,color .15s ease;
+  }
+  .nav__item svg{width:20px;height:20px;flex-shrink:0;stroke-width:1.6}
+  .nav__item:hover{background:var(--surface-subtle);color:var(--fg-strong)}
+  .nav__item.is-active{color:var(--accent-ink);background:var(--accent-soft);font-weight:600}
+  .nav__item.is-active::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;
+    background:var(--grad);
+  }
+  .nav__count{margin-left:auto;font-size:12px;color:var(--fg-faint);font-weight:600}
+
+  .tree{margin-top:auto;display:flex;flex-direction:column;gap:2px;
+    border-top:1px solid var(--border);padding-top:16px}
+  .tree__head{
+    display:flex;align-items:center;gap:8px;padding:4px 12px;
+    font-size:12px;font-weight:600;letter-spacing:0.3px;color:var(--fg-faint);text-transform:uppercase;
+  }
+  .tree__item{
+    display:flex;align-items:center;gap:10px;
+    padding:7px 12px 7px 14px;border-radius:8px;
+    color:var(--fg-muted);font-size:13.5px;background:none;border:none;width:100%;text-align:left;
+    transition:background .15s ease,color .15s ease;
+  }
+  .tree__item svg{width:16px;height:16px;color:var(--fg-faint);stroke-width:1.6}
+  .tree__item:hover{background:var(--surface-subtle);color:var(--fg-strong)}
+  .tree__item.is-root{font-weight:600;color:var(--fg)}
+  .tree__dot{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+
+  /* ---------- main ---------- */
+  .main{min-width:0;display:flex;flex-direction:column}
+
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    height:var(--topbar-h);
+    display:flex;align-items:center;gap:16px;
+    padding:0 32px;
+    background:color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter:saturate(1.4) blur(10px);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .menu-toggle{display:none}
+
+  .search{
+    position:relative;flex:1;max-width:420px;
+  }
+  .search svg{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    width:18px;height:18px;color:var(--fg-faint);stroke-width:1.7;pointer-events:none;
+  }
+  .search input{
+    width:100%;height:40px;border-radius:var(--r-ctrl);
+    border:1px solid var(--border);background:var(--surface);
+    padding:0 12px 0 38px;font-size:14px;color:var(--fg-strong);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .search input::placeholder{color:var(--fg-faint)}
+  .search input:hover{border-color:var(--border-strong)}
+  .search input:focus-visible{border-color:var(--accent-strong);box-shadow:var(--ring)}
+
+  .filters{display:flex;gap:8px}
+  .filter{
+    display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;
+    border-radius:var(--r-ctrl);border:1px solid var(--border);background:var(--surface);
+    color:var(--fg);font-size:13.5px;font-weight:500;white-space:nowrap;
+    transition:border-color .15s ease,background .15s ease;
+  }
+  .filter:hover{border-color:var(--border-strong);background:var(--surface-subtle)}
+  .filter svg{width:16px;height:16px;color:var(--fg-muted);stroke-width:2}
+
+  .topbar__right{margin-left:auto;display:flex;align-items:center;gap:14px}
+
+  .btn-primary{
+    display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;
+    border-radius:var(--r-ctrl);border:none;background:var(--grad);color:var(--on-accent);
+    font-size:14px;font-weight:600;white-space:nowrap;position:relative;
+    background-size:140% 140%;
+    box-shadow:0 2px 8px rgba(var(--glow),.32);
+    transition:background .3s ease, box-shadow .2s ease, transform .12s ease;
+  }
+  .btn-primary svg{width:18px;height:18px;stroke-width:2}
+  .btn-primary .sparkle{width:14px;height:14px;stroke-width:0}
+  .btn-primary:hover{background-image:var(--grad-hover);box-shadow:0 4px 16px rgba(var(--glow),.44)}
+  .btn-primary:active{transform:translateY(1px)}
+
+  .avatar{
+    width:38px;height:38px;border-radius:50%;background:var(--grad);
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;
+    letter-spacing:0.3px;flex-shrink:0;box-shadow:0 0 0 3px var(--surface), 0 0 0 4px var(--border);
+  }
+
+  /* ---------- content ---------- */
+  .content{padding:28px 32px 48px;max-width:var(--maxw);width:100%;margin:0 auto;flex:1}
+
+  .page-head{margin-bottom:24px}
+  .page-head h1{
+    font-size:26px;font-weight:700;letter-spacing:-0.02em;color:var(--fg-strong);line-height:1.25;
+    display:flex;align-items:center;gap:10px;
+  }
+  .page-head h1 .sparkle{width:20px;height:20px;color:var(--accent-strong)}
+  .page-head p{margin-top:4px;color:var(--fg-muted);font-size:14px}
+
+  /* summary bar */
+  .summary{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;
+  }
+  .stat{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    padding:18px 20px;box-shadow:var(--shadow-glow);position:relative;overflow:hidden;
+  }
+  .stat::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120px 80px at 90% -10%, rgba(var(--glow),.10), transparent 70%);
+  }
+  .stat__label{display:flex;align-items:center;gap:8px;color:var(--fg-muted);font-size:13px;font-weight:500}
+  .stat__label .ico{
+    width:28px;height:28px;border-radius:8px;background:var(--accent-soft);color:var(--accent-strong);
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .stat__label .ico svg{width:16px;height:16px;stroke-width:1.8}
+  .stat__val{margin-top:10px;display:flex;align-items:baseline;gap:6px}
+  .stat__num{font-size:30px;font-weight:700;letter-spacing:-0.02em;color:var(--fg-strong);line-height:1}
+  .stat__num.grad{
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .stat__unit{font-size:14px;color:var(--fg-muted);font-weight:500}
+
+  /* card grid */
+  .grid-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .grid-head h2{font-size:16px;font-weight:600;color:var(--fg-strong);letter-spacing:-0.01em}
+  .grid-head .hint{font-size:13px;color:var(--fg-faint)}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+    padding:20px 20px 16px;
+    display:flex;flex-direction:column;gap:12px;
+    box-shadow:var(--shadow-flat);
+    transition:border-color .18s ease, box-shadow .22s ease, transform .18s ease;
+  }
+  .card.is-glow{box-shadow:var(--shadow-glow)}
+  .card:hover,.card:focus-within{
+    border-color:var(--accent-soft);
+    box-shadow:var(--shadow-glow-hi);
+    transform:translateY(-2px);
+  }
+
+  .card__top{display:flex;align-items:flex-start;gap:10px}
+  .card__title{font-size:16px;font-weight:600;color:var(--fg-strong);letter-spacing:-0.01em;line-height:1.35;flex:1}
+  .star{
+    flex-shrink:0;width:30px;height:30px;border-radius:8px;border:none;background:none;
+    display:grid;place-items:center;color:var(--fg-faint);
+    transition:background .15s ease,color .15s ease,transform .12s ease;
+  }
+  .star svg{width:20px;height:20px}
+  .star:hover{background:var(--surface-subtle)}
+  .star:active{transform:scale(.9)}
+  .star.is-on{color:var(--accent-strong)}
+  .star.is-on svg{fill:currentColor;stroke:currentColor}
+  .star:not(.is-on) svg{fill:none;stroke:currentColor;stroke-width:1.6}
+
+  .card__desc{color:var(--fg-muted);font-size:13.5px;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+
+  .card__badges{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--r-pill);
+    background:var(--surface-subtle);border:1px solid var(--border);
+    font-size:12px;font-weight:500;color:var(--fg);letter-spacing:0.1px;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:var(--r-pill);
+    font-size:12px;font-weight:600;letter-spacing:0.1px;
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%}
+  .badge--claude{background:var(--claude-bg);color:var(--claude-fg)}
+  .badge--claude .dot{background:var(--accent-a)}
+  .badge--gpt{background:var(--gpt-bg);color:var(--gpt-fg)}
+  .badge--gpt .dot{background:#12B76A}
+
+  .card__meta{
+    display:flex;align-items:center;gap:12px;padding-top:12px;
+    border-top:1px solid var(--border);color:var(--fg-muted);font-size:12.5px;
+  }
+  .meta-runs{display:inline-flex;align-items:center;gap:5px;font-weight:500;color:var(--fg)}
+  .meta-runs svg{width:14px;height:14px;color:var(--accent-strong);stroke-width:2}
+  .ver{
+    display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;
+    background:var(--surface-subtle);border:1px solid var(--border);
+    font-size:11.5px;font-weight:600;color:var(--fg-muted);
+  }
+  .meta-time{margin-left:auto;color:var(--fg-faint)}
+
+  /* hover actions */
+  .card__actions{
+    display:flex;gap:8px;height:0;overflow:hidden;
+    opacity:0;transform:translateY(6px);
+    transition:opacity .18s ease, transform .18s ease, height .18s ease, margin .18s ease;
+  }
+  .card:hover .card__actions,
+  .card:focus-within .card__actions{
+    height:38px;opacity:1;transform:translateY(0);margin-top:2px;
+  }
+  .btn-ghost{
+    flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;
+    border-radius:var(--r-ctrl);border:1px solid var(--border);background:var(--surface);
+    font-size:13px;font-weight:600;color:var(--fg);
+    transition:border-color .15s ease,background .15s ease,color .15s ease;
+  }
+  .btn-ghost svg{width:15px;height:15px;stroke-width:2}
+  .btn-ghost:hover{border-color:var(--accent-soft);background:var(--accent-soft);color:var(--accent-ink)}
+  .btn-ghost.is-run:hover{background:var(--grad);border-color:transparent;color:#fff}
+  .btn-ghost.is-run:hover svg{color:#fff}
+
+  /* footer */
+  .foot{
+    padding:20px 32px;border-top:1px solid var(--border);
+    color:var(--fg-faint);font-size:12.5px;text-align:center;
+  }
+  .foot b{color:var(--fg-muted);font-weight:600}
+
+  /* sparkle animation */
+  .sparkle-anim{animation:sparkle 4.5s ease-in-out infinite}
+  @keyframes sparkle{
+    0%,72%,100%{transform:scale(1);opacity:.85}
+    80%{transform:scale(1.25) rotate(8deg);opacity:1}
+    88%{transform:scale(1);opacity:.85}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1080px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .menu-toggle{
+      display:inline-grid;place-items:center;width:40px;height:40px;flex-shrink:0;
+      border-radius:var(--r-ctrl);border:1px solid var(--border);background:var(--surface);color:var(--fg);
+    }
+    .menu-toggle svg{width:20px;height:20px;stroke-width:1.8}
+    .topbar{padding:0 20px;gap:12px}
+    .content{padding:24px 20px 40px}
+  }
+  @media (max-width:720px){
+    .summary{grid-template-columns:1fr}
+    .grid{grid-template-columns:1fr}
+    .filters{display:none}
+    .btn-primary span.label{display:none}
+    .btn-primary{padding:0 12px}
+  }
+  @media (max-width:520px){
+    .search{max-width:none}
+    .foot{padding:20px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+    .card:hover,.card:focus-within{transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16M4 12h10M4 17h13"/>
+        </svg>
+        <svg class="sparkle sparkle-anim" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2c.4 3.6 1.4 4.6 5 5-3.6.4-4.6 1.4-5 5-.4-3.6-1.4-4.6-5-5 3.6-.4 4.6-1.4 5-5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">PromptHub</span>
+    </div>
+
+    <nav class="nav" aria-label="주요 메뉴">
+      <span class="nav__label">메뉴</span>
+      <button class="nav__item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7v16H4zM13 4h7v10h-7z"/><path d="M13 17h7"/></svg>
+        라이브러리 <span class="nav__count num">128</span>
+      </button>
+      <button class="nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        에디터
+      </button>
+      <button class="nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4.5 8a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M7.5 15h9"/></svg>
+        테스트
+      </button>
+      <button class="nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="8" r="3.2"/><path d="M21 20v-1a4 4 0 0 0-3-3.8"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 6.2"/></svg>
+        팀
+      </button>
+      <button class="nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        설정
+      </button>
+    </nav>
+
+    <div class="tree" aria-label="폴더">
+      <div class="tree__head">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        폴더
+      </div>
+      <button class="tree__item is-root">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        전체 프롬프트
+      </button>
+      <button class="tree__item"><span class="tree__dot" style="background:#F79009"></span>마케팅</button>
+      <button class="tree__item"><span class="tree__dot" style="background:#5B8DEF"></span>개발</button>
+      <button class="tree__item"><span class="tree__dot" style="background:#7C5CFF"></span>글쓰기</button>
+      <button class="tree__item"><span class="tree__dot" style="background:#12B76A"></span>CS</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="프롬프트 검색" aria-label="프롬프트 검색" spellcheck="false">
+      </div>
+
+      <div class="filters">
+        <button class="filter">태그
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <button class="filter">모델
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="topbar__right">
+        <button class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="label">새 프롬프트</span>
+        </button>
+        <div class="avatar" aria-label="내 계정">PH</div>
+      </div>
+    </header>
+
+    <!-- content -->
+    <main class="content">
+
+      <div class="page-head">
+        <h1>
+          프롬프트 라이브러리
+          <svg class="sparkle sparkle-anim" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c.4 3.6 1.4 4.6 5 5-3.6.4-4.6 1.4-5 5-.4-3.6-1.4-4.6-5-5 3.6-.4 4.6-1.4 5-5z"/></svg>
+        </h1>
+      </div>
+
+      <!-- summary -->
+      <section class="summary" aria-label="요약">
+        <div class="stat is-glow">
+          <div class="stat__label">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg></span>
+            전체 프롬프트
+          </div>
+          <div class="stat__val"><span class="stat__num grad num">128</span><span class="stat__unit">개</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+            이번 주 실행
+          </div>
+          <div class="stat__val"><span class="stat__num num">1,240</span><span class="stat__unit">회</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M15.5 6.2a3 3 0 0 1 0 5.6"/><path d="M4 19v-1a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v1"/><path d="M17 14a4 4 0 0 1 3 3.9V19"/></svg></span>
+            팀 공유
+          </div>
+          <div class="stat__val"><span class="stat__num num">34</span><span class="stat__unit">개</span></div>
+        </div>
+      </section>
+
+      <!-- grid -->
+      <div class="grid-head">
+        <h2>프롬프트</h2>
+        <span class="hint">최근 수정 순</span>
+      </div>
+
+      <section class="grid" aria-label="프롬프트 카드">
+
+        <!-- card 1 -->
+        <article class="card is-glow" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">블로그 초안 생성기</h3>
+            <button class="star is-on" aria-label="즐겨찾기 해제" aria-pressed="true">
+              <svg viewBox="0 0 24 24" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">주제만 넣으면 SEO 최적화 초안</p>
+          <div class="card__badges">
+            <span class="chip">글쓰기</span>
+            <span class="badge badge--claude"><span class="dot"></span>Claude</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>340회</span>
+            <span class="ver">v3</span>
+            <span class="meta-time">2시간 전</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+        <!-- card 2 -->
+        <article class="card" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">코드 리뷰어</h3>
+            <button class="star" aria-label="즐겨찾기 추가" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">PR diff 붙여넣으면 라인별 리뷰</p>
+          <div class="card__badges">
+            <span class="chip">개발</span>
+            <span class="badge badge--gpt"><span class="dot"></span>GPT-4</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>128회</span>
+            <span class="ver">v2</span>
+            <span class="meta-time">어제</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+        <!-- card 3 -->
+        <article class="card is-glow" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">고객 응대 톤 변환기</h3>
+            <button class="star is-on" aria-label="즐겨찾기 해제" aria-pressed="true">
+              <svg viewBox="0 0 24 24" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">딱딱한 답변을 친근하게</p>
+          <div class="card__badges">
+            <span class="chip">CS</span>
+            <span class="badge badge--claude"><span class="dot"></span>Claude</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>512회</span>
+            <span class="ver">v5</span>
+            <span class="meta-time">3일 전</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+        <!-- card 4 -->
+        <article class="card" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">회의록 요약</h3>
+            <button class="star" aria-label="즐겨찾기 추가" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">긴 회의록에서 액션 아이템 추출</p>
+          <div class="card__badges">
+            <span class="chip">생산성</span>
+            <span class="badge badge--gpt"><span class="dot"></span>GPT-4</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>89회</span>
+            <span class="ver">v1</span>
+            <span class="meta-time">1주 전</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+        <!-- card 5 -->
+        <article class="card" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">제품명 브레인스토머</h3>
+            <button class="star" aria-label="즐겨찾기 추가" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">키워드 넣으면 이름 20개</p>
+          <div class="card__badges">
+            <span class="chip">마케팅</span>
+            <span class="badge badge--claude"><span class="dot"></span>Claude</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>47회</span>
+            <span class="ver">v2</span>
+            <span class="meta-time">2주 전</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+        <!-- card 6 -->
+        <article class="card is-glow" tabindex="0">
+          <div class="card__top">
+            <h3 class="card__title">SQL 생성기</h3>
+            <button class="star is-on" aria-label="즐겨찾기 해제" aria-pressed="true">
+              <svg viewBox="0 0 24 24" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>
+            </button>
+          </div>
+          <p class="card__desc">자연어를 쿼리로</p>
+          <div class="card__badges">
+            <span class="chip">개발</span>
+            <span class="badge badge--gpt"><span class="dot"></span>GPT-4</span>
+          </div>
+          <div class="card__meta">
+            <span class="meta-runs num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>203회</span>
+            <span class="ver">v4</span>
+            <span class="meta-time">4일 전</span>
+          </div>
+          <div class="card__actions">
+            <button class="btn-ghost is-run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5z"/></svg>실행</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button>
+          </div>
+        </article>
+
+      </section>
+    </main>
+
+    <footer class="foot"><b>PromptHub</b> · AI 프로덕트</footer>
+  </div>
+</div>
+</body>
+</html>

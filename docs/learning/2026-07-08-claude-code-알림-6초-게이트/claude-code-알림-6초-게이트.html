@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학습노트: Claude Code 알림 — AskUserQuestion은 왜 알림이 안 떴나 (6초 idle 게이트)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-soft: #161a21;
+    --bg-card: #1a1f28;
+    --bg-code: #12151b;
+    --border: #262c37;
+    --border-soft: #2e3542;
+    --text: #e4e7ec;
+    --text-dim: #a8afbd;
+    --text-faint: #737b8c;
+    --accent: #6ea8fe;
+    --accent-2: #7ee0c0;
+    --accent-warm: #f5c26b;
+    --danger: #f47c7c;
+    --success: #6ee7a8;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", "Cascadia Code", "Roboto Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(110,168,254,0.10), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(126,224,192,0.07), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.85;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  /* ---------- Header ---------- */
+  header.page {
+    padding: 56px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 5px 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    background: rgba(110,168,254,0.08);
+    margin-bottom: 20px;
+  }
+
+  header.page h1 {
+    font-size: 2.05rem;
+    line-height: 1.4;
+    margin: 0 0 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.92rem;
+    color: var(--text-dim);
+  }
+
+  .meta .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+  }
+
+  .meta .chip.tag {
+    color: var(--accent-2);
+    border-color: var(--border-soft);
+  }
+
+  .meta code {
+    font-family: var(--mono);
+    font-size: 0.82em;
+    background: transparent;
+    color: var(--text-faint);
+    padding: 0;
+  }
+
+  /* ---------- TOC ---------- */
+  nav.toc {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-bottom: 48px;
+  }
+
+  nav.toc h2 {
+    margin: 0 0 14px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    border: none;
+    padding: 0;
+  }
+
+  nav.toc ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: toc;
+  }
+
+  nav.toc li {
+    counter-increment: toc;
+    margin: 0;
+  }
+
+  nav.toc a {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 0;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease;
+  }
+
+  nav.toc li + li a { border-top: 1px solid var(--border); }
+
+  nav.toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    flex: none;
+  }
+
+  nav.toc a:hover { color: #fff; }
+
+  /* ---------- Sections ---------- */
+  section { margin-bottom: 46px; scroll-margin-top: 24px; }
+
+  h2.sec {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: -0.01em;
+  }
+
+  h3.sub {
+    font-size: 1.12rem;
+    font-weight: 650;
+    color: var(--accent);
+    margin: 34px 0 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  h3.sub .num {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+
+  strong { color: #fff; font-weight: 650; }
+
+  ul { padding-left: 1.3em; margin: 0 0 16px; }
+  li { margin: 6px 0; }
+
+  a { color: var(--accent); }
+
+  /* ---------- Inline code ---------- */
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #d4e2ff;
+  }
+
+  /* ---------- Code blocks ---------- */
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    padding: 20px 22px;
+    overflow-x: auto;
+    margin: 0 0 20px;
+    line-height: 1.65;
+  }
+
+  pre code {
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #cdd6e6;
+    white-space: pre;
+  }
+
+  pre.diagram {
+    background:
+      linear-gradient(180deg, rgba(126,224,192,0.04), transparent),
+      var(--bg-code);
+    border-color: var(--border-soft);
+  }
+
+  pre.diagram code { color: #d7e3d9; }
+
+  /* ---------- Q&A cards ---------- */
+  .qa {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 0 0 18px;
+  }
+
+  .qa .q {
+    font-weight: 650;
+    color: #fff;
+    margin: 0 0 10px;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  .qa .q .badge {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(110,168,254,0.12);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 1px 8px;
+    flex: none;
+  }
+
+  .qa .a {
+    color: var(--text-dim);
+    margin: 0;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  .qa .a .badge {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-2);
+    background: rgba(126,224,192,0.10);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 1px 8px;
+    flex: none;
+  }
+
+  /* ---------- Summary highlight ---------- */
+  .summary {
+    background:
+      linear-gradient(135deg, rgba(245,194,107,0.12), rgba(110,168,254,0.08));
+    border: 1px solid rgba(245,194,107,0.35);
+    border-radius: 16px;
+    padding: 28px 30px;
+    margin: 0;
+    position: relative;
+  }
+
+  .summary::before {
+    content: "★ 한 줄 요약";
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .summary p {
+    margin: 0;
+    font-size: 1.12rem;
+    line-height: 1.8;
+    color: #fff;
+  }
+
+  .summary p strong { color: #ffe6b8; }
+
+  /* ---------- Source list ---------- */
+  ul.sources {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  ul.sources li {
+    padding: 12px 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 0 0 8px;
+    line-height: 1.6;
+  }
+
+  ul.sources li code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--accent-2);
+    font-size: 0.84rem;
+  }
+
+  /* ---------- Emphasis in lists ---------- */
+  .ok { color: var(--success); }
+  .no { color: var(--danger); }
+
+  footer.page {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    header.page h1 { font-size: 1.65rem; }
+    .wrap { padding: 0 18px 72px; }
+    h2.sec { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <span class="kicker">학습노트 · Learning Note</span>
+    <h1>Claude Code 알림 — AskUserQuestion은 왜 알림이 안 떴나 (6초 idle 게이트)</h1>
+    <div class="meta">
+      <span class="chip">📅 2026-07-08</span>
+      <span class="chip tag">🏷️ Claude Code 내부 / 알림 시스템</span>
+      <span class="chip">출처 <code>claude-code-source-code-full</code></span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <h2>목차</h2>
+    <ol>
+      <li><a href="#overview">개요</a></li>
+      <li><a href="#concepts">핵심 개념</a></li>
+      <li><a href="#qa">헷갈렸던 점 Q&amp;A</a></li>
+      <li><a href="#diagram">도식 — 알림 발화 판단</a></li>
+      <li><a href="#summary">한 줄 요약</a></li>
+      <li><a href="#sources">출처 (파일:라인)</a></li>
+    </ol>
+  </nav>
+
+  <section id="overview">
+    <h2 class="sec">개요</h2>
+    <p>Windows 토스트 알림을 훅으로 걸었는데 이상한 현상이 있었다 — <strong>작업 완료(Stop)는 항상 뜨는데, AskUserQuestion(질문)은 안 떴다.</strong> 소스코드를 파헤쳐 원인을 찾았더니 <strong>버그가 아니라 설계</strong>였다. 원인(6초 idle 게이트)과 우회법(PreToolUse 훅)을 배운 기록.</p>
+  </section>
+
+  <section id="concepts">
+    <h2 class="sec">핵심 개념</h2>
+
+    <h3 class="sub"><span class="num">1.</span> 알림 훅이 발화하는 경로</h3>
+    <p><code>Notification</code> 훅(사용자가 settings.json에 건 것)은 이 사슬로 발화한다:</p>
+    <pre><code>useNotifyAfterTimeout (hook)
+   → sendNotification (services/notifier.ts)
+      → executeNotificationHooks (utils/hooks.ts)
+         → settings.json 의 Notification 훅 실행</code></pre>
+
+    <h3 class="sub"><span class="num">2.</span> 6초 idle 게이트 ← 진짜 원인</h3>
+    <p><code>useNotifyAfterTimeout.ts</code> 에 핵심이 박혀 있다:</p>
+    <pre><code>DEFAULT_INTERACTION_THRESHOLD_MS = 6000        // 6초
+shouldNotify = 최근 6초 안에 상호작용 "없을 때만" true</code></pre>
+    <ul>
+      <li>알림이 뜰지 말지를 <strong>"마지막 키 입력 후 6초 지났나"</strong> 로 판단.</li>
+      <li>키를 누를 때마다 <code>updateLastInteractionTime()</code> 로 시각 갱신 (App.tsx).</li>
+      <li>즉 <strong>6초 안에 뭐라도 만지면 알림이 억제</strong>된다 — "사용자가 자리에 있다"고 보는 것.</li>
+    </ul>
+
+    <h3 class="sub"><span class="num">3.</span> Stop 은 왜 항상 뜨나</h3>
+    <p><code>Stop</code>(완료) 훅은 <strong>이 6초 게이트를 안 거친다.</strong> 그래서 무조건 발화 → 항상 보임. 반면 <code>Notification</code> 은 게이트를 거쳐서 idle일 때만.</p>
+
+    <h3 class="sub"><span class="num">4.</span> AskUserQuestion 의 정체</h3>
+    <p><code>AskUserQuestion</code> 은 <code>AskUserQuestionPermissionRequest</code> — <strong>권한요청 계열</strong>이다. MCP 서버가 쓰는 <code>Elicitation</code>(<code>elicitationHandler.ts</code>)과는 <strong>다른 것</strong>. 그 알림은 <code>Notification</code> 경로(=6초 게이트)를 타서 억제됐던 것.</p>
+  </section>
+
+  <section id="qa">
+    <h2 class="sec">헷갈렸던 점 Q&amp;A</h2>
+
+    <div class="qa">
+      <p class="q"><span class="badge">Q</span> 왜 완료는 뜨는데 질문은 안 뜨나?</p>
+      <p class="a"><span class="badge">A</span> 완료(Stop)는 게이트 없이 무조건 발화. 질문 알림(Notification)은 6초 idle 게이트가 있어서, 내가 화면 보며 바로 답하면 억제된다.</p>
+    </div>
+
+    <div class="qa">
+      <p class="q"><span class="badge">Q</span> AskUserQuestion은 Notification이야, Elicitation이야?</p>
+      <p class="a"><span class="badge">A</span> 엄밀히는 <strong>권한요청</strong>. 알림은 Notification 경로로 흐르는데 그 경로에 6초 게이트가 있어 안 떴다. Elicitation은 MCP 전용이라 무관.</p>
+    </div>
+
+    <div class="qa">
+      <p class="q"><span class="badge">Q</span> 6초 기다리지 말고 즉시 뜨게 하려면?</p>
+      <p class="a"><span class="badge">A</span> 그 이벤트의 <strong><code>PreToolUse</code> 훅 + matcher <code>AskUserQuestion</code></strong> 을 건다. 도구가 호출되는 순간 발화 → 게이트 우회.</p>
+    </div>
+  </section>
+
+  <section id="diagram">
+    <h2 class="sec">도식 — 알림 발화 판단</h2>
+    <pre class="diagram"><code>AskUserQuestion 뜸
+      │
+      ▼
+[최근 6초 안에 키 입력 있었나?]
+   ├─ 예  → 알림 억제 ❌ (자리에 있다고 판단)   ← 내가 겪던 상황
+   └─ 아니오(6초+ idle) → Notification 훅 발화 ✅ (토스트)
+
+Stop(완료) 은 이 판단을 안 거침 → 항상 ✅
+PreToolUse 훅 도 이 판단을 안 거침 → 즉시 ✅ (우회법)</code></pre>
+  </section>
+
+  <section id="summary">
+    <div class="summary">
+      <p><strong>Notification 알림은 "6초 이상 자리를 비웠을 때만" 뜬다.</strong> 즉시 알림이 필요하면 그 이벤트를 <code>PreToolUse</code> 훅으로 잡아 6초 게이트를 우회한다.</p>
+    </div>
+  </section>
+
+  <section id="sources">
+    <h2 class="sec">출처 (파일:라인)</h2>
+    <ul class="sources">
+      <li><code>src/hooks/useNotifyAfterTimeout.ts:8</code> — <code>DEFAULT_INTERACTION_THRESHOLD_MS = 6000</code></li>
+      <li><code>src/hooks/useNotifyAfterTimeout.ts:19</code> — <code>shouldNotify</code> (6초 조건)</li>
+      <li><code>src/services/notifier.ts:25</code> — <code>executeNotificationHooks(notif)</code> 호출</li>
+      <li><code>src/utils/hooks.ts:3570</code> — <code>executeNotificationHooks</code> 정의</li>
+      <li><code>src/components/permissions/AskUserQuestionPermissionRequest/</code> — AskUserQuestion = 권한요청</li>
+    </ul>
+  </section>
+
+  <footer class="page">
+    학습노트 · Claude Code 내부 / 알림 시스템 · 2026-07-08
+  </footer>
+
+</div>
+</body>
+</html>

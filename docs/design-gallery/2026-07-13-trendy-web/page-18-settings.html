@@ -1,0 +1,945 @@
+<title>Opswise · 설정 / 계정</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root {
+    /* Canvas & surfaces */
+    --canvas: #F4F5F7;
+    --surface: #FFFFFF;
+    --subtle: #FAFBFC;
+    --border: #DFE1E6;
+    --border-strong: #C1C7D0;
+    --row-selected: #DEEBFF;
+
+    /* Practical navy */
+    --navy: #0052CC;
+    --navy-hover: #0747A6;
+    --navy-active: #043584;
+    --link: #0065FF;
+
+    /* Text */
+    --text-strong: #172B4D;
+    --text-body: #42526E;
+    --text-muted: #6B778C;
+    --text-disabled: #97A0AF;
+
+    /* Status */
+    --success: #00875A;   --success-bg: #E3FCEF;
+    --progress: #0052CC;  --progress-bg: #DEEBFF;
+    --warning: #FF8B00;   --warning-bg: #FFFAE6;
+    --danger: #DE350B;    --danger-bg: #FFEBE6;
+    --neutral: #42526E;   --neutral-bg: #F4F5F7;
+
+    /* Elevation — 얕게, 보더가 주역 */
+    --shadow-card: 0 1px 1px rgba(9, 30, 66, 0.08);
+    --shadow-pop: 0 4px 8px -2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.24);
+    --focus-ring: 0 0 0 2px var(--navy);
+
+    /* Geometry */
+    --r-card: 4px;
+    --r-ctl: 3px;
+    --topbar-h: 56px;
+    --nav-w: 240px;
+
+    --font: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--canvas);
+    color: var(--text-body);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .tabnum { font-variant-numeric: tabular-nums; }
+
+  /* ─────────── Top bar ─────────── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-strong);
+    letter-spacing: -0.01em;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+    height: 100%;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: var(--r-ctl);
+    background: linear-gradient(135deg, #0052CC 0%, #2684FF 100%);
+    position: relative;
+    flex: none;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14);
+  }
+  .brand-mark::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 2px solid #FFFFFF;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    transform: rotate(-45deg);
+  }
+  .brand-name { font-size: 15px; }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .breadcrumb .sep { color: var(--border-strong); }
+  .breadcrumb .cur { color: var(--text-strong); font-weight: 600; }
+
+  .topbar-spacer { flex: 1; }
+
+  .top-search {
+    position: relative;
+    width: 200px;
+  }
+  .top-search input {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px 0 30px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-body);
+    background: var(--subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--r-ctl);
+    transition: border-color 120ms, background 120ms, box-shadow 120ms;
+  }
+  .top-search input::placeholder { color: var(--text-disabled); }
+  .top-search input:hover { border-color: var(--border-strong); }
+  .top-search input:focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--navy);
+    box-shadow: var(--focus-ring);
+  }
+  .top-search .ico {
+    position: absolute;
+    left: 9px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .icon-btn {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--r-ctl);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .icon-btn:hover { background: var(--neutral-bg); color: var(--text-strong); }
+  .icon-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .icon-btn .dot {
+    position: absolute; margin: -10px 0 0 10px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 0 1.5px var(--surface);
+  }
+
+  .top-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #fff;
+    background: linear-gradient(135deg, #0747A6, #2684FF);
+    cursor: pointer;
+    flex: none;
+  }
+  .top-avatar:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  /* ─────────── Shell layout ─────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: var(--nav-w) 1fr;
+    min-height: calc(100vh - var(--topbar-h));
+  }
+
+  /* ─────────── Settings tab nav ─────────── */
+  .settingsnav {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    position: sticky;
+    top: var(--topbar-h);
+    align-self: start;
+    height: calc(100vh - var(--topbar-h));
+    overflow-y: auto;
+  }
+  .nav-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 12px 8px;
+  }
+  .nav-list { list-style: none; margin: 0 0 8px; padding: 0; }
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--r-ctl);
+    color: var(--text-body);
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 100ms, color 100ms;
+    margin-bottom: 2px;
+  }
+  .nav-item .nav-ico { width: 16px; height: 16px; flex: none; color: var(--text-muted); }
+  .nav-item .nav-label { flex: 1; }
+  .nav-item:hover { background: var(--canvas); }
+  .nav-item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .nav-item.active {
+    background: var(--row-selected);
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .nav-item.active .nav-ico { color: var(--navy); }
+  .nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: -12px; top: 6px; bottom: 6px;
+    width: 3px;
+    background: var(--navy);
+    border-radius: 0 2px 2px 0;
+  }
+  .nav-badge {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    padding: 0 6px;
+    border-radius: 999px;
+    color: var(--text-body);
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+  }
+  .nav-badge.warn { color: var(--warning); background: var(--warning-bg); border-color: transparent; }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 12px;
+  }
+
+  /* ─────────── Main form column ─────────── */
+  .main {
+    min-width: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .main-inner {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .page-head { margin-bottom: 4px; }
+  .page-title {
+    font-size: 24px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--text-strong);
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+  }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-head h2 {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0;
+  }
+  .card-head p { font-size: 13px; color: var(--text-muted); margin: 2px 0 0; }
+  .card-head .head-text { flex: 1; min-width: 0; }
+  .card-body { padding: 16px; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: var(--r-ctl);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    line-height: 1;
+  }
+  .badge .b-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .badge.success { color: var(--success); background: var(--success-bg); }
+  .badge.success .b-dot { background: var(--success); }
+  .badge.progress { color: var(--progress); background: var(--progress-bg); }
+  .badge.progress .b-dot { background: var(--progress); }
+  .badge.warning { color: var(--warning); background: var(--warning-bg); }
+  .badge.warning .b-dot { background: var(--warning); }
+  .badge.neutral { color: var(--neutral); background: var(--neutral-bg); }
+  .badge.neutral .b-dot { background: var(--neutral); }
+
+  /* ── Profile / avatar row ── */
+  .avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .avatar-slot {
+    position: relative;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+    background: linear-gradient(140deg, #0747A6 0%, #2684FF 60%, #4C9AFF 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 1px 2px rgba(9,30,66,0.16);
+  }
+  .avatar-slot::after {
+    content: "";
+    position: absolute;
+    right: 1px; bottom: 1px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 2.5px var(--surface);
+  }
+  .avatar-meta { flex: 1; min-width: 0; }
+  .avatar-meta .an { font-size: 16px; font-weight: 600; color: var(--text-strong); }
+  .avatar-meta .ah { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .avatar-hint { font-size: 12px; color: var(--text-disabled); margin-top: 8px; }
+  .avatar-actions { display: flex; gap: 8px; flex: none; }
+
+  /* ── Form grid ── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field label .req { color: var(--danger); font-weight: 600; }
+  .field label .opt { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text-disabled); font-size: 11px; }
+
+  .input, .select-wrap select {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-strong);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-ctl);
+    transition: border-color 120ms, box-shadow 120ms, background 120ms;
+  }
+  .input::placeholder { color: var(--text-disabled); }
+  .input:hover, .select-wrap select:hover { border-color: var(--border-strong); }
+  .input:focus, .select-wrap select:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: var(--focus-ring);
+  }
+  .input:disabled {
+    background: var(--subtle);
+    color: var(--text-disabled);
+    cursor: not-allowed;
+    border-color: var(--border);
+  }
+  .input-affix { position: relative; }
+  .input-affix .prefix {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-disabled);
+    pointer-events: none;
+  }
+  .input-affix .input { padding-left: 26px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+  .select-wrap .chev {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .helper { font-size: 12px; color: var(--text-muted); }
+  .helper.err { color: var(--danger); }
+
+  /* ── Toggle switch rows ── */
+  .toggle-list { display: flex; flex-direction: column; }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-row:first-child { padding-top: 0; }
+  .toggle-text { flex: 1; min-width: 0; }
+  .toggle-text .tt {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-strong);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toggle-text .td { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+  .switch {
+    position: relative;
+    flex: none;
+    width: 40px; height: 24px;
+    display: inline-block;
+  }
+  .switch input {
+    position: absolute;
+    opacity: 0;
+    width: 100%; height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+  .switch .track {
+    position: absolute;
+    inset: 0;
+    background: var(--border-strong);
+    border-radius: 999px;
+    transition: background 160ms ease;
+  }
+  .switch .thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(9,30,66,0.28);
+    transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .switch input:checked ~ .track { background: var(--navy); }
+  .switch input:checked ~ .thumb { transform: translateX(16px); }
+  .switch input:hover ~ .track { background: #A5ADBA; }
+  .switch input:checked:hover ~ .track { background: var(--navy-hover); }
+  .switch input:active ~ .thumb { width: 22px; }
+  .switch input:focus-visible ~ .track { box-shadow: var(--focus-ring); }
+  .switch input:disabled { cursor: not-allowed; }
+  .switch input:disabled ~ .track { background: var(--border); }
+  .switch input:disabled ~ .thumb { box-shadow: none; background: var(--subtle); }
+
+  /* ── Security mini row ── */
+  .sec-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--r-ctl);
+  }
+  .sec-row + .sec-row { margin-top: 8px; }
+  .sec-ico {
+    width: 32px; height: 32px;
+    border-radius: var(--r-ctl);
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--progress-bg);
+    color: var(--navy);
+    flex: none;
+  }
+  .sec-ico.ok { background: var(--success-bg); color: var(--success); }
+  .sec-text { flex: 1; min-width: 0; }
+  .sec-text .st { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .sec-text .sd { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: var(--r-ctl);
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 150ms, border-color 150ms, color 150ms, box-shadow 120ms;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-hover); }
+  .btn-primary:active { background: var(--navy-active); }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text-body);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--subtle); border-color: var(--border-strong); }
+  .btn-secondary:active { background: var(--neutral-bg); }
+
+  .btn-subtle {
+    background: transparent;
+    color: var(--text-body);
+  }
+  .btn-subtle:hover { background: var(--neutral-bg); }
+  .btn-subtle:active { background: #EBECF0; }
+
+  .btn-danger-subtle {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--border);
+  }
+  .btn-danger-subtle:hover { background: var(--danger-bg); border-color: #FFBDAD; }
+
+  .btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+
+  .btn:disabled {
+    background: var(--neutral-bg);
+    color: var(--text-disabled);
+    border-color: transparent;
+    cursor: not-allowed;
+  }
+
+  /* ── Sticky action bar ── */
+  .actionbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: 0 -1px 2px rgba(9, 30, 66, 0.06), var(--shadow-card);
+  }
+  .actionbar .save-note {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .unsaved-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--warning);
+    flex: none;
+  }
+
+  /* ── Footer ── */
+  .foot {
+    max-width: 800px;
+    margin: 20px auto 0;
+    width: 100%;
+    font-size: 12px;
+    color: var(--text-disabled);
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .foot .fsep { color: var(--border-strong); }
+
+  /* ─────────── Responsive ─────────── */
+  @media (max-width: 1024px) {
+    .top-search { width: 150px; }
+  }
+  @media (max-width: 768px) {
+    .shell { grid-template-columns: 1fr; }
+    .settingsnav {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+    .nav-item { margin-bottom: 0; }
+    .nav-item.active::before { display: none; }
+    .nav-divider { display: none; }
+    .breadcrumb { display: none; }
+  }
+  @media (max-width: 600px) {
+    .main { padding: 16px; }
+    .field-grid { grid-template-columns: 1fr; }
+    .avatar-row { flex-wrap: wrap; }
+    .avatar-actions { width: 100%; }
+    .top-search { display: none; }
+    .actionbar { flex-wrap: wrap; }
+    .actionbar .save-note { flex-basis: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<!-- ══════════ Top bar ══════════ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Opswise</span>
+  </div>
+  <nav class="breadcrumb" aria-label="위치">
+    <span>워크스페이스</span>
+    <span class="sep">/</span>
+    <span>설정</span>
+    <span class="sep">/</span>
+    <span class="cur">계정</span>
+  </nav>
+
+  <div class="topbar-spacer"></div>
+
+  <div class="top-search">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" placeholder="설정 검색" aria-label="설정 검색" />
+  </div>
+
+  <button class="icon-btn" aria-label="알림 3건" style="position:relative">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    <span class="dot" aria-hidden="true"></span>
+  </button>
+  <button class="top-avatar" aria-label="계정 메뉴">OP</button>
+</header>
+
+<div class="shell">
+  <!-- ══════════ Settings tab nav ══════════ -->
+  <nav class="settingsnav" aria-label="설정 탭">
+    <div class="nav-overline">개인</div>
+    <ul class="nav-list">
+      <li>
+        <a class="nav-item active" href="#" aria-current="page">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <span class="nav-label">계정</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" href="#">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="nav-label">알림</span>
+          <span class="nav-badge">4</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" href="#">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <span class="nav-label">보안</span>
+          <span class="nav-badge warn">확인 필요</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="nav-divider" role="presentation"></div>
+    <div class="nav-overline">워크스페이스</div>
+    <ul class="nav-list">
+      <li>
+        <a class="nav-item" href="#">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 6a3 3 0 0 1 0 5"/><path d="M18 20c0-2-1-3.5-2.5-4.3"/></svg>
+          <span class="nav-label">팀</span>
+          <span class="nav-badge">12</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" href="#">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>
+          <span class="nav-label">결제</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ══════════ Main form ══════════ -->
+  <main class="main">
+    <div class="main-inner">
+
+      <div class="page-head">
+        <h1 class="page-title">계정 설정</h1>
+        <p class="page-sub">프로필 정보와 알림 방식을 관리합니다. 변경 사항은 저장 후 워크스페이스 전체에 반영됩니다.</p>
+      </div>
+
+      <!-- ── 프로필 카드 ── -->
+      <section class="card">
+        <div class="card-head">
+          <div class="head-text">
+            <h2>프로필</h2>
+            <p>워크스페이스 구성원에게 표시되는 정보입니다.</p>
+          </div>
+          <span class="badge success"><span class="b-dot" aria-hidden="true"></span>동기화됨</span>
+        </div>
+        <div class="card-body">
+
+          <div class="avatar-row">
+            <div class="avatar-slot" aria-hidden="true">OP</div>
+            <div class="avatar-meta">
+              <div class="an">Opswise 관리자</div>
+              <div class="ah">@ops-admin · 워크스페이스 소유자</div>
+              <div class="avatar-hint">PNG 또는 SVG, 최대 2MB · 권장 256×256px</div>
+            </div>
+            <div class="avatar-actions">
+              <button class="btn btn-secondary btn-sm">이미지 변경</button>
+              <button class="btn btn-subtle btn-sm">제거</button>
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="f-display">표시 이름 <span class="req" aria-hidden="true">*</span></label>
+              <input class="input" id="f-display" type="text" value="Opswise 관리자" />
+              <span class="helper">구성원 목록과 활동 로그에 표시됩니다.</span>
+            </div>
+
+            <div class="field">
+              <label for="f-handle">핸들 <span class="opt">(선택)</span></label>
+              <div class="input-affix">
+                <span class="prefix" aria-hidden="true">@</span>
+                <input class="input" id="f-handle" type="text" value="ops-admin" />
+              </div>
+              <span class="helper">멘션에 사용됩니다. 영문 소문자·숫자·하이픈.</span>
+            </div>
+
+            <div class="field full">
+              <label for="f-email">업무 이메일 <span class="req" aria-hidden="true">*</span></label>
+              <input class="input" id="f-email" type="email" value="admin@opswise.io" />
+              <span class="helper">로그인과 시스템 알림 수신에 사용됩니다.</span>
+            </div>
+
+            <div class="field">
+              <label for="f-role">역할</label>
+              <div class="select-wrap">
+                <select id="f-role">
+                  <option>워크스페이스 소유자</option>
+                  <option>관리자</option>
+                  <option>운영 담당</option>
+                  <option>뷰어</option>
+                </select>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <span class="helper">권한 범위는 소유자만 변경할 수 있습니다.</span>
+            </div>
+
+            <div class="field">
+              <label for="f-tz">표준 시간대</label>
+              <div class="select-wrap">
+                <select id="f-tz">
+                  <option>(GMT+09:00) 서울</option>
+                  <option>(GMT+00:00) UTC</option>
+                  <option>(GMT-08:00) 로스앤젤레스</option>
+                  <option>(GMT+01:00) 베를린</option>
+                </select>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <span class="helper">일정과 보고서 시각 표기의 기준입니다.</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── 알림 토글 카드 ── -->
+      <section class="card">
+        <div class="card-head">
+          <div class="head-text">
+            <h2>알림</h2>
+            <p>이벤트가 발생할 때 받을 알림 채널을 선택합니다.</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="toggle-list">
+
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <div class="tt">주간 운영 요약 <span class="badge progress"><span class="b-dot" aria-hidden="true"></span>이메일</span></div>
+                <div class="td">매주 월요일 오전, 지난 주 처리량과 지연 항목을 요약해 보냅니다.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" checked aria-label="주간 운영 요약 알림" />
+                <span class="track" aria-hidden="true"></span>
+                <span class="thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <div class="tt">인시던트 즉시 알림 <span class="badge warning"><span class="b-dot" aria-hidden="true"></span>중요</span></div>
+                <div class="td">장애·임계치 초과가 감지되면 브라우저 푸시로 바로 알립니다.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" checked aria-label="인시던트 즉시 알림" />
+                <span class="track" aria-hidden="true"></span>
+                <span class="thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <div class="tt">멘션 및 댓글</div>
+                <div class="td">누군가 나를 멘션하거나 내 항목에 댓글을 남기면 알립니다.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" aria-label="멘션 및 댓글 알림" />
+                <span class="track" aria-hidden="true"></span>
+                <span class="thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <div class="tt">제품 소식 및 팁 <span class="badge neutral"><span class="b-dot" aria-hidden="true"></span>마케팅</span></div>
+                <div class="td">새 기능과 활용 팁을 월 1회 이내로 받아봅니다. 언제든 해제할 수 있습니다.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" aria-label="제품 소식 및 팁 알림" />
+                <span class="track" aria-hidden="true"></span>
+                <span class="thumb" aria-hidden="true"></span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 보안 미니 카드 ── -->
+      <section class="card">
+        <div class="card-head">
+          <div class="head-text">
+            <h2>보안</h2>
+            <p>계정 접근 보호 상태입니다.</p>
+          </div>
+          <span class="badge warning"><span class="b-dot" aria-hidden="true"></span>조치 권장</span>
+        </div>
+        <div class="card-body">
+          <div class="sec-row">
+            <span class="sec-ico ok" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            </span>
+            <div class="sec-text">
+              <div class="st">비밀번호</div>
+              <div class="sd">마지막 변경 42일 전 · 강도 높음</div>
+            </div>
+            <button class="btn btn-secondary btn-sm">변경</button>
+          </div>
+          <div class="sec-row">
+            <span class="sec-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            </span>
+            <div class="sec-text">
+              <div class="st">2단계 인증 (2FA)</div>
+              <div class="sd">아직 설정되지 않았습니다. 소유자 계정은 필수 적용을 권장합니다.</div>
+            </div>
+            <button class="btn btn-primary btn-sm">설정하기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Sticky 저장/취소 ── -->
+      <div class="actionbar">
+        <div class="save-note">
+          <span class="unsaved-dot" aria-hidden="true"></span>
+          <span>저장하지 않은 변경 사항이 있습니다.</span>
+        </div>
+        <button class="btn btn-subtle">취소</button>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          변경 사항 저장
+        </button>
+      </div>
+
+      <div class="foot">
+        <span>설정/프로필</span>
+        <span class="fsep">·</span>
+        <span>엔터프라이즈 B2B</span>
+      </div>
+
+    </div>
+  </main>
+</div>

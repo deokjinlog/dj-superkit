@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STUDIO KRFT — Independent Design Studio</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* palette — 무채색 + 원색 딱 1 */
+    --bg:#FFFFFF;
+    --ink:#000000;
+    --gray-100:#E7E7E7;
+    --gray-900:#1A1A1A;
+    --accent:#FF3B00;
+    --on-accent:#FFFFFF;
+
+    /* type scale — 제한된 스케일 */
+    --fs-xs:12px;
+    --fs-sm:14px;
+    --fs-base:16px;
+    --fs-md:20px;
+    --fs-lg:24px;
+    --fs-xl:32px;
+    --fs-2xl:48px;
+    --fs-display:clamp(56px, 11vw, 160px);
+    --fs-mega:clamp(72px, 16vw, 220px);
+
+    /* spacing — 8px grid (4/8 배수) */
+    --sp-1:4px;  --sp-2:8px;  --sp-3:12px; --sp-4:16px;
+    --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+    --sp-9:96px; --sp-10:128px;
+
+    /* structure */
+    --bd:4px;
+    --bd-thick:6px;
+    --shadow:10px 10px 0 var(--ink);
+    --shadow-press:4px 4px 0 var(--ink);
+    --maxw:1280px;
+    --gutter:var(--sp-6);
+    --tap:100ms;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    font-size:var(--fs-base);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;}
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding-left:var(--gutter);
+    padding-right:var(--gutter);
+  }
+
+  .display{
+    font-weight:900;
+    letter-spacing:-0.03em;
+    line-height:0.9;
+    text-transform:uppercase;
+  }
+  .eyebrow{
+    font-size:var(--fs-sm);
+    font-weight:800;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin:0;
+  }
+
+  /* ============ FOCUS RING (전 인터랙티브) ============ */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible{
+    outline:4px solid var(--accent);
+    outline-offset:3px;
+  }
+  .on-dark a:focus-visible,
+  .on-dark button:focus-visible,
+  .on-dark input:focus-visible,
+  .btn--accent:focus-visible{
+    outline-color:var(--bg);
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--sp-2);
+    height:52px;
+    padding:0 var(--sp-5);
+    border:var(--bd) solid var(--ink);
+    border-radius:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:var(--fs-sm);
+    font-weight:800;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+    box-shadow:var(--shadow-press);
+    transition:transform var(--tap) ease, box-shadow var(--tap) ease, background var(--tap) ease, color var(--tap) ease;
+  }
+  .btn:hover{ transform:translate(-2px,-2px); box-shadow:var(--shadow); }
+  .btn:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
+  .btn:disabled{
+    cursor:not-allowed;
+    background:var(--gray-100);
+    color:var(--gray-900);
+    border-color:var(--gray-900);
+    box-shadow:none;
+    opacity:0.55;
+    transform:none;
+  }
+  .btn--primary{ background:var(--ink); color:var(--bg); }
+  .btn--primary:hover{ background:var(--gray-900); }
+  .btn--accent{ background:var(--accent); color:var(--on-accent); border-color:var(--ink); }
+  .btn--accent:hover{ background:#E63500; }
+  .btn--ghost{ background:transparent; box-shadow:none; }
+  .btn--ghost:hover{ background:var(--ink); color:var(--bg); box-shadow:none; transform:translate(-2px,-2px); }
+  .btn--ghost:active{ transform:translate(2px,2px); }
+  .btn--lg{ height:60px; padding:0 var(--sp-6); font-size:var(--fs-base); }
+
+  /* ============ HEADER / NAV ============ */
+  header.site{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:var(--bg);
+    border-bottom:var(--bd-thick) solid var(--ink);
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:var(--sp-5);
+    height:80px;
+  }
+  .wordmark{
+    display:inline-flex;
+    align-items:center;
+    gap:var(--sp-3);
+    font-weight:900;
+    font-size:var(--fs-md);
+    letter-spacing:-0.02em;
+    text-transform:uppercase;
+  }
+  .wordmark .mark{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;height:36px;
+    background:var(--ink);
+    color:var(--bg);
+    font-size:var(--fs-base);
+    font-weight:900;
+  }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:var(--sp-2);
+  }
+  .nav-link{
+    padding:var(--sp-2) var(--sp-3);
+    font-size:var(--fs-sm);
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    border:var(--bd) solid transparent;
+    transition:background var(--tap) ease, color var(--tap) ease;
+  }
+  .nav-link:hover{ background:var(--ink); color:var(--bg); }
+
+  /* ============ HERO ============ */
+  .hero{ border-bottom:var(--bd-thick) solid var(--ink); }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:var(--sp-6);
+    padding-top:var(--sp-9);
+    padding-bottom:var(--sp-9);
+    align-items:start;
+  }
+  .hero-main{ grid-column:1 / span 8; }
+  .hero-main h1{
+    margin:var(--sp-4) 0 var(--sp-5);
+    font-size:var(--fs-display);
+  }
+  .hero-main h1 .accent-word{ color:var(--accent); }
+  .hero-lead{
+    max-width:52ch;
+    font-size:var(--fs-md);
+    line-height:1.5;
+    color:var(--gray-900);
+    margin:0 0 var(--sp-6);
+  }
+  .hero-cta{ display:flex; flex-wrap:wrap; gap:var(--sp-4); }
+
+  .hero-stat{
+    grid-column:9 / span 4;
+    margin-top:var(--sp-8);
+    background:var(--accent);
+    color:var(--on-accent);
+    border:var(--bd-thick) solid var(--ink);
+    box-shadow:var(--shadow);
+    padding:var(--sp-6);
+    transform:rotate(1.6deg);
+  }
+  .hero-stat .num{
+    font-size:var(--fs-mega);
+    font-weight:900;
+    letter-spacing:-0.04em;
+    line-height:0.82;
+  }
+  .hero-stat .label{
+    margin-top:var(--sp-3);
+    font-size:var(--fs-sm);
+    font-weight:800;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    border-top:var(--bd) solid var(--on-accent);
+    padding-top:var(--sp-3);
+  }
+
+  /* ============ MARQUEE STRIP ============ */
+  .strip{
+    background:var(--ink);
+    color:var(--bg);
+    border-bottom:var(--bd-thick) solid var(--ink);
+    overflow:hidden;
+  }
+  .marquee{
+    display:flex;
+    width:max-content;
+    gap:var(--sp-6);
+    padding:var(--sp-3) 0;
+    animation:scroll 24s linear infinite;
+  }
+  .marquee span{
+    font-weight:900;
+    font-size:var(--fs-md);
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .marquee .dot{ color:var(--accent); }
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ============ SECTION HEADS ============ */
+  .section{ padding-top:var(--sp-9); padding-bottom:var(--sp-9); }
+  .section--gray{ background:var(--gray-100); border-top:var(--bd-thick) solid var(--ink); border-bottom:var(--bd-thick) solid var(--ink); }
+  .sec-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:var(--sp-4);
+    margin-bottom:var(--sp-8);
+  }
+  .sec-head h2{
+    margin:var(--sp-3) 0 0;
+    font-size:var(--fs-2xl);
+  }
+  .sec-index{
+    font-size:var(--fs-sm);
+    font-weight:800;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gray-900);
+    margin:0;
+  }
+
+  /* ============ PROJECTS GRID ============ */
+  .projects{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    grid-auto-rows:224px;
+    gap:var(--sp-5);
+  }
+  .project{
+    display:flex;
+    flex-direction:column;
+    border:var(--bd-thick) solid var(--ink);
+    background:var(--bg);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    transition:transform var(--tap) ease, box-shadow var(--tap) ease;
+  }
+  .project:hover{ transform:translate(-4px,-4px); box-shadow:14px 14px 0 var(--ink); }
+  .project:active{ transform:translate(4px,4px); box-shadow:var(--shadow-press); }
+  .project .thumb{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    font-size:var(--fs-2xl);
+    letter-spacing:-0.03em;
+    border-bottom:var(--bd) solid var(--ink);
+  }
+  .thumb--ink{ background:var(--ink); color:var(--bg); }
+  .thumb--gray{ background:var(--gray-100); color:var(--ink); }
+  .thumb--dark{ background:var(--gray-900); color:var(--bg); }
+  .project .meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:var(--sp-3);
+    padding:var(--sp-4);
+    background:var(--bg);
+  }
+  .project .meta .name{ font-weight:900; font-size:var(--fs-md); letter-spacing:-0.02em; text-transform:uppercase; }
+  .project .meta .cat{ font-size:var(--fs-xs); font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--gray-900); text-align:right; line-height:1.3; }
+
+  .p-a{ grid-column:span 3; grid-row:span 2; }
+  .p-b{ grid-column:span 3; }
+  .p-c{ grid-column:span 3; }
+  .p-d{ grid-column:span 2; }
+  .p-e{ grid-column:span 2; }
+  .p-f{ grid-column:span 2; }
+
+  /* ============ ABOUT ============ */
+  .about-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:var(--sp-8);
+    align-items:start;
+  }
+  .about-grid h2{ font-size:var(--fs-xl); line-height:1.05; margin:0 0 var(--sp-5); }
+  .about-grid p{ font-size:var(--fs-md); line-height:1.55; color:var(--gray-900); margin:0 0 var(--sp-4); max-width:56ch; }
+  .stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    border:var(--bd-thick) solid var(--ink);
+  }
+  .stat-cell{
+    padding:var(--sp-6);
+    border-right:var(--bd) solid var(--ink);
+    border-bottom:var(--bd) solid var(--ink);
+  }
+  .stat-cell:nth-child(2n){ border-right:none; }
+  .stat-cell:nth-last-child(-n+2){ border-bottom:none; }
+  .stat-cell .n{ font-size:var(--fs-2xl); font-weight:900; letter-spacing:-0.03em; line-height:1; }
+  .stat-cell .t{ margin-top:var(--sp-2); font-size:var(--fs-xs); font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray-900); }
+
+  /* services list — 행 hover 흑백 반전 */
+  .services{ margin-top:var(--sp-8); border:var(--bd-thick) solid var(--ink); }
+  .service-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:var(--sp-4);
+    padding:var(--sp-4) var(--sp-5);
+    border-bottom:var(--bd) solid var(--ink);
+    transition:background var(--tap) ease, color var(--tap) ease;
+  }
+  .service-row:last-child{ border-bottom:none; }
+  .service-row:hover{ background:var(--ink); color:var(--bg); }
+  .service-row .s-name{ font-weight:900; font-size:var(--fs-lg); letter-spacing:-0.02em; text-transform:uppercase; }
+  .service-row .s-tags{ font-size:var(--fs-xs); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; opacity:0.85; text-align:right; }
+
+  /* ============ CLIENTS ============ */
+  .clients{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+    border-top:var(--bd-thick) solid var(--ink);
+    border-left:var(--bd-thick) solid var(--ink);
+  }
+  .client{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:120px;
+    padding:var(--sp-4);
+    border-right:var(--bd-thick) solid var(--ink);
+    border-bottom:var(--bd-thick) solid var(--ink);
+    font-weight:900;
+    font-size:var(--fs-lg);
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    background:var(--bg);
+    transition:background var(--tap) ease, color var(--tap) ease;
+  }
+  .client:hover{ background:var(--ink); color:var(--bg); }
+
+  /* ============ CONTACT CTA ============ */
+  .cta{
+    background:var(--ink);
+    color:var(--bg);
+    border-top:var(--bd-thick) solid var(--ink);
+  }
+  .cta-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:var(--sp-8);
+    align-items:end;
+    padding-top:var(--sp-9);
+    padding-bottom:var(--sp-9);
+  }
+  .cta h2{
+    font-size:var(--fs-display);
+    line-height:0.86;
+    margin:var(--sp-4) 0 0;
+  }
+  .cta h2 .u{ color:var(--accent); }
+  .field{ margin-bottom:var(--sp-5); }
+  .field label{
+    display:block;
+    font-size:var(--fs-xs);
+    font-weight:800;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    margin-bottom:var(--sp-2);
+  }
+  .field input{
+    width:100%;
+    height:56px;
+    padding:0 var(--sp-4);
+    background:var(--bg);
+    color:var(--ink);
+    border:var(--bd) solid var(--bg);
+    border-radius:0;
+    font-family:inherit;
+    font-size:var(--fs-base);
+    font-weight:600;
+    transition:box-shadow var(--tap) ease, border-color var(--tap) ease;
+  }
+  .field input::placeholder{ color:var(--gray-900); opacity:0.6; }
+  .field input:hover{ box-shadow:var(--shadow-press); }
+  .field input:focus{ box-shadow:6px 6px 0 var(--accent); }
+  .field .help{
+    margin-top:var(--sp-2);
+    font-size:var(--fs-xs);
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--gray-100);
+    opacity:0.75;
+  }
+  .cta-actions{ display:flex; flex-wrap:wrap; gap:var(--sp-4); }
+  .cta-mail{
+    margin-top:var(--sp-6);
+    font-size:var(--fs-md);
+    font-weight:800;
+    letter-spacing:0.02em;
+  }
+  .cta-mail a{ border-bottom:var(--bd) solid var(--accent); }
+  .cta-mail a:hover{ color:var(--accent); }
+
+  /* ============ FOOTER ============ */
+  footer.site{
+    background:var(--bg);
+    border-top:var(--bd-thick) solid var(--ink);
+  }
+  .foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:var(--sp-4);
+    padding-top:var(--sp-6);
+    padding-bottom:var(--sp-6);
+  }
+  .foot .fw{ font-weight:900; font-size:var(--fs-md); letter-spacing:-0.02em; text-transform:uppercase; }
+  .foot .stamp{ font-size:var(--fs-sm); font-weight:800; letter-spacing:0.06em; text-transform:uppercase; }
+  .foot .stamp .sep{ color:var(--accent); padding:0 var(--sp-2); }
+  .foot .rights{ font-size:var(--fs-xs); font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--gray-900); }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:960px){
+    .hero-main{ grid-column:1 / -1; }
+    .hero-stat{ grid-column:1 / -1; margin-top:var(--sp-2); transform:rotate(0.8deg); }
+    .projects{ grid-template-columns:repeat(2,1fr); grid-auto-rows:200px; }
+    .p-a,.p-b,.p-c,.p-d,.p-e,.p-f{ grid-column:auto; grid-row:auto; }
+    .p-a{ grid-column:span 2; }
+    .about-grid{ grid-template-columns:1fr; gap:var(--sp-7); }
+    .cta-grid{ grid-template-columns:1fr; gap:var(--sp-7); align-items:start; }
+    .clients{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:560px){
+    :root{ --gutter:var(--sp-4); }
+    .nav{ height:64px; }
+    .nav-links .nav-link{ display:none; }
+    .nav-links .btn{ height:44px; padding:0 var(--sp-4); }
+    .projects{ grid-template-columns:1fr; grid-auto-rows:180px; }
+    .p-a{ grid-column:auto; }
+    .stats{ grid-template-columns:1fr; }
+    .stat-cell{ border-right:none; }
+    .stat-cell:nth-last-child(-n+2){ border-bottom:var(--bd) solid var(--ink); }
+    .stat-cell:last-child{ border-bottom:none; }
+    .foot{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ============ REDUCED MOTION ============ */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; }
+    .btn:hover,.btn--ghost:hover,.project:hover{ transform:none !important; }
+    .btn:active,.project:active{ transform:none !important; }
+    /* 섀도 축소만 유지 (색 변화 없음) */
+    .btn:hover{ box-shadow:var(--shadow); }
+    .project:hover{ box-shadow:var(--shadow-press); }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <nav class="nav" aria-label="주요 내비게이션">
+      <a class="wordmark" href="#top" aria-label="STUDIO KRFT 홈">
+        <span class="mark">K</span>STUDIO&nbsp;KRFT
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#work">Work</a>
+        <a class="nav-link" href="#studio">Studio</a>
+        <a class="nav-link" href="#clients">Clients</a>
+        <a class="btn btn--primary" href="#contact">Start a project</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-main">
+          <p class="eyebrow">Independent Design Studio · Seoul</p>
+          <h1 class="display">
+            We make<br>
+            brands<br>
+            <span class="accent-word">impossible</span><br>
+            to ignore.
+          </h1>
+          <p class="hero-lead">
+            브랜딩, 웹, 모션, 타입 디자인을 다루는 독립 스튜디오입니다.
+            정돈된 화면 대신, 멀리서도 읽히는 대담한 시스템을 만듭니다.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn--primary btn--lg" href="#work">Selected work</a>
+            <a class="btn btn--ghost btn--lg" href="#contact">Start a project</a>
+          </div>
+        </div>
+        <aside class="hero-stat" aria-label="스튜디오 실적">
+          <div class="num">128</div>
+          <div class="label">Projects shipped · since 2014</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="strip" aria-hidden="true">
+    <div class="marquee">
+      <span>Branding</span><span class="dot">/</span>
+      <span>Web</span><span class="dot">/</span>
+      <span>Motion</span><span class="dot">/</span>
+      <span>Typeface</span><span class="dot">/</span>
+      <span>Packaging</span><span class="dot">/</span>
+      <span>Editorial</span><span class="dot">/</span>
+      <span>Branding</span><span class="dot">/</span>
+      <span>Web</span><span class="dot">/</span>
+      <span>Motion</span><span class="dot">/</span>
+      <span>Typeface</span><span class="dot">/</span>
+      <span>Packaging</span><span class="dot">/</span>
+      <span>Editorial</span><span class="dot">/</span>
+    </div>
+  </div>
+
+  <!-- WORK -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="sec-index">[ 01 — Selected Work ]</p>
+          <h2 class="display">Six loud things</h2>
+        </div>
+        <a class="btn" href="#contact">All projects</a>
+      </div>
+
+      <div class="projects">
+        <a class="project p-a" href="#work" aria-label="Mono Grotesk — Type / Identity">
+          <div class="thumb thumb--ink">MG</div>
+          <div class="meta">
+            <span class="name">Mono Grotesk</span>
+            <span class="cat">Type<br>Identity</span>
+          </div>
+        </a>
+        <a class="project p-b" href="#work" aria-label="Hangang Fest — Branding">
+          <div class="thumb thumb--gray">HF</div>
+          <div class="meta">
+            <span class="name">Hangang Fest</span>
+            <span class="cat">Branding</span>
+          </div>
+        </a>
+        <a class="project p-c" href="#work" aria-label="Volt Energy — Web / Motion">
+          <div class="thumb thumb--dark">VE</div>
+          <div class="meta">
+            <span class="name">Volt Energy</span>
+            <span class="cat">Web<br>Motion</span>
+          </div>
+        </a>
+        <a class="project p-d" href="#work" aria-label="Paper Oak — Packaging">
+          <div class="thumb thumb--gray">PO</div>
+          <div class="meta">
+            <span class="name">Paper Oak</span>
+            <span class="cat">Package</span>
+          </div>
+        </a>
+        <a class="project p-e" href="#work" aria-label="Nord Atlas — Editorial">
+          <div class="thumb thumb--ink">NA</div>
+          <div class="meta">
+            <span class="name">Nord Atlas</span>
+            <span class="cat">Editorial</span>
+          </div>
+        </a>
+        <a class="project p-f" href="#work" aria-label="Signal OS — Product UI">
+          <div class="thumb thumb--gray">SO</div>
+          <div class="meta">
+            <span class="name">Signal OS</span>
+            <span class="cat">Product</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDIO / ABOUT -->
+  <section class="section section--gray" id="studio">
+    <div class="wrap">
+      <p class="sec-index" style="margin-bottom:var(--sp-6)">[ 02 — The Studio ]</p>
+      <div class="about-grid">
+        <div>
+          <h2 class="display">No decoration.<br>Just structure,<br>scale &amp; nerve.</h2>
+          <p>
+            KRFT 는 흑·백·회색의 규율 위에 원색 한 방울만 얹는 스튜디오입니다.
+            색으로 꾸미지 않고, 구조와 크기와 두꺼운 보더로 브랜드를 세웁니다.
+          </p>
+          <p>
+            10명 규모의 팀이 전략부터 타입, 인터랙션까지 한 손으로 마감합니다.
+            시작은 대담하게, 마감은 프로덕션급으로.
+          </p>
+          <div class="services" aria-label="서비스 목록">
+            <div class="service-row">
+              <span class="s-name">Brand Systems</span>
+              <span class="s-tags">Strategy · Identity · Guidelines</span>
+            </div>
+            <div class="service-row">
+              <span class="s-name">Digital &amp; Web</span>
+              <span class="s-tags">Design · Build · Motion</span>
+            </div>
+            <div class="service-row">
+              <span class="s-name">Type &amp; Print</span>
+              <span class="s-tags">Typeface · Editorial · Packaging</span>
+            </div>
+          </div>
+        </div>
+        <div class="stats" aria-label="스튜디오 지표">
+          <div class="stat-cell"><div class="n">128</div><div class="t">Projects</div></div>
+          <div class="stat-cell"><div class="n">12</div><div class="t">Years</div></div>
+          <div class="stat-cell"><div class="n">09</div><div class="t">Awards</div></div>
+          <div class="stat-cell"><div class="n">40</div><div class="t">Clients</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTS -->
+  <section class="section" id="clients">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="sec-index">[ 03 — Selected Clients ]</p>
+          <h2 class="display">Trusted by</h2>
+        </div>
+      </div>
+      <div class="clients" aria-label="클라이언트 로고">
+        <div class="client">Neue</div>
+        <div class="client">Orbit</div>
+        <div class="client">Flux</div>
+        <div class="client">Kore</div>
+        <div class="client">Mass</div>
+        <div class="client">Atlas</div>
+        <div class="client">Pivot</div>
+        <div class="client">Grid&nbsp;Co</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT CTA -->
+  <section class="cta on-dark" id="contact">
+    <div class="wrap">
+      <div class="cta-grid">
+        <div>
+          <p class="eyebrow" style="color:var(--gray-100)">[ 04 — Let's talk ]</p>
+          <h2 class="display">Let's<br>make it<br><span class="u">loud.</span></h2>
+          <p class="cta-mail">
+            직접 쓰고 싶다면 <a href="mailto:hello@studiokrft.co">hello@studiokrft.co</a>
+          </p>
+        </div>
+        <form class="form-block" onsubmit="return false" aria-label="프로젝트 문의">
+          <div class="field">
+            <label for="email">Your email</label>
+            <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email">
+            <p class="help">보통 하루 안에 회신드립니다. 스팸 없음.</p>
+          </div>
+          <div class="cta-actions">
+            <button class="btn btn--accent btn--lg" type="submit">Send inquiry →</button>
+            <button class="btn btn--lg" type="button" disabled aria-disabled="true">Q1 2025 — Booked</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <span class="fw">STUDIO&nbsp;KRFT</span>
+      <span class="stamp">포트폴리오<span class="sep">·</span>브루탈리즘</span>
+      <span class="rights">© 2026 Studio KRFT — All rights reserved</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

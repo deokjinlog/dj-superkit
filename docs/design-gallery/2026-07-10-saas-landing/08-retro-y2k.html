@@ -1,0 +1,558 @@
+<title>Flowly — 레트로 Y2K</title>
+<style>
+  :root {
+    --magenta: #FF2E97;
+    --cyan: #00F0FF;
+    --lime: #C6FF00;
+    --purple: #B026FF;
+    --deep: #0a0025;
+    --deep2: #170042;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--deep);
+    color: #EAFBFF;
+    font-family: "Courier New", "Trebuchet MS", monospace, sans-serif;
+  }
+
+  /* ---------- background: stars + scanlines + grid floor ---------- */
+  .bg-stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 120px 90px, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 220px 40px, var(--cyan), transparent),
+      radial-gradient(2px 2px at 300px 150px, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 400px 60px, var(--magenta), transparent),
+      radial-gradient(1.5px 1.5px at 60px 220px, #fff, transparent),
+      radial-gradient(2px 2px at 340px 260px, var(--lime), transparent),
+      radial-gradient(1.5px 1.5px at 160px 300px, #fff, transparent);
+    background-repeat: repeat;
+    background-size: 420px 340px;
+    opacity: 0.7;
+  }
+  .bg-scanlines {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.035) 0px,
+      rgba(255,255,255,0.035) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+    mix-blend-mode: screen;
+  }
+  .bg-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(5,0,20,0.75) 100%);
+  }
+
+  main, header, footer { position: relative; z-index: 2; }
+
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; margin: 0; padding: 0; }
+
+  .neon-text {
+    color: #fff;
+    text-shadow:
+      0 0 4px #fff,
+      0 0 10px var(--cyan),
+      0 0 22px var(--cyan),
+      0 0 44px rgba(0,240,255,0.5);
+  }
+  .neon-text-pink {
+    color: #fff;
+    text-shadow:
+      0 0 4px #fff,
+      0 0 10px var(--magenta),
+      0 0 22px var(--magenta),
+      0 0 44px rgba(255,46,151,0.5);
+  }
+
+  .chrome-text {
+    background: linear-gradient(180deg, #ffffff 0%, #b9e7ff 22%, #6fd6ff 45%, #ffffff 55%, #ff9ee9 72%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.4)) drop-shadow(0 0 18px rgba(176,38,255,0.45));
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- header / nav ---------- */
+  header.site {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(180deg, rgba(10,0,37,0.95), rgba(10,0,37,0.75));
+    border-bottom: 2px solid var(--cyan);
+    box-shadow: 0 0 18px rgba(0,240,255,0.35), 0 2px 0 rgba(255,46,151,0.4);
+    backdrop-filter: blur(6px);
+  }
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-family: "Trebuchet MS", sans-serif;
+    font-weight: 900;
+    font-size: 1.7rem;
+    letter-spacing: 1px;
+  }
+  .logo::before { content: "✦ "; color: var(--lime); text-shadow: 0 0 10px var(--lime); }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  .nav-links a {
+    color: #d9f5ff;
+    padding: 6px 4px;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+  }
+  .nav-links a:hover {
+    color: var(--cyan);
+    border-bottom: 2px solid var(--cyan);
+    text-shadow: 0 0 8px var(--cyan);
+  }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+
+  /* ---------- Y2K beveled buttons ---------- */
+  .btn {
+    display: inline-block;
+    font-family: "Trebuchet MS", sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 13px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    position: relative;
+    border: none;
+  }
+  .btn-primary {
+    color: #12002a;
+    background: linear-gradient(180deg, #ffffff 0%, var(--lime) 35%, #7fdb00 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,0.9),
+      inset 0 -6px 10px rgba(0,0,0,0.25),
+      0 0 18px rgba(198,255,0,0.55),
+      0 4px 0 #5a9c00;
+    transition: transform 0.12s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-primary:active { transform: translateY(1px); box-shadow: inset 0 2px 3px rgba(255,255,255,0.9), inset 0 -3px 6px rgba(0,0,0,0.25), 0 0 12px rgba(198,255,0,0.5); }
+
+  .btn-ghost {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+    border: 2px solid var(--cyan);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 0 14px rgba(0,240,255,0.4);
+  }
+  .btn-ghost:hover { background: rgba(0,240,255,0.15); }
+
+  .btn-small { padding: 9px 18px; font-size: 0.85rem; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 96px 0 90px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    /* synthwave perspective grid floor */
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -10%;
+    width: 220%;
+    height: 60%;
+    transform: translateX(-50%) perspective(300px) rotateX(58deg);
+    background-image:
+      repeating-linear-gradient(to right, rgba(255,46,151,0.55) 0 2px, transparent 2px 60px),
+      repeating-linear-gradient(to bottom, rgba(0,240,255,0.45) 0 2px, transparent 2px 44px);
+    mask-image: linear-gradient(to top, black 20%, transparent 92%);
+    -webkit-mask-image: linear-gradient(to top, black 20%, transparent 92%);
+    opacity: 0.85;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 1; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--magenta);
+    background: rgba(255,46,151,0.12);
+    color: #ffd6ec;
+    box-shadow: 0 0 14px rgba(255,46,151,0.45);
+    margin-bottom: 30px;
+  }
+  .badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 8px var(--lime), 0 0 16px var(--lime);
+  }
+
+  h1.headline {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0 0 26px;
+    letter-spacing: 0.5px;
+  }
+  .sub {
+    max-width: 640px;
+    margin: 0 auto 40px;
+    font-size: 1.08rem;
+    line-height: 1.75;
+    color: #cfeeff;
+  }
+  .hero-ctas {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .demo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cyan);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0,240,255,0.6);
+  }
+  .demo-link::before { content: "▶"; font-size: 0.75em; }
+
+  /* ---------- sections ---------- */
+  section { padding: 88px 0; position: relative; }
+  .section-title {
+    text-align: center;
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    font-weight: 900;
+    margin: 0 0 54px;
+    letter-spacing: 0.5px;
+  }
+  .section-title .star { color: var(--lime); text-shadow: 0 0 10px var(--lime); }
+
+  .divider {
+    height: 3px;
+    max-width: 1180px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), var(--lime), transparent);
+    box-shadow: 0 0 12px rgba(0,240,255,0.5);
+    opacity: 0.7;
+  }
+
+  /* feature cards */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: linear-gradient(160deg, rgba(30,0,60,0.85), rgba(10,0,35,0.9));
+    border: 2px solid rgba(0,240,255,0.4);
+    border-radius: 18px;
+    padding: 32px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--purple));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .card-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    background: radial-gradient(circle at 30% 30%, #fff2, transparent 60%), linear-gradient(135deg, var(--purple), var(--magenta));
+    box-shadow: 0 0 22px rgba(176,38,255,0.55);
+  }
+  .card h3 {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 1.25rem;
+    margin: 0 0 12px;
+    color: #fff;
+  }
+  .card p {
+    font-size: 0.96rem;
+    line-height: 1.7;
+    color: #cfeeff;
+    margin: 0;
+  }
+
+  /* pricing */
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    align-items: stretch;
+  }
+  @media (max-width: 900px) {
+    .plans { grid-template-columns: 1fr; }
+  }
+  .plan {
+    background: linear-gradient(160deg, rgba(20,0,45,0.9), rgba(6,0,24,0.95));
+    border: 2px solid rgba(255,46,151,0.35);
+    border-radius: 20px;
+    padding: 34px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+  }
+  .plan.pro {
+    border-color: var(--lime);
+    box-shadow: 0 0 28px rgba(198,255,0,0.35), inset 0 0 30px rgba(198,255,0,0.06);
+    transform: translateY(-8px);
+  }
+  @media (max-width: 900px) { .plan.pro { transform: none; } }
+  .plan-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #fff, var(--lime));
+    color: #12002a;
+    font-weight: 900;
+    font-size: 0.75rem;
+    padding: 5px 16px;
+    border-radius: 999px;
+    box-shadow: 0 0 14px rgba(198,255,0,0.7);
+    white-space: nowrap;
+  }
+  .plan h3 {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 1.3rem;
+    margin: 6px 0 0;
+    color: #fff;
+  }
+  .price {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 2.1rem;
+    font-weight: 900;
+  }
+  .price span { font-size: 0.95rem; font-weight: 700; color: #a8c8d8; }
+  .plan ul { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .plan ul li {
+    font-size: 0.92rem;
+    color: #d8f3ff;
+    padding-left: 22px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .plan ul li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    text-shadow: 0 0 6px var(--cyan);
+  }
+  .plan .btn { width: 100%; text-align: center; }
+
+  /* closing CTA */
+  .cta-final {
+    text-align: center;
+    padding: 100px 0;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(176,38,255,0.35), transparent 60%),
+      linear-gradient(180deg, transparent, rgba(255,46,151,0.06));
+    border-top: 2px solid rgba(0,240,255,0.3);
+    border-bottom: 2px solid rgba(0,240,255,0.3);
+  }
+  .cta-final h2 {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    margin: 0 0 20px;
+  }
+  .cta-final p {
+    font-size: 1.05rem;
+    color: #cfeeff;
+    margin: 0 0 36px;
+  }
+
+  footer.site {
+    padding: 40px 0 60px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #8fb3c2;
+  }
+  footer.site a {
+    margin: 0 8px;
+    color: #8fb3c2;
+    border-bottom: 1px dotted #8fb3c2;
+  }
+  footer.site a:hover { color: var(--cyan); border-color: var(--cyan); }
+  footer .fstar { color: var(--magenta); }
+
+  @media (max-width: 480px) {
+    .hero { padding: 70px 0 60px; }
+    section { padding: 64px 0; }
+    .nav-links { gap: 16px; font-size: 0.85rem; }
+  }
+</style>
+
+<div class="bg-stars"></div>
+<div class="bg-scanlines"></div>
+<div class="bg-vignette"></div>
+
+<header class="site">
+  <div class="container nav-row">
+    <div class="logo chrome-text">Flowly</div>
+    <ul class="nav-links">
+      <li><a href="#features">기능</a></li>
+      <li><a href="#pricing">요금제</a></li>
+      <li><a href="#customers">고객사</a></li>
+      <li><a href="#login">로그인</a></li>
+    </ul>
+    <div class="nav-right">
+      <a class="btn btn-primary btn-small" href="#start">무료로 시작</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="badge"><span class="dot"></span>이미 12,000+ 팀이 Flowly로 일합니다</span>
+      <h1 class="headline chrome-text">팀의 모든 일이,<br />한 곳에서 흐르게</h1>
+      <p class="sub">흩어진 할 일·문서·대화를 하나로. 누가 무엇을 언제까지 하는지 한눈에 봅니다.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#start">무료로 시작하기</a>
+        <a class="demo-link" href="#demo">2분 데모 보기</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="features">
+    <div class="container">
+      <h2 class="section-title"><span class="star">✦</span> 흐름을 만드는 3가지 <span class="star">✦</span></h2>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">🗂️</div>
+          <h3 class="neon-text">칸반 보드</h3>
+          <p>드래그 한 번으로 진행 상황을 정리하세요. 누가 뭘 맡고 있는지 실시간으로 보입니다.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <h3 class="neon-text-pink">스마트 타임라인</h3>
+          <p>마감과 의존 관계를 한 화면에. 일정이 밀리기 전에 위험을 미리 봅니다.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3 class="neon-text">규칙 자동화</h3>
+          <p>반복 작업은 규칙에 맡기세요. 상태가 바뀌면 알림과 담당 배정이 자동으로.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="pricing">
+    <div class="container">
+      <h2 class="section-title"><span class="star">✦</span> 팀 크기에 맞게 <span class="star">✦</span></h2>
+      <div class="plans">
+        <div class="plan">
+          <h3>Free</h3>
+          <div class="price">₩0</div>
+          <ul>
+            <li>최대 5명</li>
+            <li>보드 3개</li>
+            <li>기본 통합</li>
+          </ul>
+          <a class="btn btn-ghost" href="#start">무료로 시작</a>
+        </div>
+        <div class="plan pro">
+          <span class="plan-badge">가장 인기</span>
+          <h3>Pro</h3>
+          <div class="price">₩12,000<span> /인·월</span></div>
+          <ul>
+            <li>무제한 보드</li>
+            <li>타임라인</li>
+            <li>자동화</li>
+            <li>우선순위 정렬</li>
+          </ul>
+          <a class="btn btn-primary" href="#start">Pro 시작하기</a>
+        </div>
+        <div class="plan">
+          <h3>Business</h3>
+          <div class="price">₩24,000<span> /인·월</span></div>
+          <ul>
+            <li>SSO</li>
+            <li>고급 권한</li>
+            <li>감사 로그</li>
+            <li>전담 지원</li>
+          </ul>
+          <a class="btn btn-ghost" href="#sales">영업팀 문의</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-final" id="start">
+    <div class="container">
+      <h2 class="chrome-text">오늘부터 팀의 흐름을 바꿔보세요</h2>
+      <p>14일 무료 체험. 카드 등록 없이 시작합니다.</p>
+      <a class="btn btn-primary" href="#start">무료로 시작하기</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="container">
+    <span class="fstar">✦</span> © 2026 Flowly
+    <a href="#terms">이용약관</a> · <a href="#privacy">개인정보</a> · <a href="#contact">문의</a>
+  </div>
+</footer>

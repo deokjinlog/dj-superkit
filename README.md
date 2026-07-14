@@ -10,7 +10,7 @@
 <br/>
 
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-7c3aed?style=for-the-badge&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-7c3aed?style=for-the-badge&labelColor=0d1117">
   <img alt="Upstream" src="https://img.shields.io/badge/upstream-superpowers%205.0.7-f97316?style=for-the-badge&labelColor=0d1117">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge&labelColor=0d1117">
   <img alt="Language" src="https://img.shields.io/badge/lang-한국어-3b82f6?style=for-the-badge&labelColor=0d1117">
@@ -19,7 +19,7 @@
 
 <p>
   <img alt="Commands" src="https://img.shields.io/badge/commands-12-06b6d4?style=flat-square&labelColor=0d1117">
-  <img alt="Skills" src="https://img.shields.io/badge/skills-28-06b6d4?style=flat-square&labelColor=0d1117">
+  <img alt="Skills" src="https://img.shields.io/badge/skills-27-06b6d4?style=flat-square&labelColor=0d1117">
   <img alt="Zero deps" src="https://img.shields.io/badge/dependencies-zero-22c55e?style=flat-square&labelColor=0d1117">
 </p>
 
@@ -185,7 +185,7 @@ PR 리뷰 시 `grep "# RISK"` 한 줄로 catch.
 
 ## 파워 기능
 
-4 단계 루프 위에, 실무에서 진짜 시간을 줄여 주는 세 가지가 얹혀 있어요.
+4 단계 루프 위에, 실무에서 진짜 시간을 줄여 주는 기능들이 얹혀 있어요.
 
 ### ① 서브에이전트 모드 — 계획서 그대로 복붙 + 자동 병렬
 
@@ -269,45 +269,6 @@ flowchart LR
 
 <br/>
 
-### ③ 도메인 하나로, 디자인 30 스타일을 한 번에 — `design-style-explorer`
-
-> *"새 화면 디자인 방향을 정해야 하는데, AI로 뽑으면 매번 비슷하게 생겨요"*
-
-도메인 하나(예: 이커머스 셀러 대시보드)를 주면 **같은 화면을 30가지 디자인 스타일로** 한 번에 뽑아 갤러리로 비교하게 해줍니다. **콘텐츠는 고정, 시각 언어만 30가지** — 순수하게 디자인만 비교돼요.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**🎨 30개 전용 프롬프트 (팔레트)**
-
-각 스타일이 매력 축·팔레트(hex)·타이포·시그니처·**금지 목록**·크리틱 루프까지 튜닝된 프롬프트예요. 무작위가 아니라 스타일마다 확실히 달라집니다.
-
-- 실무 다빈도: 트렌디 SaaS · 머티리얼 · 벤토 · 컬러풀 모던 · AI 프로덕트 · 엔터프라이즈 B2B · 핀테크 소프트 · 헬스케어 · 접근성 · 다크 대시보드 · 다크 미니멀 · 데이터 리치 · 공공포털 · 커머스 · 웜 프로
-- 창조·개성: SF HUD · 브루탈리즘 · 글래스 · 뉴모 · 클레이 · 오로라 · 럭셔리 다크 · 에디토리얼 · 네이처 · 미니멀 모노 · 스위스 · 맥시멀 · Y2K · 레트로 픽셀 · 터미널
-
-</td>
-<td width="50%" valign="top">
-
-**⚙️ 실무 품질 자동 보장**
-
-- **실무 프론트 그라운딩** — 8px 그리드·컴포넌트 상태(hover/focus)·CSS 변수 (Linear/Stripe 마감). AI-generic 티 제거
-- **린트 게이트** — 각 스타일 금지 규칙 자동 검사 (브루탈리즘에 그라디언트 있으면 FAIL → 수정 → 재린트)
-- **콘텐츠 견고성** — 큰 숫자·긴 제목·결측·빈 상태 등 "최악 콘텐츠"로 스트레스 테스트
-- **개인 실명 금지** — 브랜드·역할·이니셜만
-
-</td>
-</tr>
-</table>
-
-**워크플로**: 도메인 → 대표 화면 × 여러 스타일로 **방향 결정** → 그 방향으로 화면 세트 일관 생성 → **디자인 시스템 역추출** (이후 화면은 그 규칙대로). 30개를 병렬로 한 번에 뽑고 iframe 갤러리로 한눈에 비교해요.
-
-말로 부르면 떠요: *"디자인 시안 뽑아줘"* · *"30개 스타일로 보여줘"* · *"○○ 도메인 디자인 보여줘"*
-
-<sub>산출물은 <code>docs/design-gallery/&lt;날짜&gt;-&lt;도메인&gt;/</code> 에 <code>.html</code> 시안 + 비교 갤러리로 쌓여요 (<code>.html</code>은 사람용 파생 뷰, gitignore).</sub>
-
-<br/>
-
 ### 그 외 — 자동 흐름 · 잡일 묶기 · 배포 전 감사
 
 **`/auto-brainstorming` — 한 번에 끝까지 자동 진행.** 친숙한 영역 / 작은 ~ 중간 피처일 때. clarifying Q 1~5 개만 답하면 PRD → 기술설계 → 구현계획 → 실행까지 4 단계를 자동으로 돌리되, 변경이력 · 위험 주석 · 3 개 MD 산출물은 그대로 챙기고 마지막에 서브에이전트 병렬 실행까지 이어져요.
@@ -367,12 +328,11 @@ dj-superkit 는 **두 가지 방식**으로 움직여요.
 | `writing-plans` | "구현 계획 짜줘" · "plan 작성하자" | 구현계획.md |
 | `executing-plans` | "이 계획대로 구현해줘" | 코드 + 변경이력 + 위험 주석 |
 | `auto-brainstorming` | "자동으로 끝까지 해줘" | 4 단계 자동 진행 |
-| `design-style-explorer` | "디자인 시안 뽑아줘" · "30개 스타일 비교" · "○○ 도메인 디자인 보여줘" | 30스타일 HTML + 비교 갤러리 |
 | `systematic-debugging` | "이 버그 왜 이러지" · "테스트 자꾸 실패" | 체계적 디버깅 |
 | `requesting-code-review` | "이 코드 리뷰해줘" | 리뷰 |
 | `finishing-a-development-branch` | "개발 끝났어 마무리하자" | 테스트 게이트 + 정리 |
 
-> 정확한 주문이 아니라 **의도**로 떠요. "디자인 시안 뽑아줘"든 "30개 스타일 보여줘"든 뜻만 통하면 발동. 100% 확실히 하려면 슬래시 `/design-style-explorer` 처럼 직접 부르면 돼요.
+> 정확한 주문이 아니라 **의도**로 떠요. "이 버그 왜 이러지"든 "테스트 자꾸 실패한다"든 뜻만 통하면 발동. 100% 확실히 하려면 슬래시 `/systematic-debugging` 처럼 직접 부르면 돼요.
 
 #### 명령어 — 슬래시로만 (자동 발동 X)
 
@@ -391,7 +351,7 @@ dj-superkit 는 **두 가지 방식**으로 움직여요.
 > 워크트리는 Claude Code 내장 `--worktree` 를 사용하세요.
 
 <details>
-<summary><b>전체 Skill 28 개 펼쳐 보기</b></summary>
+<summary><b>전체 Skill 27 개 펼쳐 보기</b></summary>
 
 <br/>
 
@@ -410,8 +370,6 @@ dj-superkit 는 **두 가지 방식**으로 움직여요.
 **테스트·디버깅 (2)** — test-driven-development / systematic-debugging
 
 **리뷰·마무리 (3)** — requesting-code-review / receiving-code-review / finishing-a-development-branch
-
-**디자인 (1)** — design-style-explorer
 
 **API 테스트 (1)** — api-auto-testing
 
@@ -567,7 +525,7 @@ def withdraw(user_id, amount):
 
 ## 버전 마일스톤
 
-버전은 `plugin.json` 의 semver 하나로 관리해요 — 마켓플레이스 배포 버전 · git 태그 · 아래 마일스톤이 모두 같은 축입니다. 지금은 **v1.1.0**.
+버전은 `plugin.json` 의 semver 하나로 관리해요 — 마켓플레이스 배포 버전 · git 태그 · 아래 마일스톤이 모두 같은 축입니다. 지금은 **v1.2.0**.
 
 <details open>
 <summary><b>최근 릴리즈</b></summary>
@@ -576,6 +534,7 @@ def withdraw(user_id, amount):
 
 | 버전 | 무엇이 바뀌었나요 |
 |---|---|
+| **v1.2.0** | `design-style-explorer` → 별도 플러그인 **[design-kit](https://github.com/deokjinlog/design-kit)** 으로 분리. dj-superkit 은 프로덕션 코드 워크플로에 집중 |
 | **v1.1.0** | `devlog` 스킬 제거 + README 재구성(핵심 4단계 루프 우선) + **버전 축 통일** — semver 하나로 정리, 옛 태그 정돈 |
 | **v1.0.0** | **정식 버전** — 안정 릴리즈 |
 | **v0.26.0** | `design-style-explorer` README 쇼케이스 섹션 |
@@ -620,6 +579,10 @@ def withdraw(user_id, amount):
 <br/>
 
 <sub>버그 / 제안: <a href="https://github.com/deokjinlog/dj-superkit/issues">GitHub Issues</a></sub>
+
+<br/>
+
+<sub>🎨 디자인 방향 탐색이 필요하면 → <a href="https://github.com/deokjinlog/design-kit">design-kit</a></sub>
 
 <br/>
 

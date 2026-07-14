@@ -1,0 +1,477 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProGuild · 팀 자산 리포트</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0E0D0B;
+    --panel:#171512;
+    --panel-hi:#1C1915;
+    --gold:#C9A96A;
+    --gold-bright:#E5CFA3;
+    --ivory:#EDE8DF;
+    --muted:#8A8477;
+    --down:#B0665C;
+    --active:#8CA07C;        /* 진행계열 — 채도 낮춘 세이지 */
+    --hair: rgba(201,169,106,.25);
+    --hair-soft: rgba(201,169,106,.14);
+    --serif:"Cormorant Garamond", "Pretendard", serif;
+    --sans:"Pretendard", system-ui, sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ivory);
+    font-family:var(--sans);
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    letter-spacing:.005em;
+  }
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:clamp(28px,5vw,64px) clamp(20px,4vw,52px) 64px;
+  }
+
+  .num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
+
+  /* ── 소형 대문자 레이블 ── */
+  .label{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ── 그려지는 골드 헤어라인 (시그니처) ── */
+  .rule{
+    height:1px;
+    background:var(--hair);
+    transform-origin:left center;
+    animation:drawline 640ms ease-out both;
+  }
+
+  /* ══ 헤더 ══ */
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+    padding-bottom:18px;
+  }
+  .brand{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(34px,5.4vw,46px);
+    line-height:1;
+    color:var(--ivory);
+    letter-spacing:.01em;
+  }
+  .brand .g{color:var(--gold)}
+  .updated{ text-align:right; padding-bottom:4px }
+  .updated .stamp{
+    font-family:var(--serif);
+    font-size:20px;
+    color:var(--ivory);
+    letter-spacing:.02em;
+  }
+  header + .rule{ margin:0 0 40px; animation-delay:0ms }
+
+  /* ══ KPI ══ */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+    border-top:1px solid var(--hair-soft);
+    border-bottom:1px solid var(--hair-soft);
+  }
+  .kpi{
+    position:relative;
+    padding:26px 24px 28px;
+    border-left:1px solid var(--hair-soft);
+    transition:background 360ms ease-out;
+    overflow:hidden;
+  }
+  .kpi:first-child{border-left:none}
+  .kpi::before{ /* 위에서 떨어지는 조명 */
+    content:"";
+    position:absolute; inset:0 0 auto 0; height:90px;
+    background:linear-gradient(180deg, rgba(201,169,106,.06), transparent);
+    pointer-events:none;
+  }
+  .kpi::after{ /* hover 시 선명해지는 좌측 헤어라인 */
+    content:"";
+    position:absolute; left:-1px; top:0; bottom:0; width:1px;
+    background:var(--gold);
+    opacity:0;
+    transition:opacity 360ms ease-out;
+  }
+  .kpi:hover{ background:var(--panel-hi) }
+  .kpi:hover::after{ opacity:.5 }
+  .kpi .label{ display:block; margin-bottom:14px; position:relative }
+  .kpi .value{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(48px,6vw,64px);
+    line-height:.98;
+    color:var(--ivory);
+    position:relative;
+    animation:fadein 620ms ease-out both;
+  }
+  .kpi .value small{ font-size:.42em; color:var(--muted); margin-left:.15em; letter-spacing:.02em }
+  .kpi .delta{
+    margin-top:12px;
+    font-size:12px;
+    letter-spacing:.03em;
+    color:var(--muted);
+    position:relative;
+    animation:fadein 620ms ease-out both;
+  }
+  .kpi .delta .up{ color:var(--gold) }
+  .kpi .delta .sub{ color:var(--muted) }
+
+  /* KPI 순차 페이드 (0.6s~) */
+  .kpi:nth-child(1) .value{animation-delay:.60s}
+  .kpi:nth-child(1) .delta{animation-delay:.72s}
+  .kpi:nth-child(2) .value{animation-delay:.75s}
+  .kpi:nth-child(2) .delta{animation-delay:.87s}
+  .kpi:nth-child(3) .value{animation-delay:.90s}
+  .kpi:nth-child(3) .delta{animation-delay:1.02s}
+  .kpi:nth-child(4) .value{animation-delay:1.05s}
+  .kpi:nth-child(4) .delta{animation-delay:1.17s}
+
+  /* ══ 패널 공통 ══ */
+  .panel{
+    position:relative;
+    margin-top:40px;
+    background:linear-gradient(180deg, rgba(201,169,106,.06), transparent 120px), var(--panel);
+    border:1px solid var(--hair);
+    padding:30px clamp(22px,3.2vw,38px) 34px;
+  }
+  .panel-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+    margin-bottom:26px;
+  }
+  .panel-head .label{color:var(--muted)}
+  .panel-head .note{ font-family:var(--serif); font-size:17px; color:var(--gold); font-style:italic }
+
+  /* ══ 차트 ══ */
+  .chart{
+    display:flex;
+    align-items:flex-end;
+    gap:clamp(8px,1.8vw,20px);
+    height:230px;
+    padding-top:34px;                 /* 피크 라벨 여유 */
+    border-bottom:1px solid var(--hair);
+  }
+  .col{
+    position:relative;
+    flex:1;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    cursor:default;
+  }
+  .bar{
+    width:100%;
+    max-width:52px;
+    margin:0 auto;
+    height:var(--h);
+    background:linear-gradient(180deg, rgba(201,169,106,.22), rgba(201,169,106,.05));
+    border-top:1px solid var(--hair);
+    transform-origin:bottom center;
+    animation:grow 700ms ease-out both;
+    animation-delay:calc(1.2s + var(--i) * .05s);
+  }
+  .col.peak .bar{
+    background:linear-gradient(180deg, rgba(201,169,106,.34), rgba(201,169,106,.08));
+  }
+  .cap{ /* 피크 상단 밝은 골드 캡 (2.0s 점등) */
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:calc(100% - var(--h) - 1px);
+    width:100%; max-width:52px; height:2px;
+    background:var(--gold-bright);
+    opacity:0;
+    animation:fadein 520ms ease-out both;
+    animation-delay:2.0s;
+  }
+  .peak-tag{
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:6px;
+    font-family:var(--serif); font-style:italic; font-size:16px;
+    color:var(--gold-bright);
+    white-space:nowrap;
+    animation:fadein 520ms ease-out both; animation-delay:2.0s;
+  }
+  .bar-value{ /* hover 시 조용히 뜨는 세리프 이탤릭 수치 */
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:calc(100% - var(--h) - 28px);
+    font-family:var(--serif); font-style:italic; font-size:19px;
+    color:var(--ivory);
+    opacity:0;
+    transition:opacity 360ms ease-out;
+    pointer-events:none;
+  }
+  .col:hover .bar-value{ opacity:1 }
+  .col.peak:hover .bar-value{ opacity:0 } /* 피크는 상시 라벨이 이미 존재 */
+  .xlabels{
+    display:flex; gap:clamp(8px,1.8vw,20px);
+    margin-top:14px;
+  }
+  .xlabels span{
+    flex:1; text-align:center;
+    font-size:11px; letter-spacing:.08em; color:var(--muted);
+  }
+
+  /* ══ 테이블 ══ */
+  .roster{ width:100%; border-collapse:collapse }
+  .roster thead th{
+    font-family:var(--sans); font-size:11px; font-weight:500;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    text-align:left; padding:0 14px 14px;
+    border-bottom:1px solid var(--hair);
+  }
+  .roster th.r, .roster td.r{ text-align:right }
+  .roster tbody td{
+    padding:17px 14px;
+    border-bottom:1px solid var(--hair-soft);
+    color:var(--ivory);
+    font-size:15px;
+    vertical-align:middle;
+  }
+  .roster tbody tr{ position:relative }
+  .roster tbody tr::after{ /* row hover: 좌→우로 그어지는 골드 헤어라인 */
+    content:""; position:absolute; left:0; bottom:-1px; height:1px;
+    width:100%; background:var(--gold);
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform 380ms ease-out;
+  }
+  .roster tbody tr:hover::after{ transform:scaleX(1) }
+  .roster tbody tr:hover td{ background:rgba(28,25,21,.6) }
+  .player{ font-family:var(--serif); font-size:20px; color:var(--ivory); letter-spacing:.01em }
+  .pos{ color:var(--muted); font-size:13.5px; letter-spacing:.04em }
+  .kda{ font-family:var(--serif); font-size:20px; color:var(--ivory) }
+
+  /* 폼 방향 */
+  .form{ font-size:13.5px; letter-spacing:.04em; color:var(--muted); white-space:nowrap }
+  .form .tri{ font-size:10px; margin-right:6px; vertical-align:1px }
+  .form.up .tri{ color:var(--gold) }
+  .form.down .tri{ color:var(--down) }
+  .form.flat .tri{ color:var(--muted) }
+
+  /* 상태 — 알약 금지: 색점 + 소형 대문자 텍스트 */
+  .stat{ display:inline-flex; align-items:center; gap:9px; white-space:nowrap }
+  .dot{ width:7px; height:7px; border-radius:50%; flex:none }
+  .stat .t{ font-size:11px; font-weight:500; letter-spacing:.11em; text-transform:uppercase; color:var(--ivory) }
+  .s-set  .dot{ background:var(--gold) }        /* 주전확정 — 완료계열 */
+  .s-set  .t{ color:var(--gold) }
+  .s-live .dot{ background:var(--active) }       /* 활성 — 진행계열 */
+  .s-down .dot{ background:var(--down) }          /* 폼저하 — 문제계열 */
+  .s-down .t{ color:var(--down) }
+  .s-wait .dot{ background:var(--muted) }         /* 로테이션대기 — 대기계열 */
+  .s-wait .t{ color:var(--muted) }
+
+  /* ══ 푸터 ══ */
+  footer{
+    margin-top:46px; padding-top:20px;
+    border-top:1px solid var(--hair-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  footer .sig{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted) }
+  footer .mark{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--gold) }
+
+  /* ══ 키프레임 ══ */
+  @keyframes drawline{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+  @keyframes fadein{ from{ opacity:0 } to{ opacity:1 } }
+  @keyframes grow{ from{ transform:scaleY(0) } to{ transform:scaleY(1) } }
+
+  /* ── 반응형 ── */
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr) }
+    .kpi:nth-child(3){ border-left:none }
+    .kpi:nth-child(1), .kpi:nth-child(2){ border-bottom:1px solid var(--hair-soft) }
+    .chart{ height:200px }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr }
+    .kpi{ border-left:none; border-bottom:1px solid var(--hair-soft) }
+    .kpi:last-child{ border-bottom:none }
+    .roster .hide-sm{ display:none }
+    .chart{ gap:5px; padding-top:30px }
+    .xlabels{ gap:5px }
+    header{ align-items:flex-start }
+    .updated{ text-align:left }
+  }
+
+  /* ── 모션 최소화 ── */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; transition:none !important }
+    .kpi .value, .kpi .delta, .cap, .peak-tag, .bar-value{ opacity:1 !important }
+    .rule{ transform:none !important }
+    .bar{ transform:none !important }
+    .roster tbody tr::after{ transform:scaleX(0) !important }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">Pro<span class="g">Guild</span></div>
+    <div class="updated">
+      <div class="label">갱신 시각</div>
+      <div class="stamp num">2026 · 07 · 10 &nbsp; 16:00</div>
+    </div>
+  </header>
+  <div class="rule"></div>
+
+  <!-- ── KPI ── -->
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <div class="kpi">
+      <span class="label">시즌 승률</span>
+      <div class="value num">68.4<small>%</small></div>
+      <div class="delta num">전주 대비 <span class="up">+3.2%p</span></div>
+    </div>
+    <div class="kpi">
+      <span class="label">리그 순위</span>
+      <div class="value num">2<small>위</small></div>
+      <div class="delta"><span class="up">▲ 1계단</span> 상승</div>
+    </div>
+    <div class="kpi">
+      <span class="label">누적 상금</span>
+      <div class="value num">1억 8,400<small>만원</small></div>
+      <div class="delta num"><span class="up">+2,300만원</span></div>
+    </div>
+    <div class="kpi">
+      <span class="label">다음 경기</span>
+      <div class="value num">D-2</div>
+      <div class="delta"><span class="sub">vs 팀 이클립스</span></div>
+    </div>
+  </section>
+
+  <!-- ── 차트 ── -->
+  <section class="panel" aria-label="최근 8주 승률">
+    <div class="panel-head">
+      <span class="label">최근 8주 승률 추이 <span class="num">(%)</span></span>
+      <span class="note">피크 · 6주 71%</span>
+    </div>
+
+    <div class="chart" role="img"
+         aria-label="주별 승률: 1주 52, 2주 58, 3주 61, 4주 55, 5주 64, 6주 71 피크, 7주 67, 8주 68 퍼센트">
+      <div class="col"      style="--h:34.3%; --i:0"><div class="bar-value num">52</div><div class="bar"></div></div>
+      <div class="col"      style="--h:51.4%; --i:1"><div class="bar-value num">58</div><div class="bar"></div></div>
+      <div class="col"      style="--h:60.0%; --i:2"><div class="bar-value num">61</div><div class="bar"></div></div>
+      <div class="col"      style="--h:42.9%; --i:3"><div class="bar-value num">55</div><div class="bar"></div></div>
+      <div class="col"      style="--h:68.6%; --i:4"><div class="bar-value num">64</div><div class="bar"></div></div>
+      <div class="col peak" style="--h:88.6%; --i:5">
+        <div class="peak-tag num">71</div>
+        <div class="cap"></div>
+        <div class="bar-value num">71</div>
+        <div class="bar"></div>
+      </div>
+      <div class="col"      style="--h:77.1%; --i:6"><div class="bar-value num">67</div><div class="bar"></div></div>
+      <div class="col"      style="--h:80.0%; --i:7"><div class="bar-value num">68</div><div class="bar"></div></div>
+    </div>
+    <div class="xlabels num" aria-hidden="true">
+      <span>1주</span><span>2주</span><span>3주</span><span>4주</span>
+      <span>5주</span><span>6주</span><span>7주</span><span>8주</span>
+    </div>
+  </section>
+
+  <!-- ── 로스터 ── -->
+  <section class="panel" aria-label="선수 로스터">
+    <div class="panel-head">
+      <span class="label">선수 로스터</span>
+      <span class="note">6인 엔트리</span>
+    </div>
+
+    <table class="roster">
+      <thead>
+        <tr>
+          <th>선수</th>
+          <th class="hide-sm">포지션</th>
+          <th class="r">KDA</th>
+          <th class="hide-sm">폼</th>
+          <th class="r">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="player">블레이즈</span></td>
+          <td class="hide-sm pos">엔트리</td>
+          <td class="r kda num">1.42</td>
+          <td class="hide-sm"><span class="form up"><span class="tri">▲</span>상승</span></td>
+          <td class="r"><span class="stat s-set"><span class="dot"></span><span class="t">주전확정</span></span></td>
+        </tr>
+        <tr>
+          <td><span class="player">프로스트</span></td>
+          <td class="hide-sm pos">서포터</td>
+          <td class="r kda num">0.98</td>
+          <td class="hide-sm"><span class="form flat"><span class="tri">—</span>유지</span></td>
+          <td class="r"><span class="stat s-live"><span class="dot"></span><span class="t">활성</span></span></td>
+        </tr>
+        <tr>
+          <td><span class="player">레이븐</span></td>
+          <td class="hide-sm pos">스나이퍼</td>
+          <td class="r kda num">1.67</td>
+          <td class="hide-sm"><span class="form up"><span class="tri">▲</span>상승</span></td>
+          <td class="r"><span class="stat s-set"><span class="dot"></span><span class="t">주전확정</span></span></td>
+        </tr>
+        <tr>
+          <td><span class="player">노바</span></td>
+          <td class="hide-sm pos">리퍼</td>
+          <td class="r kda num">0.71</td>
+          <td class="hide-sm"><span class="form down"><span class="tri">▼</span>하락</span></td>
+          <td class="r"><span class="stat s-down"><span class="dot"></span><span class="t">폼저하</span></span></td>
+        </tr>
+        <tr>
+          <td><span class="player">쿼츠</span></td>
+          <td class="hide-sm pos">인게이저</td>
+          <td class="r kda num">1.15</td>
+          <td class="hide-sm"><span class="form flat"><span class="tri">—</span>유지</span></td>
+          <td class="r"><span class="stat s-live"><span class="dot"></span><span class="t">활성</span></span></td>
+        </tr>
+        <tr>
+          <td><span class="player">에코</span></td>
+          <td class="hide-sm pos">플렉스</td>
+          <td class="r kda num">1.03</td>
+          <td class="hide-sm"><span class="form flat"><span class="tri">—</span>유지</span></td>
+          <td class="r"><span class="stat s-wait"><span class="dot"></span><span class="t">로테이션대기</span></span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span class="sig">STYLE 08 · 럭셔리 다크</span>
+    <span class="mark">오늘의 팀 자산 리포트</span>
+  </footer>
+
+</div>
+
+<script>
+  /* 순수 장식 — 실패해도 완성 화면은 위 CSS가 그대로 렌더한다 */
+  (function(){
+    try{
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      /* 폼 하락 행에만 아주 옅은 문제계열 톤을 얹어 소재감 강조 (가독성 비의존) */
+      document.querySelectorAll('.s-down').forEach(function(el){
+        var tr = el.closest('tr');
+        if (tr) tr.style.setProperty('background-image',
+          'linear-gradient(90deg, rgba(176,102,92,.05), transparent 40%)');
+      });
+    }catch(e){ /* no-op */ }
+  })();
+</script>

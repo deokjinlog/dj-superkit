@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핏펄스(FitPulse) 활동 통계포털 — 오늘의 활동 리포트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --navy:#00447C;
+    --navy-2:#2E6396;
+    --navy-3:#5D87AE;
+    --navy-4:#8CACC6;
+    --navy-5:#C4D6E3;
+    --thead:#E8F1F9;
+    --text:#1A1A1A;
+    --border:#D5DBE1;
+    --zebra:#FAFBFC;
+    --ok:#1A7F3C;
+    --bad:#C62828;
+    --wait:#9A6700;
+    --muted:#55606B;
+  }
+  *,*::before,*::after{ box-sizing:border-box; border-radius:0; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Pretendard", -apple-system, sans-serif;
+    font-size:13px;
+    line-height:1.65;
+    font-variant-numeric: tabular-nums;
+  }
+  a{ color:var(--navy); }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+  .skip-link{
+    position:absolute; left:-9999px; top:0; background:#fff; color:var(--navy);
+    padding:8px 14px; border:1px solid var(--navy); z-index:100;
+  }
+  .skip-link:focus{ left:12px; top:12px; }
+
+  /* ===== 상단 기관 헤더 바 ===== */
+  .topbar{ background:var(--navy); color:#fff; }
+  .topbar-inner{
+    max-width:1120px; margin:0 auto; padding:10px 20px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .topbar-brand{ font-weight:800; font-size:16px; letter-spacing:-0.2px; }
+  .topbar-brand small{ font-weight:400; font-size:11px; opacity:.85; margin-left:6px; }
+  .topbar-meta{ font-size:11px; opacity:.9; text-align:right; }
+
+  .pagehead{ background:#fff; border-bottom:1px solid var(--border); }
+  .pagehead-inner{
+    max-width:1120px; margin:0 auto; padding:16px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .pagehead h1{ margin:0; font-size:21px; font-weight:800; }
+  .pagehead .user-line{ font-size:12px; color:var(--muted); }
+  .pagehead .user-line strong{ color:var(--text); font-weight:700; }
+  .toolbar{ font-size:12px; }
+  .toolbar a{ text-decoration:underline; }
+  .toolbar a:hover{ background:var(--thead); }
+
+  main{ max-width:1120px; margin:0 auto; padding:24px 20px 60px; }
+
+  .section{ margin-bottom:40px; }
+  .section-title{
+    border-left:4px solid var(--navy);
+    padding:2px 0 2px 12px;
+    font-size:16px; font-weight:800;
+    margin:0 0 14px;
+    display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+  }
+  .section-title .sub{ font-weight:400; font-size:12px; color:var(--muted); }
+
+  .box{ background:#fff; border:1px solid var(--border); }
+
+  /* ===== 히어로 요약 밴드 ===== */
+  .hero{
+    display:flex; flex-wrap:wrap; gap:24px; align-items:center;
+    padding:24px; justify-content:space-between;
+  }
+  .hero-score{ min-width:180px; }
+  .hero-score .label{ font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .hero-score .num{ font-size:44px; font-weight:800; line-height:1; }
+  .hero-score .num .unit{ font-size:16px; font-weight:600; margin-left:2px; }
+  .hero-score .delta{ font-size:12px; margin-top:6px; color:var(--muted); }
+  .hero-rings{ display:flex; gap:22px; flex-wrap:wrap; }
+  .ring-item{ display:flex; flex-direction:column; align-items:center; width:96px; }
+  .ring-item svg{ display:block; }
+  .ring-pct{ font-size:17px; font-weight:800; }
+  .ring-label{ font-size:11px; color:var(--muted); margin-top:4px; text-align:center; }
+  .hero-coach{
+    flex:1 1 260px; border-left:1px solid var(--border); padding-left:24px;
+    min-width:220px;
+  }
+  .hero-coach .cap{ font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .hero-coach p{ margin:0; font-size:15px; font-weight:700; line-height:1.5; }
+  @media (max-width:760px){
+    .hero-coach{ border-left:none; border-top:1px solid var(--border); padding-left:0; padding-top:16px; }
+  }
+
+  /* ===== KPI 카드 6장 ===== */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+  .kpi-card{ padding:16px; }
+  .kpi-card .k-label{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .kpi-card .k-value{ font-size:26px; font-weight:800; }
+  .kpi-card .k-value .k-unit{ font-size:13px; font-weight:600; color:var(--muted); margin-left:3px; }
+  .kpi-card .k-delta{ font-size:12px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+  .kpi-card .k-extra{ font-size:11px; color:var(--muted); margin-top:3px; }
+
+  /* ===== 차트 영역 ===== */
+  .charts-grid{ display:grid; grid-template-columns:1.15fr 1fr; gap:16px; align-items:stretch; }
+  .chart-box{ padding:18px; display:flex; flex-direction:column; }
+  .chart-box h3{ margin:0 0 4px; font-size:14px; font-weight:800; }
+  .chart-box .chart-sub{ font-size:11px; color:var(--muted); margin-bottom:14px; }
+
+  .bar-chart{ display:flex; align-items:flex-end; gap:6px; height:150px; border-bottom:1px solid var(--border); padding-top:20px; }
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; position:relative; }
+  .bar-col .bar-val{ font-size:10px; color:var(--muted); margin-bottom:3px; white-space:nowrap; }
+  .bar-col .bar{ width:100%; background:var(--navy); }
+  .bar-col.is-peak .bar{ background:var(--navy); outline:2px solid var(--navy); outline-offset:1px; }
+  .bar-col.is-peak .bar-val{ color:var(--navy); font-weight:800; }
+  .bar-axis{ display:flex; gap:6px; margin-top:6px; }
+  .bar-axis span{ flex:1; text-align:center; font-size:10px; color:var(--muted); }
+
+  /* ===== 시간대 차트 — 기준선 + 옅은 격자 (고도화 v2, 네이비 단색) ===== */
+  .bar-chart-plot{ position:relative; z-index:0; }
+  .bar-chart-scale{ position:absolute; left:0; right:0; top:20px; bottom:1px; pointer-events:none; z-index:-1; }
+  .bar-chart-scale .grid-line{ position:absolute; left:0; right:0; height:1px; background:var(--navy-5); }
+  .bar-chart-scale .baseline-rule{ position:absolute; left:0; right:0; height:0; border-top:1px dashed var(--navy); }
+  .bar-chart-callouts{ position:absolute; left:0; right:0; top:20px; bottom:1px; pointer-events:none; z-index:1; }
+  .bar-chart-callouts .baseline-tag{
+    position:absolute; right:0; transform:translateY(-100%);
+    background:#fff; padding:0 4px 1px 6px; font-size:10px; font-weight:800; color:var(--navy); white-space:nowrap;
+  }
+
+  .zone-bar{ display:flex; height:30px; border:1px solid var(--border); margin-top:4px; }
+  .zone-seg{ height:100%; }
+  .zone-legend{ margin-top:14px; display:flex; flex-direction:column; gap:7px; }
+  .zone-row{ display:flex; align-items:center; gap:8px; font-size:12px; }
+  .zone-swatch{ width:11px; height:11px; flex:0 0 auto; }
+  .zone-name{ flex:0 0 62px; font-weight:700; }
+  .zone-range{ flex:0 0 90px; color:var(--muted); font-size:11px; }
+  .zone-min{ margin-left:auto; font-weight:700; }
+  .zone-row.is-highlight .zone-name{ color:var(--navy); }
+  .zone-row.is-highlight .zone-min::after{ content:" ※목표초과"; font-weight:700; color:var(--navy); font-size:10px; }
+
+  .footnote{
+    margin-top:14px; padding-top:10px; border-top:1px dashed var(--border);
+    font-size:11px; color:var(--muted); line-height:1.6;
+  }
+  .next-action{ margin-top:10px; font-size:12px; }
+  .next-action a{ font-weight:700; text-decoration:underline; }
+  .next-action a:hover{ background:var(--thead); }
+
+  /* ===== 데이터 표 (공통) ===== */
+  table{ width:100%; border-collapse:collapse; font-size:12px; }
+  caption{ text-align:left; font-size:12px; font-weight:800; margin-bottom:8px; caption-side:top; }
+  th,td{ border:1px solid var(--border); padding:7px 9px; text-align:left; }
+  thead th{ background:var(--thead); font-weight:800; white-space:nowrap; }
+  td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  tbody tr:nth-child(even){ background:var(--zebra); }
+  tbody tr:hover{ background:var(--thead); }
+  .data-table-wrap{ margin-top:14px; overflow-x:auto; }
+  .today-row td{ font-weight:800; }
+
+  /* ===== 최근 7일 걸음 스트립 ===== */
+  .week-strip{ display:flex; gap:10px; align-items:flex-end; height:130px; padding:20px 4px 0; }
+  .week-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .week-col .w-val{ font-size:10px; color:var(--muted); margin-bottom:3px; }
+  .week-col .w-bar{ width:100%; background:var(--navy-4); }
+  .week-col.is-max .w-bar{ background:var(--navy); }
+  .week-col.is-max .w-val{ font-weight:800; color:var(--navy); }
+  .week-col.is-today .w-bar{ background:var(--navy); outline:2px solid var(--navy); outline-offset:1px; }
+  .week-col.is-today .w-val{ font-weight:800; color:var(--navy); }
+  .week-axis{ display:flex; gap:10px; margin-top:6px; padding:0 4px; }
+  .week-axis span{ flex:1; text-align:center; font-size:11px; color:var(--muted); }
+  .week-tag{ display:block; font-size:9px; margin-top:2px; }
+
+  /* ===== 미션 테이블 ===== */
+  .status-cell{ white-space:nowrap; text-align:center; }
+  th.status-col{ text-align:center; }
+  .status-dot{ display:inline-block; width:9px; height:9px; margin-right:6px; vertical-align:middle; }
+  .status-dot.done{ background:var(--ok); }
+  .status-dot.progress{ background:var(--navy); }
+  .status-dot.wait{ background:var(--wait); }
+  .status-dot.warn{ background:var(--bad); }
+  .status-legend{ display:flex; flex-wrap:wrap; gap:16px; font-size:11px; color:var(--muted); margin:10px 0 4px; }
+  .status-legend .status-dot{ margin-right:5px; }
+
+  /* ===== "주의" 행 강조 (고도화 v2 — 기존 색·기호 유지, 명확도만 상향) ===== */
+  tbody tr.is-warn{ background:rgba(198,40,40,.07); }
+  tbody tr.is-warn:hover{ background:rgba(198,40,40,.14); }
+  .status-dot.warn{ outline:2px solid var(--bad); outline-offset:1px; }
+  .status-cell.is-warn-text{ font-weight:800; color:var(--bad); }
+
+  /* ===== 업적 배지 3종 ===== */
+  .badge-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+  .badge-card{ padding:18px; border-left:4px solid var(--navy); }
+  .badge-card .b-title{ font-size:14px; font-weight:800; margin-bottom:6px; }
+  .badge-card .b-desc{ font-size:12px; color:var(--muted); }
+
+  /* ===== 푸터 ===== */
+  footer{ background:var(--navy); color:#fff; }
+  .footer-inner{ max-width:1120px; margin:0 auto; padding:24px 20px; }
+  .footer-style-tag{ font-size:11px; font-weight:800; letter-spacing:.3px; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,.25); }
+  .footer-grid{ display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:11px; opacity:.85; }
+  .footer-grid a{ color:#fff; text-decoration:underline; }
+
+  /* ===== 반응형 ===== */
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2, 1fr); }
+    .charts-grid{ grid-template-columns:1fr; }
+    .badge-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .hero{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ===== 인쇄 ===== */
+  @media print{
+    body{ background:#fff; font-size:11px; }
+    .topbar, .pagehead, footer{ background:#fff !important; color:#000 !important; }
+    .toolbar, .skip-link, .next-action{ display:none !important; }
+    .box, .kpi-card, .chart-box, .badge-card{ background:#fff !important; }
+    thead th, tbody tr:nth-child(even), tbody tr:hover{ background:#fff !important; }
+    table, th, td{ border:1px solid #000 !important; }
+    .footer-style-tag{ border-bottom:1px solid #000; }
+    a{ color:#000; text-decoration:underline; }
+    .status-dot{ outline:1px solid #000; }
+  }
+
+  /* ===== 모션 최소화 (본 스타일은 애초에 정적) ===== */
+  @media (prefers-reduced-motion: reduce){
+    * { scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-brand">핏펄스 <small>FitPulse · 개인 건강 활동 통계포털</small></div>
+    <div class="topbar-meta">갱신 2026-07-10 08:42 · 동기화 완료</div>
+  </div>
+</div>
+
+<div class="pagehead">
+  <div class="pagehead-inner">
+    <div>
+      <h1>오늘의 활동 리포트</h1>
+      <div class="user-line">사용자 <strong>핏메이트</strong> · 연속 기록 <strong>12일</strong></div>
+    </div>
+    <div class="toolbar"><a href="javascript:void(0)" id="printLink">인쇄하기</a></div>
+  </div>
+</div>
+
+<main id="main">
+
+  <!-- 2. 히어로 요약 밴드 -->
+  <section class="section" aria-labelledby="hero-title">
+    <h2 id="hero-title" class="section-title">종합 활동 요약 <span class="sub">2026-07-10 기준</span></h2>
+    <div class="box hero">
+      <div class="hero-score">
+        <div class="label">종합 활동 점수</div>
+        <div class="num">87<span class="unit">점</span></div>
+        <div class="delta">전일 대비 <strong>+6점</strong></div>
+      </div>
+
+      <div class="hero-rings" role="img" aria-label="활동 링 3종 — 걷기 달성률 84퍼센트, 운동 달성률 94퍼센트, 스탠드 달성률 75퍼센트">
+        <div class="ring-item">
+          <svg width="88" height="88" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy-5)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy)" stroke-width="9"
+              stroke-dasharray="263.89 263.89" stroke-dashoffset="42.22"
+              transform="rotate(-90 50 50)" stroke-linecap="butt"/>
+          </svg>
+          <div class="ring-pct">84%</div>
+          <div class="ring-label">걷기</div>
+        </div>
+        <div class="ring-item">
+          <svg width="88" height="88" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy-5)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy)" stroke-width="9"
+              stroke-dasharray="263.89 263.89" stroke-dashoffset="15.83"
+              transform="rotate(-90 50 50)" stroke-linecap="butt"/>
+          </svg>
+          <div class="ring-pct">94%</div>
+          <div class="ring-label">운동</div>
+        </div>
+        <div class="ring-item">
+          <svg width="88" height="88" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy-5)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--navy)" stroke-width="9"
+              stroke-dasharray="263.89 263.89" stroke-dashoffset="65.97"
+              transform="rotate(-90 50 50)" stroke-linecap="butt"/>
+          </svg>
+          <div class="ring-pct">75%</div>
+          <div class="ring-label">스탠드</div>
+        </div>
+      </div>
+
+      <div class="hero-coach">
+        <div class="cap">코칭 메시지</div>
+        <p>"목표까지 1,568걸음 남았어요. 저녁 산책이면 충분해요."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. KPI 카드 6장 -->
+  <section class="section" aria-labelledby="kpi-title">
+    <h2 id="kpi-title" class="section-title">핵심 지표(KPI) <span class="sub">전기간 대비 증감 포함</span></h2>
+    <div class="kpi-grid">
+      <div class="box kpi-card">
+        <div class="k-label">걸음 수</div>
+        <div class="k-value">8,432<span class="k-unit">걸음</span></div>
+        <div class="k-delta">전일 대비 +12.3%</div>
+        <div class="k-extra">목표 10,000보의 84%</div>
+      </div>
+      <div class="box kpi-card">
+        <div class="k-label">활동 칼로리</div>
+        <div class="k-value">512<span class="k-unit">kcal</span></div>
+        <div class="k-delta">전일 대비 +8.1%</div>
+        <div class="k-extra">목표 700kcal의 73%</div>
+      </div>
+      <div class="box kpi-card">
+        <div class="k-label">운동 시간</div>
+        <div class="k-value">47<span class="k-unit">분</span></div>
+        <div class="k-delta">전일 대비 +15.2%</div>
+        <div class="k-extra">목표 50분의 94%</div>
+      </div>
+      <div class="box kpi-card">
+        <div class="k-label">평균 심박수</div>
+        <div class="k-value">72<span class="k-unit">bpm</span></div>
+        <div class="k-delta">전일 대비 −2.7%</div>
+        <div class="k-extra">안정 범위</div>
+      </div>
+      <div class="box kpi-card">
+        <div class="k-label">수면 점수</div>
+        <div class="k-value">82<span class="k-unit">점</span></div>
+        <div class="k-delta">전주 대비 +4.0%</div>
+        <div class="k-extra">6시간 48분</div>
+      </div>
+      <div class="box kpi-card">
+        <div class="k-label">스트레스 지수</div>
+        <div class="k-value">34<span class="k-unit">—</span></div>
+        <div class="k-delta">전일 대비 −11.0%</div>
+        <div class="k-extra">낮음(양호)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 차트 2개 -->
+  <section class="section" aria-labelledby="chart-title">
+    <h2 id="chart-title" class="section-title">활동 추이 및 분포</h2>
+    <div class="charts-grid">
+
+      <!-- 4-A 시간대별 걸음 수 -->
+      <div class="box chart-box">
+        <h3>시간대별 걸음 수(오늘)</h3>
+        <div class="chart-sub">세로축 걸음 수 · 가로축 시각 · 데이터 포인트 9개 · 점선은 구간 평균 937걸음(8,432걸음÷9구간) 기준선</div>
+
+        <div class="bar-chart-plot">
+          <div class="bar-chart-scale" aria-hidden="true">
+            <div class="grid-line" style="bottom:25%"></div>
+            <div class="grid-line" style="bottom:50%"></div>
+            <div class="grid-line" style="bottom:75%"></div>
+            <div class="baseline-rule" style="bottom:43.79%"></div>
+          </div>
+          <div class="bar-chart-callouts" aria-hidden="true">
+            <div class="baseline-tag" style="bottom:43.79%">평균 937걸음</div>
+          </div>
+          <div class="bar-chart" role="img" aria-label="시간대별 걸음 수 막대그래프, 18시 2,140걸음으로 최고치(저녁 운동), 점선은 구간 평균 937걸음 기준선">
+            <div class="bar-col"><div class="bar-val">320</div><div class="bar" style="height:14.95%"></div></div>
+            <div class="bar-col"><div class="bar-val">1,240</div><div class="bar" style="height:57.94%"></div></div>
+            <div class="bar-col"><div class="bar-val">680</div><div class="bar" style="height:31.78%"></div></div>
+            <div class="bar-col"><div class="bar-val">1,520</div><div class="bar" style="height:71.03%"></div></div>
+            <div class="bar-col"><div class="bar-val">540</div><div class="bar" style="height:25.23%"></div></div>
+            <div class="bar-col"><div class="bar-val">890</div><div class="bar" style="height:41.59%"></div></div>
+            <div class="bar-col is-peak"><div class="bar-val">2,140</div><div class="bar" style="height:100%"></div></div>
+            <div class="bar-col"><div class="bar-val">780</div><div class="bar" style="height:36.45%"></div></div>
+            <div class="bar-col"><div class="bar-val">322</div><div class="bar" style="height:15.05%"></div></div>
+          </div>
+        </div>
+        <div class="bar-axis">
+          <span>06시</span><span>08시</span><span>10시</span><span>12시</span><span>14시</span>
+          <span>16시</span><span>18시</span><span>20시</span><span>22시</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table>
+            <caption>표 1. 시간대별 걸음 수 원자료(2026-07-10)</caption>
+            <thead>
+              <tr><th scope="col">시각</th><th scope="col" class="num">걸음 수</th><th scope="col">비고</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>06시</td><td class="num">320</td><td>—</td></tr>
+              <tr><td>08시</td><td class="num">1,240</td><td>—</td></tr>
+              <tr><td>10시</td><td class="num">680</td><td>—</td></tr>
+              <tr><td>12시</td><td class="num">1,520</td><td>—</td></tr>
+              <tr><td>14시</td><td class="num">540</td><td>—</td></tr>
+              <tr><td>16시</td><td class="num">890</td><td>—</td></tr>
+              <tr><td>18시</td><td class="num">2,140</td><td>피크(저녁 운동)</td></tr>
+              <tr><td>20시</td><td class="num">780</td><td>—</td></tr>
+              <tr><td>22시</td><td class="num">322</td><td>—</td></tr>
+              <tr><th scope="row">합계</th><td class="num">8,432</td><td>KPI 걸음 수와 일치</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="footnote">※ 출처: 핏펄스 웨어러블 센서 자체 집계 · 집계 기준: 2026-07-10 00:00~23:59(KST), 2시간 단위 · 갱신 주기: 5분</div>
+        <div class="next-action"><a href="#">시간대별 원자료 전체 보기 +</a></div>
+      </div>
+
+      <!-- 4-B 심박존 분포 -->
+      <div class="box chart-box">
+        <h3>심박존 분포(오늘)</h3>
+        <div class="chart-sub">구간별 시간(분) · 5구간</div>
+
+        <div class="zone-bar" role="img" aria-label="심박존 분포, 유산소 존 41분으로 목표 30분 초과 달성">
+          <div class="zone-seg" style="width:66.02%; background:var(--navy-5)"></div>
+          <div class="zone-seg" style="width:18.77%; background:var(--navy-4)"></div>
+          <div class="zone-seg" style="width:9.93%; background:var(--navy-3)"></div>
+          <div class="zone-seg" style="width:4.42%; background:var(--navy)"></div>
+          <div class="zone-seg" style="width:0.86%; background:var(--navy-2)"></div>
+        </div>
+
+        <div class="zone-legend">
+          <div class="zone-row"><span class="zone-swatch" style="background:var(--navy-5)"></span><span class="zone-name">휴식</span><span class="zone-range">&lt;90 bpm</span><span class="zone-min">612분</span></div>
+          <div class="zone-row"><span class="zone-swatch" style="background:var(--navy-4)"></span><span class="zone-name">워밍업</span><span class="zone-range">90–108 bpm</span><span class="zone-min">174분</span></div>
+          <div class="zone-row"><span class="zone-swatch" style="background:var(--navy-3)"></span><span class="zone-name">지방연소</span><span class="zone-range">108–126 bpm</span><span class="zone-min">92분</span></div>
+          <div class="zone-row is-highlight"><span class="zone-swatch" style="background:var(--navy)"></span><span class="zone-name">유산소</span><span class="zone-range">126–144 bpm</span><span class="zone-min">41분</span></div>
+          <div class="zone-row"><span class="zone-swatch" style="background:var(--navy-2)"></span><span class="zone-name">최대</span><span class="zone-range">144+ bpm</span><span class="zone-min">8분</span></div>
+        </div>
+
+        <div class="footnote">※ 출처: 핏펄스 웨어러블 센서 자체 집계 · 집계 기준: 2026-07-10 00:00~23:59(KST) · 갱신 주기: 5분 · 유산소 존 목표 30분 대비 41분으로 초과 달성</div>
+        <div class="next-action"><a href="#">심박존 원자료 전체 보기 +</a></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. 최근 7일 걸음 스트립 -->
+  <section class="section" aria-labelledby="week-title">
+    <h2 id="week-title" class="section-title">최근 7일 걸음 수 <span class="sub">오늘(7/10) 강조 · 주간 최고 7/7</span></h2>
+    <div class="box chart-box">
+      <div class="week-strip" role="img" aria-label="최근 7일 걸음 수, 7월 7일 9,120걸음으로 주간 최고, 7월 10일 오늘 8,432걸음">
+        <div class="week-col"><div class="w-val">5,210</div><div class="w-bar" style="height:57.13%"></div></div>
+        <div class="week-col"><div class="w-val">7,680</div><div class="w-bar" style="height:84.21%"></div></div>
+        <div class="week-col"><div class="w-val">6,940</div><div class="w-bar" style="height:76.10%"></div></div>
+        <div class="week-col is-max"><div class="w-val">9,120</div><div class="w-bar" style="height:100%"></div></div>
+        <div class="week-col"><div class="w-val">7,450</div><div class="w-bar" style="height:81.68%"></div></div>
+        <div class="week-col"><div class="w-val">8,010</div><div class="w-bar" style="height:87.83%"></div></div>
+        <div class="week-col is-today"><div class="w-val">8,432</div><div class="w-bar" style="height:92.46%"></div></div>
+      </div>
+      <div class="week-axis">
+        <span>7/4</span>
+        <span>7/5</span>
+        <span>7/6</span>
+        <span>7/7<span class="w-tag">최고</span></span>
+        <span>7/8</span>
+        <span>7/9</span>
+        <span>7/10<span class="w-tag">오늘</span></span>
+      </div>
+
+      <div class="data-table-wrap">
+        <table>
+          <caption>표 2. 최근 7일 걸음 수 원자료</caption>
+          <thead>
+            <tr><th scope="col">날짜</th><th scope="col" class="num">걸음 수</th><th scope="col">비고</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>7/4</td><td class="num">5,210</td><td>—</td></tr>
+            <tr><td>7/5</td><td class="num">7,680</td><td>—</td></tr>
+            <tr><td>7/6</td><td class="num">6,940</td><td>—</td></tr>
+            <tr><td>7/7</td><td class="num">9,120</td><td>주간 최고</td></tr>
+            <tr><td>7/8</td><td class="num">7,450</td><td>—</td></tr>
+            <tr><td>7/9</td><td class="num">8,010</td><td>—</td></tr>
+            <tr class="today-row"><td>7/10</td><td class="num">8,432</td><td>오늘</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footnote">※ 출처: 핏펄스 웨어러블 센서 자체 집계 · 집계 기준: 2026-07-04~2026-07-10(KST, 7일간) · 갱신 주기: 1일</div>
+    </div>
+  </section>
+
+  <!-- 6. 오늘의 건강 미션 테이블 -->
+  <section class="section" aria-labelledby="mission-title">
+    <h2 id="mission-title" class="section-title">오늘의 건강 미션 현황 <span class="sub">7열 × 8행</span></h2>
+    <div class="box" style="padding:18px;">
+      <div class="status-legend" aria-hidden="true">
+        <span><span class="status-dot done"></span>완료</span>
+        <span><span class="status-dot progress"></span>진행중</span>
+        <span><span class="status-dot wait"></span>대기</span>
+        <span><span class="status-dot warn"></span>주의</span>
+      </div>
+      <div class="data-table-wrap">
+        <table>
+          <caption>표 3. 오늘의 건강 미션 현황(2026-07-10 기준)</caption>
+          <thead>
+            <tr>
+              <th scope="col">시각</th>
+              <th scope="col">활동</th>
+              <th scope="col" class="num">목표</th>
+              <th scope="col" class="num">현재</th>
+              <th scope="col" class="num">달성률</th>
+              <th scope="col" class="num">소비</th>
+              <th scope="col" class="status-col">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>07:10</td><td>모닝 스트레칭</td><td class="num">15분</td><td class="num">15분</td><td class="num">100%</td><td class="num">38 kcal</td>
+              <td class="status-cell"><span class="status-dot done"></span>완료</td>
+            </tr>
+            <tr>
+              <td>08:30</td><td>출근 걷기</td><td class="num">3,000보</td><td class="num">3,240보</td><td class="num">108%</td><td class="num">96 kcal</td>
+              <td class="status-cell"><span class="status-dot done"></span>완료</td>
+            </tr>
+            <tr>
+              <td>12:20</td><td>점심 산책</td><td class="num">2,000보</td><td class="num">1,520보</td><td class="num">76%</td><td class="num">54 kcal</td>
+              <td class="status-cell"><span class="status-dot progress"></span>진행중</td>
+            </tr>
+            <tr>
+              <td>14:00</td><td>수분 섭취</td><td class="num">2.0 L</td><td class="num">1.2 L</td><td class="num">60%</td><td class="num">—</td>
+              <td class="status-cell"><span class="status-dot progress"></span>진행중</td>
+            </tr>
+            <tr>
+              <td>16:30</td><td>근력 운동</td><td class="num">3 세트</td><td class="num">0 세트</td><td class="num">0%</td><td class="num">—</td>
+              <td class="status-cell"><span class="status-dot wait"></span>대기</td>
+            </tr>
+            <tr>
+              <td>18:00</td><td>저녁 러닝</td><td class="num">5.0 km</td><td class="num">4.2 km</td><td class="num">84%</td><td class="num">312 kcal</td>
+              <td class="status-cell"><span class="status-dot progress"></span>진행중</td>
+            </tr>
+            <tr>
+              <td>21:00</td><td>명상</td><td class="num">10분</td><td class="num">10분</td><td class="num">100%</td><td class="num">8 kcal</td>
+              <td class="status-cell"><span class="status-dot done"></span>완료</td>
+            </tr>
+            <tr class="is-warn">
+              <td>22:30</td><td>심박존 유지</td><td class="num">20분</td><td class="num">6분</td><td class="num">30%</td><td class="num">—</td>
+              <td class="status-cell is-warn-text"><span class="status-dot warn"></span>주의</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footnote">※ 출처: 핏펄스 미션 엔진 자체 집계 · 집계 기준: 2026-07-10 00:00~23:59(KST) · 갱신 주기: 실시간(5분 배치)</div>
+      <div class="next-action"><a href="#">전체 목록 보기 +</a></div>
+    </div>
+  </section>
+
+  <!-- 7. 업적 배지 3종 -->
+  <section class="section" aria-labelledby="badge-title">
+    <h2 id="badge-title" class="section-title">업적 배지</h2>
+    <div class="badge-grid">
+      <div class="box badge-card">
+        <div class="b-title">연속 12일 목표 달성</div>
+        <div class="b-desc">12일째 데일리 골 완료</div>
+      </div>
+      <div class="box badge-card">
+        <div class="b-title">이번 주 최고 걸음</div>
+        <div class="b-desc">7/7 9,120걸음 기록</div>
+      </div>
+      <div class="box badge-card">
+        <div class="b-title">유산소 존 목표 3회</div>
+        <div class="b-desc">이번 주 유산소 목표 3회 달성</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-style-tag">STYLE 02 · 공공포털</div>
+    <div class="footer-grid">
+      <div>핏펄스(FitPulse)는 가상의 건강 활동 트래커이며, 본 화면의 모든 데이터는 디자인 검토용 더미 데이터입니다.</div>
+      <div><a href="#">개인정보처리방침</a> · <a href="#">이용약관</a> · <a href="#">고객센터</a></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // 연출 전용 — 실패해도 위 HTML만으로 화면은 완전하다.
+  (function(){
+    var btn = document.getElementById('printLink');
+    if (btn) {
+      btn.addEventListener('click', function(){
+        if (window.print) { window.print(); }
+      });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAISON — 미디어 스트리밍</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* ── 팔레트 (럭셔리 다크) ── */
+    --bg:            #0E0D0B;
+    --bg-2:          #100F0C;
+    --panel:         #171512;
+    --panel-hover:   #1C1915;
+    --gold:          #C9A96A;
+    --gold-bright:   #E5CFA3;
+    --ivory:         #EDE8DF;
+    --muted:         #8A8477;
+    --muted-2:       #6B655B;
+    --danger:        #B0665C;
+
+    /* 골드 헤어라인 — opacity 계단 */
+    --line:          rgba(201,169,106,.18);
+    --line-soft:     rgba(201,169,106,.10);
+    --line-strong:   rgba(201,169,106,.42);
+    --light-top:     rgba(201,169,106,.06);
+
+    /* ── 타이포 ── */
+    --serif: "Nanum Myeongjo", Georgia, "Times New Roman", Times, serif;
+    --sans:  "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    /* ── 8px 그리드 ── */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+    --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+    /* ── radius ── */
+    --r-1: 4px; --r-2: 6px; --r-3: 8px; --r-4: 12px;
+
+    --maxw: 1280px;
+    --ease: cubic-bezier(.16,.68,.32,1);   /* ease-out 단일 */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ivory);
+    background:
+      radial-gradient(120% 80% at 78% -10%, rgba(201,169,106,.05), transparent 46%),
+      radial-gradient(90% 70% at 8% 4%, rgba(176,102,92,.035), transparent 40%),
+      linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 34%, #0C0B09 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(201,169,106,.24); color: var(--ivory); }
+
+  /* 스크롤바 (가로 행) */
+  .row__track::-webkit-scrollbar { height: 6px; }
+  .row__track::-webkit-scrollbar-track { background: transparent; }
+  .row__track::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+  .row__track::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
+
+  /* ══════════════════════════════════════════
+     공통 — 소형 대문자 레이블 · 골드 헤어라인
+     ══════════════════════════════════════════ */
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .hairline { height: 1px; background: var(--line); border: 0; }
+
+  /* 상태 = 소형 대문자 텍스트 + 색점 (알약 태그 금지) */
+  .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 600; color: var(--ivory);
+  }
+  .status .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .status--new .dot    { background: var(--gold-bright); }
+  .status--only .dot   { background: var(--danger); }
+  .status--4k .dot     { background: var(--muted); }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* 포커스 링 — 글로우 아님, 크리스프 outline */
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: var(--r-2); }
+  .btn:focus-visible, .icon-btn:focus-visible { outline-offset: 3px; }
+
+  /* ══════════════════════════════════════════
+     NAV
+     ══════════════════════════════════════════ */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: var(--s-6);
+    padding: 0 var(--s-6);
+    height: 68px;
+    background: linear-gradient(180deg, rgba(14,13,11,.92), rgba(14,13,11,.66) 70%, transparent);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+  }
+  .nav::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-strong) 12%, var(--line) 50%, var(--line-strong) 88%, transparent);
+    transform-origin: left center;
+    animation: draw 700ms var(--ease) both;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 24px; font-weight: 500; letter-spacing: .28em;
+    color: var(--ivory); padding-left: 4px;
+    text-indent: .28em;   /* 마지막 글자 자간 보정 */
+  }
+  .brand b { color: var(--gold); font-weight: 500; }
+
+  .nav__links { display: flex; align-items: center; gap: 2px; margin-left: var(--s-2); }
+  .nav__link {
+    position: relative;
+    font-size: 13.5px; color: var(--muted); font-weight: 500;
+    padding: 8px 14px; border-radius: var(--r-2);
+    transition: color .3s var(--ease);
+  }
+  .nav__link::after {
+    content: ""; position: absolute; left: 14px; right: 14px; bottom: 4px; height: 1px;
+    background: var(--gold); transform: scaleX(0); transform-origin: left center;
+    transition: transform .35s var(--ease);
+  }
+  .nav__link:hover { color: var(--ivory); }
+  .nav__link:hover::after { transform: scaleX(1); }
+  .nav__link[aria-current="page"] { color: var(--ivory); }
+  .nav__link[aria-current="page"]::after { transform: scaleX(1); background: var(--gold-bright); }
+
+  .nav__right { margin-left: auto; display: flex; align-items: center; gap: var(--s-4); }
+
+  /* 검색 인풋 */
+  .search { position: relative; }
+  .search__icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; stroke: var(--muted); stroke-width: 1.6; fill: none;
+    pointer-events: none; transition: stroke .3s var(--ease);
+  }
+  .search input {
+    width: 220px; height: 38px;
+    background: var(--panel); color: var(--ivory);
+    border: 1px solid var(--line); border-radius: var(--r-3);
+    padding: 0 12px 0 34px; font-family: var(--sans); font-size: 13px;
+    transition: border-color .3s var(--ease), background .3s var(--ease), width .35s var(--ease);
+  }
+  .search input::placeholder { color: var(--muted-2); }
+  .search input:hover { background: var(--panel-hover); }
+  .search input:focus { outline: none; border-color: var(--line-strong); background: var(--panel-hover); width: 260px; }
+  .search input:focus + .search__icon,
+  .search:focus-within .search__icon { stroke: var(--gold); }
+
+  .icon-btn {
+    width: 38px; height: 38px; display: grid; place-items: center;
+    background: transparent; border: 1px solid transparent; border-radius: var(--r-3);
+    color: var(--muted); cursor: pointer;
+    transition: color .3s var(--ease), border-color .3s var(--ease), background .3s var(--ease);
+  }
+  .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+  .icon-btn:hover { color: var(--ivory); border-color: var(--line); background: var(--panel); }
+
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    font-family: var(--serif); font-size: 16px; color: var(--gold-bright);
+    background: radial-gradient(120% 120% at 30% 20%, #241f18, #14110d);
+    border: 1px solid var(--line-strong);
+    transition: border-color .3s var(--ease);
+  }
+  .avatar:hover { border-color: var(--gold); }
+
+  /* ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ */
+  .hero {
+    position: relative;
+    min-height: 76vh;
+    display: flex; align-items: flex-end;
+    padding: var(--s-8) var(--s-6) var(--s-7);
+    overflow: hidden;
+    margin-top: -68px;   /* nav 아래로 배너가 흐르도록 */
+    padding-top: calc(68px + var(--s-8));
+  }
+  /* 키아트 — CSS 도형 (외부 이미지 X) */
+  .hero__art {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(70% 90% at 74% 26%, #221d16 0%, #16130e 40%, transparent 72%),
+      radial-gradient(50% 60% at 88% 8%, rgba(201,169,106,.10), transparent 60%),
+      linear-gradient(115deg, #0C0B09 0%, #131009 44%, #1A1610 68%, #0E0C09 100%);
+  }
+  .hero__monogram {
+    position: absolute; right: 4%; top: 42%; transform: translateY(-50%);
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(180px, 30vw, 420px); line-height: .8;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(201,169,106,.16);
+    letter-spacing: -.04em;
+    user-select: none; pointer-events: none;
+    animation: fade 1200ms var(--ease) .3s both;
+  }
+  /* 좌측 시네마틱 스크림 + 하단 페이드 */
+  .hero__scrim {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(12,11,9,.94) 0%, rgba(12,11,9,.74) 34%, rgba(12,11,9,.28) 60%, transparent 82%),
+      linear-gradient(180deg, transparent 40%, rgba(12,11,9,.55) 82%, var(--bg) 100%);
+  }
+  .hero__inner { position: relative; z-index: 2; max-width: 620px; width: 100%; }
+
+  .hero__genre {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    color: var(--gold); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: var(--s-4);
+    animation: fade 700ms var(--ease) .55s both;
+  }
+  .hero__genre .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--line-strong); }
+
+  .hero__title {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(46px, 7vw, 84px); line-height: 1.02;
+    letter-spacing: -.02em; color: var(--ivory);
+    margin-bottom: var(--s-4);
+    animation: fade 700ms var(--ease) .7s both;
+  }
+  .hero__meta {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    color: var(--muted); font-size: 13px; margin-bottom: var(--s-4);
+    animation: fade 700ms var(--ease) .82s both;
+  }
+  .hero__meta .rating {
+    font-family: var(--serif); font-size: 15px; color: var(--gold-bright);
+    border: 1px solid var(--line-strong); border-radius: var(--r-1);
+    padding: 0 7px; line-height: 22px;
+  }
+  .hero__meta .score { color: var(--gold); font-family: var(--serif); font-size: 16px; letter-spacing: .01em; }
+  .hero__meta .divider { width: 1px; height: 12px; background: var(--line); }
+
+  .hero__desc {
+    font-size: 15.5px; line-height: 1.68; color: #C9C3B7;
+    max-width: 540px; margin-bottom: var(--s-6);
+    animation: fade 700ms var(--ease) .94s both;
+  }
+
+  .hero__actions {
+    display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap;
+    animation: fade 700ms var(--ease) 1.06s both;
+  }
+
+  /* ── 버튼 시스템 (primary / secondary / ghost + disabled) ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    height: 46px; padding: 0 var(--s-5);
+    font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: .01em;
+    border-radius: var(--r-3); cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .35s var(--ease), color .35s var(--ease),
+                border-color .35s var(--ease), transform .1s var(--ease);
+    user-select: none; white-space: nowrap;
+  }
+  .btn svg { width: 17px; height: 17px; fill: currentColor; }
+  .btn:active { transform: translateY(1px); }
+
+  .btn--primary { background: var(--gold); color: #14110B; border-color: var(--gold); }
+  .btn--primary:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+  .btn--primary:active { background: #BD9A58; }
+
+  .btn--secondary { background: var(--panel); color: var(--ivory); border-color: var(--line); }
+  .btn--secondary:hover { background: var(--panel-hover); border-color: var(--line-strong); }
+  .btn--secondary:active { background: #211D17; }
+  .btn--secondary svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+  .btn--ghost { background: transparent; color: var(--muted); border-color: transparent; }
+  .btn--ghost:hover { color: var(--ivory); background: var(--panel); }
+  .btn--ghost svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+  .btn:disabled, .btn[aria-disabled="true"] {
+    opacity: .38; cursor: not-allowed; pointer-events: none;
+  }
+
+  /* ══════════════════════════════════════════
+     ROWS — 가로 카드 행
+     ══════════════════════════════════════════ */
+  .rows {
+    position: relative; z-index: 3;
+    max-width: var(--maxw); margin: 0 auto;
+    padding: var(--s-6) var(--s-6) var(--s-4);
+    display: flex; flex-direction: column; gap: var(--s-7);
+  }
+  .row { animation: fade 700ms var(--ease) both; }
+  .row:nth-child(1) { animation-delay: 1.2s; }
+  .row:nth-child(2) { animation-delay: 1.4s; }
+  .row:nth-child(3) { animation-delay: 1.6s; }
+
+  .row__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--s-4); margin-bottom: var(--s-4);
+  }
+  .row__title {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 26px; letter-spacing: -.01em; color: var(--ivory);
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .row__title .count { font-size: 15px; color: var(--gold); }
+  .row__more {
+    font-size: 12px; letter-spacing: .04em; color: var(--muted);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color .3s var(--ease);
+  }
+  .row__more svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+  .row__more:hover { color: var(--gold); }
+
+  .row__track {
+    display: flex; gap: var(--s-4);
+    overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    padding-bottom: var(--s-3);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    flex: 0 0 232px; scroll-snap-align: start;
+    cursor: pointer; background: transparent; border: 0;
+    text-align: left; font-family: inherit; color: inherit;
+    display: flex; flex-direction: column;
+  }
+  .poster {
+    position: relative; width: 100%; aspect-ratio: 16 / 10;
+    border-radius: var(--r-4); overflow: hidden;
+    border: 1px solid var(--line-soft);
+    transition: border-color .35s var(--ease);
+  }
+  /* 위에서 조명이 떨어지는 소재감 */
+  .poster::before {
+    content: ""; position: absolute; inset: 0; z-index: 2;
+    background: linear-gradient(180deg, var(--light-top), transparent 42%);
+    pointer-events: none;
+  }
+  .poster__mono {
+    position: absolute; inset: 0; z-index: 1;
+    display: grid; place-items: center;
+    font-family: var(--serif); font-weight: 500; font-size: 76px;
+    color: rgba(237,232,223,.14); letter-spacing: -.02em;
+    transition: color .4s var(--ease);
+  }
+  .poster__badge { position: absolute; top: 10px; left: 12px; z-index: 3; }
+  .poster__rank {
+    position: absolute; left: 10px; bottom: -6px; z-index: 3;
+    font-family: var(--serif); font-weight: 500; font-size: 68px; line-height: 1;
+    color: var(--ivory); text-shadow: 0 2px 18px rgba(0,0,0,.6);
+  }
+  .poster__play {
+    position: absolute; inset: 0; z-index: 4;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(180deg, rgba(12,11,9,.12), rgba(12,11,9,.62));
+    opacity: 0; transition: opacity .38s var(--ease);
+    font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--gold-bright);
+    letter-spacing: .02em;
+  }
+  .poster__play svg { width: 16px; height: 16px; fill: var(--gold-bright); }
+
+  /* 포스터 톤 — 절제된 다크 desaturated 변주 */
+  .t-walnut { background: linear-gradient(150deg, #241D14 0%, #14100B 62%, #100C08 100%); }
+  .t-slate  { background: linear-gradient(150deg, #171B1E 0%, #101315 60%, #0C0E10 100%); }
+  .t-olive  { background: linear-gradient(150deg, #1B1E15 0%, #12140E 60%, #0D0F0A 100%); }
+  .t-plum   { background: linear-gradient(150deg, #201620 0%, #150F16 60%, #0F0B10 100%); }
+  .t-clay   { background: linear-gradient(150deg, #241814 0%, #16100D 60%, #100A08 100%); }
+  .t-ink    { background: linear-gradient(150deg, #14161C 0%, #0F1014 60%, #0B0C0F 100%); }
+
+  /* hover / focus — 이동·부유 금지, 헤어라인 + 조명으로 반응 */
+  .card:hover .poster,
+  .card:focus-visible .poster,
+  .card:focus-within .poster { border-color: var(--line-strong); }
+  .card:hover .poster__play,
+  .card:focus-within .poster__play { opacity: 1; }
+  .card:hover .poster__mono { color: rgba(201,169,106,.20); }
+
+  .card__body { padding: var(--s-3) 2px 0; }
+  .card__title {
+    font-size: 15px; font-weight: 600; color: var(--ivory);
+    letter-spacing: -.01em; margin-bottom: 3px;
+    transition: color .3s var(--ease);
+  }
+  .card:hover .card__title,
+  .card:focus-within .card__title { color: var(--gold-bright); }
+  .card__meta { font-size: 12.5px; color: var(--muted); }
+  .card__meta .match { color: var(--gold); font-family: var(--serif); font-size: 13.5px; }
+
+  /* ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ */
+  .foot {
+    max-width: var(--maxw); margin: var(--s-6) auto 0;
+    padding: var(--s-6);
+    border-top: 1px solid var(--line-soft);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+    flex-wrap: wrap;
+  }
+  .foot__brand { font-family: var(--serif); letter-spacing: .22em; color: var(--muted); font-size: 15px; }
+  .foot__brand b { color: var(--gold); font-weight: 500; }
+  .foot__meta { font-size: 12px; letter-spacing: .04em; color: var(--muted-2); }
+
+  /* ══════════════════════════════════════════
+     ANIMATION
+     ══════════════════════════════════════════ */
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition-duration: .01ms !important;
+    }
+    .nav::after { transform: scaleX(1); }
+  }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE
+     ══════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .search input { width: 180px; }
+    .search input:focus { width: 200px; }
+  }
+  @media (max-width: 860px) {
+    .nav { gap: var(--s-4); padding: 0 var(--s-4); }
+    .nav__links { display: none; }
+    .hero { min-height: 68vh; padding-left: var(--s-4); padding-right: var(--s-4); }
+    .rows { padding-left: var(--s-4); padding-right: var(--s-4); }
+    .card { flex-basis: 200px; }
+  }
+  @media (max-width: 560px) {
+    .search { display: none; }
+    .brand { font-size: 20px; }
+    .hero__desc { font-size: 14.5px; }
+    .hero__actions { gap: var(--s-2); }
+    .btn { height: 44px; padding: 0 var(--s-4); font-size: 13.5px; }
+    .row__title { font-size: 22px; }
+    .card { flex-basis: 168px; }
+    .poster__mono { font-size: 58px; }
+    .poster__rank { font-size: 54px; }
+    .foot { flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ═══════════ NAV ═══════════ -->
+  <nav class="nav" aria-label="주요 메뉴">
+    <a class="brand" href="#" aria-label="MAISON 홈">MAI<b>SON</b></a>
+    <div class="nav__links">
+      <a class="nav__link" href="#" aria-current="page">홈</a>
+      <a class="nav__link" href="#popular">인기</a>
+      <a class="nav__link" href="#new">신작</a>
+      <a class="nav__link" href="#pick">추천</a>
+      <a class="nav__link" href="#">시리즈</a>
+      <a class="nav__link" href="#">영화</a>
+      <a class="nav__link" href="#">내 목록</a>
+    </div>
+    <div class="nav__right">
+      <label class="search">
+        <input type="search" placeholder="제목, 장르, 감독 검색" aria-label="콘텐츠 검색">
+        <svg class="search__icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </label>
+      <button class="icon-btn" aria-label="알림">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </button>
+      <div class="avatar" role="button" tabindex="0" aria-label="프로필">M</div>
+    </div>
+  </nav>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <header class="hero">
+    <div class="hero__art" aria-hidden="true"></div>
+    <div class="hero__monogram" aria-hidden="true">庭</div>
+    <div class="hero__scrim" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+      <div class="hero__genre">
+        <span>MAISON 오리지널</span><span class="sep"></span>
+        <span>미스터리</span><span class="sep"></span>
+        <span>느와르</span><span class="sep"></span>
+        <span>드라마</span>
+      </div>
+
+      <h1 class="hero__title">그림자 정원</h1>
+
+      <div class="hero__meta">
+        <span class="score">98% 일치</span>
+        <span class="divider"></span>
+        <span>2026</span>
+        <span class="divider"></span>
+        <span>시즌 2 · 8부작</span>
+        <span class="divider"></span>
+        <span class="rating">15</span>
+        <span>4K HDR</span>
+      </div>
+
+      <p class="hero__desc">
+        오래된 저택의 정원에 묻힌 비밀이 하나씩 자라난다. 한 정원사가 남긴 마지막 편지를 따라,
+        세 가문의 침묵이 천천히 무너진다. 느리게 조여오는 밤의 서사.
+      </p>
+
+      <div class="hero__actions">
+        <button class="btn btn--primary">
+          <svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>
+          재생
+        </button>
+        <button class="btn btn--secondary">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          내 목록
+        </button>
+        <button class="btn btn--ghost">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+          예고편
+        </button>
+        <button class="btn btn--ghost" aria-disabled="true" disabled title="이번 주 공개 예정">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 21h14"/></svg>
+          다운로드
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════ ROWS ═══════════ -->
+  <main class="rows">
+
+    <!-- ── 인기 ── -->
+    <section class="row" id="popular" aria-label="이번 주 인기 시리즈">
+      <div class="row__head">
+        <h2 class="row__title">이번 주 인기 <span class="count">TOP 6</span></h2>
+        <a class="row__more" href="#">전체 보기 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="row__track">
+        <button class="card">
+          <span class="poster t-walnut">
+            <span class="poster__mono">庭</span>
+            <span class="poster__badge"><span class="status status--only"><span class="dot"></span>독점</span></span>
+            <span class="poster__rank">1</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">그림자 정원</span><span class="card__meta"><span class="match">98%</span> · 시즌 2 · 미스터리</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-slate">
+            <span class="poster__mono">城</span>
+            <span class="poster__rank">2</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">유리 도시</span><span class="card__meta"><span class="match">95%</span> · 시즌 1 · SF</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-plum">
+            <span class="poster__mono">舞</span>
+            <span class="poster__rank">3</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">마지막 왈츠</span><span class="card__meta"><span class="match">92%</span> · 영화 · 로맨스</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-ink">
+            <span class="poster__mono">岸</span>
+            <span class="poster__badge"><span class="status status--4k"><span class="dot"></span>4K</span></span>
+            <span class="poster__rank">4</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">검은 해안</span><span class="card__meta"><span class="match">90%</span> · 시즌 3 · 스릴러</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-olive">
+            <span class="poster__mono">港</span>
+            <span class="poster__rank">5</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">고요한 항구</span><span class="card__meta"><span class="match">88%</span> · 시즌 1 · 드라마</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-clay">
+            <span class="poster__mono">霞</span>
+            <span class="poster__rank">6</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">붉은 노을</span><span class="card__meta"><span class="match">86%</span> · 영화 · 시대극</span></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── 신작 ── -->
+    <section class="row" id="new" aria-label="이번 주 신작">
+      <div class="row__head">
+        <h2 class="row__title">이번 주 신작 <span class="count">방금 공개</span></h2>
+        <a class="row__more" href="#">전체 보기 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="row__track">
+        <button class="card">
+          <span class="poster t-ink">
+            <span class="poster__mono">書</span>
+            <span class="poster__badge"><span class="status status--new"><span class="dot"></span>NEW</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">밤의 서재</span><span class="card__meta">시즌 1 · 6부작 · 미스터리</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-slate">
+            <span class="poster__mono">霜</span>
+            <span class="poster__badge"><span class="status status--new"><span class="dot"></span>NEW</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">서리꽃</span><span class="card__meta">영화 · 116분 · 멜로</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-plum">
+            <span class="poster__mono">冬</span>
+            <span class="poster__badge"><span class="status status--only"><span class="dot"></span>독점</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">열두 번째 겨울</span><span class="card__meta">시즌 1 · 10부작 · 판타지</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-walnut">
+            <span class="poster__mono">河</span>
+            <span class="poster__badge"><span class="status status--new"><span class="dot"></span>NEW</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">은하 정거장</span><span class="card__meta">시즌 2 · 8부작 · SF</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-olive">
+            <span class="poster__mono">波</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">파도의 기록</span><span class="card__meta">다큐 · 4부작 · 자연</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-clay">
+            <span class="poster__mono">燈</span>
+            <span class="poster__badge"><span class="status status--new"><span class="dot"></span>NEW</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">오래된 등대</span><span class="card__meta">영화 · 128분 · 드라마</span></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── 추천 ── -->
+    <section class="row" id="pick" aria-label="MAISON 추천">
+      <div class="row__head">
+        <h2 class="row__title">MAISON 추천 <span class="count">당신을 위한 큐레이션</span></h2>
+        <a class="row__more" href="#">전체 보기 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="row__track">
+        <button class="card">
+          <span class="poster t-plum">
+            <span class="poster__mono">谷</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">안개 계곡</span><span class="card__meta"><span class="match">96%</span> · 시즌 1 · 미스터리</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-ink">
+            <span class="poster__mono">夜</span>
+            <span class="poster__badge"><span class="status status--4k"><span class="dot"></span>4K</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">백야</span><span class="card__meta"><span class="match">94%</span> · 영화 · 스릴러</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-olive">
+            <span class="poster__mono">季</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">사라진 계절</span><span class="card__meta"><span class="match">91%</span> · 시즌 2 · 드라마</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-walnut">
+            <span class="poster__mono">木</span>
+            <span class="poster__badge"><span class="status status--only"><span class="dot"></span>독점</span></span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">목요일의 편지</span><span class="card__meta"><span class="match">89%</span> · 시즌 1 · 로맨스</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-slate">
+            <span class="poster__mono">灰</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">회색 지대</span><span class="card__meta"><span class="match">87%</span> · 시즌 3 · 느와르</span></span>
+        </button>
+
+        <button class="card">
+          <span class="poster t-clay">
+            <span class="poster__mono">窓</span>
+            <span class="poster__play"><svg viewBox="0 0 24 24"><path d="M7 5v14l12-7z"/></svg>재생</span>
+          </span>
+          <span class="card__body"><span class="card__title">창가의 계절</span><span class="card__meta"><span class="match">85%</span> · 영화 · 힐링</span></span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="foot">
+    <div class="foot__brand">MAI<b>SON</b></div>
+    <div class="foot__meta">미디어 스트리밍 홈 · 럭셔리 다크</div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커머스OS · 로그인 · 머티리얼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  /* Material 3 tone palette */
+  --primary:#6750A4;
+  --on-primary:#FFFFFF;
+  --primary-container:#EADDFF;
+  --on-primary-container:#21005D;
+  --surface:#FEF7FF;
+  --surface-container-low:#F7F2FA;
+  --surface-container:#F3EDF7;
+  --surface-container-high:#ECE6F0;
+  --on-surface:#1D1B20;
+  --on-surface-variant:#49454F;
+  --outline:#79747E;
+  --outline-variant:#CAC4D0;
+  --secondary:#625B71;
+  --error:#B3261E;
+  --on-error-container:#410E0B;
+  --success:#386A20;
+  --scrim:rgba(0,0,0,.32);
+
+  /* elevation */
+  --dp1:0 1px 2px rgba(0,0,0,.30), 0 1px 3px 1px rgba(0,0,0,.15);
+  --dp2:0 1px 2px rgba(0,0,0,.30), 0 2px 6px 2px rgba(0,0,0,.15);
+  --dp4:0 2px 3px rgba(0,0,0,.30), 0 6px 10px 4px rgba(0,0,0,.15);
+  --dp8:0 4px 4px rgba(0,0,0,.30), 0 8px 12px 6px rgba(0,0,0,.15);
+
+  /* radii */
+  --r-card:12px;
+  --r-btn:8px;
+  --r-input:8px;
+  --r-dialog:28px;
+  --r-fab:16px;
+
+  --ease-standard:cubic-bezier(.2,0,0,1);
+  --ease-emph:cubic-bezier(.2,0,0,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Pretendard',-apple-system,Roboto,sans-serif;
+  background:var(--surface);
+  color:var(--on-surface);
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:.15px;
+  min-height:100dvh;
+}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ============ layout ============ */
+.shell{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  min-height:100dvh;
+}
+
+/* ============ brand panel (left) ============ */
+.brand{
+  position:relative;
+  background:var(--primary);
+  color:var(--on-primary);
+  padding:56px 64px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.brand::before{
+  /* soft tonal layering, not glass */
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(120% 90% at 8% 0%, rgba(234,221,255,.22), transparent 55%),
+    radial-gradient(100% 80% at 100% 100%, rgba(33,0,93,.42), transparent 60%);
+  pointer-events:none;
+}
+.brand>*{position:relative;z-index:1}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:auto;
+  animation:appbar-in 240ms var(--ease-standard) both;
+}
+.logo-mark{
+  width:44px;height:44px;
+  border-radius:12px;
+  background:var(--on-primary);
+  color:var(--primary);
+  display:grid;place-items:center;
+  font-weight:800;font-size:19px;
+  box-shadow:var(--dp2);
+  letter-spacing:0;
+}
+.logo-word{font-size:22px;font-weight:700;letter-spacing:.1px;line-height:28px}
+.logo-badge{
+  margin-left:8px;
+  font-size:11px;font-weight:600;letter-spacing:.4px;
+  padding:3px 8px;border-radius:999px;
+  background:rgba(255,255,255,.16);
+  color:var(--on-primary);
+  align-self:center;
+}
+
+.brand-hero{margin:48px 0 40px}
+.tagline-kicker{
+  font-size:13px;font-weight:600;letter-spacing:.6px;
+  color:var(--primary-container);
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+.tagline{
+  font-size:40px;line-height:48px;font-weight:700;
+  letter-spacing:-.4px;
+  max-width:14ch;
+}
+.tagline em{font-style:normal;color:var(--primary-container)}
+.brand-sub{
+  margin-top:20px;
+  font-size:16px;line-height:24px;
+  color:rgba(255,255,255,.82);
+  max-width:34ch;
+}
+
+/* mini stats — surface cards floating on primary */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-top:auto;
+}
+.stat{
+  background:var(--surface-container-low);
+  color:var(--on-surface);
+  border-radius:var(--r-card);
+  padding:18px 18px 16px;
+  box-shadow:var(--dp1);
+  transition:box-shadow 150ms var(--ease-standard), transform 150ms var(--ease-standard);
+  animation:stat-in 220ms var(--ease-standard) both;
+}
+.stat:nth-child(1){animation-delay:150ms}
+.stat:nth-child(2){animation-delay:190ms}
+.stat:nth-child(3){animation-delay:230ms}
+.stat:hover{box-shadow:var(--dp2);transform:translateY(-2px)}
+.stat-label{
+  font-size:12px;font-weight:500;letter-spacing:.3px;
+  color:var(--on-surface-variant);
+  display:flex;align-items:center;gap:6px;
+}
+.stat-ico{width:16px;height:16px;color:var(--primary);flex:none}
+.stat-value{
+  margin-top:10px;
+  font-size:26px;font-weight:700;line-height:32px;
+  letter-spacing:-.2px;
+}
+.stat-value .u{font-size:14px;font-weight:600;color:var(--on-surface-variant);margin-left:2px}
+.stat-foot{
+  margin-top:8px;font-size:11.5px;font-weight:500;
+  color:var(--success);
+  display:flex;align-items:center;gap:4px;
+}
+.stat-foot.neutral{color:var(--on-surface-variant)}
+
+.brand-legal{
+  margin-top:28px;
+  font-size:12px;line-height:18px;
+  color:rgba(255,255,255,.62);
+  display:flex;gap:18px;flex-wrap:wrap;
+}
+.brand-legal a{color:rgba(255,255,255,.82);text-decoration:none}
+.brand-legal a:hover{text-decoration:underline}
+
+/* ============ auth panel (right) ============ */
+.auth{
+  background:var(--surface);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px 40px;
+}
+.auth-card{
+  width:100%;
+  max-width:420px;
+  background:var(--surface-container-low);
+  border-radius:var(--r-card);
+  box-shadow:var(--dp1);
+  padding:40px 40px 32px;
+  animation:card-in 260ms var(--ease-standard) both;
+  animation-delay:120ms;
+}
+.auth-eyebrow{
+  font-size:13px;font-weight:600;letter-spacing:.4px;
+  color:var(--primary);
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+}
+.auth-title{
+  font-size:28px;line-height:36px;font-weight:700;
+  letter-spacing:-.3px;
+}
+.auth-desc{
+  margin-top:8px;
+  font-size:14px;line-height:20px;
+  color:var(--on-surface-variant);
+}
+
+form{margin-top:28px}
+.field{margin-bottom:20px}
+.field-label{
+  display:block;
+  font-size:14px;font-weight:500;line-height:20px;
+  letter-spacing:.1px;
+  color:var(--on-surface);
+  margin-bottom:8px;
+}
+.input-wrap{position:relative}
+.input-lead{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:20px;height:20px;color:var(--on-surface-variant);pointer-events:none;
+}
+.input{
+  width:100%;
+  height:52px;
+  border:1px solid var(--outline-variant);
+  border-radius:var(--r-input);
+  background:var(--surface);
+  color:var(--on-surface);
+  font:inherit;font-size:16px;letter-spacing:.15px;
+  padding:0 16px 0 44px;
+  transition:border-color 150ms var(--ease-standard), box-shadow 150ms var(--ease-standard);
+  outline:none;
+}
+.input::placeholder{color:var(--on-surface-variant);opacity:.75}
+.input:hover{border-color:var(--on-surface-variant)}
+.input:focus-visible{
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px var(--primary);
+}
+.input.has-toggle{padding-right:52px}
+.pw-toggle{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border:none;background:transparent;border-radius:999px;
+  color:var(--on-surface-variant);cursor:pointer;
+  transition:background 150ms var(--ease-standard);
+}
+.pw-toggle:hover{background:rgba(103,80,164,.08)}
+.pw-toggle:active{background:rgba(103,80,164,.12)}
+.pw-toggle:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.pw-toggle svg{width:20px;height:20px;pointer-events:none}
+.field-help{
+  margin-top:6px;
+  font-size:12px;line-height:16px;letter-spacing:.3px;
+  color:var(--on-surface-variant);
+}
+
+.row-between{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:-4px 0 24px;
+}
+.remember{
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  font-size:14px;color:var(--on-surface);letter-spacing:.1px;
+}
+.switch{
+  position:relative;width:44px;height:26px;flex:none;
+}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.switch .track{
+  position:absolute;inset:0;border-radius:999px;
+  background:var(--surface-container-high);
+  border:2px solid var(--outline);
+  transition:background 200ms var(--ease-standard), border-color 200ms var(--ease-standard);
+}
+.switch .thumb{
+  position:absolute;left:6px;top:50%;transform:translate(0,-50%);
+  width:12px;height:12px;border-radius:999px;
+  background:var(--outline);
+  transition:transform 200ms var(--ease-emph), width 200ms var(--ease-emph), height 200ms var(--ease-emph), background 200ms var(--ease-standard);
+}
+.switch input:checked ~ .track{background:var(--primary);border-color:var(--primary)}
+.switch input:checked ~ .thumb{transform:translate(18px,-50%);width:18px;height:18px;background:var(--on-primary);left:4px}
+.switch input:focus-visible ~ .track{outline:3px solid var(--primary);outline-offset:2px}
+
+.link{
+  font-size:14px;font-weight:500;letter-spacing:.1px;
+  color:var(--primary);text-decoration:none;
+  padding:6px 4px;border-radius:6px;
+  transition:background 150ms var(--ease-standard);
+}
+.link:hover{background:rgba(103,80,164,.08);text-decoration:underline}
+.link:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+/* buttons */
+.btn{
+  position:relative;overflow:hidden;
+  width:100%;height:52px;
+  border:none;border-radius:var(--r-btn);
+  font:inherit;font-size:15px;font-weight:600;letter-spacing:.1px;
+  cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  transition:box-shadow 150ms var(--ease-standard), background 150ms var(--ease-standard), transform 100ms var(--ease-standard);
+}
+.btn svg{width:20px;height:20px;flex:none}
+.btn-filled{
+  background:var(--primary);color:var(--on-primary);
+  box-shadow:var(--dp1);
+}
+.btn-filled:hover{box-shadow:var(--dp2);background:#5b4696}
+.btn-filled:active{transform:translateY(1px)}
+.btn-filled:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+.divider{
+  display:flex;align-items:center;gap:16px;
+  margin:24px 0;
+  color:var(--on-surface-variant);
+  font-size:12px;font-weight:500;letter-spacing:.5px;
+}
+.divider::before,.divider::after{
+  content:"";flex:1;height:1px;background:var(--outline-variant);
+}
+
+.socials{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-outlined{
+  background:var(--surface);color:var(--on-surface);
+  border:1px solid var(--outline-variant);
+  font-size:14px;
+}
+.btn-outlined:hover{background:var(--surface-container);box-shadow:var(--dp1)}
+.btn-outlined:active{transform:translateY(1px)}
+.btn-outlined:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+
+/* ripple */
+.ripple{
+  position:absolute;border-radius:999px;
+  transform:scale(0);
+  background:currentColor;opacity:.16;
+  pointer-events:none;
+  animation:ripple 400ms var(--ease-standard);
+}
+
+/* 2FA notice */
+.notice{
+  margin-top:24px;
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--primary-container);
+  color:var(--on-primary-container);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.notice svg{width:20px;height:20px;flex:none;margin-top:1px}
+.notice-body{font-size:13px;line-height:19px;letter-spacing:.15px}
+.notice-body b{font-weight:700}
+
+.signup-line{
+  margin-top:28px;text-align:center;
+  font-size:14px;color:var(--on-surface-variant);letter-spacing:.1px;
+}
+.signup-line a{color:var(--primary);font-weight:600;text-decoration:none;margin-left:4px}
+.signup-line a:hover{text-decoration:underline}
+
+/* footer */
+.foot{
+  grid-column:1 / -1;
+  padding:18px 40px;
+  background:var(--surface-container-low);
+  border-top:1px solid var(--outline-variant);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  font-size:12.5px;letter-spacing:.2px;
+  color:var(--on-surface-variant);
+}
+.foot .ws{display:flex;align-items:center;gap:10px}
+.ws-init{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--primary);color:var(--on-primary);
+  display:grid;place-items:center;font-size:12px;font-weight:700;
+}
+
+/* FAB — signature */
+.fab{
+  position:fixed;right:28px;bottom:28px;z-index:20;
+  width:56px;height:56px;border-radius:var(--r-fab);
+  border:none;
+  background:var(--primary);color:var(--on-primary);
+  box-shadow:var(--dp4);
+  cursor:pointer;
+  display:grid;place-items:center;
+  overflow:hidden;
+  transition:box-shadow 200ms var(--ease-standard), transform 200ms var(--ease-emph);
+  animation:fab-in 250ms var(--ease-emph) both;
+  animation-delay:.6s;
+}
+.fab svg{width:24px;height:24px}
+.fab:hover{box-shadow:var(--dp8);transform:scale(1.03)}
+.fab:active{transform:scale(.97)}
+.fab:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+
+/* tooltip on FAB */
+.fab-wrap{position:fixed;right:28px;bottom:28px;z-index:20}
+.fab-wrap .fab{position:static;right:auto;bottom:auto}
+.fab-tip{
+  position:absolute;right:68px;top:50%;transform:translateY(-50%) translateX(6px);
+  background:var(--on-surface);color:var(--surface);
+  font-size:12.5px;font-weight:500;letter-spacing:.2px;white-space:nowrap;
+  padding:8px 12px;border-radius:8px;box-shadow:var(--dp2);
+  opacity:0;pointer-events:none;
+  transition:opacity 150ms var(--ease-standard), transform 150ms var(--ease-standard);
+}
+.fab-wrap:hover .fab-tip,.fab-wrap:focus-within .fab-tip{opacity:1;transform:translateY(-50%) translateX(0)}
+
+/* keyframes */
+@keyframes appbar-in{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes stat-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes card-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fab-in{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes ripple{to{transform:scale(2.6);opacity:0}}
+
+/* ============ responsive ============ */
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr}
+  .brand{padding:40px 32px 36px}
+  .brand-hero{margin:32px 0 28px}
+  .tagline{font-size:32px;line-height:40px}
+  .stats{margin-top:28px}
+  .auth{padding:36px 24px}
+  .foot{flex-direction:column;align-items:flex-start;gap:8px}
+}
+@media (max-width:520px){
+  .brand{padding:32px 20px 28px}
+  .tagline{font-size:27px;line-height:34px}
+  .stats{grid-template-columns:1fr;gap:12px}
+  .stat{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+  .stat-value{margin-top:0;font-size:22px}
+  .stat-foot{display:none}
+  .brand-legal{display:none}
+  .auth-card{padding:28px 22px 24px;box-shadow:none;background:transparent}
+  .auth{padding:8px 16px 32px}
+  .socials{grid-template-columns:1fr}
+  .fab-wrap{right:18px;bottom:18px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important}
+  .ripple{display:none !important}
+  .btn,.stat,.fab,.input,.switch .thumb,.switch .track{transition:none !important}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+
+  <!-- ============ LEFT : BRAND ============ -->
+  <section class="brand" aria-label="커머스OS 소개">
+    <header class="topbar">
+      <div class="logo-mark" aria-hidden="true">CO</div>
+      <span class="logo-word">커머스OS</span>
+      <span class="logo-badge">ADMIN</span>
+    </header>
+
+    <div class="brand-hero">
+      <div class="tagline-kicker">쇼핑몰 운영 플랫폼</div>
+      <h1 class="tagline">쇼핑몰 운영을<br><em>한 곳에서</em></h1>
+      <p class="brand-sub">주문·상품·정산·프로모션까지, 흩어진 운영 업무를 커머스OS 하나로 모읍니다.</p>
+    </div>
+
+    <div class="stats" role="list" aria-label="플랫폼 지표">
+      <div class="stat" role="listitem">
+        <div class="stat-label">
+          <svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>
+          입점 스토어
+        </div>
+        <div class="stat-value tnum">1.2<span class="u">만</span></div>
+        <div class="stat-foot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>전월 대비 +8.4%</div>
+      </div>
+      <div class="stat" role="listitem">
+        <div class="stat-label">
+          <svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l1.5 3h9L18 2"/><path d="M4 7h16l-1.2 12.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/></svg>
+          처리 주문
+        </div>
+        <div class="stat-value tnum">340<span class="u">만</span></div>
+        <div class="stat-foot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>누적 기준</div>
+      </div>
+      <div class="stat" role="listitem">
+        <div class="stat-label">
+          <svg class="stat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          평균 정산
+        </div>
+        <div class="stat-value tnum">D+2</div>
+        <div class="stat-foot neutral">영업일 기준</div>
+      </div>
+    </div>
+
+    <div class="brand-legal">
+      <span>© 2026 커머스OS</span>
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">고객센터</a>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT : LOGIN ============ -->
+  <section class="auth" aria-label="로그인">
+    <div class="auth-card">
+      <div class="auth-eyebrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        관리자 로그인
+      </div>
+      <h2 class="auth-title">다시 오셨네요</h2>
+      <p class="auth-desc">커머스OS 워크스페이스 계정으로 로그인하세요.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label class="field-label" for="email">이메일</label>
+          <div class="input-wrap">
+            <svg class="input-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            <input class="input" id="email" type="email" name="email" inputmode="email" autocomplete="username" placeholder="name@store.co.kr" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password">비밀번호</label>
+          <div class="input-wrap">
+            <svg class="input-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            <input class="input has-toggle" id="password" type="password" name="password" autocomplete="current-password" placeholder="비밀번호 입력" required>
+            <button class="pw-toggle" type="button" id="pwToggle" aria-label="비밀번호 표시" aria-pressed="false">
+              <svg id="eyeOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eyeOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M9.9 5.1A9.8 9.8 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1"/><path d="M6.6 6.6A17.7 17.7 0 0 0 2 12s3.5 7 10 7a9.6 9.6 0 0 0 4.6-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/></svg>
+            </button>
+          </div>
+          <p class="field-help">최소 10자, 대소문자와 숫자를 조합해 주세요.</p>
+        </div>
+
+        <div class="row-between">
+          <label class="remember">
+            <span class="switch">
+              <input type="checkbox" id="remember" checked>
+              <span class="track" aria-hidden="true"></span>
+              <span class="thumb" aria-hidden="true"></span>
+            </span>
+            로그인 유지
+          </label>
+          <a class="link" href="#">비밀번호 찾기</a>
+        </div>
+
+        <button class="btn btn-filled" type="submit">
+          로그인
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+
+        <div class="divider">또는 간편 로그인</div>
+
+        <div class="socials">
+          <button class="btn btn-outlined" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.2c0-.7-.06-1.3-.18-1.9H12v3.6h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.7-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1A10 10 0 0 0 2 12c0 1.6.4 3.2 1.1 4.6z"/><path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 12 2 10 10 0 0 0 3.1 7.4l3.3 2.6C7.2 7.6 9.4 5.9 12 5.9z"/></svg>
+            Google
+          </button>
+          <button class="btn btn-outlined" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="12" fill="#FEE500"/><path d="M12 5.5c-3.6 0-6.5 2.3-6.5 5.1 0 1.8 1.2 3.4 3 4.3-.1.5-.5 1.8-.6 2.1 0 0 0 .2.1.2h.2c.3-.04 2.1-1.4 2.7-1.9.4.05.7.07 1.1.07 3.6 0 6.5-2.3 6.5-5.1S15.6 5.5 12 5.5z" fill="#3C1E1E"/></svg>
+            카카오
+          </button>
+        </div>
+
+        <div class="notice" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 9.5C8 22.3 5 18.5 5 14V6z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div class="notice-body"><b>2단계 인증</b>이 켜져 있습니다. 로그인 후 등록된 인증 앱의 6자리 코드를 입력해야 합니다.</div>
+        </div>
+      </form>
+
+      <p class="signup-line">아직 워크스페이스가 없나요?<a href="#">입점 신청하기</a></p>
+    </div>
+  </section>
+
+  <!-- footer spans both columns -->
+  <footer class="foot">
+    <span>커머스OS · 로그인 · 머티리얼</span>
+    <span class="ws">
+      <span class="ws-init" aria-hidden="true">CO</span>
+      커머스OS 워크스페이스
+    </span>
+  </footer>
+</main>
+
+<!-- FAB — signature -->
+<div class="fab-wrap">
+  <span class="fab-tip" role="tooltip">도움이 필요하신가요?</span>
+  <button class="fab" type="button" aria-label="고객지원 문의">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+  </button>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // password toggle
+  var pw = document.getElementById('password');
+  var toggle = document.getElementById('pwToggle');
+  var eyeOpen = document.getElementById('eyeOpen');
+  var eyeOff = document.getElementById('eyeOff');
+  if(toggle){
+    toggle.addEventListener('click', function(){
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      toggle.setAttribute('aria-pressed', String(show));
+      toggle.setAttribute('aria-label', show ? '비밀번호 숨기기' : '비밀번호 표시');
+      eyeOpen.style.display = show ? 'none' : 'block';
+      eyeOff.style.display = show ? 'block' : 'none';
+    });
+  }
+
+  // ripple on interactive material surfaces
+  function addRipple(el){
+    el.addEventListener('pointerdown', function(e){
+      if(reduce) return;
+      var rect = el.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var r = document.createElement('span');
+      r.className = 'ripple';
+      r.style.width = r.style.height = size + 'px';
+      r.style.left = (e.clientX - rect.left - size/2) + 'px';
+      r.style.top = (e.clientY - rect.top - size/2) + 'px';
+      el.appendChild(r);
+      r.addEventListener('animationend', function(){ r.remove(); });
+    });
+  }
+  document.querySelectorAll('.btn, .fab, .pw-toggle').forEach(addRipple);
+
+  // demo submit — no real auth
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = this.querySelector('.btn-filled');
+    var original = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.opacity = '.85';
+    btn.textContent = '인증 중…';
+    setTimeout(function(){
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.innerHTML = original;
+    }, 1100);
+  });
+})();
+</script>
+</body>
+</html>

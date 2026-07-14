@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowbase — 통합 마켓플레이스</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* ── 색 토큰 ── */
+    --bg: #FBFAFF;
+    --surface: #FFFFFF;
+    --surface-2: #F5F3FF;
+    --ink: #17143A;
+    --muted: #7B7897;
+    --muted-2: #A6A3BE;
+    --border: rgba(23, 20, 58, 0.08);
+    --border-strong: rgba(23, 20, 58, 0.14);
+
+    --primary: #7C5CFF;
+    --primary-ink: #5B3EE0;
+    --primary-soft: rgba(124, 92, 255, 0.10);
+    --pink: #FF8FC0;
+    --mint: #5EE6C8;
+    --mint-ink: #0E9B7E;
+
+    --grad: linear-gradient(120deg, #7C5CFF 0%, #FF8FC0 100%);
+
+    /* ── elevation ── */
+    --shadow-1: 0 1px 2px rgba(23, 20, 58, 0.04), 0 10px 30px rgba(23, 20, 58, 0.06);
+    --shadow-2: 0 20px 40px rgba(124, 92, 255, 0.15);
+
+    /* ── radius ── */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 24px;
+    --r-pill: 999px;
+
+    /* ── focus ── */
+    --ring: 0 0 0 3px rgba(124, 92, 255, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── L0: 배경 블롭 ── */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+  body::before {
+    width: 520px; height: 520px;
+    top: -160px; right: -140px;
+    background: rgba(124, 92, 255, 0.28);
+  }
+  body::after {
+    width: 480px; height: 480px;
+    bottom: -180px; left: -160px;
+    background: rgba(94, 230, 200, 0.24);
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ─────────────────────────  HEADER  ───────────────────────── */
+  header.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(251, 250, 255, 0.78);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-in {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+  .brand .glyph {
+    width: 28px; height: 28px;
+    border-radius: 9px;
+    background: var(--grad);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 12px rgba(124, 92, 255, 0.35);
+  }
+  .brand .glyph::after {
+    content: "";
+    width: 11px; height: 11px;
+    border-radius: 4px;
+    background: #fff;
+    transform: rotate(45deg);
+  }
+  .brand .word {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+  }
+  .nav a {
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .nav a:hover { background: var(--primary-soft); color: var(--ink); }
+  .nav a[aria-current="page"] { color: var(--primary-ink); background: var(--primary-soft); }
+  .nav a:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* 실시간 칩 (숨쉬는 인디케이터) */
+  .live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .live-chip .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 0 rgba(94, 230, 200, 0.6);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(94, 230, 200, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(94, 230, 200, 0); }
+  }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7C5CFF, #FF8FC0);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: none;
+  }
+  .avatar:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  /* ─────────────────────────  HERO  ───────────────────────── */
+  .hero {
+    padding: 56px 0 32px;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--primary-ink);
+    background: var(--primary-soft);
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    margin: 0 0 16px;
+  }
+  .hero h1 {
+    margin: 0 0 12px;
+    font-size: 44px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    max-width: 720px;
+  }
+  .hero h1 .accent {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.sub {
+    margin: 0 0 28px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 560px;
+  }
+
+  /* 검색 */
+  .searchbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 620px;
+    height: 52px;
+    padding: 0 8px 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    transition: box-shadow 180ms ease, border-color 180ms ease;
+  }
+  .searchbar:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-1), var(--ring);
+  }
+  .searchbar .ico {
+    width: 18px; height: 18px;
+    flex: none;
+    border: 2px solid var(--muted-2);
+    border-radius: 50%;
+    position: relative;
+  }
+  .searchbar .ico::after {
+    content: "";
+    position: absolute;
+    right: -5px; bottom: -4px;
+    width: 8px; height: 2px;
+    background: var(--muted-2);
+    border-radius: 2px;
+    transform: rotate(45deg);
+  }
+  .searchbar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .searchbar input::placeholder { color: var(--muted-2); }
+  .searchbar .kbd {
+    flex: none;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 7px;
+    margin-right: 4px;
+  }
+  .searchbar .go {
+    flex: none;
+    height: 40px;
+    padding: 0 18px;
+    border: none;
+    border-radius: var(--r-md);
+    background: var(--grad);
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+  }
+  .searchbar .go:hover { box-shadow: 0 8px 20px rgba(124, 92, 255, 0.35); }
+  .searchbar .go:active { transform: translateY(1px); filter: brightness(0.97); }
+  .searchbar .go:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  /* ── 살아있는 숫자 (KPI 스트립) ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-1);
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .stat:nth-child(1) { animation-delay: 60ms; }
+  .stat:nth-child(2) { animation-delay: 120ms; }
+  .stat:nth-child(3) { animation-delay: 180ms; }
+  .stat:nth-child(4) { animation-delay: 240ms; }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .stat .num {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .stat .num .unit { font-size: 18px; font-weight: 700; color: var(--muted); margin-left: 2px; }
+  .stat .cap {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .stat .cap .trend { color: var(--mint-ink); font-weight: 700; }
+
+  /* ─────────────────────  카테고리 탭  ───────────────────── */
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 48px 0 20px;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .section-head .hint { font-size: 13px; color: var(--muted); }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 24px;
+  }
+  .tab {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease, transform 120ms ease;
+  }
+  .tab .count {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .tab:hover { color: var(--ink); border-color: var(--primary); }
+  .tab:active { transform: translateY(1px); }
+  .tab:focus-visible { outline: none; box-shadow: var(--ring); }
+  .tab[aria-selected="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .tab[aria-selected="true"] .count { color: rgba(255,255,255,0.6); }
+
+  /* ─────────────────────  통합 카드 그리드  ───────────────────── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-1);
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, border-color 200ms ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-2);
+    border-color: rgba(124, 92, 255, 0.28);
+  }
+  .card:focus-within {
+    border-color: var(--primary);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* 앱 로고 슬롯 — CSS 도형 + 이니셜 */
+  .logo {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+    flex: none;
+    box-shadow: 0 6px 16px rgba(23, 20, 58, 0.14);
+  }
+  .logo.round { border-radius: 50%; }
+  .logo.soft { border-radius: 16px; }
+  /* 브랜드별 마크 */
+  .logo.b-comm { background: linear-gradient(135deg, #5B3EE0, #9B7BFF); }
+  .logo.b-doc  { background: linear-gradient(135deg, #17143A, #45406E); }
+  .logo.b-dev  { background: linear-gradient(135deg, #12100F, #3A3A3A); }
+  .logo.b-pay  { background: linear-gradient(135deg, #635BFF, #A38BFF); }
+  .logo.b-mail { background: linear-gradient(135deg, #FF6FA5, #FFA36C); }
+  .logo.b-data { background: linear-gradient(135deg, #0E9B7E, #5EE6C8); color: #06463A; }
+  .logo.b-meet { background: linear-gradient(135deg, #2D8CFF, #7CC0FF); }
+  .logo.b-file { background: linear-gradient(135deg, #F5B400, #FFD873); color: #4A3600; }
+  .logo.b-crm  { background: linear-gradient(135deg, #FF5C7A, #FF9AAE); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .badge.connected {
+    background: rgba(94, 230, 200, 0.16);
+    color: var(--mint-ink);
+    border: 1px solid rgba(14, 155, 126, 0.22);
+  }
+  .badge.connected .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--mint-ink);
+    animation: breathe-sm 2s ease-in-out infinite;
+  }
+  @keyframes breathe-sm {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
+  .badge.cat {
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .card h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .card .desc {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--muted);
+    flex: 1;
+  }
+  .card .meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0 16px;
+    font-size: 12px;
+    color: var(--muted-2);
+    font-weight: 600;
+  }
+  .card .meta .rating { color: var(--ink); }
+  .card .meta .rating .star { color: #F5B400; }
+  .card .meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--muted-2); }
+
+  .card-foot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 버튼 시스템 */
+  .btn {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: transform 130ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, filter 160ms ease;
+    white-space: nowrap;
+  }
+  .btn:focus-visible { outline: none; box-shadow: var(--ring); }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--grad);
+    color: #fff;
+    border: 1px solid transparent;
+    flex: 1;
+  }
+  .btn-primary:hover { box-shadow: 0 8px 20px rgba(124, 92, 255, 0.35); }
+  .btn-primary:active { filter: brightness(0.97); }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border-strong);
+    flex: 1;
+  }
+  .btn-secondary:hover { border-color: var(--primary); color: var(--primary-ink); background: var(--primary-soft); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0 12px;
+  }
+  .btn-ghost:hover { color: var(--ink); border-color: var(--border-strong); background: var(--surface-2); }
+
+  .btn-icon {
+    width: 38px;
+    padding: 0;
+    flex: none;
+  }
+  .btn-icon .gear {
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    position: relative;
+  }
+  .btn-icon .gear::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    opacity: 0.4;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    filter: grayscale(0.2);
+  }
+  .btn:disabled:hover { box-shadow: none; transform: none; }
+
+  /* ─────────────────────  인기 섹션  ───────────────────── */
+  .popular {
+    margin-top: 56px;
+    background: linear-gradient(135deg, rgba(124,92,255,0.06), rgba(255,143,192,0.05));
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 28px;
+  }
+  .popular-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .popular-head h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .popular-head .flame {
+    width: 24px; height: 24px;
+    border-radius: 8px;
+    background: var(--grad);
+    display: grid; place-items: center;
+    font-size: 13px;
+  }
+  .popular-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .pop-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  }
+  .pop-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-1);
+    border-color: rgba(124, 92, 255, 0.3);
+  }
+  .pop-item:focus-visible { outline: none; box-shadow: var(--ring); }
+  .pop-rank {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-2);
+    width: 24px;
+    flex: none;
+  }
+  .pop-item:nth-child(1) .pop-rank {
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .pop-logo {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 800; color: #fff;
+    flex: none;
+  }
+  .pop-body { min-width: 0; flex: 1; }
+  .pop-name { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+  .pop-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+
+  /* ─────────────────────  FOOTER  ───────────────────── */
+  footer.foot {
+    margin-top: 64px;
+    padding: 32px 0 48px;
+    border-top: 1px solid var(--border);
+  }
+  .foot-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .foot .sig {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .foot .sig .b { color: var(--ink); }
+  .foot .links { display: flex; gap: 20px; }
+  .foot .links a {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 140ms ease;
+  }
+  .foot .links a:hover { color: var(--primary-ink); }
+  .foot .links a:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 4px; }
+
+  /* ─────────────────────  반응형  ───────────────────── */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .popular-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .nav { display: none; }
+    .hero h1 { font-size: 34px; }
+    .searchbar .kbd { display: none; }
+  }
+  @media (max-width: 640px) {
+    .shell { padding: 0 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .stat-strip { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 40px 0 24px; }
+    .hero h1 { font-size: 30px; }
+    .searchbar .go { padding: 0 12px; }
+    .live-chip .label { display: none; }
+  }
+
+  /* ─────────────────────  모션 접근성  ───────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .stat { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="topbar">
+    <div class="shell topbar-in">
+      <div class="brand">
+        <span class="glyph" aria-hidden="true"></span>
+        <span class="word">Flowbase</span>
+      </div>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a href="#" aria-current="page">마켓플레이스</a>
+        <a href="#">내 연동</a>
+        <a href="#">워크플로우</a>
+        <a href="#">개발자</a>
+      </nav>
+      <div class="topbar-right">
+        <span class="live-chip">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="label">실시간 동기화</span>
+        </span>
+        <button class="avatar" aria-label="워크스페이스 설정">GP</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <p class="eyebrow">Integrations</p>
+      <h1>팀이 쓰는 모든 도구를 <span class="accent">한곳에서 연결</span>하세요</h1>
+      <p class="sub">240개 이상의 앱을 클릭 한 번으로 연동하고, 데이터가 자동으로 흐르게 하세요. 코드 없이 워크플로우를 만드는 가장 빠른 방법.</p>
+
+      <div class="searchbar" role="search">
+        <span class="ico" aria-hidden="true"></span>
+        <input type="search" placeholder="Slack, GitHub, 결제, 데이터 웨어하우스…" aria-label="통합 검색">
+        <span class="kbd">⌘K</span>
+        <button class="go">검색</button>
+      </div>
+
+      <!-- 살아있는 숫자 -->
+      <div class="stat-strip">
+        <div class="stat">
+          <div class="num"><span data-count="248">0</span></div>
+          <div class="cap">등록된 통합</div>
+        </div>
+        <div class="stat">
+          <div class="num"><span data-count="12">0</span><span class="unit">개</span></div>
+          <div class="cap">우리 팀 연결됨 · <span class="trend">+3 이번 주</span></div>
+        </div>
+        <div class="stat">
+          <div class="num"><span data-count="1.8" data-decimals="1">0</span><span class="unit">M</span></div>
+          <div class="cap">오늘 동기화된 이벤트</div>
+        </div>
+        <div class="stat">
+          <div class="num"><span data-count="99.9" data-decimals="1">0</span><span class="unit">%</span></div>
+          <div class="cap">가동률 · <span class="trend">30일</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 카테고리 + 그리드 ── -->
+    <div class="section-head">
+      <h2>통합 둘러보기</h2>
+      <span class="hint">카테고리로 필터링하거나 검색해 보세요</span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="카테고리">
+      <button class="tab" role="tab" aria-selected="true">전체 <span class="count">248</span></button>
+      <button class="tab" role="tab" aria-selected="false">커뮤니케이션 <span class="count">32</span></button>
+      <button class="tab" role="tab" aria-selected="false">개발 <span class="count">54</span></button>
+      <button class="tab" role="tab" aria-selected="false">결제 <span class="count">18</span></button>
+      <button class="tab" role="tab" aria-selected="false">마케팅 <span class="count">41</span></button>
+      <button class="tab" role="tab" aria-selected="false">생산성 <span class="count">37</span></button>
+      <button class="tab" role="tab" aria-selected="false">데이터 <span class="count">29</span></button>
+    </div>
+
+    <div class="grid">
+
+      <!-- 1 · 연결됨 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-comm">Sl</div>
+          <span class="badge connected"><span class="dot" aria-hidden="true"></span>연결됨</span>
+        </div>
+        <h3>Slackline</h3>
+        <p class="desc">채널·DM으로 알림을 보내고 워크플로우를 승인 흐름과 연결합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.9</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>커뮤니케이션</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-secondary">연동 관리</button>
+          <button class="btn btn-icon btn-ghost" aria-label="설정"><span class="gear" aria-hidden="true"></span></button>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-doc soft">Pf</div>
+          <span class="badge cat">문서</span>
+        </div>
+        <h3>Pageflow</h3>
+        <p class="desc">문서와 위키를 양방향으로 동기화해 항상 최신 상태를 유지합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.7</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>생산성</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary">연결하기</button>
+        </div>
+      </article>
+
+      <!-- 3 · 연결됨 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-dev">Gp</div>
+          <span class="badge connected"><span class="dot" aria-hidden="true"></span>연결됨</span>
+        </div>
+        <h3>GitPulse</h3>
+        <p class="desc">PR·이슈·배포 이벤트를 실시간으로 받아 파이프라인을 자동화합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.8</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>개발</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-secondary">연동 관리</button>
+          <button class="btn btn-icon btn-ghost" aria-label="설정"><span class="gear" aria-hidden="true"></span></button>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-pay round">Pl</div>
+          <span class="badge cat">결제</span>
+        </div>
+        <h3>Paylane</h3>
+        <p class="desc">결제·환불·구독 이벤트를 받아 매출 리포트를 자동 갱신합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.9</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>결제</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary">연결하기</button>
+        </div>
+      </article>
+
+      <!-- 5 · 연결됨 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-data">Sg</div>
+          <span class="badge connected"><span class="dot" aria-hidden="true"></span>연결됨</span>
+        </div>
+        <h3>Sheetgrid</h3>
+        <p class="desc">스프레드시트 행을 트리거로 데이터를 수집하고 웨어하우스로 적재합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.6</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>데이터</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-secondary">연동 관리</button>
+          <button class="btn btn-icon btn-ghost" aria-label="설정"><span class="gear" aria-hidden="true"></span></button>
+        </div>
+      </article>
+
+      <!-- 6 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-mail soft">Mw</div>
+          <span class="badge cat">마케팅</span>
+        </div>
+        <h3>Mailwave</h3>
+        <p class="desc">이메일 캠페인 성과를 가져오고 세그먼트를 자동으로 업데이트합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.5</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>마케팅</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary">연결하기</button>
+        </div>
+      </article>
+
+      <!-- 7 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-meet round">Ml</div>
+          <span class="badge cat">화상회의</span>
+        </div>
+        <h3>Meetline</h3>
+        <p class="desc">회의 녹화·요약을 자동으로 저장하고 관련 채널에 공유합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.7</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>커뮤니케이션</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary">연결하기</button>
+        </div>
+      </article>
+
+      <!-- 8 -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-file soft">Db</div>
+          <span class="badge cat">스토리지</span>
+        </div>
+        <h3>Drivebox</h3>
+        <p class="desc">파일 업로드를 감지해 백업하고 권한을 팀 규칙대로 정리합니다.</p>
+        <div class="meta">
+          <span class="rating"><span class="star">★</span> 4.4</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>생산성</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary">연결하기</button>
+        </div>
+      </article>
+
+      <!-- 9 · 준비 중 (disabled 상태 예시) -->
+      <article class="card">
+        <div class="card-top">
+          <div class="logo b-crm round">Cw</div>
+          <span class="badge cat">CRM</span>
+        </div>
+        <h3>Crmwise</h3>
+        <p class="desc">리드·거래 단계를 동기화합니다. 곧 정식 출시 예정인 통합입니다.</p>
+        <div class="meta">
+          <span class="rating">베타 대기</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>영업</span>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" disabled>출시 예정</button>
+          <button class="btn btn-ghost">알림 받기</button>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ── 인기 섹션 ── -->
+    <section class="popular">
+      <div class="popular-head">
+        <span class="flame" aria-hidden="true">🔥</span>
+        <h2>이번 주 인기 통합</h2>
+      </div>
+      <div class="popular-list">
+        <a href="#" class="pop-item">
+          <span class="pop-rank">1</span>
+          <span class="pop-logo b-dev">Gp</span>
+          <span class="pop-body">
+            <span class="pop-name">GitPulse</span>
+            <span class="pop-sub">이번 주 설치 <strong>3,420</strong>회</span>
+          </span>
+        </a>
+        <a href="#" class="pop-item">
+          <span class="pop-rank">2</span>
+          <span class="pop-logo b-comm">Sl</span>
+          <span class="pop-body">
+            <span class="pop-name">Slackline</span>
+            <span class="pop-sub">이번 주 설치 <strong>2,980</strong>회</span>
+          </span>
+        </a>
+        <a href="#" class="pop-item">
+          <span class="pop-rank">3</span>
+          <span class="pop-logo b-pay">Pl</span>
+          <span class="pop-body">
+            <span class="pop-name">Paylane</span>
+            <span class="pop-sub">이번 주 설치 <strong>2,110</strong>회</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="foot">
+    <div class="shell foot-in">
+      <span class="sig"><span class="b">Flowbase</span> · 트렌디 SaaS</span>
+      <nav class="links" aria-label="푸터">
+        <a href="#">문서</a>
+        <a href="#">API</a>
+        <a href="#">상태</a>
+        <a href="#">개인정보</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var nodes = document.querySelectorAll("[data-count]");
+
+      nodes.forEach(function (el) {
+        var target = parseFloat(el.getAttribute("data-count"));
+        var decimals = parseInt(el.getAttribute("data-decimals") || "0", 10);
+        var format = function (v) {
+          return decimals > 0
+            ? v.toFixed(decimals)
+            : Math.round(v).toLocaleString("en-US");
+        };
+        // 최종값은 접근성/실패 안전을 위해 즉시 확정
+        if (reduce) { el.textContent = format(target); return; }
+
+        var dur = 800, start = null;
+        function step(ts) {
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+          el.textContent = format(target * eased);
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = format(target);
+        }
+        requestAnimationFrame(step);
+      });
+
+      // 카테고리 탭 — 단일 선택
+      var tabs = document.querySelectorAll(".tab");
+      tabs.forEach(function (t) {
+        t.addEventListener("click", function () {
+          tabs.forEach(function (x) { x.setAttribute("aria-selected", "false"); });
+          t.setAttribute("aria-selected", "true");
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

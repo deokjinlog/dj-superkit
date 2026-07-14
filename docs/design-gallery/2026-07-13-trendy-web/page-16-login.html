@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowbase — 로그인</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* palette */
+    --bg:#FBFAFF;
+    --surface:#FFFFFF;
+    --primary:#7C5CFF;
+    --primary-strong:#6A48F0;
+    --primary-press:#5B3BDC;
+    --pink:#FF8FC0;
+    --mint:#5EE6C8;
+    --ink:#17143A;
+    --muted:#7B7897;
+    --line:#ECE9F6;
+    --line-strong:#DED9EE;
+    --field:#F6F4FD;
+    --ring:rgba(124,92,255,.28);
+    --ring-strong:rgba(124,92,255,.45);
+
+    /* elevation */
+    --shadow-card:0 10px 30px rgba(23,20,58,.06);
+    --shadow-float:0 20px 40px rgba(124,92,255,.15);
+    --grad:linear-gradient(135deg,#7C5CFF 0%,#FF8FC0 100%);
+
+    /* type scale */
+    --t-cap:12px;
+    --t-body:14px;
+    --t-btn:16px;
+    --t-sub:20px;
+    --t-title:28px;
+    --t-brand:40px;
+
+    /* radius */
+    --r-field:12px;
+    --r-btn:12px;
+    --r-card:28px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ---------- page shell ---------- */
+  .page{
+    min-height:100%;
+    display:grid;
+    grid-template-columns:1.05fr 1fr;
+  }
+
+  /* ---------- left: brand ---------- */
+  .brand{
+    position:relative;
+    overflow:hidden;
+    padding:48px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    background:
+      radial-gradient(120% 120% at 12% 8%, #8C6BFF 0%, #7C5CFF 42%, #6A48F0 100%);
+    color:#fff;
+  }
+  /* signature blobs on the brand side */
+  .brand::before,
+  .brand::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:.7;
+    pointer-events:none;
+  }
+  .brand::before{
+    width:360px;height:360px;
+    top:-80px;right:-80px;
+    background:var(--pink);
+  }
+  .brand::after{
+    width:320px;height:320px;
+    bottom:-120px;left:-60px;
+    background:var(--mint);
+    opacity:.55;
+  }
+
+  .brand__head{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .logo{
+    width:40px;height:40px;
+    border-radius:12px;
+    display:grid;place-items:center;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.28);
+    backdrop-filter:blur(4px);
+    flex:none;
+  }
+  .logo svg{display:block}
+  .brand__word{
+    font-size:var(--t-sub);
+    font-weight:700;
+    letter-spacing:-.02em;
+  }
+
+  /* CSS-shape illustration */
+  .art{
+    position:relative;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:280px;
+    margin:40px 0;
+  }
+  .art__stage{
+    position:relative;
+    width:100%;
+    max-width:380px;
+    height:320px;
+  }
+  .orb{
+    position:absolute;
+    inset:auto;
+    top:40px;left:50%;
+    width:200px;height:200px;
+    margin-left:-100px;
+    border-radius:50%;
+    background:linear-gradient(150deg,#FFFFFF 0%,#FFE7F2 45%,#E4DBFF 100%);
+    box-shadow:0 24px 60px rgba(23,20,58,.28), inset 0 -18px 40px rgba(124,92,255,.18);
+  }
+  .orb__ring{
+    position:absolute;
+    inset:-18px;
+    border-radius:50%;
+    border:1px dashed rgba(255,255,255,.5);
+  }
+  .glass{
+    position:absolute;
+    border-radius:18px;
+    background:rgba(255,255,255,.88);
+    box-shadow:0 16px 34px rgba(23,20,58,.18);
+    padding:14px 16px;
+    color:var(--ink);
+  }
+  .glass--top{
+    top:8px;left:8px;
+    width:196px;
+  }
+  .glass--bottom{
+    bottom:0;right:0;
+    width:212px;
+  }
+  .g-title{
+    font-size:var(--t-cap);
+    font-weight:700;
+    letter-spacing:-.01em;
+    margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .live{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:600;color:var(--primary);
+    margin-left:auto;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--mint);
+    box-shadow:0 0 0 0 rgba(94,230,200,.7);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  .dot--violet{background:var(--primary);box-shadow:0 0 0 0 rgba(124,92,255,.6)}
+  /* mini bar row (no chart lib — plain divs) */
+  .bars{display:flex;align-items:flex-end;gap:8px;height:56px}
+  .bars i{
+    flex:1;border-radius:6px 6px 3px 3px;
+    background:linear-gradient(180deg,#C9BEFF,#7C5CFF);
+    display:block;
+  }
+  .bars i:nth-child(1){height:44%}
+  .bars i:nth-child(2){height:66%}
+  .bars i:nth-child(3){height:38%}
+  .bars i:nth-child(4){height:88%;background:var(--grad)}
+  .bars i:nth-child(5){height:58%}
+  /* avatar initials row */
+  .stack{display:flex;align-items:center}
+  .ava{
+    width:28px;height:28px;border-radius:50%;
+    display:grid;place-items:center;
+    font-size:11px;font-weight:700;color:#fff;
+    border:2px solid #fff;
+    margin-left:-8px;
+  }
+  .ava:first-child{margin-left:0}
+  .ava--1{background:#7C5CFF}
+  .ava--2{background:#FF8FC0}
+  .ava--3{background:#5EE6C8;color:#0B4A3E}
+  .ava--more{background:var(--field);color:var(--muted)}
+  .pill{
+    margin-left:auto;
+    font-size:11px;font-weight:700;
+    color:#0B4A3E;
+    background:rgba(94,230,200,.28);
+    padding:4px 8px;border-radius:999px;
+  }
+
+  .brand__copy{position:relative;max-width:420px}
+  .brand__copy h1{
+    margin:0 0 12px;
+    font-size:var(--t-title);
+    font-weight:800;
+    line-height:1.3;
+    letter-spacing:-.02em;
+  }
+  .brand__copy p{
+    margin:0;
+    font-size:var(--t-body);
+    line-height:1.6;
+    color:rgba(255,255,255,.82);
+  }
+
+  /* ---------- right: auth ---------- */
+  .auth{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 24px;
+    overflow:hidden;
+  }
+  /* pastel blobs behind the card */
+  .auth::before,
+  .auth::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    filter:blur(90px);
+    pointer-events:none;
+    z-index:0;
+  }
+  .auth::before{
+    width:300px;height:300px;
+    top:-90px;right:-40px;
+    background:rgba(124,92,255,.20);
+  }
+  .auth::after{
+    width:280px;height:280px;
+    bottom:-100px;left:-40px;
+    background:rgba(94,230,200,.20);
+  }
+
+  .card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:400px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--r-card);
+    box-shadow:var(--shadow-card);
+    padding:40px;
+  }
+
+  .card__logo{
+    width:44px;height:44px;border-radius:12px;
+    display:grid;place-items:center;
+    background:var(--grad);
+    box-shadow:0 8px 20px rgba(124,92,255,.28);
+    margin-bottom:24px;
+  }
+
+  .card__title{
+    margin:0 0 8px;
+    font-size:var(--t-title);
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:1.25;
+  }
+  .card__sub{
+    margin:0 0 32px;
+    font-size:var(--t-body);
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  /* ---------- form ---------- */
+  .field{margin-bottom:20px}
+  .field__label{
+    display:block;
+    font-size:var(--t-cap);
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:8px;
+    letter-spacing:-.01em;
+  }
+  .input{
+    position:relative;
+    display:flex;align-items:center;
+    background:var(--field);
+    border:1px solid transparent;
+    border-radius:var(--r-field);
+    transition:border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+  .input__icon{
+    display:grid;place-items:center;
+    width:44px;height:44px;flex:none;
+    color:var(--muted);
+    transition:color .18s ease;
+  }
+  .input input{
+    flex:1;
+    height:44px;
+    border:0;background:transparent;
+    padding:0 8px 0 0;
+    font:inherit;
+    font-size:var(--t-body);
+    color:var(--ink);
+    outline:none;
+    min-width:0;
+  }
+  .input input::placeholder{color:var(--muted);opacity:.75}
+  .input:hover{border-color:var(--line-strong)}
+  .input:focus-within{
+    background:var(--surface);
+    border-color:var(--primary);
+    box-shadow:0 0 0 4px var(--ring);
+  }
+  .input:focus-within .input__icon{color:var(--primary)}
+
+  .peek{
+    appearance:none;
+    border:0;background:transparent;
+    width:44px;height:44px;flex:none;
+    display:grid;place-items:center;
+    color:var(--muted);
+    cursor:pointer;
+    border-radius:0 var(--r-field) var(--r-field) 0;
+    transition:color .18s ease, background .18s ease;
+  }
+  .peek:hover{color:var(--ink)}
+  .peek:active{background:rgba(124,92,255,.08)}
+  .peek:focus-visible{
+    outline:none;
+    color:var(--primary);
+    box-shadow:inset 0 0 0 2px var(--ring-strong);
+  }
+
+  /* row: remember + forgot */
+  .row-between{
+    display:flex;align-items:center;justify-content:space-between;
+    margin:-4px 0 24px;
+  }
+  .check{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:var(--t-cap);color:var(--muted);
+    cursor:pointer;user-select:none;
+  }
+  .check input{position:absolute;opacity:0;width:0;height:0}
+  .check__box{
+    width:18px;height:18px;border-radius:6px;
+    border:1.5px solid var(--line-strong);
+    background:var(--surface);
+    display:grid;place-items:center;
+    transition:border-color .16s ease, background .16s ease;
+  }
+  .check__box svg{opacity:0;transform:scale(.6);transition:opacity .16s ease, transform .16s ease}
+  .check input:checked + .check__box{background:var(--grad);border-color:transparent}
+  .check input:checked + .check__box svg{opacity:1;transform:scale(1)}
+  .check input:focus-visible + .check__box{box-shadow:0 0 0 4px var(--ring)}
+
+  .link{
+    font-size:var(--t-cap);
+    font-weight:600;
+    color:var(--primary);
+    text-decoration:none;
+    border-radius:6px;
+    transition:color .16s ease;
+  }
+  .link:hover{color:var(--primary-press);text-decoration:underline;text-underline-offset:2px}
+  .link:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
+
+  /* buttons */
+  .btn{
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:var(--r-btn);
+    font:inherit;
+    font-size:var(--t-btn);
+    font-weight:700;
+    letter-spacing:-.01em;
+    cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    transition:transform .16s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--ring-strong)}
+
+  .btn--primary{
+    color:#fff;
+    background:var(--grad);
+    box-shadow:0 10px 24px rgba(124,92,255,.30);
+  }
+  .btn--primary:hover{box-shadow:0 16px 32px rgba(124,92,255,.38);transform:translateY(-1px)}
+  .btn--primary:active{transform:translateY(0);box-shadow:0 6px 16px rgba(124,92,255,.32);background:linear-gradient(135deg,var(--primary-press),#F06BA8)}
+
+  .btn--social{
+    color:var(--ink);
+    background:var(--surface);
+    border:1px solid var(--line-strong);
+  }
+  .btn--social:hover{background:var(--field);border-color:var(--primary);transform:translateY(-1px)}
+  .btn--social:active{transform:translateY(0);background:#EFEBFC}
+
+  /* divider */
+  .divider{
+    display:flex;align-items:center;gap:16px;
+    margin:24px 0;
+    color:var(--muted);
+    font-size:var(--t-cap);
+    font-weight:500;
+  }
+  .divider::before,.divider::after{
+    content:"";flex:1;height:1px;background:var(--line);
+  }
+
+  .socials{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .signup{
+    margin:32px 0 0;
+    text-align:center;
+    font-size:var(--t-body);
+    color:var(--muted);
+  }
+  .signup a{margin-left:4px}
+
+  /* footer */
+  .foot{
+    position:relative;z-index:1;
+    margin-top:32px;
+    text-align:center;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.01em;
+  }
+
+  /* ---------- entrance sequence ---------- */
+  @keyframes riseIn{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(94,230,200,.6)}
+    70%{box-shadow:0 0 0 8px rgba(94,230,200,0)}
+    100%{box-shadow:0 0 0 0 rgba(94,230,200,0)}
+  }
+  .rise{opacity:0;animation:riseIn .5s cubic-bezier(.22,.61,.36,1) forwards}
+  .rise.d1{animation-delay:.06s}
+  .rise.d2{animation-delay:.12s}
+  .rise.d3{animation-delay:.18s}
+  .rise.d4{animation-delay:.24s}
+  .rise.d5{animation-delay:.30s}
+  .rise.d6{animation-delay:.36s}
+  .rise.d7{animation-delay:.42s}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .page{grid-template-columns:1fr}
+    .brand{display:none}
+    .auth{padding:40px 20px}
+  }
+  @media (max-width:420px){
+    .card{padding:28px 24px;border-radius:24px}
+    .socials{grid-template-columns:1fr}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+    .rise{opacity:1}
+    .dot{box-shadow:none}
+    .btn--primary:hover,.btn--social:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============ LEFT · BRAND ============ -->
+    <aside class="brand">
+      <div class="brand__head rise">
+        <span class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7c4-3 8 3 12 0M4 12c4-3 8 3 12 0M4 17c4-3 8 3 12 0"
+                  stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="brand__word">Flowbase</span>
+      </div>
+
+      <!-- CSS-shape illustration -->
+      <div class="art rise d2" aria-hidden="true">
+        <div class="art__stage">
+          <div class="orb"><span class="orb__ring"></span></div>
+
+          <div class="glass glass--top">
+            <div class="g-title">
+              주간 처리량
+              <span class="live"><span class="dot dot--violet"></span>실시간</span>
+            </div>
+            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+
+          <div class="glass glass--bottom">
+            <div class="g-title">참여 팀</div>
+            <div class="stack">
+              <span class="ava ava--1">FB</span>
+              <span class="ava ava--2">OP</span>
+              <span class="ava ava--3">DX</span>
+              <span class="ava ava--more">+9</span>
+              <span class="pill">동기화 완료</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand__copy rise d4">
+        <h1>팀의 흐름을<br>한 화면에서 살아 움직이게.</h1>
+        <p>흩어진 작업과 지표를 Flowbase 하나로 모으고, 지금 이 순간의 데이터를 함께 봅니다.</p>
+      </div>
+    </aside>
+
+    <!-- ============ RIGHT · AUTH CARD ============ -->
+    <main class="auth">
+      <div>
+        <div class="card">
+          <div class="card__logo rise" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M4 7c4-3 8 3 12 0M4 12c4-3 8 3 12 0M4 17c4-3 8 3 12 0"
+                    stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <h2 class="card__title rise d1">다시 만나서 반가워요</h2>
+          <p class="card__sub rise d2">Flowbase 계정으로 로그인하고 팀의 워크스페이스로 이동하세요.</p>
+
+          <form class="rise d3" onsubmit="return false">
+            <!-- email -->
+            <div class="field">
+              <label class="field__label" for="email">이메일</label>
+              <div class="input">
+                <span class="input__icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="5" width="18" height="14" rx="3"/>
+                    <path d="m4 7 8 6 8-6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email">
+              </div>
+            </div>
+
+            <!-- password -->
+            <div class="field">
+              <label class="field__label" for="password">비밀번호</label>
+              <div class="input">
+                <span class="input__icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="4" y="10" width="16" height="10" rx="3"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <input id="password" type="password" name="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+                <button type="button" class="peek" id="peek" aria-label="비밀번호 표시" aria-pressed="false">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="row-between">
+              <label class="check">
+                <input type="checkbox" checked>
+                <span class="check__box" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3">
+                    <path d="m5 12 5 5 9-10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                로그인 유지
+              </label>
+              <a class="link" href="#">비밀번호를 잊으셨나요?</a>
+            </div>
+
+            <button type="submit" class="btn btn--primary">로그인</button>
+          </form>
+
+          <div class="divider rise d4">또는 소셜 계정으로</div>
+
+          <div class="socials rise d5">
+            <button type="button" class="btn btn--social">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#EA4335" d="M12 10.2v3.9h5.4a4.6 4.6 0 0 1-2 3l3.2 2.5c1.9-1.7 3-4.3 3-7.4 0-.7-.1-1.4-.2-2z"/>
+                <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.7-5.6-4.1L3.1 16.5A10 10 0 0 0 12 22z"/>
+                <path fill="#4285F4" d="M6.4 13.9a6 6 0 0 1 0-3.8L3.1 7.5a10 10 0 0 0 0 9z"/>
+                <path fill="#FBBC05" d="M12 6.6c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 8.3 9.4 6.6 12 6.6z"/>
+              </svg>
+              Google
+            </button>
+            <button type="button" class="btn btn--social">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16.4 12.9c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8ZM14.2 6c.6-.8 1.1-1.9 1-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2-.5 2.7-1.3Z"/>
+              </svg>
+              Apple
+            </button>
+          </div>
+
+          <p class="signup rise d6">
+            아직 계정이 없으신가요?<a class="link" href="#">회원가입</a>
+          </p>
+        </div>
+
+        <p class="foot rise d7">로그인/회원가입 · 트렌디 SaaS</p>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // 비밀번호 표시/숨김 — 연출/편의만 담당, 폼 데이터에는 영향 없음
+    (function(){
+      var btn = document.getElementById('peek');
+      var input = document.getElementById('password');
+      if(!btn || !input) return;
+      btn.addEventListener('click', function(){
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.setAttribute('aria-label', show ? '비밀번호 숨김' : '비밀번호 표시');
+      });
+    })();
+  </script>
+</body>
+</html>

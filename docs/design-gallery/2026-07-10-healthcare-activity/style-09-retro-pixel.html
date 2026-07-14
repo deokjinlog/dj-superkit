@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>핏펄스 · 오늘의 활동 리포트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#1A1C2C;
+  --panel:#29366F;
+  --panel-2:#324082;
+  --green:#38B764;
+  --green-tx:#4FCB79;
+  --yellow:#FFCD75;
+  --red:#B13E53;
+  --red-tx:#F08FA4;
+  --text:#F4F4F4;
+  --muted:#A9ADD0;
+  --grey:#4A4F6B;
+  --shadow:rgba(0,0,0,.45);
+  --notch-o:8px;
+  --notch-i:4px;
+  --gap:16px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(244,244,244,.04) 0px, rgba(244,244,244,.04) 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(-45deg, rgba(244,244,244,.03) 0px, rgba(244,244,244,.03) 1px, transparent 1px, transparent 4px);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', system-ui, Arial, Helvetica, Verdana;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+img,svg{ display:block; }
+.pix{ font-family:'Press Start 2P','Pretendard', monospace; letter-spacing: .5px; }
+.num{ font-family:'Press Start 2P','Pretendard', monospace; font-variant-numeric: tabular-nums; }
+.eyebrow{ font-family:'Press Start 2P','Pretendard', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 1px; display:block; margin: 0 0 6px; }
+.pxicon{ fill: currentColor; }
+
+/* ============ pixel-frame 3겹 시스템 (다중 box-shadow + clip-path 계단 코너) ============ */
+.pf-wrap{
+  position: relative;
+  box-shadow:
+    5px 5px 0 0 rgba(0,0,0,.28),
+    9px 9px 0 0 var(--shadow);
+  margin: 0 6px 14px 0;
+}
+.pf-outer{
+  --frame: var(--muted);
+  background: var(--frame);
+  padding: 4px;
+  clip-path: polygon(
+    0 var(--notch-o), var(--notch-o) var(--notch-o), var(--notch-o) 0,
+    calc(100% - var(--notch-o)) 0, calc(100% - var(--notch-o)) var(--notch-o), 100% var(--notch-o),
+    100% calc(100% - var(--notch-o)), calc(100% - var(--notch-o)) calc(100% - var(--notch-o)), calc(100% - var(--notch-o)) 100%,
+    var(--notch-o) 100%, var(--notch-o) calc(100% - var(--notch-o)), 0 calc(100% - var(--notch-o))
+  );
+}
+.pf-inner{
+  background: var(--panel);
+  padding: 18px;
+  clip-path: polygon(
+    0 var(--notch-i), var(--notch-i) var(--notch-i), var(--notch-i) 0,
+    calc(100% - var(--notch-i)) 0, calc(100% - var(--notch-i)) var(--notch-i), 100% var(--notch-i),
+    100% calc(100% - var(--notch-i)), calc(100% - var(--notch-i)) calc(100% - var(--notch-i)), calc(100% - var(--notch-i)) 100%,
+    var(--notch-i) 100%, var(--notch-i) calc(100% - var(--notch-i)), 0 calc(100% - var(--notch-i))
+  );
+}
+.pf-hover:hover .pf-outer{ background: var(--panel); }
+.pf-hover:hover .pf-inner{ background: var(--muted); }
+.pf-hover:hover .pf-inner .kpi-value,
+.pf-hover:hover .pf-inner .kpi-label,
+.pf-hover:hover .pf-inner .kpi-foot{ color: var(--bg); }
+.pf-hover:hover .pf-inner .kpi-unit{ color: var(--bg); }
+
+/* small chip frame (1겹) */
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding: 4px 8px;
+  background: var(--panel);
+  box-shadow: 0 0 0 2px var(--muted);
+}
+
+/* ============ READY? 오프닝 ============ */
+#ready{
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  animation: readyHide .01s steps(1) .6s forwards;
+}
+#ready .box{
+  padding: 20px 28px;
+  background: var(--panel);
+  box-shadow: 0 0 0 4px var(--yellow), 8px 8px 0 0 rgba(0,0,0,.5);
+}
+#ready .txt{
+  font-size: 16px; letter-spacing: 4px; color: var(--yellow);
+  animation: readyBlink .6s steps(1) 1;
+}
+@keyframes readyBlink{
+  0%,24%{ opacity:1; } 25%,49%{ opacity:0; }
+  50%,74%{ opacity:1; } 75%,100%{ opacity:0; }
+}
+@keyframes readyHide{ to{ opacity:0; visibility:hidden; } }
+
+/* ============ 패널 스냅 등장 (0.6s) ============ */
+.snap{ opacity:0; animation: snapIn 1ms steps(1) .62s forwards; }
+@keyframes snapIn{ to{ opacity:1; } }
+
+/* ============ 레이아웃 ============ */
+.page{ max-width: 1240px; margin: 0 auto; padding: 0 20px 60px; }
+
+/* header */
+header.topbar{
+  background: var(--panel);
+  box-shadow: 0 4px 0 0 var(--bg), 0 6px 0 0 var(--muted);
+  padding: 14px 20px;
+  margin-bottom: 28px;
+}
+.topbar-inner{
+  max-width: 1240px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap: 12px;
+}
+.brand{ display:flex; align-items:center; gap: 12px; }
+.brand-badge{
+  width: 40px; height: 40px; display:flex; align-items:center; justify-content:center;
+  background: var(--yellow); color: var(--bg);
+  font-size: 14px;
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--yellow);
+  flex-shrink:0;
+}
+.brand-text .brand-name{ margin:0; font-weight:800; font-size:16px; color: var(--text); }
+.brand-text .brand-name .en{ font-family:'Press Start 2P','Pretendard', monospace; font-size:8px; color: var(--muted); margin-left:8px; letter-spacing:1px; vertical-align:middle; }
+.brand-text .screen-title{ margin:2px 0 0; font-size:13px; color: var(--muted); }
+.status-cluster{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.streak-chip .icon{ width:14px; height:14px; color: var(--yellow); }
+.sync-chip .led{
+  width:8px; height:8px; background: var(--green);
+  box-shadow: 0 0 0 2px var(--bg);
+  animation: ledBlink 1.6s steps(1) infinite;
+}
+@keyframes ledBlink{ 0%,79%{opacity:1;} 80%,100%{opacity:.35;} }
+.chip-txt{ font-size:12px; color: var(--text); }
+.chip-txt b{ color: var(--yellow); font-weight:700; }
+
+main{ display:flex; flex-direction:column; gap: 28px; }
+section{ scroll-margin-top: 20px; }
+h2.section-h{ margin:0 0 14px; font-size:18px; font-weight:800; color: var(--text); }
+
+/* ============ HERO ============ */
+.hero-inner{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap: 26px; align-items:start; }
+.score-block{ display:flex; flex-direction:column; gap:10px; }
+.score-readout{
+  display:inline-flex; align-items:baseline; gap:8px;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--panel-2);
+  padding: 14px 18px;
+  width: fit-content;
+}
+.score-readout .num{ font-size:16px; color: var(--yellow); }
+.score-readout .unit{ font-size:13px; color: var(--muted); }
+.score-delta{ font-size:12px; color: var(--text); display:flex; align-items:center; gap:6px; }
+.score-delta .arrow-up{ color: var(--green-tx); }
+.score-delta .num{ font-size:11px; color: var(--green-tx); }
+.coach-box{
+  margin-top: 6px;
+  background: var(--bg);
+  box-shadow: 0 0 0 2px var(--panel-2);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+  line-height:1.6;
+}
+.coach-box b{ color: var(--yellow); }
+
+.rings-row{ display:flex; gap: 22px; flex-wrap:wrap; }
+.ring-block{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.ring{ position:relative; width:76px; height:76px; }
+.ring-grid{ position:absolute; inset:0; display:grid; grid-template-columns:repeat(9,1fr); grid-template-rows:repeat(9,1fr); }
+.ring-grid .cell.lit{ background: var(--c, var(--green)); }
+.ring-grid .cell.dim{ background: var(--panel-2); }
+.ring-pct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ring-pct .num{ font-size:12px; color: var(--text); }
+.ring-pct .pct{ font-size:9px; color: var(--text); }
+.ring-label{ font-size:12px; color: var(--muted); text-align:center; }
+.ring-label b{ display:block; color: var(--text); font-size:13px; margin-top:2px; }
+
+/* ============ KPI ============ */
+.kpi-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+.kpi-label{ margin:0 0 8px; font-size:12px; color: var(--muted); }
+.kpi-value{ margin:0; display:flex; align-items:baseline; gap:6px; }
+.kpi-value .num{ font-size:16px; color: var(--text); }
+.kpi-unit{ font-size:13px; color: var(--muted); }
+.kpi-delta{ margin: 10px 0 0; display:inline-flex; align-items:center; gap:5px; font-size:11px; }
+.kpi-delta .num{ font-size:11px; }
+.kpi-delta.up{ color: var(--green-tx); }
+.kpi-delta.down{ color: var(--red-tx); }
+.kpi-foot{ margin:8px 0 0; font-size:11.5px; color: var(--muted); }
+
+/* ============ CHARTS ============ */
+.chart-grid{ display:grid; grid-template-columns: 1.5fr 1fr; gap: var(--gap); align-items:start; }
+.chart-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
+.chart-head h3{ margin:0; font-size:16px; font-weight:800; }
+.chart-head .tag{ font-size:9px; color: var(--yellow); }
+
+/* bar chart 1 */
+.bars1{
+  display:flex; align-items:flex-end; gap:10px; height: 200px; padding-top: 22px; position:relative;
+  background-image: repeating-linear-gradient(to top, var(--panel-2) 0px, var(--panel-2) 2px, transparent 2px, transparent 42px);
+  background-position: left bottom;
+  box-shadow: inset 0 -3px 0 0 var(--muted);
+}
+.bar1-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end; position:relative; }
+.bar1{
+  width: 100%;
+  max-width: 30px;
+  background-color: var(--green);
+  background-image: repeating-linear-gradient(to top, var(--bg) 0px, var(--bg) 1px, transparent 1px, transparent 9px);
+  animation: growBar .5s steps(6,end) .82s both;
+  --h: 24px;
+  height: var(--h);
+}
+.bar1-col.peak .bar1{ background-color: var(--yellow); }
+@keyframes growBar{ from{ height:0; } to{ height: var(--h); } }
+.peak-cursor{
+  position:absolute; top:-20px; left:50%; transform:translateX(-50%);
+  color: var(--yellow); font-size:12px;
+  opacity:0;
+  animation: cursorBlink 1s steps(1) 1.42s infinite;
+}
+@keyframes cursorBlink{ 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+.bar1-time{ font-size:10px; color: var(--muted); }
+.bar1-time .num{ font-size:9px; }
+.bar1-val{ font-size:9px; color:var(--text); }
+
+/* chart2 heart zone */
+.zones{ display:flex; flex-direction:column; gap:12px; }
+.zone-row{ display:grid; grid-template-columns: 78px 1fr 62px; gap:10px; align-items:center; }
+.zone-name{ font-size:12px; color: var(--text); }
+.zone-name small{ display:block; font-size:9.5px; color: var(--muted); margin-top:1px; }
+.zone-track{ height:14px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--panel-2); position:relative; }
+.zone-fill{ height:100%; min-width:6px; background-color: var(--green);
+  background-image: repeating-linear-gradient(to right, var(--bg) 0px, var(--bg) 1px, transparent 1px, transparent 7px);
+  animation: growW .5s steps(6,end) .82s both;
+  --w: 10%;
+  width: var(--w);
+}
+@keyframes growW{ from{ width:0; } to{ width: var(--w); } }
+.zone-row.hl .zone-fill{ background-color: var(--yellow); }
+.zone-min{ font-size:11px; color: var(--text); text-align:right; }
+.zone-hl-tag{ display:flex; align-items:center; gap:5px; margin-top:14px; padding:8px 10px; background: var(--bg); box-shadow: 0 0 0 2px var(--yellow); }
+.zone-hl-tag .icon{ width:14px; height:14px; color: var(--yellow); flex-shrink:0; }
+.zone-hl-tag span{ font-size:11.5px; color: var(--text); }
+.zone-hl-tag b{ color: var(--yellow); }
+
+/* ============ WEEK STRIP ============ */
+.week-row{ display:flex; gap:12px; align-items:flex-end; overflow-x:auto; padding-top:22px; }
+.week-col{ flex:1; min-width:56px; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; }
+.week-bar-wrap{ height:110px; display:flex; align-items:flex-end; width:100%; justify-content:center; }
+.week-bar{
+  width: 26px;
+  background-color: var(--panel-2);
+  background-image: repeating-linear-gradient(to top, var(--bg) 0px, var(--bg) 1px, transparent 1px, transparent 8px);
+  animation: growBar .5s steps(6,end) .82s both;
+  --h: 40px; height: var(--h);
+}
+.week-col.today .week-bar{ background-color: var(--green); box-shadow: 0 0 0 2px var(--yellow); }
+.week-col.best .week-bar{ background-color: var(--yellow); }
+.week-star{ position:absolute; top:-2px; width:14px; height:14px; color: var(--yellow); }
+.week-today-tag{ font-size:8px; color: var(--bg); background: var(--yellow); padding:2px 4px; }
+.week-date{ font-size:10.5px; color: var(--muted); }
+.week-date .num{ font-size:10px; }
+.week-val{ font-size:9px; color: var(--text); }
+
+/* ============ MISSION TABLE ============ */
+.table-scroll{ overflow-x:auto; padding-left: 18px; }
+table.mission{ width:100%; border-collapse:collapse; min-width: 720px; }
+table.mission thead th{
+  text-align:left; font-size:11px; color: var(--bg); background: var(--yellow);
+  padding: 10px 10px; font-weight:800; white-space:nowrap;
+}
+table.mission tbody td{ padding: 10px 10px; font-size:12.5px; border-bottom: 2px solid var(--bg); vertical-align:middle; }
+table.mission tbody tr{ background: var(--panel-2); position:relative; }
+table.mission tbody tr:nth-child(even){ background: var(--panel); }
+table.mission tbody tr:hover{ background: var(--muted); }
+table.mission tbody tr:hover td{ color: var(--bg); }
+table.mission tbody tr:hover td .num{ color: var(--bg); }
+table.mission td:first-child{ position:relative; }
+table.mission tr:hover td:first-child::before{
+  content:"▶"; position:absolute; left:-16px; top:50%; transform:translateY(-50%);
+  color: var(--yellow); font-size:11px;
+}
+.hpbar{ display:inline-flex; gap:2px; vertical-align:middle; margin-right:8px; }
+.hpbar i{ display:block; width:7px; height:12px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--panel-2); }
+.hpbar i.on{ background: var(--pip, var(--green)); box-shadow:none; }
+.hpbar.warn{ box-shadow: 0 0 0 2px var(--red); }
+.hpbar.warn i.on{ animation: pipBlink .9s steps(1) infinite; }
+@keyframes pipBlink{ 0%,59%{opacity:1;} 60%,100%{opacity:.25;} }
+.status-cell{ display:flex; align-items:center; }
+.status-txt{ font-size:11.5px; font-weight:700; }
+.status-txt.done{ color: var(--green-tx); }
+.status-txt.prog{ color: var(--yellow); }
+.status-txt.wait{ color: var(--muted); }
+.status-txt.warn{ color: var(--red-tx); }
+tr:hover .status-txt{ color: var(--bg) !important; }
+
+/* ============ BADGES ============ */
+.badges-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap: var(--gap); }
+.badge-card{ display:flex; gap:14px; align-items:flex-start; }
+.badge-icon{ width:44px; height:44px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background: var(--bg); box-shadow: 0 0 0 2px var(--yellow); }
+.badge-icon svg{ width:26px; height:26px; color: var(--yellow); }
+.badge-title{ margin:0 0 6px; font-size:13.5px; font-weight:800; color: var(--text); }
+.badge-tag{ display:inline-block; margin-bottom:6px; font-size:8px; color:var(--bg); background:var(--green-tx); padding:2px 5px; }
+.badge-desc{ margin:0; font-size:12px; color: var(--muted); line-height:1.5; }
+
+/* ============ FOOTER ============ */
+footer.foot{ margin-top: 36px; text-align:center; }
+footer.foot .tag{ font-size:10px; color: var(--muted); }
+footer.foot .tag .pix{ color: var(--yellow); }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 900px){
+  .hero-inner{ grid-template-columns: 1fr; }
+  .kpi-grid{ grid-template-columns: repeat(2,1fr); }
+  .chart-grid{ grid-template-columns: 1fr; }
+  .badges-grid{ grid-template-columns: 1fr; }
+  .topbar-inner{ flex-direction:column; align-items:flex-start; }
+}
+@media (max-width: 560px){
+  .kpi-grid{ grid-template-columns: 1fr; }
+  .rings-row{ justify-content:space-between; gap:14px; }
+  .ring{ width:64px; height:64px; }
+}
+
+/* ============ prefers-reduced-motion ============ */
+@media (prefers-reduced-motion: reduce){
+  #ready{ display:none !important; }
+  #ready .txt{ animation:none !important; }
+  .snap{ opacity:1 !important; animation:none !important; }
+  .bar1, .week-bar{ animation:none !important; height: var(--h) !important; }
+  .zone-fill{ animation:none !important; width: var(--w) !important; }
+  .peak-cursor{ animation:none !important; opacity:1 !important; }
+  .sync-chip .led{ animation:none !important; opacity:1 !important; }
+  .hpbar.warn i.on{ animation:none !important; opacity:1 !important; }
+  *{ animation-duration:.01ms !important; animation-delay:0s !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="ready" aria-hidden="true">
+  <div class="box"><span class="txt pix">READY?</span></div>
+</div>
+
+<header class="topbar snap">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-badge pix">FP</div>
+      <div class="brand-text">
+        <p class="brand-name">핏펄스<span class="en">FITPULSE</span></p>
+        <p class="screen-title">오늘의 활동 리포트</p>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <div class="chip">
+        <span class="chip-txt">플레이어 <b>핏메이트</b></span>
+      </div>
+      <div class="chip streak-chip">
+        <svg class="icon pxicon" viewBox="0 0 5 5" width="14" height="14" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="2" y="0" width="1" height="1"/>
+          <rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/>
+          <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+          <rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/>
+          <rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/>
+        </svg>
+        <span class="chip-txt"><span class="num">12</span>일 연속</span>
+      </div>
+      <div class="chip sync-chip">
+        <span class="led" aria-hidden="true"></span>
+        <span class="chip-txt">갱신 <span class="num">2026-07-10 08:42</span> · 동기화 완료</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+<main>
+
+  <!-- 2. 히어로 요약 밴드 -->
+  <section class="pf-wrap snap" aria-label="히어로 요약">
+    <div class="pf-outer"><div class="pf-inner">
+      <span class="eyebrow">STAGE STATUS</span>
+      <div class="hero-inner">
+        <div class="score-block">
+          <div class="score-readout">
+            <span class="num">87</span><span class="unit">점</span>
+          </div>
+          <div class="score-delta"><span class="arrow-up">▲</span>전일 대비 <span class="num">+6</span>점</div>
+          <div class="coach-box">
+            목표까지 <b>1,568걸음</b> 남았어요. 저녁 산책이면 충분해요.
+          </div>
+        </div>
+        <div class="rings-row">
+          <div class="ring-block">
+            <div class="ring">
+              <div class="ring-grid" style="--c:var(--green)">
+                <span class="cell lit" style="grid-row:1;grid-column:1"></span><span class="cell lit" style="grid-row:1;grid-column:2"></span><span class="cell lit" style="grid-row:1;grid-column:3"></span><span class="cell lit" style="grid-row:1;grid-column:4"></span><span class="cell lit" style="grid-row:1;grid-column:5"></span><span class="cell lit" style="grid-row:1;grid-column:6"></span><span class="cell lit" style="grid-row:1;grid-column:7"></span><span class="cell lit" style="grid-row:1;grid-column:8"></span><span class="cell lit" style="grid-row:1;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:2;grid-column:9"></span><span class="cell lit" style="grid-row:3;grid-column:9"></span><span class="cell lit" style="grid-row:4;grid-column:9"></span><span class="cell lit" style="grid-row:5;grid-column:9"></span><span class="cell lit" style="grid-row:6;grid-column:9"></span><span class="cell lit" style="grid-row:7;grid-column:9"></span><span class="cell lit" style="grid-row:8;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:9;grid-column:9"></span><span class="cell lit" style="grid-row:9;grid-column:8"></span><span class="cell lit" style="grid-row:9;grid-column:7"></span><span class="cell lit" style="grid-row:9;grid-column:6"></span><span class="cell lit" style="grid-row:9;grid-column:5"></span><span class="cell lit" style="grid-row:9;grid-column:4"></span><span class="cell lit" style="grid-row:9;grid-column:3"></span><span class="cell lit" style="grid-row:9;grid-column:2"></span><span class="cell lit" style="grid-row:9;grid-column:1"></span>
+                <span class="cell lit" style="grid-row:8;grid-column:1"></span><span class="cell lit" style="grid-row:7;grid-column:1"></span>
+                <span class="cell dim" style="grid-row:6;grid-column:1"></span><span class="cell dim" style="grid-row:5;grid-column:1"></span><span class="cell dim" style="grid-row:4;grid-column:1"></span><span class="cell dim" style="grid-row:3;grid-column:1"></span><span class="cell dim" style="grid-row:2;grid-column:1"></span>
+              </div>
+              <div class="ring-pct"><span class="num">84</span><span class="pct">%</span></div>
+            </div>
+            <div class="ring-label">걷기<b>84%</b></div>
+          </div>
+          <div class="ring-block">
+            <div class="ring">
+              <div class="ring-grid" style="--c:var(--yellow)">
+                <span class="cell lit" style="grid-row:1;grid-column:1"></span><span class="cell lit" style="grid-row:1;grid-column:2"></span><span class="cell lit" style="grid-row:1;grid-column:3"></span><span class="cell lit" style="grid-row:1;grid-column:4"></span><span class="cell lit" style="grid-row:1;grid-column:5"></span><span class="cell lit" style="grid-row:1;grid-column:6"></span><span class="cell lit" style="grid-row:1;grid-column:7"></span><span class="cell lit" style="grid-row:1;grid-column:8"></span><span class="cell lit" style="grid-row:1;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:2;grid-column:9"></span><span class="cell lit" style="grid-row:3;grid-column:9"></span><span class="cell lit" style="grid-row:4;grid-column:9"></span><span class="cell lit" style="grid-row:5;grid-column:9"></span><span class="cell lit" style="grid-row:6;grid-column:9"></span><span class="cell lit" style="grid-row:7;grid-column:9"></span><span class="cell lit" style="grid-row:8;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:9;grid-column:9"></span><span class="cell lit" style="grid-row:9;grid-column:8"></span><span class="cell lit" style="grid-row:9;grid-column:7"></span><span class="cell lit" style="grid-row:9;grid-column:6"></span><span class="cell lit" style="grid-row:9;grid-column:5"></span><span class="cell lit" style="grid-row:9;grid-column:4"></span><span class="cell lit" style="grid-row:9;grid-column:3"></span><span class="cell lit" style="grid-row:9;grid-column:2"></span><span class="cell lit" style="grid-row:9;grid-column:1"></span>
+                <span class="cell lit" style="grid-row:8;grid-column:1"></span><span class="cell lit" style="grid-row:7;grid-column:1"></span><span class="cell lit" style="grid-row:6;grid-column:1"></span><span class="cell lit" style="grid-row:5;grid-column:1"></span><span class="cell lit" style="grid-row:4;grid-column:1"></span>
+                <span class="cell dim" style="grid-row:3;grid-column:1"></span><span class="cell dim" style="grid-row:2;grid-column:1"></span>
+              </div>
+              <div class="ring-pct"><span class="num">94</span><span class="pct">%</span></div>
+            </div>
+            <div class="ring-label">운동<b>94%</b></div>
+          </div>
+          <div class="ring-block">
+            <div class="ring">
+              <div class="ring-grid" style="--c:var(--red)">
+                <span class="cell lit" style="grid-row:1;grid-column:1"></span><span class="cell lit" style="grid-row:1;grid-column:2"></span><span class="cell lit" style="grid-row:1;grid-column:3"></span><span class="cell lit" style="grid-row:1;grid-column:4"></span><span class="cell lit" style="grid-row:1;grid-column:5"></span><span class="cell lit" style="grid-row:1;grid-column:6"></span><span class="cell lit" style="grid-row:1;grid-column:7"></span><span class="cell lit" style="grid-row:1;grid-column:8"></span><span class="cell lit" style="grid-row:1;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:2;grid-column:9"></span><span class="cell lit" style="grid-row:3;grid-column:9"></span><span class="cell lit" style="grid-row:4;grid-column:9"></span><span class="cell lit" style="grid-row:5;grid-column:9"></span><span class="cell lit" style="grid-row:6;grid-column:9"></span><span class="cell lit" style="grid-row:7;grid-column:9"></span><span class="cell lit" style="grid-row:8;grid-column:9"></span>
+                <span class="cell lit" style="grid-row:9;grid-column:9"></span><span class="cell lit" style="grid-row:9;grid-column:8"></span><span class="cell lit" style="grid-row:9;grid-column:7"></span><span class="cell lit" style="grid-row:9;grid-column:6"></span><span class="cell lit" style="grid-row:9;grid-column:5"></span><span class="cell lit" style="grid-row:9;grid-column:4"></span><span class="cell lit" style="grid-row:9;grid-column:3"></span><span class="cell lit" style="grid-row:9;grid-column:2"></span>
+                <span class="cell dim" style="grid-row:9;grid-column:1"></span><span class="cell dim" style="grid-row:8;grid-column:1"></span><span class="cell dim" style="grid-row:7;grid-column:1"></span><span class="cell dim" style="grid-row:6;grid-column:1"></span><span class="cell dim" style="grid-row:5;grid-column:1"></span><span class="cell dim" style="grid-row:4;grid-column:1"></span><span class="cell dim" style="grid-row:3;grid-column:1"></span><span class="cell dim" style="grid-row:2;grid-column:1"></span>
+              </div>
+              <div class="ring-pct"><span class="num">75</span><span class="pct">%</span></div>
+            </div>
+            <div class="ring-label">스탠드<b>75%</b></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 3. KPI 카드 6장 -->
+  <section aria-label="핵심 지표">
+    <span class="eyebrow" style="margin-left:2px">STAT WINDOW</span>
+    <h2 class="section-h">핵심 지표</h2>
+    <div class="kpi-grid">
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">걸음 수</p>
+        <p class="kpi-value"><span class="num">8,432</span><span class="kpi-unit">걸음</span></p>
+        <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">12.3</span>% · 전일 대비</span>
+        <p class="kpi-foot">목표 10,000보의 84%</p>
+      </div></div></div>
+
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">활동 칼로리</p>
+        <p class="kpi-value"><span class="num">512</span><span class="kpi-unit">kcal</span></p>
+        <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">8.1</span>% · 전일 대비</span>
+        <p class="kpi-foot">목표 700kcal의 73%</p>
+      </div></div></div>
+
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">운동 시간</p>
+        <p class="kpi-value"><span class="num">47</span><span class="kpi-unit">분</span></p>
+        <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">15.2</span>% · 전일 대비</span>
+        <p class="kpi-foot">목표 50분의 94%</p>
+      </div></div></div>
+
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">평균 심박수</p>
+        <p class="kpi-value"><span class="num">72</span><span class="kpi-unit">bpm</span></p>
+        <span class="kpi-delta down"><span class="arrow">▼</span><span class="num">2.7</span>% · 전일 대비</span>
+        <p class="kpi-foot">안정 범위</p>
+      </div></div></div>
+
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">수면 점수</p>
+        <p class="kpi-value"><span class="num">82</span><span class="kpi-unit">점</span></p>
+        <span class="kpi-delta up"><span class="arrow">▲</span><span class="num">4.0</span>% · 전주 대비</span>
+        <p class="kpi-foot">6시간 48분</p>
+      </div></div></div>
+
+      <div class="pf-wrap pf-hover snap"><div class="pf-outer"><div class="pf-inner">
+        <p class="kpi-label">스트레스 지수</p>
+        <p class="kpi-value"><span class="num">34</span><span class="kpi-unit">—</span></p>
+        <span class="kpi-delta down"><span class="arrow">▼</span><span class="num">11.0</span>% · 전일 대비</span>
+        <p class="kpi-foot">낮음 (양호)</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- 4. 차트 2개 -->
+  <section aria-label="활동 차트">
+    <div class="chart-grid">
+      <div class="pf-wrap snap"><div class="pf-outer"><div class="pf-inner">
+        <div class="chart-head">
+          <div>
+            <span class="eyebrow">STEP LOG · HOURLY</span>
+            <h3>시간대별 걸음 수</h3>
+          </div>
+          <span class="tag pix">TODAY</span>
+        </div>
+        <div class="bars1">
+          <div class="bar1-col"><div class="bar1" style="--h:24px"></div><span class="bar1-time"><span class="num">06</span>시</span><span class="bar1-val num">320</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:96px"></div><span class="bar1-time"><span class="num">08</span>시</span><span class="bar1-val num">1,240</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:56px"></div><span class="bar1-time"><span class="num">10</span>시</span><span class="bar1-val num">680</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:120px"></div><span class="bar1-time"><span class="num">12</span>시</span><span class="bar1-val num">1,520</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:40px"></div><span class="bar1-time"><span class="num">14</span>시</span><span class="bar1-val num">540</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:72px"></div><span class="bar1-time"><span class="num">16</span>시</span><span class="bar1-val num">890</span></div>
+          <div class="bar1-col peak"><span class="peak-cursor">▶</span><div class="bar1" style="--h:168px"></div><span class="bar1-time"><span class="num">18</span>시</span><span class="bar1-val num">2,140</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:64px"></div><span class="bar1-time"><span class="num">20</span>시</span><span class="bar1-val num">780</span></div>
+          <div class="bar1-col"><div class="bar1" style="--h:24px"></div><span class="bar1-time"><span class="num">22</span>시</span><span class="bar1-val num">322</span></div>
+        </div>
+      </div></div></div>
+
+      <div class="pf-wrap snap"><div class="pf-outer"><div class="pf-inner">
+        <div class="chart-head">
+          <div>
+            <span class="eyebrow">HR ZONE</span>
+            <h3>심박존 분포</h3>
+          </div>
+        </div>
+        <div class="zones">
+          <div class="zone-row">
+            <div class="zone-name">휴식<small>&lt;90 bpm</small></div>
+            <div class="zone-track"><div class="zone-fill" style="--w:100%"></div></div>
+            <div class="zone-min"><span class="num">612</span>분</div>
+          </div>
+          <div class="zone-row">
+            <div class="zone-name">워밍업<small>90–108</small></div>
+            <div class="zone-track"><div class="zone-fill" style="--w:28%"></div></div>
+            <div class="zone-min"><span class="num">174</span>분</div>
+          </div>
+          <div class="zone-row">
+            <div class="zone-name">지방연소<small>108–126</small></div>
+            <div class="zone-track"><div class="zone-fill" style="--w:15%"></div></div>
+            <div class="zone-min"><span class="num">92</span>분</div>
+          </div>
+          <div class="zone-row hl">
+            <div class="zone-name">유산소<small>126–144</small></div>
+            <div class="zone-track"><div class="zone-fill" style="--w:7%"></div></div>
+            <div class="zone-min"><span class="num">41</span>분</div>
+          </div>
+          <div class="zone-row">
+            <div class="zone-name">최대<small>144+</small></div>
+            <div class="zone-track"><div class="zone-fill" style="--w:1%"></div></div>
+            <div class="zone-min"><span class="num">8</span>분</div>
+          </div>
+        </div>
+        <div class="zone-hl-tag">
+          <svg class="icon pxicon" viewBox="0 0 5 5" width="14" height="14" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="1" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/>
+            <rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/>
+            <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+            <rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/>
+            <rect x="2" y="4" width="1" height="1"/>
+          </svg>
+          <span>유산소 존 <b>41분</b> = 목표 30분 초과 달성</span>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+  <!-- 5. 최근 7일 걸음 스트립 -->
+  <section class="pf-wrap snap" aria-label="최근 7일 걸음">
+    <div class="pf-outer"><div class="pf-inner">
+      <span class="eyebrow">WEEK LOG</span>
+      <h2 class="section-h" style="margin-bottom:16px">최근 7일 걸음</h2>
+      <div class="week-row">
+        <div class="week-col">
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:55px"></div></div>
+          <span class="week-date"><span class="num">7/4</span></span>
+          <span class="week-val num">5,210</span>
+        </div>
+        <div class="week-col">
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:81px"></div></div>
+          <span class="week-date"><span class="num">7/5</span></span>
+          <span class="week-val num">7,680</span>
+        </div>
+        <div class="week-col">
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:73px"></div></div>
+          <span class="week-date"><span class="num">7/6</span></span>
+          <span class="week-val num">6,940</span>
+        </div>
+        <div class="week-col best">
+          <svg class="week-star pxicon" viewBox="0 0 5 5" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="1"/>
+            <rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/>
+            <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+            <rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/>
+            <rect x="2" y="4" width="1" height="1"/>
+          </svg>
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:96px"></div></div>
+          <span class="week-date"><span class="num">7/7</span></span>
+          <span class="week-val num">9,120</span>
+        </div>
+        <div class="week-col">
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:78px"></div></div>
+          <span class="week-date"><span class="num">7/8</span></span>
+          <span class="week-val num">7,450</span>
+        </div>
+        <div class="week-col">
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:84px"></div></div>
+          <span class="week-date"><span class="num">7/9</span></span>
+          <span class="week-val num">8,010</span>
+        </div>
+        <div class="week-col today">
+          <span class="week-today-tag pix">TODAY</span>
+          <div class="week-bar-wrap"><div class="week-bar" style="--h:89px"></div></div>
+          <span class="week-date"><span class="num">7/10</span></span>
+          <span class="week-val num">8,432</span>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 6. 오늘의 건강 미션 테이블 -->
+  <section class="pf-wrap snap" aria-label="오늘의 건강 미션">
+    <div class="pf-outer"><div class="pf-inner">
+      <span class="eyebrow">QUEST LOG</span>
+      <h2 class="section-h">오늘의 건강 미션</h2>
+      <div class="table-scroll">
+        <table class="mission">
+          <thead>
+            <tr>
+              <th>시각</th><th>활동</th><th>목표</th><th>현재</th><th>달성률</th><th>소비</th><th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="num">07:10</span></td>
+              <td>모닝 스트레칭</td>
+              <td><span class="num">15</span>분</td>
+              <td><span class="num">15</span>분</td>
+              <td><span class="num">100%</span></td>
+              <td><span class="num">38</span> kcal</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--green)"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="status-txt done">완료</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">08:30</span></td>
+              <td>출근 걷기</td>
+              <td><span class="num">3,000</span>보</td>
+              <td><span class="num">3,240</span>보</td>
+              <td><span class="num">108%</span></td>
+              <td><span class="num">96</span> kcal</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--green)"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="status-txt done">완료</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">12:20</span></td>
+              <td>점심 산책</td>
+              <td><span class="num">2,000</span>보</td>
+              <td><span class="num">1,520</span>보</td>
+              <td><span class="num">76%</span></td>
+              <td><span class="num">54</span> kcal</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--yellow)"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="status-txt prog">진행중</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">14:00</span></td>
+              <td>수분 섭취</td>
+              <td><span class="num">2.0</span> L</td>
+              <td><span class="num">1.2</span> L</td>
+              <td><span class="num">60%</span></td>
+              <td>—</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--yellow)"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="status-txt prog">진행중</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">16:30</span></td>
+              <td>근력 운동</td>
+              <td><span class="num">3</span> 세트</td>
+              <td><span class="num">0</span> 세트</td>
+              <td><span class="num">0%</span></td>
+              <td>—</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--grey)"><i></i><i></i><i></i><i></i><i></i></span><span class="status-txt wait">대기</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">18:00</span></td>
+              <td>저녁 러닝</td>
+              <td><span class="num">5.0</span> km</td>
+              <td><span class="num">4.2</span> km</td>
+              <td><span class="num">84%</span></td>
+              <td><span class="num">312</span> kcal</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--yellow)"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="status-txt prog">진행중</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">21:00</span></td>
+              <td>명상</td>
+              <td><span class="num">10</span>분</td>
+              <td><span class="num">10</span>분</td>
+              <td><span class="num">100%</span></td>
+              <td><span class="num">8</span> kcal</td>
+              <td class="status-cell"><span class="hpbar" style="--pip:var(--green)"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="status-txt done">완료</span></td>
+            </tr>
+            <tr>
+              <td><span class="num">22:30</span></td>
+              <td>심박존 유지</td>
+              <td><span class="num">20</span>분</td>
+              <td><span class="num">6</span>분</td>
+              <td><span class="num">30%</span></td>
+              <td>—</td>
+              <td class="status-cell"><span class="hpbar warn" style="--pip:var(--red)"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="status-txt warn">주의</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 7. 업적 배지 3종 -->
+  <section aria-label="업적 배지">
+    <span class="eyebrow" style="margin-left:2px">TROPHY GET</span>
+    <h2 class="section-h">업적 배지</h2>
+    <div class="badges-grid">
+      <div class="pf-wrap snap"><div class="pf-outer"><div class="pf-inner badge-card">
+        <div class="badge-icon">
+          <svg viewBox="0 0 5 5" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="1"/>
+            <rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/>
+            <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+            <rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/>
+            <rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/>
+          </svg>
+        </div>
+        <div>
+          <span class="badge-tag pix">GET!</span>
+          <p class="badge-title">연속 12일 목표 달성</p>
+          <p class="badge-desc">12일째 데일리 골 완료</p>
+        </div>
+      </div></div></div>
+
+      <div class="pf-wrap snap"><div class="pf-outer"><div class="pf-inner badge-card">
+        <div class="badge-icon">
+          <svg viewBox="0 0 5 5" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="1"/>
+            <rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/>
+            <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+            <rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/>
+            <rect x="2" y="4" width="1" height="1"/>
+          </svg>
+        </div>
+        <div>
+          <span class="badge-tag pix">GET!</span>
+          <p class="badge-title">이번 주 최고 걸음</p>
+          <p class="badge-desc">7/7 9,120걸음 기록</p>
+        </div>
+      </div></div></div>
+
+      <div class="pf-wrap snap"><div class="pf-outer"><div class="pf-inner badge-card">
+        <div class="badge-icon">
+          <svg viewBox="0 0 5 5" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="1" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/>
+            <rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/>
+            <rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/>
+            <rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/>
+            <rect x="2" y="4" width="1" height="1"/>
+          </svg>
+        </div>
+        <div>
+          <span class="badge-tag pix">GET!</span>
+          <p class="badge-title">유산소 존 목표 3회</p>
+          <p class="badge-desc">이번 주 유산소 목표 3회 달성</p>
+        </div>
+      </div></div></div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<footer class="foot">
+  <span class="tag"><span class="pix">STYLE 09</span> · 레트로 픽셀</span>
+</footer>
+
+</body>
+</html>

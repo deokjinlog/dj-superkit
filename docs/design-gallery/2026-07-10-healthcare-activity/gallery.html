@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>핏펄스 디자인 시안 갤러리 · 15스타일</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#141822; --panel-2:#1b2130; --line:#2a3140;
+    --ink:#eef2f8; --ink-soft:#aeb7c6; --ink-faint:#6b7688; --accent:#5b8cff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  header{padding:40px 28px 8px;max-width:1360px;margin:0 auto}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+  h1{margin:.35em 0 .2em;font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:-.02em}
+  .sub{color:var(--ink-soft);font-size:15px;line-height:1.6;max-width:760px}
+  .sub b{color:var(--ink)}
+  .hint{margin-top:14px;color:var(--ink-faint);font-size:13px}
+  .grid{max-width:1360px;margin:22px auto 120px;padding:0 22px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    display:flex;flex-direction:column;transition:border-color .18s, transform .18s}
+  .card:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .thumb{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;background:#000;border-bottom:1px solid var(--line)}
+  .thumb iframe{position:absolute;top:0;left:0;width:1333px;height:1000px;border:0;
+    transform:scale(.3);transform-origin:0 0;pointer-events:none;background:#fff}
+  .thumb .open{position:absolute;inset:0;z-index:2}
+  .badge{position:absolute;top:12px;left:12px;z-index:3;background:rgba(11,13,18,.82);
+    border:1px solid var(--line);color:var(--ink);font-size:12px;font-weight:800;
+    padding:4px 9px;border-radius:8px;letter-spacing:.02em;backdrop-filter:blur(4px)}
+  .meta{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
+  .name{font-size:17px;font-weight:800;letter-spacing:-.01em}
+  .attrs{color:var(--ink-soft);font-size:13px}
+  .attrs .axis{color:var(--accent);font-weight:700}
+  .row{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .row .cta{font-size:12.5px;color:var(--ink-faint);font-weight:600}
+  .cmp{margin-left:auto;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    font-size:12.5px;color:var(--ink-soft);border:1px solid var(--line);
+    padding:5px 10px;border-radius:8px;user-select:none;transition:.15s}
+  .cmp:hover{border-color:var(--accent);color:var(--ink)}
+  .cmp.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .cmp .box{width:12px;height:12px;border:1.5px solid currentColor;border-radius:3px;display:inline-block}
+  .cmp.on .box{background:#fff;border-color:#fff}
+  /* compare bar */
+  .bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(140%);
+    background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
+    padding:12px 14px;display:flex;align-items:center;gap:14px;z-index:50;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);transition:transform .25s ease}
+  .bar.show{transform:translateX(-50%) translateY(0)}
+  .bar .txt{font-size:13.5px;color:var(--ink-soft)}
+  .bar .txt b{color:var(--ink)}
+  .bar button{font:inherit;font-size:13.5px;font-weight:700;border:0;border-radius:9px;
+    padding:9px 16px;cursor:pointer;background:var(--accent);color:#fff}
+  .bar button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft)}
+  .bar button:disabled{opacity:.4;cursor:not-allowed}
+  /* compare overlay */
+  .ov{position:fixed;inset:0;background:rgba(6,8,12,.96);z-index:100;display:none;flex-direction:column}
+  .ov.show{display:flex}
+  .ov .top{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line)}
+  .ov .top .t{font-weight:800;font-size:15px}
+  .ov .top .close{margin-left:auto;cursor:pointer;border:1px solid var(--line);
+    border-radius:9px;padding:8px 14px;color:var(--ink-soft);font-weight:700;font-size:13px}
+  .ov .top .close:hover{color:var(--ink);border-color:var(--accent)}
+  .ov .panes{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+  .ov .pane{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line)}
+  .ov .pane:last-child{border-right:0}
+  .ov .pane .lbl{padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink-soft);
+    border-bottom:1px solid var(--line);background:var(--panel)}
+  .ov .pane iframe{flex:1;width:100%;border:0;background:#fff}
+  @media (max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .ov .panes{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+    .ov .pane{border-right:0;border-bottom:1px solid var(--line)}
+  }
+  footer{max-width:1360px;margin:0 auto 60px;padding:0 22px;color:var(--ink-faint);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Design Style Explorer · 2026-07-10</div>
+  <h1>핏펄스 (FitPulse) — 15스타일 디자인 시안</h1>
+  <p class="sub">헬스케어 활동 대시보드 한 화면을 <b>완전히 동일한 콘텐츠·데이터</b>로 렌더링했습니다.
+  콘텐츠는 고정, 스타일만 변수 — 그래야 디자인만 비교할 수 있습니다.
+  <b>01–12</b>는 기본 카탈로그(취향을 벌려놓은 스펙트럼), <b>13–15</b>는 헬스케어 도메인에 맞춰 새로 설계한
+  네이티브 아키타입(차분한 웰니스 · 소프트 모던 · 바이탈)입니다.</p>
+  <p class="hint">카드를 클릭하면 새 탭에서 전체 화면으로 열립니다. 오른쪽 <b>비교</b> 버튼으로 2개를 골라 나란히 볼 수 있어요.
+  헬스케어엔 <b>13–15</b>가 가장 현실적인 후보입니다.</p>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<div class="bar" id="bar">
+  <span class="txt"><b id="cmpCount">0</b>/2 선택됨</span>
+  <button id="cmpGo" disabled>나란히 비교</button>
+  <button class="ghost" id="cmpClear">선택 해제</button>
+</div>
+
+<div class="ov" id="ov">
+  <div class="top">
+    <span class="t">나란히 비교</span>
+    <span class="close" id="ovClose">닫기 ✕</span>
+  </div>
+  <div class="panes">
+    <div class="pane"><div class="lbl" id="lblA"></div><iframe id="frA" title="비교 A"></iframe></div>
+    <div class="pane"><div class="lbl" id="lblB"></div><iframe id="frB" title="비교 B"></iframe></div>
+  </div>
+</div>
+
+<footer>STYLE 01–12 · 콘텐츠 고정 / 스타일 변수 · self-contained HTML</footer>
+
+<script>
+  const STYLES = [
+    {nn:'01', file:'style-01-sf-hud.html',         name:'SF 게임 HUD',      axis:'연극성', sig:'부팅 시퀀스'},
+    {nn:'02', file:'style-02-public-portal.html',  name:'공공데이터 포털',   axis:'신뢰',   sig:'출처·각주, 인쇄 가능'},
+    {nn:'03', file:'style-03-trendy-saas.html',    name:'트렌디 SaaS',      axis:'생동감', sig:'카운트업·숨쉬는 도트'},
+    {nn:'04', file:'style-04-dense-terminal.html', name:'고밀도 터미널',     axis:'유능감', sig:'흐르는 이벤트 로그'},
+    {nn:'05', file:'style-05-brutalism.html',      name:'브루탈리즘',        axis:'대담함', sig:'초대형 숫자·찍히는 hover'},
+    {nn:'06', file:'style-06-glassmorphism.html',  name:'글래스모피즘',      axis:'투명감', sig:'흐르는 배경·유리 차트'},
+    {nn:'07', file:'style-07-minimal-mono.html',   name:'미니멀 모노크롬',   axis:'정밀함', sig:'후퇴에 의한 강조·주황 3곳'},
+    {nn:'08', file:'style-08-luxury-dark.html',    name:'럭셔리 다크',       axis:'품격',   sig:'그려지는 골드 선·세리프 수치'},
+    {nn:'09', file:'style-09-retro-pixel.html',    name:'레트로 픽셀',       axis:'향수',   sig:'READY? 오프닝·블록 차트'},
+    {nn:'10', file:'style-10-editorial.html',      name:'에디토리얼 매거진', axis:'지성',   sig:'숫자마다 헤드라인 해설'},
+    {nn:'11', file:'style-11-nature-organic.html', name:'네이처 오가닉',     axis:'온기',   sig:'자라는 차트·종이 질감'},
+    {nn:'12', file:'style-12-neumorphism.html',    name:'뉴모피즘 소프트',   axis:'촉감',   sig:'클릭 시 눌리는 요철 반전'},
+    {nn:'13', file:'style-13-calm-wellness.html',    name:'차분한 웰니스 ★',  axis:'평온',   sig:'색은 지표에만 · Apple Health·Oura 계보'},
+    {nn:'14', file:'style-14-soft-modern.html',      name:'소프트 모던 ★',    axis:'정제',   sig:'정밀 보더·얕은 깊이 · Linear·Vercel 계보'},
+    {nn:'15', file:'style-15-vital-motivation.html', name:'바이탈 ★',        axis:'활력',   sig:'성취를 빛나게 · Nike·Strava 계보'},
+  ];
+
+  const grid = document.getElementById('grid');
+  const selected = new Set();
+
+  STYLES.forEach(s => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="thumb">
+        <div class="badge">STYLE ${s.nn}</div>
+        <iframe src="${s.file}" scrolling="no" title="${s.name}"></iframe>
+        <a class="open" href="${s.file}" target="_blank" rel="noopener" aria-label="${s.name} 전체 열기"></a>
+      </div>
+      <div class="meta">
+        <div class="name">${s.nn}. ${s.name}</div>
+        <div class="attrs"><span class="axis">${s.axis}</span> · 시그니처 ${s.sig}</div>
+        <div class="row">
+          <a class="cta" href="${s.file}" target="_blank" rel="noopener">전체 화면 열기 ↗</a>
+          <span class="cmp" data-nn="${s.nn}"><span class="box"></span>비교</span>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  const bar = document.getElementById('bar');
+  const cmpCount = document.getElementById('cmpCount');
+  const cmpGo = document.getElementById('cmpGo');
+
+  function refresh(){
+    cmpCount.textContent = selected.size;
+    cmpGo.disabled = selected.size !== 2;
+    bar.classList.toggle('show', selected.size > 0);
+  }
+
+  document.querySelectorAll('.cmp').forEach(el => {
+    el.addEventListener('click', () => {
+      const nn = el.dataset.nn;
+      if (selected.has(nn)) { selected.delete(nn); el.classList.remove('on'); }
+      else {
+        if (selected.size >= 2) return; // 최대 2개
+        selected.add(nn); el.classList.add('on');
+      }
+      refresh();
+    });
+  });
+
+  document.getElementById('cmpClear').addEventListener('click', () => {
+    selected.clear();
+    document.querySelectorAll('.cmp.on').forEach(e => e.classList.remove('on'));
+    refresh();
+  });
+
+  const ov = document.getElementById('ov');
+  cmpGo.addEventListener('click', () => {
+    const [a,b] = [...selected];
+    const sa = STYLES.find(x=>x.nn===a), sb = STYLES.find(x=>x.nn===b);
+    document.getElementById('lblA').textContent = `${sa.nn}. ${sa.name}`;
+    document.getElementById('lblB').textContent = `${sb.nn}. ${sb.name}`;
+    document.getElementById('frA').src = sa.file;
+    document.getElementById('frB').src = sb.file;
+    ov.classList.add('show');
+  });
+  document.getElementById('ovClose').addEventListener('click', () => {
+    ov.classList.remove('show');
+    document.getElementById('frA').src = 'about:blank';
+    document.getElementById('frB').src = 'about:blank';
+  });
+  document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('ovClose').click(); });
+</script>
+</body>
+</html>

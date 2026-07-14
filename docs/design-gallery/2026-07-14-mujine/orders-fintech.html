@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MUJINE · 주문 목록 · 핀테크 소프트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============ 디자인 토큰 (CSS 변수) ============ */
+  :root {
+    /* 배경 / surface */
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --surface-soft: #F7F8FA;
+    --surface-hover: #F1F3F5;
+
+    /* 브랜드 */
+    --primary: #3182F6;
+    --primary-press: #1B64DA;
+    --primary-wash: #EAF2FE;
+    --mint: #00C6AE;
+    --mint-wash: #E5FAF6;
+
+    /* 텍스트 */
+    --fg: #191F28;
+    --fg-mid: #4E5968;
+    --fg-weak: #8B95A1;
+
+    /* 보더 */
+    --border: #E5E8EB;
+    --border-strong: #D1D6DB;
+
+    /* 시맨틱 상태 */
+    --paid: #3182F6;      --paid-wash: #EAF2FE;
+    --ship: #FF9500;      --ship-wash: #FFF3E0;
+    --done: #00C6AE;      --done-wash: #E5FAF6;
+    --cancel: #F04452;    --cancel-wash: #FDECEE;
+
+    /* elevation */
+    --shadow-sm: 0 2px 8px rgba(23,31,40,.04);
+    --shadow-md: 0 8px 24px rgba(23,31,40,.06);
+    --shadow-lg: 0 12px 32px rgba(23,31,40,.10);
+
+    /* radius */
+    --r-card: 20px;
+    --r-ctrl: 14px;
+    --r-chip: 12px;
+    --r-pill: 999px;
+
+    /* 8px 그리드 spacing */
+    --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+    --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  /* ============ 앱 레이아웃 (Grid) ============ */
+  .app {
+    display: grid;
+    grid-template-columns: 248px 1fr;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      "sidebar topbar"
+      "sidebar main";
+    min-height: 100vh;
+  }
+
+  /* ============ 사이드바 ============ */
+  .sidebar {
+    grid-area: sidebar;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: var(--s5) var(--s4);
+    gap: var(--s5);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: 0 var(--s2);
+  }
+  .brand-mark {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--mint));
+    display: grid; place-items: center;
+    color: #fff; font-weight: 800; font-size: 17px;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+  .brand-name { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+  .brand-sub  { font-size: 12px; font-weight: 600; color: var(--fg-weak); }
+
+  .nav-group { display: flex; flex-direction: column; gap: 2px; }
+  .nav-label {
+    font-size: 12px; font-weight: 700; color: var(--fg-weak);
+    padding: 0 var(--s3) var(--s2);
+    letter-spacing: 0.02em;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: var(--s3);
+    height: 44px; padding: 0 var(--s3);
+    border-radius: var(--r-ctrl);
+    color: var(--fg-mid); font-weight: 600; font-size: 14px;
+    cursor: pointer; text-decoration: none;
+    transition: background .16s ease, color .16s ease;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item .ico { width: 20px; height: 20px; flex-shrink: 0; stroke: currentColor; }
+  .nav-item:hover { background: var(--surface-hover); color: var(--fg); }
+  .nav-item.active {
+    background: var(--primary-wash);
+    color: var(--primary-press);
+    font-weight: 700;
+  }
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 12px; font-weight: 700;
+    background: var(--surface-soft);
+    color: var(--fg-mid);
+    padding: 2px 8px; border-radius: var(--r-pill);
+  }
+  .nav-item.active .count { background: #fff; color: var(--primary-press); }
+  .nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    display: flex; align-items: center; gap: var(--s3);
+    padding: var(--s3);
+    background: var(--surface-soft);
+    border-radius: var(--r-ctrl);
+  }
+  .seller-avatar {
+    width: 32px; height: 32px; border-radius: var(--r-pill);
+    background: var(--mint-wash); color: var(--mint);
+    display: grid; place-items: center; font-weight: 800; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .seller-name { font-size: 13px; font-weight: 700; }
+  .seller-role { font-size: 12px; font-weight: 500; color: var(--fg-weak); }
+
+  /* ============ 상단바 ============ */
+  .topbar {
+    grid-area: topbar;
+    background: rgba(247,248,250,.82);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: var(--s4);
+    padding: 0 var(--s6);
+    position: sticky; top: 0; z-index: 20;
+    animation: dropIn .2s ease-out both;
+  }
+  .crumb { display: flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--fg-weak); font-weight: 600; }
+  .crumb b { color: var(--fg); font-weight: 700; }
+  .crumb .sep { color: var(--border-strong); }
+  .topbar-spacer { flex: 1; }
+
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: var(--r-ctrl);
+    border: 1px solid var(--border); background: var(--surface);
+    display: grid; place-items: center; cursor: pointer; position: relative;
+    color: var(--fg-mid);
+    transition: background .16s, border-color .16s, transform .1s;
+  }
+  .icon-btn:hover { background: var(--surface-hover); color: var(--fg); }
+  .icon-btn:active { transform: scale(.96); }
+  .icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .icon-btn .ico { width: 20px; height: 20px; stroke: currentColor; }
+  .icon-btn .dot {
+    position: absolute; top: 8px; right: 9px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--cancel); border: 2px solid var(--surface);
+  }
+
+  /* ============ 메인 ============ */
+  .main {
+    grid-area: main;
+    padding: var(--s6);
+    max-width: 1320px;
+    width: 100%;
+  }
+
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: var(--s4); margin-bottom: var(--s5); flex-wrap: wrap;
+  }
+  .page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.33; }
+  .page-desc { font-size: 14px; color: var(--fg-mid); margin-top: var(--s1); font-weight: 500; }
+
+  .btn {
+    height: 44px; padding: 0 var(--s4);
+    border-radius: var(--r-ctrl); border: 1px solid var(--border);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    background: var(--surface); color: var(--fg);
+    cursor: pointer; display: inline-flex; align-items: center; gap: var(--s2);
+    transition: background .16s, border-color .16s, transform .1s, box-shadow .16s;
+    letter-spacing: -0.01em;
+  }
+  .btn .ico { width: 18px; height: 18px; stroke: currentColor; }
+  .btn:hover { background: var(--surface-hover); }
+  .btn:active { transform: scale(.98); }
+  .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .btn.primary {
+    background: var(--primary); color: #fff; border-color: transparent;
+    font-weight: 800; box-shadow: var(--shadow-sm);
+  }
+  .btn.primary:hover { background: var(--primary-press); }
+  .btn.primary:active { background: var(--primary-press); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--fg-mid); }
+  .btn.ghost:hover { background: var(--surface-hover); color: var(--fg); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn:disabled:hover { background: var(--surface); }
+
+  /* ============ KPI 카드 ============ */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: var(--s4); margin-bottom: var(--s5);
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: var(--s5);
+    box-shadow: var(--shadow-sm);
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s;
+    animation: riseIn .34s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .kpi:nth-child(1){ animation-delay: .04s } .kpi:nth-child(2){ animation-delay: .08s }
+  .kpi:nth-child(3){ animation-delay: .12s } .kpi:nth-child(4){ animation-delay: .16s }
+  .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s4); }
+  .kpi-label { font-size: 13px; font-weight: 600; color: var(--fg-mid); }
+  .kpi-ico { width: 36px; height: 36px; border-radius: var(--r-chip); display: grid; place-items: center; }
+  .kpi-ico .ico { width: 20px; height: 20px; }
+  .kpi-ico.blue { background: var(--primary-wash); color: var(--primary); }
+  .kpi-ico.mint { background: var(--mint-wash); color: var(--mint); }
+  .kpi-ico.orange { background: var(--ship-wash); color: var(--ship); }
+  .kpi-ico.red { background: var(--cancel-wash); color: var(--cancel); }
+  .kpi-value {
+    font-size: 40px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .kpi-unit { font-size: 18px; font-weight: 700; color: var(--fg-mid); }
+  .kpi-delta { font-size: 13px; font-weight: 700; margin-top: var(--s2); display: flex; align-items: center; gap: 4px; }
+  .kpi-delta.up { color: var(--cancel); }     /* 한국 금융 관습: 오르면 빨강 */
+  .kpi-delta.down { color: var(--primary); }
+  .kpi-delta .muted { color: var(--fg-weak); font-weight: 500; }
+
+  /* ============ 툴바 (탭 + 필터) ============ */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .tabs {
+    display: flex; align-items: center; gap: var(--s1);
+    padding: var(--s4) var(--s5) 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab {
+    position: relative;
+    padding: var(--s3) var(--s4) var(--s4);
+    font-size: 15px; font-weight: 600; color: var(--fg-mid);
+    background: none; border: none; cursor: pointer; white-space: nowrap;
+    display: flex; align-items: center; gap: var(--s2);
+    transition: color .16s;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab .badge-count {
+    font-size: 12px; font-weight: 700;
+    background: var(--surface-soft); color: var(--fg-mid);
+    padding: 1px 8px; border-radius: var(--r-pill);
+    font-variant-numeric: tabular-nums;
+  }
+  .tab.active { color: var(--primary-press); font-weight: 700; }
+  .tab.active .badge-count { background: var(--primary-wash); color: var(--primary-press); }
+  .tab.active::after {
+    content: ""; position: absolute; left: var(--s4); right: var(--s4); bottom: -1px;
+    height: 3px; border-radius: 3px 3px 0 0; background: var(--primary);
+  }
+  .tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 8px; }
+
+  .filters {
+    display: flex; align-items: center; gap: var(--s3);
+    padding: var(--s4) var(--s5);
+    flex-wrap: wrap;
+  }
+  .search {
+    flex: 1; min-width: 220px; max-width: 420px;
+    position: relative; display: flex; align-items: center;
+  }
+  .search .ico {
+    position: absolute; left: 14px; width: 18px; height: 18px;
+    stroke: var(--fg-weak); pointer-events: none;
+  }
+  .search input {
+    width: 100%; height: 44px;
+    padding: 0 var(--s4) 0 42px;
+    border: 1px solid var(--border); border-radius: var(--r-ctrl);
+    background: var(--surface-soft);
+    font-family: inherit; font-size: 14px; font-weight: 500; color: var(--fg);
+    transition: border-color .16s, background .16s, box-shadow .16s;
+  }
+  .search input::placeholder { color: var(--fg-weak); font-weight: 500; }
+  .search input:hover { background: var(--surface-hover); }
+  .search input:focus {
+    outline: none; background: var(--surface);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-wash);
+  }
+
+  .dropdown {
+    height: 44px; padding: 0 var(--s3) 0 var(--s4);
+    border: 1px solid var(--border); border-radius: var(--r-ctrl);
+    background: var(--surface); color: var(--fg);
+    font-size: 14px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: var(--s2);
+    cursor: pointer; white-space: nowrap;
+    transition: background .16s, border-color .16s;
+  }
+  .dropdown:hover { background: var(--surface-hover); }
+  .dropdown:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .dropdown .ico { width: 16px; height: 16px; stroke: var(--fg-weak); }
+  .dropdown .lead { color: var(--fg-weak); font-weight: 500; }
+  .filter-spacer { flex: 1; }
+
+  /* ============ 선택 바 (bulk 선택 시) ============ */
+  .selection-bar {
+    display: flex; align-items: center; gap: var(--s4);
+    padding: var(--s3) var(--s5);
+    background: var(--primary-wash);
+    border-bottom: 1px solid var(--border);
+    font-size: 14px; font-weight: 600; color: var(--primary-press);
+  }
+  .selection-bar .sel-count { font-weight: 800; }
+  .selection-bar .sb-actions { margin-left: auto; display: flex; gap: var(--s2); }
+  .chip-btn {
+    height: 34px; padding: 0 var(--s3);
+    border-radius: var(--r-pill); border: 1px solid var(--border);
+    background: var(--surface); color: var(--fg-mid);
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background .16s, color .16s, border-color .16s;
+  }
+  .chip-btn:hover { background: var(--surface-hover); color: var(--fg); }
+  .chip-btn .ico { width: 15px; height: 15px; stroke: currentColor; }
+
+  /* ============ 테이블 ============ */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 960px; }
+
+  thead th {
+    text-align: left; padding: var(--s3) var(--s4);
+    font-size: 12px; font-weight: 700; color: var(--fg-weak);
+    background: var(--surface-soft);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--fg-mid); }
+  th .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+  th .sort-ico { width: 14px; height: 14px; stroke: currentColor; opacity: .5; }
+  th.sortable.asc .sort-ico, th.sortable.desc .sort-ico { opacity: 1; color: var(--primary); }
+  th.num, td.num { text-align: right; }
+  th.center, td.center { text-align: center; }
+
+  tbody td {
+    padding: var(--s4); border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--fg); vertical-align: middle;
+    background: var(--surface);
+    transition: background .14s;
+  }
+  tbody tr { animation: rowIn .3s ease-out both; }
+  tbody tr:nth-child(1){animation-delay:.02s} tbody tr:nth-child(2){animation-delay:.05s}
+  tbody tr:nth-child(3){animation-delay:.08s} tbody tr:nth-child(4){animation-delay:.11s}
+  tbody tr:nth-child(5){animation-delay:.14s} tbody tr:nth-child(6){animation-delay:.17s}
+  tbody tr:nth-child(7){animation-delay:.20s} tbody tr:nth-child(8){animation-delay:.23s}
+  tbody tr:nth-child(9){animation-delay:.26s} tbody tr:nth-child(10){animation-delay:.29s}
+  tbody tr:hover td { background: var(--primary-wash); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.selected td { background: var(--primary-wash); }
+
+  /* 체크박스 */
+  .cbx { width: 20px; height: 20px; position: relative; display: inline-block; vertical-align: middle; }
+  .cbx input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+  .cbx .box {
+    width: 20px; height: 20px; border-radius: 7px;
+    border: 1.5px solid var(--border-strong); background: var(--surface);
+    display: grid; place-items: center;
+    transition: background .14s, border-color .14s;
+  }
+  .cbx .box .ico { width: 13px; height: 13px; stroke: #fff; stroke-width: 3; opacity: 0; transform: scale(.6); transition: opacity .14s, transform .14s; }
+  .cbx input:hover + .box { border-color: var(--primary); }
+  .cbx input:checked + .box { background: var(--primary); border-color: var(--primary); }
+  .cbx input:checked + .box .ico { opacity: 1; transform: scale(1); }
+  .cbx input:focus-visible + .box { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  /* 주문번호 */
+  .ord-no { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .ord-no .hash { color: var(--fg-weak); font-weight: 600; }
+
+  /* 고객 이니셜 */
+  .cust { display: flex; align-items: center; gap: var(--s3); }
+  .cust-avatar {
+    width: 34px; height: 34px; border-radius: var(--r-pill);
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+  .av-1 { background: var(--primary-wash); color: var(--primary); }
+  .av-2 { background: var(--mint-wash); color: var(--mint); }
+  .av-3 { background: var(--ship-wash); color: #C77700; }
+  .av-4 { background: #F3EDFE; color: #7C3AED; }
+  .av-5 { background: var(--cancel-wash); color: var(--cancel); }
+  .cust-meta { display: flex; flex-direction: column; line-height: 1.3; }
+  .cust-init { font-weight: 700; font-size: 14px; }
+  .cust-tier { font-size: 12px; color: var(--fg-weak); font-weight: 500; }
+
+  /* 상품 */
+  .prod { display: flex; align-items: center; gap: var(--s3); max-width: 280px; }
+  .prod-thumb {
+    width: 40px; height: 40px; border-radius: var(--r-chip);
+    flex-shrink: 0; position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .prod-thumb::before {
+    content: ""; position: absolute; inset: 0;
+  }
+  .th-a { background: linear-gradient(135deg, #EAF2FE, #C9E0FD); }
+  .th-b { background: linear-gradient(135deg, #E5FAF6, #BFF3EB); }
+  .th-c { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+  .th-d { background: linear-gradient(135deg, #F3EDFE, #DDD0FB); }
+  .th-e { background: linear-gradient(135deg, #FDECEE, #FBD0D6); }
+  .prod-thumb .glyph {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    color: rgba(25,31,40,.32);
+  }
+  .prod-thumb .glyph .ico { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; }
+  .prod-info { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
+  .prod-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prod-extra { font-size: 12px; color: var(--fg-weak); font-weight: 500; }
+
+  /* 금액 */
+  .amount { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .amount .won { font-size: 12px; font-weight: 700; color: var(--fg-mid); margin-left: 2px; }
+  .amount-empty { color: var(--fg-weak); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* 결제수단 */
+  .pay { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--fg-mid); }
+  .pay .pico {
+    width: 24px; height: 16px; border-radius: 4px;
+    display: grid; place-items: center; font-size: 8px; font-weight: 800; color: #fff;
+    letter-spacing: -0.02em; flex-shrink: 0;
+  }
+  .pico.card { background: #191F28; }
+  .pico.toss { background: var(--primary); }
+  .pico.bank { background: var(--fg-mid); }
+  .pico.easy { background: var(--mint); }
+
+  /* 상태 배지 */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 10px 0 8px;
+    border-radius: var(--r-pill);
+    font-size: 13px; font-weight: 700; white-space: nowrap;
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .badge.paid   { background: var(--paid-wash);   color: #1B64DA; }
+  .badge.paid   .dot { background: var(--paid); }
+  .badge.ship   { background: var(--ship-wash);   color: #C77700; }
+  .badge.ship   .dot { background: var(--ship); }
+  .badge.done   { background: var(--done-wash);   color: #009E8A; }
+  .badge.done   .dot { background: var(--done); }
+  .badge.cancel { background: var(--cancel-wash); color: #D3313E; }
+  .badge.cancel .dot { background: var(--cancel); }
+
+  /* 주문일시 */
+  .datetime { font-variant-numeric: tabular-nums; color: var(--fg-mid); font-weight: 500; line-height: 1.35; }
+  .datetime .time { color: var(--fg-weak); font-size: 12px; display: block; }
+
+  /* 행 hover 상세 액션 */
+  .row-actions { display: flex; align-items: center; gap: var(--s1); opacity: 0; transition: opacity .16s; justify-content: flex-end; }
+  tbody tr:hover .row-actions { opacity: 1; }
+  .row-btn {
+    width: 32px; height: 32px; border-radius: 9px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: grid; place-items: center; cursor: pointer; color: var(--fg-mid);
+    transition: background .14s, color .14s, border-color .14s;
+  }
+  .row-btn:hover { background: var(--surface); color: var(--primary); border-color: var(--primary); }
+  .row-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .row-btn .ico { width: 16px; height: 16px; stroke: currentColor; }
+  .row-detail-hint {
+    font-size: 12px; color: var(--fg-weak); font-weight: 500;
+    display: none;
+  }
+  tbody tr:hover .row-detail-hint { display: inline; }
+
+  /* ============ 페이지네이션 ============ */
+  .pager {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--s4) var(--s5); flex-wrap: wrap; gap: var(--s3);
+  }
+  .pager-info { font-size: 13px; color: var(--fg-mid); font-weight: 500; }
+  .pager-info b { color: var(--fg); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .pager-nav { display: flex; align-items: center; gap: var(--s1); }
+  .pg {
+    min-width: 40px; height: 40px; padding: 0 var(--s2);
+    border-radius: var(--r-chip); border: 1px solid transparent;
+    background: none; color: var(--fg-mid);
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    display: grid; place-items: center;
+    font-variant-numeric: tabular-nums;
+    transition: background .14s, color .14s;
+  }
+  .pg:hover { background: var(--surface-hover); color: var(--fg); }
+  .pg.active { background: var(--primary); color: #fff; }
+  .pg.active:hover { background: var(--primary-press); }
+  .pg:disabled { opacity: .4; cursor: not-allowed; }
+  .pg:disabled:hover { background: none; }
+  .pg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .pg .ico { width: 18px; height: 18px; stroke: currentColor; }
+  .pg-ellipsis { color: var(--fg-weak); padding: 0 4px; font-weight: 700; }
+
+  .pager-size {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    font-size: 13px; color: var(--fg-mid); font-weight: 500;
+  }
+
+  /* ============ 푸터 ============ */
+  .foot {
+    text-align: center; padding: var(--s6) var(--s4) var(--s7);
+    font-size: 13px; color: var(--fg-weak); font-weight: 500;
+  }
+  .foot .sep { margin: 0 8px; color: var(--border-strong); }
+
+  /* ============ 애니메이션 ============ */
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes rowIn  { from { opacity: 0; transform: translateY(6px); }  to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* ============ 반응형 ============ */
+  @media (max-width: 1024px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .app { grid-template-columns: 72px 1fr; }
+    .sidebar { padding: var(--s5) var(--s3); }
+    .brand-name, .brand-sub, .nav-label, .nav-item .count, .nav-item span:not(.count),
+    .seller-name, .seller-role { display: none; }
+    .nav-item { justify-content: center; padding: 0; }
+    .brand { justify-content: center; }
+    .sidebar-foot { justify-content: center; padding: var(--s2); }
+  }
+  @media (max-width: 768px) {
+    .main { padding: var(--s4); }
+    .topbar { padding: 0 var(--s4); }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-value { font-size: 34px; }
+    .crumb { display: none; }
+    .page-head { align-items: stretch; }
+    .filters { flex-direction: column; align-items: stretch; }
+    .search { max-width: none; }
+    .filter-spacer { display: none; }
+  }
+  @media (max-width: 640px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== 사이드바 ========== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div>
+        <div class="brand-name">MUJINE</div>
+        <div class="brand-sub">셀러 어드민</div>
+      </div>
+    </div>
+
+    <nav class="nav-group">
+      <div class="nav-label">주문 관리</div>
+      <button class="nav-item active">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        <span>주문 목록</span>
+        <span class="count">128</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <span>배송 관리</span>
+        <span class="count">37</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4 4-4-4"/><path d="M5 18V9a4 4 0 0 1 4-4h10"/><path d="M15 10l4-4 4 4"/><path d="M19 6v9a4 4 0 0 1-4 4H5"/></svg>
+        <span>취소·환불</span>
+        <span class="count">6</span>
+      </button>
+    </nav>
+
+    <nav class="nav-group">
+      <div class="nav-label">상점</div>
+      <button class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>
+        <span>상품 관리</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        <span>매출 정산</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.11a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 4.6V4.5a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 2.82 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 11h.1a2 2 0 1 1 0 4z"/></svg>
+        <span>상점 설정</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="seller-avatar">MJ</div>
+      <div>
+        <div class="seller-name">MUJINE 스토어</div>
+        <div class="seller-role">셀러 · 정식</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== 상단바 ========== -->
+  <header class="topbar">
+    <div class="crumb"><span>주문 관리</span><span class="sep">/</span><b>주문 목록</b></div>
+    <div class="topbar-spacer"></div>
+    <button class="icon-btn" aria-label="검색">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="알림">
+      <span class="dot"></span>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="도움말">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    </button>
+  </header>
+
+  <!-- ========== 메인 ========== -->
+  <main class="main">
+
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">주문 목록</h1>
+        <p class="page-desc">오늘 들어온 주문을 확인하고, 배송과 정산을 한 곳에서 관리하세요.</p>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button class="btn">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 21h16"/></svg>
+          내보내기
+        </button>
+        <button class="btn primary">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          주문 등록
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <section class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">오늘 주문</span>
+          <span class="kpi-ico blue"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="tnum" data-count="128">128</span><span class="kpi-unit">건</span></div>
+        <div class="kpi-delta up">▲ 12건 <span class="muted">어제 대비</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">결제 완료 금액</span>
+          <span class="kpi-ico mint"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="tnum" data-count="4820000" data-format="comma">4,820,000</span><span class="kpi-unit">원</span></div>
+        <div class="kpi-delta up">▲ 8.4% <span class="muted">어제 대비</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">배송 중</span>
+          <span class="kpi-ico orange"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="tnum" data-count="37">37</span><span class="kpi-unit">건</span></div>
+        <div class="kpi-delta down">▼ 5건 <span class="muted">어제 대비</span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">취소·환불</span>
+          <span class="kpi-ico red"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+        </div>
+        <div class="kpi-value"><span class="tnum" data-count="6">6</span><span class="kpi-unit">건</span></div>
+        <div class="kpi-delta down">▼ 2건 <span class="muted">어제 대비</span></div>
+      </div>
+    </section>
+
+    <!-- 패널: 탭 + 필터 + 테이블 + 페이지네이션 -->
+    <section class="panel">
+
+      <!-- 상태 탭 -->
+      <div class="tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true">전체 <span class="badge-count">128</span></button>
+        <button class="tab" role="tab" aria-selected="false">결제완료 <span class="badge-count">54</span></button>
+        <button class="tab" role="tab" aria-selected="false">배송중 <span class="badge-count">37</span></button>
+        <button class="tab" role="tab" aria-selected="false">배송완료 <span class="badge-count">31</span></button>
+        <button class="tab" role="tab" aria-selected="false">취소 <span class="badge-count">6</span></button>
+      </div>
+
+      <!-- 필터 -->
+      <div class="filters">
+        <div class="search">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" placeholder="주문번호 · 상품명 · 고객 검색" aria-label="주문 검색" />
+        </div>
+        <button class="dropdown">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span class="lead">기간</span> 최근 7일
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="filter-spacer"></div>
+        <button class="dropdown" id="bulkBtn">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          대량작업
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- 선택 바 (2건 선택된 상태 예시) -->
+      <div class="selection-bar">
+        <span class="cbx"><input type="checkbox" checked aria-label="선택 요약"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span>
+        <span><span class="sel-count tnum">2건</span> 선택됨</span>
+        <div class="sb-actions">
+          <button class="chip-btn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>배송 시작</button>
+          <button class="chip-btn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 21h16"/></svg>송장 출력</button>
+          <button class="chip-btn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 6-12 12M6 6l12 12"/></svg>선택 해제</button>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="center" style="width:44px;">
+                <span class="cbx"><input type="checkbox" aria-label="전체 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span>
+              </th>
+              <th class="sortable desc" style="width:120px;"><span class="th-inner">주문번호 <svg class="sort-ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></th>
+              <th>고객</th>
+              <th>상품</th>
+              <th class="num sortable"><span class="th-inner">금액 <svg class="sort-ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></span></th>
+              <th>결제수단</th>
+              <th>상태</th>
+              <th class="sortable"><span class="th-inner">주문일시 <svg class="sort-ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></span></th>
+              <th class="num" style="width:120px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 1 (selected) -->
+            <tr class="selected">
+              <td class="center"><span class="cbx"><input type="checkbox" checked aria-label="주문 10491 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10491</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-1">K.M</div><div class="cust-meta"><span class="cust-init">K.M</span><span class="cust-tier">단골 · 12회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-a"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span></div><div class="prod-info"><span class="prod-name">무선 노이즈캔슬링 이어버드</span><span class="prod-extra">외 2건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">189,000<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico easy">간편</span>토스페이</span></td>
+              <td><span class="badge paid"><span class="dot"></span>결제완료</span></td>
+              <td class="num"><span class="datetime">2026.07.14<span class="time">14:32</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 2 (selected) -->
+            <tr class="selected">
+              <td class="center"><span class="cbx"><input type="checkbox" checked aria-label="주문 10490 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10490</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-2">J.S</div><div class="cust-meta"><span class="cust-init">J.S</span><span class="cust-tier">신규</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-b"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg></span></div><div class="prod-info"><span class="prod-name">프리미엄 향 디퓨저 세트</span><span class="prod-extra">외 1건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">64,500<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico card">CARD</span>신용카드</span></td>
+              <td><span class="badge paid"><span class="dot"></span>결제완료</span></td>
+              <td class="num"><span class="datetime">2026.07.14<span class="time">13:58</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 3 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10489 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10489</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-3">L.H</div><div class="cust-meta"><span class="cust-init">L.H</span><span class="cust-tier">단골 · 8회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-c"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span></div><div class="prod-info"><span class="prod-name">오가닉 코튼 룸웨어</span><span class="prod-extra">외 3건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">128,000<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico easy">간편</span>토스페이</span></td>
+              <td><span class="badge ship"><span class="dot"></span>배송중</span></td>
+              <td class="num"><span class="datetime">2026.07.14<span class="time">11:20</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 4 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10488 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10488</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-4">P.J</div><div class="cust-meta"><span class="cust-init">P.J</span><span class="cust-tier">단골 · 21회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-d"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8M8 6l4 4 4-4"/><rect x="3" y="10" width="18" height="11" rx="2"/></svg></span></div><div class="prod-info"><span class="prod-name">스테인리스 텀블러 500ml</span><span class="prod-extra">단일 상품</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">32,900<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico card">CARD</span>신용카드</span></td>
+              <td><span class="badge ship"><span class="dot"></span>배송중</span></td>
+              <td class="num"><span class="datetime">2026.07.14<span class="time">10:47</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 5 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10487 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10487</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-5">S.Y</div><div class="cust-meta"><span class="cust-init">S.Y</span><span class="cust-tier">신규</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-e"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span></div><div class="prod-info"><span class="prod-name">핸드메이드 캔들 기프트</span><span class="prod-extra">외 4건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">96,000<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico bank">이체</span>계좌이체</span></td>
+              <td><span class="badge done"><span class="dot"></span>배송완료</span></td>
+              <td class="num"><span class="datetime">2026.07.13<span class="time">19:05</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 6 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10486 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10486</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-1">C.W</div><div class="cust-meta"><span class="cust-init">C.W</span><span class="cust-tier">단골 · 5회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-a"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></span></div><div class="prod-info"><span class="prod-name">고속충전 보조배터리 20000mAh</span><span class="prod-extra">단일 상품</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">41,800<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico easy">간편</span>토스페이</span></td>
+              <td><span class="badge done"><span class="dot"></span>배송완료</span></td>
+              <td class="num"><span class="datetime">2026.07.13<span class="time">16:41</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 7 : 금액 결측 — -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10485 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10485</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-2">H.R</div><div class="cust-meta"><span class="cust-init">H.R</span><span class="cust-tier">신규</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-b"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v4H3zM5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M10 11h4"/></svg></span></div><div class="prod-info"><span class="prod-name">주문 정보 확인 필요</span><span class="prod-extra">외 1건</span></div></div>
+              </td>
+              <td class="num"><span class="amount-empty" title="결제 대기 · 금액 미확정">—</span></td>
+              <td><span class="pay"><span class="pico bank">입금</span>무통장입금</span></td>
+              <td><span class="badge paid"><span class="dot"></span>결제완료</span></td>
+              <td class="num"><span class="datetime">2026.07.13<span class="time">15:12</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 8 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10484 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10484</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-3">B.K</div><div class="cust-meta"><span class="cust-init">B.K</span><span class="cust-tier">단골 · 33회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-c"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span></div><div class="prod-info"><span class="prod-name">블루투스 스피커 미니</span><span class="prod-extra">외 2건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">218,000<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico card">CARD</span>신용카드</span></td>
+              <td><span class="badge done"><span class="dot"></span>배송완료</span></td>
+              <td class="num"><span class="datetime">2026.07.13<span class="time">09:33</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 9 : 취소 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10483 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10483</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-4">Y.D</div><div class="cust-meta"><span class="cust-init">Y.D</span><span class="cust-tier">신규</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-d"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h2l2.5 13h11l2.5-9H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></span></div><div class="prod-info"><span class="prod-name">캠핑 폴딩 체어</span><span class="prod-extra">단일 상품</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">73,000<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico easy">간편</span>토스페이</span></td>
+              <td><span class="badge cancel"><span class="dot"></span>취소</span></td>
+              <td class="num"><span class="datetime">2026.07.12<span class="time">22:18</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <!-- 10 -->
+            <tr>
+              <td class="center"><span class="cbx"><input type="checkbox" aria-label="주문 10482 선택"><span class="box"><svg class="ico" viewBox="0 0 24 24" fill="none"><path d="m5 12 5 5 9-11"/></svg></span></span></td>
+              <td><span class="ord-no"><span class="hash">#</span>10482</span></td>
+              <td>
+                <div class="cust"><div class="cust-avatar av-5">N.G</div><div class="cust-meta"><span class="cust-init">N.G</span><span class="cust-tier">단골 · 7회</span></div></div>
+              </td>
+              <td>
+                <div class="prod"><div class="prod-thumb th-e"><span class="glyph"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5 2 5h10s2-2 2-5a7 7 0 0 0-7-7Z"/><path d="M9 18h6M10 21h4"/></svg></span></div><div class="prod-info"><span class="prod-name">LED 무드등 스탠드</span><span class="prod-extra">외 1건</span></div></div>
+              </td>
+              <td class="num"><span class="amount tnum">54,900<span class="won">원</span></span></td>
+              <td><span class="pay"><span class="pico card">CARD</span>신용카드</span></td>
+              <td><span class="badge paid"><span class="dot"></span>결제완료</span></td>
+              <td class="num"><span class="datetime">2026.07.12<span class="time">20:04</span></span></td>
+              <td class="num">
+                <div class="row-actions">
+                  <button class="row-btn" aria-label="상세"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="row-btn" aria-label="더보기"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 페이지네이션 -->
+      <div class="pager">
+        <div class="pager-info">전체 <b class="tnum">128</b>건 중 <b class="tnum">1–10</b>건 표시</div>
+        <div class="pager-nav">
+          <button class="pg" disabled aria-label="이전 페이지"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="pg active" aria-current="page">1</button>
+          <button class="pg">2</button>
+          <button class="pg">3</button>
+          <button class="pg">4</button>
+          <span class="pg-ellipsis">…</span>
+          <button class="pg">13</button>
+          <button class="pg" aria-label="다음 페이지"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+        <div class="pager-size">
+          <span>페이지당</span>
+          <button class="dropdown" style="height:36px;">10개 <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="foot">
+      MUJINE<span class="sep">·</span>주문 목록<span class="sep">·</span>핀테크 소프트
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- KPI count-up ----
+  function formatComma(n) { return n.toLocaleString('en-US'); }
+  function runCount(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    var isComma = el.getAttribute('data-format') === 'comma';
+    if (reduce || isNaN(target)) {
+      el.textContent = isComma ? formatComma(target) : String(target);
+      return;
+    }
+    var start = performance.now(), dur = 640;
+    function tick(now) {
+      var p = Math.min((now - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var v = Math.round(target * eased);
+      el.textContent = isComma ? formatComma(v) : String(v);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  document.querySelectorAll('[data-count]').forEach(function (el, i) {
+    if (reduce) { runCount(el); return; }
+    setTimeout(function () { runCount(el); }, 300 + i * 40);
+  });
+
+  // ---- 탭 전환 (시각 상태만) ----
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (t) {
+        t.classList.remove('active'); t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+    });
+  });
+
+  // ---- 행 선택 동기화 ----
+  document.querySelectorAll('tbody input[type="checkbox"]').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var tr = cb.closest('tr');
+      if (tr) tr.classList.toggle('selected', cb.checked);
+    });
+  });
+
+  // ---- 페이지네이션 (시각 상태만) ----
+  document.querySelectorAll('.pg').forEach(function (pg) {
+    pg.addEventListener('click', function () {
+      if (pg.disabled || !pg.textContent.trim().match(/^\d+$/)) return;
+      document.querySelectorAll('.pg').forEach(function (p) { p.classList.remove('active'); p.removeAttribute('aria-current'); });
+      pg.classList.add('active'); pg.setAttribute('aria-current', 'page');
+    });
+  });
+})();
+</script>
+</body>
+</html>

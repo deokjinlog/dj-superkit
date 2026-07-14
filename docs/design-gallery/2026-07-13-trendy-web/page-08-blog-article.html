@@ -1,0 +1,377 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>왜 좋은 디자인은 조용한가 — 롱폼</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    /* palette */
+    --paper:#FAF7F2;
+    --paper-2:#F3EEE5;
+    --ink:#1C1B18;
+    --ink-2:#3D3A34;
+    --muted:#6B655C;
+    --crimson:#A32638;
+    --crimson-ink:#7E1C2B;
+    --hairline:#D8D2C6;
+    --highlight:rgba(163,38,56,0.07);
+    --focus:rgba(163,38,56,0.35);
+
+    /* type */
+    --sans:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+    --serif:"Nanum Myeongjo",Georgia,"Times New Roman","Apple SD Gothic Neo",serif;
+
+    /* type scale */
+    --fs-12:12px; --fs-14:14px; --fs-16:16px; --fs-18:18px;
+    --fs-20:20px; --fs-24:24px; --fs-32:32px; --fs-48:48px;
+
+    /* 8px spacing scale */
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+    --sp-6:24px; --sp-8:32px; --sp-12:48px; --sp-16:64px; --sp-20:80px;
+
+    --radius:0px;
+    --maxw:720px;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:var(--fs-16);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .fade{opacity:0;animation:fade 400ms ease-out forwards}
+  @keyframes fade{to{opacity:1}}
+
+  ::selection{background:var(--highlight);color:var(--crimson-ink)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--sp-6)}
+
+  a{color:var(--crimson);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+  a:hover{color:var(--crimson-ink)}
+  a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+  h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-0.01em;color:var(--ink)}
+
+  /* ── masthead (제호) ── */
+  .masthead{border-bottom:1px solid var(--hairline)}
+  .masthead-inner{
+    max-width:var(--maxw);margin:0 auto;padding:var(--sp-3) var(--sp-6);
+    display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-4);
+    font-size:var(--fs-12);color:var(--muted);
+    text-transform:uppercase;letter-spacing:0.16em;
+  }
+  .masthead-brand{font-family:var(--serif);font-weight:700;font-size:var(--fs-16);
+    letter-spacing:0.28em;color:var(--ink);text-transform:uppercase}
+  .masthead-meta{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* ── article header ── */
+  header.article{padding:var(--sp-16) 0 var(--sp-8)}
+  .kicker{
+    display:inline-block;font-size:var(--fs-12);font-weight:700;
+    letter-spacing:0.18em;text-transform:uppercase;color:var(--crimson);
+    border-bottom:2px solid var(--crimson);padding-bottom:var(--sp-1);
+    margin-bottom:var(--sp-6);
+  }
+  h1.title{
+    font-size:clamp(34px,7vw,var(--fs-48));line-height:1.12;
+    letter-spacing:-0.02em;margin:0 0 var(--sp-6);
+  }
+  .standfirst{
+    font-family:var(--serif);font-size:var(--fs-20);line-height:1.5;
+    color:var(--ink-2);margin:0 0 var(--sp-8);max-width:60ch;
+  }
+  .byline{
+    display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-3);
+    padding-top:var(--sp-4);border-top:1px solid var(--hairline);
+    font-size:var(--fs-14);color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  .byline .author{color:var(--ink);font-weight:600}
+  .byline .dot{width:3px;height:3px;border-radius:50%;background:var(--hairline);display:inline-block}
+
+  /* ── body copy ── */
+  article .body{padding:var(--sp-8) 0 var(--sp-12)}
+  .body p{margin:0 0 var(--sp-6);max-width:66ch}
+  .lead{font-size:var(--fs-18)}
+  .lead::first-letter{
+    font-family:var(--serif);font-weight:700;color:var(--crimson);
+    float:left;font-size:76px;line-height:0.82;
+    padding:6px var(--sp-3) 0 0;
+  }
+
+  /* section rule + heading (2px + 1px 이중 괘선) */
+  .section-rule{border:0;height:0;border-top:2px solid var(--ink);
+    margin:var(--sp-12) 0 0;position:relative}
+  .section-rule::after{content:"";position:absolute;left:0;right:0;top:3px;
+    border-top:1px solid var(--hairline)}
+  h2.sub{font-size:var(--fs-24);line-height:1.25;margin:var(--sp-6) 0 var(--sp-4)}
+  h2.sub .idx{color:var(--crimson);font-size:var(--fs-16);
+    vertical-align:6px;margin-right:var(--sp-2);font-variant-numeric:tabular-nums}
+
+  /* pull quote */
+  blockquote{
+    margin:var(--sp-8) 0;padding:var(--sp-2) 0 var(--sp-2) var(--sp-6);
+    border-left:2px solid var(--crimson);
+    font-family:var(--serif);font-style:italic;font-size:var(--fs-24);
+    line-height:1.4;color:var(--ink);
+  }
+  blockquote cite{display:block;margin-top:var(--sp-4);font-style:normal;
+    font-family:var(--sans);font-size:var(--fs-14);color:var(--muted);
+    letter-spacing:0.02em}
+
+  /* figure (CSS-drawn image) */
+  figure{margin:var(--sp-8) 0}
+  .plate{
+    width:100%;aspect-ratio:16/9;border:1px solid var(--hairline);
+    background:
+      radial-gradient(120% 140% at 82% 18%, rgba(163,38,56,0.16), transparent 46%),
+      radial-gradient(90% 120% at 12% 88%, rgba(28,27,24,0.10), transparent 52%),
+      repeating-linear-gradient(90deg,transparent 0 39px,rgba(28,27,24,0.05) 39px 40px),
+      linear-gradient(180deg,#F5EFE4,#EDE5D6);
+    position:relative;overflow:hidden;
+  }
+  .plate::before{
+    content:"";position:absolute;left:8%;top:16%;width:34%;aspect-ratio:1;
+    border:2px solid var(--ink);border-radius:50%;opacity:0.85;
+  }
+  .plate::after{
+    content:"";position:absolute;right:10%;bottom:0;width:26%;height:64%;
+    background:var(--crimson);opacity:0.9;
+  }
+  .plate .mark{
+    position:absolute;left:8%;bottom:12%;font-family:var(--serif);
+    font-weight:700;font-size:clamp(40px,9vw,72px);color:var(--ink);
+    letter-spacing:-0.03em;line-height:1;
+  }
+  figcaption{
+    margin-top:var(--sp-3);padding-left:var(--sp-3);
+    border-left:2px solid var(--hairline);
+    font-family:var(--serif);font-style:italic;font-size:var(--fs-14);
+    color:var(--muted);
+  }
+
+  /* ── tags ── */
+  .tags{padding:var(--sp-8) 0;border-top:1px solid var(--hairline)}
+  .tags .label{font-size:var(--fs-12);letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:var(--sp-3)}
+  .tags .list{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4)}
+  .tags a{font-size:var(--fs-14)}
+
+  /* ── subscribe (input + button states) ── */
+  .subscribe{
+    margin:var(--sp-8) 0 var(--sp-12);padding:var(--sp-8) 0;
+    border-top:2px solid var(--ink);border-bottom:1px solid var(--hairline);
+  }
+  .subscribe h3{font-size:var(--fs-20);margin:0 0 var(--sp-2)}
+  .subscribe p{color:var(--muted);font-size:var(--fs-14);margin:0 0 var(--sp-6);max-width:52ch}
+  .form{display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:flex-start}
+  .field{flex:1 1 260px;min-width:0}
+  .input{
+    width:100%;height:40px;padding:0 var(--sp-3);
+    font-family:var(--sans);font-size:var(--fs-14);color:var(--ink);
+    background:var(--paper);border:1px solid var(--hairline);border-radius:var(--radius);
+    transition:border-color 120ms ease,box-shadow 120ms ease;
+  }
+  .input::placeholder{color:var(--muted)}
+  .input:hover{border-color:var(--muted)}
+  .input:focus{outline:none;border-color:var(--crimson);box-shadow:0 0 0 3px var(--focus)}
+  .helper{margin-top:var(--sp-2);font-size:var(--fs-12);color:var(--muted)}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    height:40px;padding:0 var(--sp-6);gap:var(--sp-2);
+    font-family:var(--sans);font-size:var(--fs-14);font-weight:600;
+    border-radius:var(--radius);border:1px solid transparent;cursor:pointer;
+    transition:background 120ms ease,color 120ms ease,border-color 120ms ease,transform 80ms ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .btn-primary{background:var(--crimson);color:var(--paper);border-color:var(--crimson)}
+  .btn-primary:hover{background:var(--crimson-ink);border-color:var(--crimson-ink)}
+  .btn-primary:active{background:var(--crimson-ink);transform:translateY(1px)}
+  .btn-primary:disabled{background:var(--hairline);border-color:var(--hairline);
+    color:var(--muted);cursor:not-allowed;transform:none}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--hairline)}
+  .btn-ghost:hover{border-color:var(--ink);background:var(--paper-2)}
+  .btn-ghost:active{transform:translateY(1px)}
+
+  /* ── related ── */
+  .related{padding:var(--sp-8) 0 var(--sp-16)}
+  .related-head{border-top:2px solid var(--ink);padding-top:var(--sp-2);position:relative}
+  .related-head::after{content:"";position:absolute;left:0;right:0;top:3px;
+    border-top:1px solid var(--hairline)}
+  .related-head h3{font-size:var(--fs-24);margin:var(--sp-4) 0 var(--sp-6)}
+  .related-list{list-style:none;margin:0;padding:0;display:grid;gap:0}
+  .related-list li{border-bottom:1px solid var(--hairline)}
+  .related-list li:first-child{border-top:1px solid var(--hairline)}
+  .r-link{
+    display:grid;grid-template-columns:auto 1fr;gap:var(--sp-4);
+    align-items:baseline;padding:var(--sp-6) var(--sp-3);
+    text-decoration:none;color:inherit;
+    transition:background 120ms ease;
+  }
+  .r-link:hover{background:var(--highlight)}
+  .r-link:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+  .r-num{font-family:var(--serif);font-weight:700;font-size:var(--fs-20);
+    color:var(--crimson);font-variant-numeric:tabular-nums;line-height:1}
+  .r-cat{font-size:var(--fs-12);letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:var(--sp-2)}
+  .r-title{font-family:var(--serif);font-weight:700;font-size:var(--fs-18);
+    line-height:1.3;color:var(--ink);margin:0 0 var(--sp-2)}
+  .r-link:hover .r-title{color:var(--crimson-ink);text-decoration:underline;
+    text-underline-offset:2px;text-decoration-thickness:1px}
+  .r-meta{font-size:var(--fs-12);color:var(--muted);font-variant-numeric:tabular-nums}
+
+  /* ── footer ── */
+  footer.page{border-top:1px solid var(--hairline)}
+  .footer-inner{
+    max-width:var(--maxw);margin:0 auto;padding:var(--sp-8) var(--sp-6) var(--sp-12);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-4);
+    font-size:var(--fs-12);color:var(--muted);letter-spacing:0.06em;
+  }
+  .footer-inner .sig{font-family:var(--serif);text-transform:uppercase;letter-spacing:0.16em}
+
+  @media (max-width:520px){
+    header.article{padding-top:var(--sp-12)}
+    .lead::first-letter{font-size:60px}
+    .r-link{grid-template-columns:1fr}
+    .r-num{margin-bottom:var(--sp-1)}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .fade{animation:none;opacity:1}
+    *{transition:none!important}
+  }
+</style>
+
+<div class="fade">
+  <div class="masthead">
+    <div class="masthead-inner">
+      <span class="masthead-brand">롱폼</span>
+      <span class="masthead-meta">2026.07.13 · No. 148</span>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <article>
+      <header class="article">
+        <span class="kicker">디자인 노트</span>
+        <h1 class="title">왜 좋은 디자인은 조용한가</h1>
+        <p class="standfirst">가장 잘 만든 화면은 자신을 설명하지 않는다. 사용자가 목적지에 닿는 동안, 인터페이스는 뒤로 물러나 조용히 사라진다.</p>
+        <div class="byline">
+          <span class="author">롱폼 에디터</span>
+          <span class="dot"></span>
+          <span>읽기 8분</span>
+          <span class="dot"></span>
+          <span>2026년 7월 13일</span>
+        </div>
+      </header>
+
+      <div class="body">
+        <p class="lead">좋은 디자인은 박수를 요구하지 않는다. 오히려 사용자가 방금 무엇을 지나쳤는지조차 기억하지 못할 때, 그 화면은 제 역할을 다한 것이다. 결제 버튼이 어디 있었는지, 목록이 어떻게 정렬됐는지 굳이 떠올릴 필요가 없었다면 — 그것이 조용함의 증거다.</p>
+
+        <p>우리는 종종 인상적인 것과 좋은 것을 혼동한다. 화려한 전환 효과, 과감한 색, 처음 보는 레이아웃은 눈길을 끈다. 하지만 눈길을 끄는 일과 일을 끝내게 돕는 일은 다르다. 매일 쓰는 도구가 매번 자기를 뽐낸다면, 그건 소음이다.</p>
+
+        <hr class="section-rule">
+        <h2 class="sub"><span class="idx">01</span>소음과 신호</h2>
+        <p>모든 화면에는 신호와 소음이 섞여 있다. 신호는 사용자가 지금 필요로 하는 정보이고, 소음은 그 외의 모든 장식이다. 디자인의 절반은 무엇을 더할지가 아니라 무엇을 덜어낼지를 정하는 일이다. 여백은 비어 있는 것이 아니라, 남겨두기로 결정한 자리다.</p>
+        <p>덜어내기는 용기를 요구한다. 빈 공간은 게을러 보일까 두렵고, 그래서 우리는 자꾸 채운다. 하지만 채움은 위계를 무너뜨린다. 모든 것이 강조되면 아무것도 강조되지 않는다.</p>
+
+        <blockquote>
+          디자인이 훌륭할수록 우리는 그것을 덜 알아차린다. 잘 만든 문은 손잡이를 어디에 둬야 할지 고민하게 만들지 않는다.
+          <cite>— 인터페이스 원칙 노트</cite>
+        </blockquote>
+
+        <hr class="section-rule">
+        <h2 class="sub"><span class="idx">02</span>일관성이라는 문법</h2>
+        <p>조용한 디자인은 예측 가능하다. 같은 동작은 같은 결과를 낳고, 같은 요소는 같은 자리에 있다. 이 예측 가능성이 신뢰를 만든다. 사용자는 다음에 무슨 일이 벌어질지 배우지 않아도 알 수 있을 때 비로소 화면에서 눈을 뗄 수 있다.</p>
+        <p>일관성은 규칙의 집합이다. 8의 배수로 짜인 간격, 손에 익은 몇 개의 글자 크기, 언제나 같은 방식으로 반응하는 버튼. 이 규칙들은 눈에 띄지 않지만, 없으면 즉시 티가 난다. 문법이 틀린 문장처럼.</p>
+
+        <figure>
+          <div class="plate" role="img" aria-label="원과 사각형이 여백 위에서 균형을 이루는 추상 구성">
+            <span class="mark">Aa</span>
+          </div>
+          <figcaption>여백 위에 놓인 두 형태 — 균형은 채움이 아니라 남김에서 나온다.</figcaption>
+        </figure>
+
+        <hr class="section-rule">
+        <h2 class="sub"><span class="idx">03</span>물러서는 기술</h2>
+        <p>가장 어려운 디자인은 자신을 지우는 디자인이다. 만든 사람의 개성을 드러내고 싶은 유혹, 새 기법을 써보고 싶은 욕심을 누르고, 화면을 쓰는 사람 뒤로 한 걸음 물러서야 한다. 조용함은 무관심이 아니라, 극도로 세심한 배려의 결과다.</p>
+        <p>물러선 디자인은 오래간다. 유행하는 장식은 이듬해에 낡지만, 잘 정돈된 위계와 정직한 여백은 시간을 견딘다. 결국 남는 것은 소리치던 화면이 아니라, 조용히 제 일을 하던 화면이다.</p>
+      </div>
+
+      <div class="tags">
+        <div class="label">태그</div>
+        <div class="list">
+          <a href="#">#디자인원칙</a>
+          <a href="#">#인터페이스</a>
+          <a href="#">#타이포그래피</a>
+          <a href="#">#여백</a>
+          <a href="#">#일관성</a>
+        </div>
+      </div>
+
+      <section class="subscribe" aria-labelledby="sub-h">
+        <h3 id="sub-h">롱폼 레터</h3>
+        <p>2주에 한 번, 디자인과 글쓰기에 대한 긴 호흡의 노트를 보냅니다. 광고 없이 본문만.</p>
+        <form class="form" onsubmit="return false">
+          <div class="field">
+            <label for="email" style="position:absolute;left:-9999px">이메일 주소</label>
+            <input class="input" id="email" type="email" inputmode="email" placeholder="이메일 주소를 입력하세요" autocomplete="email">
+            <div class="helper">구독은 언제든 한 번의 클릭으로 해지할 수 있습니다.</div>
+          </div>
+          <button class="btn btn-primary" type="submit">구독하기</button>
+          <button class="btn btn-ghost" type="button">지난 호 보기</button>
+        </form>
+      </section>
+    </article>
+
+    <section class="related" aria-labelledby="rel-h">
+      <div class="related-head">
+        <h3 id="rel-h">이어 읽기</h3>
+      </div>
+      <ol class="related-list">
+        <li>
+          <a class="r-link" href="#">
+            <span class="r-num">01</span>
+            <span>
+              <span class="r-cat">타이포그래피</span>
+              <p class="r-title">본문 글자 크기를 정하는 세 가지 기준</p>
+              <span class="r-meta">읽기 6분 · 2026년 6월 28일</span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="r-link" href="#">
+            <span class="r-num">02</span>
+            <span>
+              <span class="r-cat">레이아웃</span>
+              <p class="r-title">8px 그리드가 화면을 조용하게 만드는 법</p>
+              <span class="r-meta">읽기 9분 · 2026년 6월 14일</span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="r-link" href="#">
+            <span class="r-num">03</span>
+            <span>
+              <span class="r-cat">디자인 노트</span>
+              <p class="r-title">덜어내기: 무엇을 남기지 않을 것인가</p>
+              <span class="r-meta">읽기 7분 · 2026년 5월 30일</span>
+            </span>
+          </a>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="page">
+    <div class="footer-inner">
+      <span class="sig">블로그 아티클 · 에디토리얼 매거진</span>
+      <span>롱폼 · No. 148</span>
+    </div>
+  </footer>
+</div>

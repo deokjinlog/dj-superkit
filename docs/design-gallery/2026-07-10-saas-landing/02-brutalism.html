@@ -1,0 +1,433 @@
+<title>Flowly — 브루탈리즘</title>
+<style>
+  :root{
+    --yellow:#FFE600;
+    --red:#FF3B30;
+    --blue:#0047FF;
+    --black:#000;
+    --white:#fff;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:hidden}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:'Courier New', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    line-height:1.35;
+    -webkit-font-smoothing:none;
+  }
+  img,svg{display:block}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+  /* ---------- NAV ---------- */
+  header.topbar{
+    border-bottom:5px solid var(--black);
+    background:var(--white);
+    position:sticky;top:0;z-index:50;
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;
+    max-width:1180px;margin:0 auto;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .logo{
+    font-size:1.6rem;font-weight:900;letter-spacing:-1px;
+    background:var(--yellow);
+    border:4px solid var(--black);
+    padding:2px 12px;
+    transform:rotate(-2deg);
+    display:inline-block;
+  }
+  nav.menu{display:flex;gap:22px;flex-wrap:wrap}
+  nav.menu a{
+    text-decoration:none;font-weight:700;text-transform:uppercase;
+    font-size:.85rem;letter-spacing:.5px;
+    border-bottom:3px solid transparent;
+  }
+  nav.menu a:hover{border-bottom:3px solid var(--black)}
+  .btn{
+    display:inline-block;
+    font-family:inherit;
+    font-weight:900;
+    text-transform:uppercase;
+    text-decoration:none;
+    border:4px solid var(--black);
+    background:var(--white);
+    color:var(--black);
+    padding:12px 22px;
+    cursor:pointer;
+    box-shadow:6px 6px 0 var(--black);
+    transition:transform .08s ease, box-shadow .08s ease;
+    font-size:.95rem;
+    letter-spacing:.5px;
+  }
+  .btn:active{transform:translate(6px,6px);box-shadow:0 0 0 var(--black)}
+  .btn-yellow{background:var(--yellow)}
+  .btn-red{background:var(--red);color:var(--white)}
+  .btn-blue{background:var(--blue);color:var(--white)}
+  .btn-sm{padding:8px 16px;font-size:.8rem;box-shadow:4px 4px 0 var(--black)}
+  .btn-sm:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--black)}
+
+  /* ---------- HERO ---------- */
+  section.hero{
+    border-bottom:5px solid var(--black);
+    background:var(--yellow);
+    position:relative;
+    overflow:hidden;
+    padding:70px 0 90px;
+  }
+  section.hero::before{
+    content:"";
+    position:absolute;
+    top:-60px;right:-60px;
+    width:220px;height:220px;
+    background:var(--red);
+    border:5px solid var(--black);
+    transform:rotate(15deg);
+  }
+  section.hero::after{
+    content:"";
+    position:absolute;
+    bottom:-80px;left:-40px;
+    width:180px;height:180px;
+    background:var(--blue);
+    border:5px solid var(--black);
+    border-radius:0;
+    transform:rotate(-10deg);
+  }
+  .hero-inner{
+    position:relative;z-index:2;
+    max-width:1180px;margin:0 auto;padding:0 20px;
+  }
+  .badge{
+    display:inline-block;
+    background:var(--white);
+    border:3px solid var(--black);
+    padding:6px 14px;
+    font-weight:900;
+    font-size:.8rem;
+    text-transform:uppercase;
+    margin-bottom:26px;
+    box-shadow:4px 4px 0 var(--black);
+    transform:rotate(-1deg);
+  }
+  h1.headline{
+    font-size:clamp(2.2rem, 6vw, 4.5rem);
+    font-weight:900;
+    line-height:1.02;
+    letter-spacing:-1.5px;
+    max-width:900px;
+    margin-bottom:26px;
+    text-shadow:4px 4px 0 var(--white);
+  }
+  p.subhead{
+    font-size:clamp(1rem, 2vw, 1.3rem);
+    font-weight:700;
+    max-width:640px;
+    background:var(--white);
+    border:4px solid var(--black);
+    padding:16px 20px;
+    margin-bottom:34px;
+    box-shadow:8px 8px 0 var(--black);
+  }
+  .hero-ctas{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .demo-link{
+    font-weight:900;
+    text-transform:uppercase;
+    text-decoration:none;
+    border-bottom:4px solid var(--black);
+    padding-bottom:2px;
+    font-size:.95rem;
+  }
+  .demo-link::before{content:"▶ ";}
+
+  /* ---------- SECTION TITLES ---------- */
+  h2.section-title{
+    font-size:clamp(1.8rem,4vw,3rem);
+    font-weight:900;
+    letter-spacing:-1px;
+    display:inline-block;
+    background:var(--black);
+    color:var(--white);
+    padding:8px 22px;
+    margin-bottom:44px;
+    transform:rotate(-1deg);
+  }
+
+  /* ---------- FEATURES ---------- */
+  section.features{
+    padding:80px 0;
+    border-bottom:5px solid var(--black);
+  }
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:32px;
+  }
+  @media (max-width:860px){
+    .feature-grid{grid-template-columns:1fr}
+  }
+  .feature-card{
+    border:5px solid var(--black);
+    padding:28px 24px 32px;
+    background:var(--white);
+    box-shadow:8px 8px 0 var(--black);
+    position:relative;
+  }
+  .feature-card:nth-child(1){background:var(--white);transform:rotate(-1.2deg)}
+  .feature-card:nth-child(2){background:var(--yellow);transform:rotate(0.8deg);margin-top:20px}
+  .feature-card:nth-child(3){background:var(--white);transform:rotate(-0.5deg)}
+  .feature-num{
+    position:absolute;top:-22px;left:-18px;
+    width:52px;height:52px;
+    background:var(--red);
+    color:var(--white);
+    border:4px solid var(--black);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:1.4rem;
+  }
+  .feature-icon{font-size:2.4rem;margin-bottom:14px;display:block}
+  .feature-card h3{
+    font-size:1.3rem;font-weight:900;text-transform:uppercase;
+    margin-bottom:14px;letter-spacing:-0.5px;
+    border-bottom:3px solid var(--black);
+    padding-bottom:10px;
+  }
+  .feature-card p{font-size:.95rem;font-weight:700}
+
+  /* ---------- PRICING ---------- */
+  section.pricing{
+    padding:80px 0;
+    border-bottom:5px solid var(--black);
+    background:
+      repeating-linear-gradient(45deg, var(--white) 0 24px, #f2f2f2 24px 26px);
+  }
+  .price-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:32px;
+    align-items:stretch;
+  }
+  @media (max-width:900px){
+    .price-grid{grid-template-columns:1fr}
+  }
+  .price-card{
+    border:5px solid var(--black);
+    background:var(--white);
+    padding:30px 26px;
+    display:flex;flex-direction:column;
+    box-shadow:8px 8px 0 var(--black);
+    position:relative;
+  }
+  .price-card.popular{
+    background:var(--blue);
+    color:var(--white);
+    transform:scale(1.05);
+    z-index:2;
+    box-shadow:10px 10px 0 var(--red);
+  }
+  .price-card.popular .btn{color:var(--black)}
+  .plan-badge{
+    position:absolute;top:-20px;right:16px;
+    background:var(--red);
+    color:var(--white);
+    border:4px solid var(--black);
+    padding:5px 12px;
+    font-weight:900;
+    font-size:.75rem;
+    text-transform:uppercase;
+    transform:rotate(4deg);
+  }
+  .plan-name{
+    font-size:1.5rem;font-weight:900;text-transform:uppercase;
+    margin-bottom:6px;letter-spacing:-0.5px;
+  }
+  .plan-price{
+    font-size:2.4rem;font-weight:900;margin-bottom:4px;
+    letter-spacing:-1px;
+  }
+  .plan-price span{font-size:1rem;font-weight:700}
+  .plan-card-divider{
+    height:4px;background:currentColor;margin:16px 0 20px;
+  }
+  .plan-card ul, .price-card ul{list-style:none;margin-bottom:26px;flex-grow:1}
+  .price-card li{
+    font-weight:700;font-size:.92rem;
+    padding:6px 0;
+    border-bottom:2px dashed currentColor;
+  }
+  .price-card li::before{content:"■ ";}
+  .price-card .btn{align-self:flex-start}
+
+  /* ---------- FINAL CTA ---------- */
+  section.final-cta{
+    padding:90px 0;
+    background:var(--black);
+    color:var(--white);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  section.final-cta::before{
+    content:"";
+    position:absolute;
+    width:140%;height:60px;
+    background:var(--red);
+    border-top:5px solid var(--black);
+    border-bottom:5px solid var(--black);
+    top:20%;left:-20%;
+    transform:rotate(-4deg);
+    z-index:0;
+  }
+  .final-inner{position:relative;z-index:1}
+  h2.final-headline{
+    font-size:clamp(2rem,5vw,3.4rem);
+    font-weight:900;
+    color:var(--yellow);
+    letter-spacing:-1px;
+    margin-bottom:20px;
+    text-shadow:4px 4px 0 var(--red);
+  }
+  .final-inner p{
+    font-weight:700;
+    font-size:1.1rem;
+    margin-bottom:34px;
+  }
+  .final-inner .btn{
+    font-size:1.1rem;
+    padding:18px 40px;
+    box-shadow:8px 8px 0 var(--yellow);
+  }
+  .final-inner .btn:active{box-shadow:0 0 0 var(--yellow)}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:5px solid var(--black);
+    padding:22px 0;
+    background:var(--white);
+  }
+  .footer-inner{
+    display:flex;flex-wrap:wrap;gap:10px 20px;
+    align-items:center;justify-content:space-between;
+    font-size:.8rem;font-weight:700;text-transform:uppercase;
+  }
+  .footer-links{display:flex;gap:16px;flex-wrap:wrap}
+  .footer-links a{text-decoration:underline}
+</style>
+
+<header class="topbar">
+  <div class="nav-inner">
+    <span class="logo">Flowly</span>
+    <nav class="menu">
+      <a href="#features">기능</a>
+      <a href="#pricing">요금제</a>
+      <a href="#clients">고객사</a>
+      <a href="#login">로그인</a>
+    </nav>
+    <a href="#start" class="btn btn-sm btn-yellow">무료로 시작</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="badge">★ 이미 12,000+ 팀이 Flowly로 일합니다</span>
+    <h1 class="headline">팀의 모든 일이,<br>한 곳에서 흐르게</h1>
+    <p class="subhead">흩어진 할 일·문서·대화를 하나로. 누가 무엇을 언제까지 하는지 한눈에 봅니다.</p>
+    <div class="hero-ctas">
+      <a href="#start" class="btn btn-red">무료로 시작하기</a>
+      <a href="#demo" class="demo-link">2분 데모 보기</a>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <h2 class="section-title">흐름을 만드는 3가지</h2>
+    <div class="feature-grid">
+      <article class="feature-card">
+        <span class="feature-num">1</span>
+        <span class="feature-icon">▦</span>
+        <h3>칸반 보드</h3>
+        <p>드래그 한 번으로 진행 상황을 정리하세요. 누가 뭘 맡고 있는지 실시간으로 보입니다.</p>
+      </article>
+      <article class="feature-card">
+        <span class="feature-num">2</span>
+        <span class="feature-icon">▤</span>
+        <h3>스마트 타임라인</h3>
+        <p>마감과 의존 관계를 한 화면에. 일정이 밀리기 전에 위험을 미리 봅니다.</p>
+      </article>
+      <article class="feature-card">
+        <span class="feature-num">3</span>
+        <span class="feature-icon">⚡</span>
+        <h3>규칙 자동화</h3>
+        <p>반복 작업은 규칙에 맡기세요. 상태가 바뀌면 알림과 담당 배정이 자동으로.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <h2 class="section-title">팀 크기에 맞게</h2>
+    <div class="price-grid">
+      <article class="price-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">₩0</div>
+        <div class="plan-card-divider"></div>
+        <ul>
+          <li>최대 5명</li>
+          <li>보드 3개</li>
+          <li>기본 통합</li>
+        </ul>
+        <a href="#start" class="btn btn-yellow">무료로 시작</a>
+      </article>
+      <article class="price-card popular">
+        <span class="plan-badge">가장 인기</span>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">₩12,000<span>/인·월</span></div>
+        <div class="plan-card-divider"></div>
+        <ul>
+          <li>무제한 보드</li>
+          <li>타임라인</li>
+          <li>자동화</li>
+          <li>우선순위 정렬</li>
+        </ul>
+        <a href="#start" class="btn btn-yellow">Pro 시작하기</a>
+      </article>
+      <article class="price-card">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">₩24,000<span>/인·월</span></div>
+        <div class="plan-card-divider"></div>
+        <ul>
+          <li>SSO</li>
+          <li>고급 권한</li>
+          <li>감사 로그</li>
+          <li>전담 지원</li>
+        </ul>
+        <a href="#sales" class="btn btn-blue">영업팀 문의</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="start">
+  <div class="wrap final-inner">
+    <h2 class="final-headline">오늘부터 팀의 흐름을 바꿔보세요</h2>
+    <p>14일 무료 체험. 카드 등록 없이 시작합니다.</p>
+    <a href="#start" class="btn btn-yellow">무료로 시작하기</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>© 2026 Flowly</span>
+    <div class="footer-links">
+      <a href="#terms">이용약관</a>
+      <a href="#privacy">개인정보</a>
+      <a href="#contact">문의</a>
+    </div>
+  </div>
+</footer>

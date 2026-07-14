@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowbase — 마케팅 이메일 템플릿 · 컬러풀 모던</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============================================================
+     Flowbase — 마케팅 이메일 · 컬러풀 모던 (Stripe/Linear 마감)
+     디자인 토큰 — 8px 그리드 · 제한된 타이포 스케일 · CSS 변수
+     ============================================================ */
+  :root {
+    /* 팔레트 — 밝은 배경 + 비비드 브랜드 */
+    --bg: #EEF2FF;
+    --surface: #FFFFFF;
+    --surface-alt: #F6F9FC;
+    --surface-tint: #EEF2FF;
+    --border: #E3E8EF;
+    --border-strong: #D5DCE6;
+
+    --primary: #635BFF;
+    --primary-hover: #5548E8;
+    --primary-active: #4A3EDB;
+    --on-primary: #FFFFFF;
+
+    --violet: #7A5AF8;
+    --teal: #00C2B8;
+    --pink: #FF6699;
+    --amber: #FFB020;
+
+    --text: #0A2540;
+    --subtext: #425466;
+    --muted: #8792A2;
+
+    --success: #00A87E;
+
+    /* 그라디언트 액센트 */
+    --grad-brand: linear-gradient(135deg, #635BFF 0%, #7A5AF8 100%);
+    --grad-teal: linear-gradient(135deg, #00C2B8 0%, #635BFF 100%);
+
+    /* 컬러 틴트 소프트 섀도우 */
+    --shadow-rest: 0 1px 2px rgba(10,37,64,.06), 0 4px 12px rgba(10,37,64,.05);
+    --shadow-hover: 0 4px 8px rgba(99,91,255,.12), 0 12px 28px rgba(99,91,255,.14);
+    --shadow-cta: 0 4px 12px rgba(99,91,255,.28), 0 12px 32px rgba(99,91,255,.24);
+
+    /* radius */
+    --r-card: 16px;
+    --r-ctrl: 10px;
+    --r-pill: 999px;
+
+    /* 스페이싱 — 4/8px 배수 */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+    --font: "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(122,90,248,.10), transparent 42%),
+      radial-gradient(circle at 88% 4%, rgba(0,194,184,.08), transparent 38%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.6;
+    padding: var(--sp-7) var(--sp-4);
+    min-height: 100vh;
+  }
+
+  /* 프리헤더 — 받은편지함 미리보기, 화면엔 숨김 */
+  .preheader {
+    display: none; visibility: hidden; opacity: 0;
+    height: 0; width: 0; overflow: hidden;
+    mso-hide: all; font-size: 1px; line-height: 1px;
+  }
+
+  /* ==================== 이메일 컨테이너 600px ==================== */
+  .email {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(10,37,64,.06), 0 24px 60px rgba(10,37,64,.10);
+  }
+
+  /* 발신 컨텍스트 라벨 (갤러리 프리뷰용) */
+  .inbox-meta {
+    max-width: 600px;
+    margin: 0 auto var(--sp-3);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 0 var(--sp-1);
+    font-size: 12px;
+    letter-spacing: .02em;
+    color: var(--muted);
+  }
+  .inbox-meta .tag {
+    font-weight: 600;
+    color: var(--subtext);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    padding: 3px 10px;
+  }
+  .inbox-meta .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+
+  /* ==================== 헤더 — 로고 ==================== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-5) var(--sp-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo { display: flex; align-items: center; gap: var(--sp-2); }
+  .logo .mark {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--grad-brand);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(99,91,255,.35);
+    position: relative;
+  }
+  /* 로고 심볼 — CSS 도형 (외부 이미지 X) */
+  .logo .mark::before {
+    content: "";
+    width: 13px; height: 13px;
+    border: 2.5px solid #fff;
+    border-radius: 4px 4px 4px 0;
+    transform: rotate(45deg);
+  }
+  .logo .word {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .logo .word b { color: var(--primary); font-weight: 700; }
+
+  .nav-note {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: .02em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ==================== 히어로 — 그라디언트 블록 ==================== */
+  .hero {
+    background: var(--grad-brand);
+    padding: var(--sp-7) var(--sp-6) var(--sp-6);
+    color: var(--on-primary);
+    position: relative;
+    overflow: hidden;
+  }
+  /* 히어로 오라 광원 (은은) */
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: -60px; right: -50px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(0,194,184,.45), transparent 65%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: var(--r-pill);
+    padding: 5px 12px;
+    margin-bottom: var(--sp-4);
+    position: relative; z-index: 1;
+  }
+  .hero .eyebrow::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,194,184,.30);
+  }
+  .hero h1 {
+    font-size: 32px; line-height: 1.2; font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--sp-3);
+    position: relative; z-index: 1;
+    max-width: 20ch;
+  }
+  .hero p {
+    font-size: 15px; line-height: 1.6;
+    color: rgba(255,255,255,.86);
+    max-width: 46ch;
+    position: relative; z-index: 1;
+  }
+
+  /* 히어로 이미지 슬롯 — CSS 도형 목업 (외부 이미지 X) */
+  .hero-slot {
+    margin-top: var(--sp-5);
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 14px;
+    padding: var(--sp-4);
+    position: relative; z-index: 1;
+    backdrop-filter: none; /* 글래스 금지 — 솔리드 톤 */
+  }
+  .hero-slot .bar {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: var(--sp-3);
+  }
+  .hero-slot .bar span { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.42); }
+  .hero-slot .bar span:nth-child(1) { background: var(--pink); }
+  .hero-slot .bar span:nth-child(2) { background: var(--amber); }
+  .hero-slot .bar span:nth-child(3) { background: var(--teal); }
+  .hero-slot .bar .cap {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,.72); letter-spacing: .02em;
+  }
+  /* 미니 차트 목업 — 순수 CSS 막대 */
+  .hero-slot .canvas {
+    display: flex; align-items: flex-end; gap: 8px;
+    height: 88px;
+    padding: var(--sp-2) var(--sp-1) 0;
+    border-top: 1px solid rgba(255,255,255,.16);
+  }
+  .hero-slot .canvas i {
+    flex: 1; display: block;
+    border-radius: 5px 5px 2px 2px;
+    background: rgba(255,255,255,.30);
+  }
+  .hero-slot .canvas i.on {
+    background: linear-gradient(to top, rgba(255,255,255,.55), #fff);
+  }
+
+  /* ==================== 본문 문단 ==================== */
+  .body-copy {
+    padding: var(--sp-6) var(--sp-6) var(--sp-5);
+  }
+  .body-copy .greeting {
+    font-size: 13px; font-weight: 600; letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: var(--sp-3);
+  }
+  .body-copy h2 {
+    font-size: 22px; line-height: 1.3; font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--sp-4);
+    max-width: 24ch;
+  }
+  .body-copy p {
+    font-size: 15px; line-height: 1.65;
+    color: var(--subtext);
+    max-width: 62ch;
+  }
+  .body-copy p + p { margin-top: var(--sp-4); }
+  .body-copy p .hl {
+    color: var(--text); font-weight: 600;
+    box-shadow: inset 0 -8px 0 rgba(0,194,184,.16);
+  }
+
+  /* ==================== 큰 CTA 버튼 ==================== */
+  .cta-wrap {
+    padding: var(--sp-3) var(--sp-6) var(--sp-6);
+    text-align: center;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    font-family: var(--font);
+    font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--on-primary);
+    text-decoration: none;
+    background: var(--grad-brand);
+    background-size: 140% 140%;
+    background-position: 0% 0%;
+    border: none;
+    border-radius: var(--r-ctrl);
+    padding: 15px var(--sp-6);
+    min-height: 48px;
+    cursor: pointer;
+    box-shadow: var(--shadow-cta);
+    transition: transform .18s ease, box-shadow .18s ease,
+                background-position .28s ease, filter .18s ease;
+  }
+  .cta .arrow { transition: transform .18s ease; font-size: 18px; line-height: 1; }
+  .cta:hover {
+    background-position: 100% 100%;
+    filter: brightness(1.04);
+    box-shadow: 0 6px 16px rgba(99,91,255,.34), 0 16px 40px rgba(99,91,255,.28);
+    transform: translateY(-1px);
+  }
+  .cta:hover .arrow { transform: translateX(3px); }
+  .cta:active {
+    transform: translateY(0) scale(.985);
+    box-shadow: 0 2px 8px rgba(99,91,255,.30);
+    filter: brightness(.98);
+  }
+  .cta:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+  .cta-sub {
+    display: block;
+    margin-top: var(--sp-3);
+    font-size: 13px; font-weight: 500;
+    color: var(--muted);
+  }
+
+  /* ==================== 기능 3 ==================== */
+  .features {
+    padding: var(--sp-6);
+    background: var(--surface-alt);
+    border-top: 1px solid var(--border);
+  }
+  .features .label {
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: var(--sp-5);
+  }
+  .feature {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: var(--sp-4);
+    box-shadow: var(--shadow-rest);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .feature + .feature { margin-top: var(--sp-3); }
+  .feature:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(99,91,255,.30);
+  }
+  /* 컬러 아이콘 뱃지 — 12% 틴트 배경 + 원색 아이콘 (CSS 도형) */
+  .feature .badge {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .feature .badge svg { width: 22px; height: 22px; stroke-width: 1.75; fill: none; }
+  .feature.f-indigo .badge { background: rgba(99,91,255,.12); }
+  .feature.f-indigo .badge svg { stroke: var(--primary); }
+  .feature.f-teal .badge { background: rgba(0,194,184,.12); }
+  .feature.f-teal .badge svg { stroke: var(--teal); }
+  .feature.f-pink .badge { background: rgba(255,102,153,.12); }
+  .feature.f-pink .badge svg { stroke: var(--pink); }
+
+  .feature .txt { padding-top: 2px; }
+  .feature .txt h3 {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+    margin-bottom: 3px;
+  }
+  .feature .txt p {
+    font-size: 13.5px; line-height: 1.5;
+    color: var(--subtext);
+  }
+
+  /* ==================== 푸터 ==================== */
+  .footer {
+    padding: var(--sp-6);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .footer .foot-logo {
+    font-size: 15px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: var(--sp-4);
+  }
+  .footer .foot-logo b { color: var(--primary); }
+
+  /* 소셜 아이콘 — CSS/이니셜 (외부 X) */
+  .social {
+    display: flex; justify-content: center; gap: var(--sp-3);
+    margin-bottom: var(--sp-5);
+  }
+  .social a {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-tint);
+    border: 1px solid var(--border);
+    color: var(--subtext);
+    font-size: 13px; font-weight: 700;
+    text-decoration: none;
+    transition: transform .16s ease, background .16s ease,
+                color .16s ease, border-color .16s ease;
+  }
+  .social a:hover {
+    transform: translateY(-2px);
+    background: var(--grad-brand);
+    color: var(--on-primary);
+    border-color: transparent;
+  }
+  .social a:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+  .social a:active { transform: translateY(0) scale(.94); }
+
+  .footer .addr {
+    font-size: 12.5px; line-height: 1.7;
+    color: var(--muted);
+    max-width: 44ch;
+    margin: 0 auto var(--sp-4);
+  }
+  .footer .addr b { color: var(--subtext); font-weight: 600; }
+
+  .footer .foot-links {
+    display: inline-flex; flex-wrap: wrap;
+    align-items: center; justify-content: center;
+    gap: var(--sp-1);
+    font-size: 12.5px;
+  }
+  .footer .foot-links a {
+    color: var(--subtext);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 4px 6px;
+    border-radius: 6px;
+    position: relative;
+    transition: color .15s ease;
+  }
+  /* 링크 언더라인 좌→우 (150ms) */
+  .footer .foot-links a::after {
+    content: "";
+    position: absolute;
+    left: 6px; right: 6px; bottom: 2px;
+    height: 1.5px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .15s ease;
+  }
+  .footer .foot-links a:hover { color: var(--primary); }
+  .footer .foot-links a:hover::after { transform: scaleX(1); }
+  .footer .foot-links a:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+  }
+  .footer .foot-links .sep { color: var(--border-strong); user-select: none; }
+
+  .footer .unsub {
+    margin-top: var(--sp-4);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .footer .unsub a { color: var(--subtext); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  .footer .unsub a:hover { color: var(--primary); }
+  .footer .unsub a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+  /* 갤러리 캡션 — {템플릿} · {스타일} */
+  .caption {
+    max-width: 600px;
+    margin: var(--sp-4) auto 0;
+    text-align: center;
+    font-size: 12px; letter-spacing: .02em;
+    color: var(--muted);
+  }
+  .caption b { color: var(--subtext); font-weight: 600; }
+
+  /* ==================== 반응형 ==================== */
+  @media (max-width: 620px) {
+    body { padding: var(--sp-4) var(--sp-3); }
+    .email { border-radius: 16px; }
+    .header { padding: var(--sp-4) var(--sp-5); }
+    .hero { padding: var(--sp-6) var(--sp-5) var(--sp-5); }
+    .hero h1 { font-size: 26px; }
+    .body-copy { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+    .body-copy h2 { font-size: 20px; }
+    .cta-wrap { padding: var(--sp-2) var(--sp-5) var(--sp-5); }
+    .cta { width: 100%; }
+    .features, .footer { padding: var(--sp-5); }
+  }
+
+  /* ==================== 모션 축소 ==================== */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition-duration: .001ms !important;
+    }
+    .cta:hover, .feature:hover, .social a:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+  <span class="preheader">Flowbase 2.0 — 실시간 협업과 원클릭 배포가 담긴 새 워크스페이스를 만나보세요.</span>
+
+  <div class="inbox-meta">
+    <span class="tag">Flowbase</span>
+    <span class="dot"></span>
+    <span>제품 소식 · 새 버전 안내</span>
+  </div>
+
+  <div class="email" role="article" aria-label="Flowbase 마케팅 이메일">
+
+    <!-- 헤더 -->
+    <header class="header">
+      <div class="logo">
+        <span class="mark" aria-hidden="true"></span>
+        <span class="word">Flow<b>base</b></span>
+      </div>
+      <span class="nav-note">Product Update</span>
+    </header>
+
+    <!-- 히어로 -->
+    <section class="hero">
+      <span class="eyebrow">New · v2.0</span>
+      <h1>워크스페이스가 이렇게 빨라도 되나요</h1>
+      <p>흩어져 있던 디자인, 문서, 배포를 하나로 모았습니다. Flowbase 2.0에서 팀 전체가 같은 화면 위에서 움직입니다.</p>
+
+      <!-- 히어로 이미지 슬롯 (CSS 도형 목업) -->
+      <div class="hero-slot" aria-hidden="true">
+        <div class="bar">
+          <span></span><span></span><span></span>
+          <span class="cap">주간 활성 협업</span>
+        </div>
+        <div class="canvas">
+          <i style="height:38%"></i>
+          <i style="height:52%"></i>
+          <i style="height:46%"></i>
+          <i style="height:64%"></i>
+          <i class="on" style="height:82%"></i>
+          <i style="height:58%"></i>
+          <i style="height:71%"></i>
+          <i class="on" style="height:94%"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- 본문 문단 -->
+    <section class="body-copy">
+      <p class="greeting">안녕하세요, 팀 리드님</p>
+      <h2>기다리시던 2.0, 오늘 정식 출시했습니다</h2>
+      <p>지난 6개월간 가장 많이 요청주셨던 것들을 담았습니다. <span class="hl">실시간 커서 공유</span>로 누가 어디를 보는지 한눈에 들어오고, 리뷰 코멘트는 문서를 벗어나지 않고 그대로 해결됩니다.</p>
+      <p>새 컴포넌트 라이브러리는 팀의 디자인 토큰과 자동으로 동기화됩니다. 한 번 정해둔 색과 간격이 모든 화면에 그대로 흐르도록 설계했습니다. 지금 바로 워크스페이스에서 확인해보세요.</p>
+    </section>
+
+    <!-- 큰 CTA 버튼 -->
+    <div class="cta-wrap">
+      <a class="cta" href="#" role="button">
+        새 버전 살펴보기
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+      </a>
+      <span class="cta-sub">설치 없이 브라우저에서 바로 · 2분이면 충분해요</span>
+    </div>
+
+    <!-- 기능 3 -->
+    <section class="features">
+      <p class="label">2.0에서 새로워진 것</p>
+
+      <div class="feature f-indigo">
+        <span class="badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9.5" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <div class="txt">
+          <h3>실시간 협업</h3>
+          <p>같은 캔버스에서 커서와 선택을 공유하며 함께 편집합니다.</p>
+        </div>
+      </div>
+
+      <div class="feature f-teal">
+        <span class="badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+        </span>
+        <div class="txt">
+          <h3>컴포넌트 라이브러리</h3>
+          <p>디자인 토큰과 자동 동기화되는 재사용 블록을 제공합니다.</p>
+        </div>
+      </div>
+
+      <div class="feature f-pink">
+        <span class="badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/>
+          </svg>
+        </span>
+        <div class="txt">
+          <h3>원클릭 배포</h3>
+          <p>완성한 화면을 버튼 한 번으로 공유 링크까지 내보냅니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+      <div class="foot-logo">Flow<b>base</b></div>
+
+      <div class="social">
+        <a href="#" aria-label="트위터">X</a>
+        <a href="#" aria-label="링크드인">in</a>
+        <a href="#" aria-label="깃허브">Gh</a>
+        <a href="#" aria-label="유튜브">Yt</a>
+      </div>
+
+      <p class="addr">
+        <b>Flowbase, Inc.</b><br>
+        서울특별시 강남구 테헤란로 123, 8층<br>
+        06234 대한민국
+      </p>
+
+      <div class="foot-links">
+        <a href="#">도움말 센터</a>
+        <span class="sep">·</span>
+        <a href="#">개인정보 처리방침</a>
+        <span class="sep">·</span>
+        <a href="#">이용약관</a>
+        <span class="sep">·</span>
+        <a href="#">이메일 설정</a>
+      </div>
+
+      <p class="unsub">
+        이 메일은 Flowbase 제품 소식 수신에 동의하신 분께 발송됩니다.<br>
+        더 이상 받고 싶지 않다면 <a href="#">구독 취소</a>를 눌러주세요.
+      </p>
+    </footer>
+
+  </div>
+
+  <p class="caption">마케팅 이메일 템플릿 &middot; <b>컬러풀 모던</b></p>
+
+</body>
+</html>

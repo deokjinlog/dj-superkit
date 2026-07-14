@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE — 에어니트 스니커즈</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* palette — white bg + bold coral/purple duotone */
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --canvas-tint:#FFF7F7;
+    --border:#F0E9F5;
+    --line:#ECECF2;
+
+    --coral:#FF5A5F;
+    --coral-strong:#E8484D;
+    --coral-soft:#FFE7E8;
+    --on-coral:#FFFFFF;
+
+    --purple:#7B2FF7;
+    --purple-strong:#6522D6;
+    --purple-soft:#EFE4FF;
+    --on-purple:#FFFFFF;
+
+    --text:#1B1533;
+    --sub:#6B6480;
+    --hint:#A29CB5;
+
+    --sale:#FF5A5F;
+    --new:#7B2FF7;
+    --stock:#F5A623;
+    --success:#17B26A;
+    --danger:#E8484D;
+
+    /* radii */
+    --r-card:16px;
+    --r-thumb:14px;
+    --r-ctrl:12px;
+    --r-pill:999px;
+
+    /* elevation */
+    --sh-card:0 2px 8px rgba(27,21,51,.06);
+    --sh-hover:0 8px 24px rgba(255,90,95,.14);
+    --sh-pop:0 12px 32px rgba(27,21,51,.12);
+
+    /* active product colorway (swatched) */
+    --pc1:#FF7A7E;
+    --pc2:#E8484D;
+
+    /* focus */
+    --focus:#FF5A5F;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Pretendard",system-ui,-apple-system,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    font-weight:500;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{font-family:"Manrope","Pretendard",sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  img{max-width:100%;}
+
+  :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px;}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px;}
+
+  /* ── top nav ─────────────────────────────── */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    background:rgba(255,255,255,.92);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;gap:24px;height:64px;}
+  .brand{
+    font-family:"Manrope",sans-serif;
+    font-weight:800;font-size:24px;line-height:1;letter-spacing:-0.02em;
+    background:linear-gradient(92deg,var(--coral) 0%,var(--purple) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--coral);
+    padding:4px 0;
+  }
+  .nav-links{display:flex;align-items:center;gap:4px;margin-left:8px;}
+  .nav-links a{
+    padding:8px 12px;border-radius:var(--r-pill);
+    font-size:14px;font-weight:600;color:var(--sub);
+    transition:background .16s ease,color .16s ease;
+  }
+  .nav-links a:hover{background:var(--coral-soft);color:var(--coral-strong);}
+  .nav-links a.is-active{color:var(--text);}
+  .nav-links a.is-sale{color:var(--coral-strong);}
+  .nav-spacer{flex:1;}
+
+  .search{position:relative;width:264px;max-width:34vw;}
+  .search input{
+    width:100%;height:40px;
+    padding:0 16px 0 40px;
+    border:1px solid var(--border);border-radius:var(--r-ctrl);
+    background:var(--surface);color:var(--text);
+    font-family:inherit;font-size:14px;font-weight:500;
+    transition:border-color .16s ease,box-shadow .16s ease;
+  }
+  .search input::placeholder{color:var(--hint);}
+  .search input:hover{border-color:#E3D9EE;}
+  .search input:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 3px var(--coral-soft);}
+  .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--hint);pointer-events:none;display:flex;}
+
+  .icon-btn{
+    position:relative;
+    width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--border);border-radius:var(--r-ctrl);
+    background:var(--surface);color:var(--sub);
+    transition:border-color .16s ease,color .16s ease,background .16s ease,transform .12s ease;
+  }
+  .icon-btn:hover{border-color:#E3D9EE;color:var(--text);background:var(--canvas-tint);}
+  .icon-btn:active{transform:scale(.96);}
+  .icon-btn .dot{
+    position:absolute;top:-4px;right:-4px;
+    min-width:18px;height:18px;padding:0 4px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--coral);color:var(--on-coral);
+    font-family:"Manrope",sans-serif;font-size:12px;font-weight:800;line-height:1;
+    border-radius:var(--r-pill);border:2px solid var(--surface);
+  }
+  .nav-tools{display:flex;align-items:center;gap:8px;}
+
+  /* ── breadcrumb ──────────────────────────── */
+  .crumb{display:flex;align-items:center;gap:8px;padding:16px 0;color:var(--hint);font-size:12px;font-weight:600;flex-wrap:wrap;}
+  .crumb a:hover{color:var(--sub);}
+  .crumb .sep{color:var(--line);}
+  .crumb .cur{color:var(--sub);}
+
+  /* ── main product grid ───────────────────── */
+  .product{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 440px;
+    gap:48px;
+    padding-bottom:48px;
+  }
+
+  /* gallery */
+  .gallery{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:start;}
+  .thumbs{display:flex;flex-direction:column;gap:12px;}
+  .thumb{
+    position:relative;width:72px;height:72px;padding:0;
+    border:1px solid var(--border);border-radius:var(--r-thumb);
+    background:var(--canvas-tint);overflow:hidden;
+    transition:border-color .16s ease,transform .12s ease,box-shadow .16s ease;
+  }
+  .thumb:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:var(--sh-hover);}
+  .thumb:active{transform:translateY(0) scale(.98);}
+  .thumb[aria-current="true"]{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral-soft);}
+  .thumb .mini{position:absolute;inset:0;}
+
+  .stage{
+    position:relative;aspect-ratio:1/1;
+    border:1px solid var(--border);border-radius:var(--r-card);
+    background:var(--canvas-tint);overflow:hidden;
+    box-shadow:var(--sh-card);
+  }
+  .stage .view{position:absolute;inset:0;opacity:0;transition:opacity .28s ease;}
+  .stage .view.is-on{opacity:1;}
+  .stage-badges{position:absolute;top:16px;left:16px;z-index:3;display:flex;gap:8px;}
+  .stage-cta{position:absolute;bottom:16px;right:16px;z-index:3;display:flex;gap:8px;}
+
+  /* CSS-drawn product compositions (no external images) */
+  .canvasgrad{position:absolute;inset:0;background:
+    radial-gradient(120% 90% at 78% 12%, rgba(255,255,255,.9), rgba(255,255,255,0) 60%),
+    radial-gradient(140% 120% at 20% 100%, color-mix(in srgb,var(--pc1) 22%,#fff), #fff 70%);}
+  .knit{position:absolute;inset:0;
+    background:repeating-linear-gradient(48deg, rgba(255,255,255,.55) 0 2px, rgba(255,255,255,0) 2px 7px),
+      repeating-linear-gradient(-48deg, rgba(27,21,51,.05) 0 1px, rgba(27,21,51,0) 1px 8px);}
+  .blob{position:absolute;border-radius:48% 52% 55% 45%/55% 48% 52% 45%;
+    background:linear-gradient(150deg,var(--pc1),var(--pc2));}
+  .mono{
+    position:absolute;font-family:"Manrope",sans-serif;font-weight:800;color:rgba(255,255,255,.95);
+    letter-spacing:-0.04em;text-shadow:0 8px 24px rgba(27,21,51,.22);
+  }
+
+  /* view 1 — side */
+  .v-side .blob{inset:26% 14% 22% 12%;border-radius:60% 60% 46% 46%/72% 72% 40% 40%;}
+  .v-side .sole{position:absolute;left:10%;right:10%;bottom:20%;height:11%;border-radius:var(--r-pill);
+    background:linear-gradient(180deg,#fff,#F3EEFA);box-shadow:0 6px 16px rgba(27,21,51,.12);}
+  .v-side .stripe{position:absolute;left:30%;top:44%;width:44%;height:5%;border-radius:var(--r-pill);
+    background:rgba(255,255,255,.85);transform:rotate(-8deg);}
+  .v-side .mono{right:16%;top:30%;font-size:clamp(40px,9vw,84px);}
+
+  /* view 2 — front */
+  .v-front .blob{left:24%;right:24%;top:24%;bottom:26%;border-radius:52% 52% 46% 46%/60% 60% 44% 44%;}
+  .v-front .eyelet{position:absolute;width:9%;aspect-ratio:1/1;border-radius:50%;background:rgba(255,255,255,.9);top:38%;}
+  .v-front .eyelet.l{left:37%;} .v-front .eyelet.r{right:37%;}
+  .v-front .tongue{position:absolute;left:46%;right:46%;top:30%;bottom:36%;border-radius:var(--r-pill);background:rgba(255,255,255,.55);}
+  .v-front .sole{position:absolute;left:22%;right:22%;bottom:22%;height:9%;border-radius:var(--r-pill);background:linear-gradient(180deg,#fff,#F3EEFA);box-shadow:0 6px 16px rgba(27,21,51,.12);}
+
+  /* view 3 — knit detail */
+  .v-detail .blob{inset:12%;border-radius:20px;}
+  .v-detail .knit2{position:absolute;inset:12%;border-radius:20px;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.6) 0 3px, rgba(255,255,255,0) 3px 10px),
+      repeating-linear-gradient(90deg, rgba(27,21,51,.06) 0 2px, rgba(27,21,51,0) 2px 11px);}
+  .v-detail .lace{position:absolute;left:12%;right:12%;top:48%;height:6%;border-radius:var(--r-pill);
+    background:rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(27,21,51,.14);}
+  .v-detail .tab{position:absolute;right:16%;bottom:16%;padding:6px 12px;border-radius:var(--r-pill);
+    background:rgba(27,21,51,.72);color:#fff;font-family:"Manrope",sans-serif;font-weight:800;font-size:12px;letter-spacing:0.04em;}
+
+  /* view 4 — sole */
+  .v-sole .blob{inset:16% 26%;border-radius:44% 44% 50% 50%/60% 60% 42% 42%;}
+  .v-sole .tread{position:absolute;inset:20% 30%;border-radius:44% 44% 50% 50%/60% 60% 42% 42%;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 6px, rgba(255,255,255,0) 6px 16px);}
+  .v-sole .heel{position:absolute;left:38%;right:38%;bottom:20%;height:16%;border-radius:44%;background:rgba(255,255,255,.4);}
+
+  /* ── info panel ──────────────────────────── */
+  .info{display:flex;flex-direction:column;}
+  .eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .brand-tag{font-family:"Manrope",sans-serif;font-weight:800;font-size:14px;letter-spacing:0.02em;color:var(--purple-strong);}
+  .p-title{font-size:26px;line-height:1.23;font-weight:800;letter-spacing:-0.02em;margin:0 0 12px;}
+
+  .rating{display:flex;align-items:center;gap:8px;margin-bottom:24px;}
+  .stars{position:relative;display:inline-block;line-height:1;font-family:"Manrope";}
+  .stars .base{color:var(--line);}
+  .stars .fill{position:absolute;inset:0;color:var(--stock);overflow:hidden;white-space:nowrap;}
+  .rating .score{font-family:"Manrope",sans-serif;font-weight:800;font-size:14px;letter-spacing:-0.02em;}
+  .rating .cnt{color:var(--sub);font-size:14px;font-weight:500;}
+  .rating .cnt a{color:var(--purple-strong);font-weight:600;}
+  .rating .cnt a:hover{text-decoration:underline;}
+
+  .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .discount{font-family:"Manrope",sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.02em;color:var(--coral-strong);}
+  .price{font-family:"Manrope",sans-serif;font-weight:800;font-size:32px;line-height:1.1;letter-spacing:-0.02em;color:var(--text);}
+  .price .won{font-size:20px;font-weight:700;margin-left:2px;}
+  .price-was{font-family:"Manrope",sans-serif;font-weight:600;font-size:16px;color:var(--hint);text-decoration:line-through;}
+  .ship-note{display:flex;align-items:center;gap:6px;color:var(--success);font-size:14px;font-weight:600;margin-bottom:24px;}
+
+  .divider{height:1px;background:var(--line);margin:0 0 24px;}
+
+  .opt{margin-bottom:24px;}
+  .opt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .opt-head .lbl{font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--sub);}
+  .opt-head .sel{font-size:14px;font-weight:600;color:var(--text);}
+
+  /* color swatches */
+  .swatches{display:flex;gap:12px;}
+  .swatch{
+    width:40px;height:40px;padding:0;border-radius:var(--r-pill);
+    border:2px solid var(--border);background:var(--surface);
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:transform .12s ease,border-color .16s ease,box-shadow .16s ease;
+  }
+  .swatch i{width:24px;height:24px;border-radius:var(--r-pill);display:block;
+    box-shadow:inset 0 0 0 1px rgba(27,21,51,.08);}
+  .swatch:hover{transform:translateY(-2px);border-color:#E3D9EE;}
+  .swatch:active{transform:translateY(0) scale(.94);}
+  .swatch[aria-pressed="true"]{border-color:var(--coral);box-shadow:0 0 0 3px var(--coral-soft);}
+
+  /* size grid */
+  .sizes{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .size{
+    height:44px;padding:0;border-radius:var(--r-ctrl);
+    border:1px solid var(--border);background:var(--surface);
+    color:var(--text);font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;
+    transition:transform .12s ease,border-color .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease;
+  }
+  .size:hover:not(:disabled){border-color:var(--coral);color:var(--coral-strong);transform:translateY(-2px);box-shadow:var(--sh-card);}
+  .size:active:not(:disabled){transform:translateY(0) scale(.97);}
+  .size[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:#fff;}
+  .size:disabled{color:var(--hint);background:var(--canvas-tint);cursor:not-allowed;position:relative;overflow:hidden;}
+  .size:disabled::after{content:"";position:absolute;left:8%;right:8%;top:50%;height:1px;background:var(--line);transform:rotate(-18deg);}
+  .size-help{margin-top:8px;font-size:12px;font-weight:600;min-height:16px;color:var(--sub);}
+  .size-help.is-warn{color:var(--coral-strong);}
+
+  /* quantity + actions */
+  .buy{display:flex;gap:12px;align-items:stretch;margin-bottom:12px;}
+  .qty{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--r-ctrl);background:var(--surface);height:52px;}
+  .qty button{
+    width:44px;height:100%;border:0;background:transparent;color:var(--sub);
+    font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;
+    transition:color .16s ease,background .16s ease,transform .12s ease;border-radius:var(--r-ctrl);
+  }
+  .qty button:hover:not(:disabled){color:var(--coral-strong);background:var(--coral-soft);}
+  .qty button:active:not(:disabled){transform:scale(.94);}
+  .qty button:disabled{color:var(--line);cursor:not-allowed;}
+  .qty output{min-width:36px;text-align:center;font-family:"Manrope",sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.02em;}
+
+  .btn{
+    height:52px;border-radius:var(--r-ctrl);
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-size:15px;font-weight:700;letter-spacing:-0.01em;
+    border:1.5px solid transparent;
+    transition:transform .12s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease,color .16s ease;
+  }
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-primary{flex:1;background:var(--coral);color:var(--on-coral);box-shadow:0 4px 14px rgba(255,90,95,.28);}
+  .btn-primary:hover{background:var(--coral-strong);box-shadow:0 8px 22px rgba(255,90,95,.34);transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0) scale(.99);box-shadow:0 3px 10px rgba(255,90,95,.3);}
+  .btn-secondary{flex:1;background:var(--surface);color:var(--purple-strong);border-color:var(--purple);}
+  .btn-secondary:hover{background:var(--purple-soft);border-color:var(--purple-strong);transform:translateY(-1px);}
+  .btn-secondary:active{transform:translateY(0) scale(.99);}
+  .btn-wish{
+    width:52px;background:var(--surface);border-color:var(--border);color:var(--sub);flex:0 0 auto;
+  }
+  .btn-wish:hover{border-color:var(--coral);color:var(--coral);background:var(--coral-soft);transform:translateY(-1px);}
+  .btn-wish:active{transform:translateY(0) scale(.96);}
+  .btn-wish[aria-pressed="true"]{color:var(--coral);border-color:var(--coral);background:var(--coral-soft);}
+  .btn-wish[aria-pressed="true"] svg{fill:currentColor;}
+  .btn-wish.pop svg{animation:heartpop .34s ease;}
+  @keyframes heartpop{0%{transform:scale(1)}40%{transform:scale(1.32)}100%{transform:scale(1)}}
+
+  .assure{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+  .assure div{display:flex;flex-direction:column;gap:2px;padding:12px;border:1px solid var(--border);border-radius:var(--r-ctrl);background:var(--canvas-tint);}
+  .assure .t{font-size:12px;font-weight:700;color:var(--text);}
+  .assure .d{font-size:12px;font-weight:500;color:var(--sub);line-height:1.4;}
+
+  /* ── badges ──────────────────────────────── */
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 10px;
+    border-radius:var(--r-pill);
+    font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;line-height:1;
+  }
+  .badge.sale{background:var(--coral);color:var(--on-coral);}
+  .badge.new{background:var(--purple);color:var(--on-purple);}
+  .badge.soft-sale{background:var(--coral-soft);color:var(--coral-strong);}
+  .badge.soft-new{background:var(--purple-soft);color:var(--purple-strong);}
+  .badge.stock{background:#FEF3E2;color:#B5730F;}
+  .badge.pop{animation:badgepop .4s cubic-bezier(.2,1.4,.5,1) both;}
+  @keyframes badgepop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+
+  /* ── tabs ────────────────────────────────── */
+  .tabsec{padding:16px 0 48px;}
+  .tablist{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+  .tab{
+    appearance:none;border:0;background:transparent;white-space:nowrap;
+    padding:12px 16px;margin-bottom:-1px;
+    font-size:15px;font-weight:600;color:var(--sub);
+    border-bottom:2px solid transparent;
+    transition:color .16s ease,border-color .16s ease;
+  }
+  .tab:hover{color:var(--text);}
+  .tab[aria-selected="true"]{color:var(--coral-strong);border-bottom-color:var(--coral);}
+  .tab .cnt{font-family:"Manrope";font-weight:700;color:var(--hint);margin-left:6px;font-size:13px;}
+  .panel{display:none;}
+  .panel.is-on{display:block;animation:fadein .28s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .prose h3{font-size:16px;font-weight:700;margin:0 0 12px;letter-spacing:-0.01em;}
+  .prose p{color:var(--sub);font-size:14px;line-height:1.65;margin:0 0 12px;max-width:60ch;}
+  .feature-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+  .feature-list li{display:flex;gap:8px;font-size:14px;color:var(--sub);}
+  .feature-list .k{color:var(--coral-strong);flex:0 0 auto;margin-top:1px;}
+
+  .spec-scroll{overflow-x:auto;}
+  table.spec{width:100%;border-collapse:collapse;font-size:14px;}
+  table.spec caption{text-align:left;font-size:16px;font-weight:700;margin-bottom:12px;}
+  table.spec th,table.spec td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);}
+  table.spec thead th{font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--sub);background:var(--canvas-tint);}
+  table.spec tbody tr:hover{background:var(--canvas-tint);}
+  table.spec td.num{font-family:"Manrope";font-weight:700;}
+  table.spec .row-me td{color:var(--coral-strong);font-weight:700;background:var(--coral-soft);}
+
+  /* reviews */
+  .rev-summary{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:center;padding:24px;border:1px solid var(--border);border-radius:var(--r-card);background:var(--canvas-tint);margin-bottom:24px;}
+  .rev-big{font-family:"Manrope",sans-serif;font-weight:800;font-size:48px;line-height:1;letter-spacing:-0.03em;}
+  .rev-bars{display:flex;flex-direction:column;gap:8px;}
+  .rev-bar{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:600;color:var(--sub);}
+  .rev-bar .lab{width:32px;font-family:"Manrope";font-weight:700;color:var(--text);}
+  .rev-bar .track{flex:1;height:8px;border-radius:var(--r-pill);background:#EDE6F4;overflow:hidden;}
+  .rev-bar .val{height:100%;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--coral),var(--coral-strong));}
+  .rev-bar .pct{width:36px;text-align:right;font-family:"Manrope";font-weight:700;color:var(--sub);}
+
+  .rev-card{display:flex;gap:16px;padding:20px 0;border-top:1px solid var(--line);}
+  .rev-av{width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-pill);display:inline-flex;align-items:center;justify-content:center;
+    font-family:"Manrope",sans-serif;font-weight:800;font-size:14px;color:#fff;letter-spacing:0.02em;}
+  .rev-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+  .rev-meta .who{font-size:14px;font-weight:700;}
+  .rev-meta .verify{font-size:12px;font-weight:600;color:var(--success);display:inline-flex;align-items:center;gap:4px;}
+  .rev-meta .when{font-size:12px;color:var(--hint);margin-left:auto;font-family:"Manrope";}
+  .rev-stars{color:var(--stock);font-size:12px;line-height:1;margin-bottom:6px;}
+  .rev-body{font-size:14px;color:var(--sub);line-height:1.6;}
+  .rev-opt{font-size:12px;color:var(--hint);margin-top:8px;font-weight:600;}
+
+  /* ── related ─────────────────────────────── */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;padding:16px 0 24px;}
+  .section-head h2{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin:0;}
+  .section-head a{font-size:14px;font-weight:600;color:var(--purple-strong);}
+  .section-head a:hover{text-decoration:underline;}
+  .rel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-bottom:64px;}
+  .card{
+    position:relative;
+    border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);
+    box-shadow:var(--sh-card);overflow:hidden;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--sh-hover);border-color:#F3D9DB;}
+  .card:focus-within{border-color:var(--coral);}
+  .card-media{position:relative;aspect-ratio:1/1;background:var(--canvas-tint);overflow:hidden;}
+  .card-media .blob{inset:22% 18%;border-radius:56% 56% 46% 46%/70% 70% 40% 40%;}
+  .card-media .sole{position:absolute;left:16%;right:16%;bottom:22%;height:9%;border-radius:var(--r-pill);background:linear-gradient(180deg,#fff,#F3EEFA);box-shadow:0 4px 12px rgba(27,21,51,.1);}
+  .card-media .mono{right:18%;top:26%;font-size:44px;}
+  .card-media .knit{opacity:.7;}
+  .card-badges{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:2;}
+  .card-wish{position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;border-radius:var(--r-pill);
+    border:1px solid var(--border);background:rgba(255,255,255,.92);color:var(--sub);
+    display:inline-flex;align-items:center;justify-content:center;transition:color .16s ease,transform .12s ease,border-color .16s ease;}
+  .card-wish:hover{color:var(--coral);border-color:var(--coral);}
+  .card-wish:active{transform:scale(.9);}
+  .card-wish[aria-pressed="true"]{color:var(--coral);border-color:var(--coral);}
+  .card-wish[aria-pressed="true"] svg{fill:currentColor;}
+  .card-body{padding:16px;}
+  .card-brand{font-family:"Manrope",sans-serif;font-weight:700;font-size:12px;letter-spacing:0.02em;color:var(--purple-strong);margin-bottom:4px;}
+  .card-name{font-size:15px;font-weight:600;letter-spacing:-0.01em;margin-bottom:8px;color:var(--text);
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+  .card-name:hover{color:var(--coral-strong);}
+  .card-foot{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  .card-price{font-family:"Manrope",sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em;}
+  .card-price .off{color:var(--coral-strong);margin-right:6px;}
+  .card-rate{display:inline-flex;align-items:center;gap:4px;font-family:"Manrope";font-weight:700;font-size:12px;color:var(--sub);}
+  .card-rate .st{color:var(--stock);}
+
+  /* ── toast ───────────────────────────────── */
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);
+    background:var(--text);color:#fff;
+    padding:12px 20px;border-radius:var(--r-pill);
+    font-size:14px;font-weight:600;
+    box-shadow:var(--sh-pop);
+    display:flex;align-items:center;gap:8px;
+    opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .ic{color:var(--coral);display:flex;}
+
+  /* ── footer ──────────────────────────────── */
+  footer{border-top:1px solid var(--line);padding:32px 0;}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .foot .fb{font-family:"Manrope",sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em;
+    background:linear-gradient(92deg,var(--coral),var(--purple));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--coral);}
+  .foot .meta{font-size:12px;color:var(--hint);font-weight:600;letter-spacing:0.02em;}
+
+  /* ── responsive ──────────────────────────── */
+  @media (max-width:1024px){
+    .product{grid-template-columns:minmax(0,1fr) 400px;gap:32px;}
+    .nav-links{display:none;}
+  }
+  @media (max-width:900px){
+    .product{grid-template-columns:1fr;gap:32px;}
+    .rel-grid{grid-template-columns:repeat(2,1fr);}
+    .spec-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 16px;}
+    .search{display:none;}
+    .gallery{grid-template-columns:1fr;}
+    .thumbs{flex-direction:row;order:2;}
+    .thumb{width:64px;height:64px;}
+    .rev-summary{grid-template-columns:1fr;gap:16px;}
+    .rel-grid{grid-template-columns:1fr;}
+    .assure{grid-template-columns:1fr;}
+    .p-title{font-size:24px;}
+    .product{gap:24px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- top nav -->
+<header class="topbar">
+  <div class="wrap">
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="#" class="brand" aria-label="MUJINE 홈">MUJINE</a>
+      <div class="nav-links">
+        <a href="#" class="is-active">신상</a>
+        <a href="#">여성</a>
+        <a href="#">남성</a>
+        <a href="#">슈즈</a>
+        <a href="#" class="is-sale">세일</a>
+      </div>
+      <span class="nav-spacer"></span>
+      <form class="search" role="search" onsubmit="return false">
+        <span class="ic" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <input type="search" placeholder="브랜드, 상품 검색" aria-label="상품 검색">
+      </form>
+      <div class="nav-tools">
+        <button class="icon-btn" aria-label="찜 목록 3개">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 15.5S2.5 11.6 2.5 6.9A3.4 3.4 0 0 1 9 5.2a3.4 3.4 0 0 1 6.5 1.7C15.5 11.6 9 15.5 9 15.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span class="dot num">3</span>
+        </button>
+        <button class="icon-btn" aria-label="장바구니 2개">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 3h1.6l1.4 8.2a1 1 0 0 0 1 .8h5.9a1 1 0 0 0 1-.8L15.5 6H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="15" r="1.1" fill="currentColor"/><circle cx="13" cy="15" r="1.1" fill="currentColor"/></svg>
+          <span class="dot num">2</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- breadcrumb -->
+  <nav class="crumb" aria-label="탐색 경로">
+    <a href="#">홈</a><span class="sep">/</span>
+    <a href="#">슈즈</a><span class="sep">/</span>
+    <a href="#">스니커즈</a><span class="sep">/</span>
+    <span class="cur">에어니트 스니커즈</span>
+  </nav>
+
+  <!-- product -->
+  <section class="product">
+    <!-- gallery -->
+    <div class="gallery">
+      <div class="thumbs" role="tablist" aria-label="상품 이미지 미리보기">
+        <button class="thumb" role="tab" aria-current="true" aria-label="측면 보기" data-view="side">
+          <span class="mini"><span class="canvasgrad"></span><span class="knit"></span><span class="blob" style="inset:30% 18% 26% 16%;border-radius:60% 60% 46% 46%/72% 72% 40% 40%"></span></span>
+        </button>
+        <button class="thumb" role="tab" aria-label="정면 보기" data-view="front">
+          <span class="mini"><span class="canvasgrad"></span><span class="knit"></span><span class="blob" style="left:26%;right:26%;top:26%;bottom:28%;border-radius:52% 52% 46% 46%/60% 60% 44% 44%"></span></span>
+        </button>
+        <button class="thumb" role="tab" aria-label="니트 디테일 보기" data-view="detail">
+          <span class="mini"><span class="canvasgrad"></span><span class="blob" style="inset:16%;border-radius:16px"></span><span class="knit" style="inset:16%;border-radius:16px"></span></span>
+        </button>
+        <button class="thumb" role="tab" aria-label="밑창 보기" data-view="sole">
+          <span class="mini"><span class="canvasgrad"></span><span class="blob" style="inset:20% 28%;border-radius:44% 44% 50% 50%/60% 60% 42% 42%"></span></span>
+        </button>
+      </div>
+
+      <div class="stage" id="stage" role="tabpanel" aria-label="상품 이미지">
+        <div class="stage-badges">
+          <span class="badge sale" id="heroBadge">Sale 31%</span>
+          <span class="badge soft-new">New</span>
+        </div>
+
+        <div class="view v-side is-on" data-view="side">
+          <span class="canvasgrad"></span><span class="knit"></span>
+          <span class="blob"></span><span class="stripe"></span><span class="sole"></span>
+          <span class="mono">AK</span>
+        </div>
+        <div class="view v-front" data-view="front">
+          <span class="canvasgrad"></span><span class="knit"></span>
+          <span class="blob"></span><span class="tongue"></span>
+          <span class="eyelet l"></span><span class="eyelet r"></span><span class="sole"></span>
+        </div>
+        <div class="view v-detail" data-view="detail">
+          <span class="canvasgrad"></span>
+          <span class="blob"></span><span class="knit2"></span>
+          <span class="lace"></span><span class="tab">AIRKNIT</span>
+        </div>
+        <div class="view v-sole" data-view="sole">
+          <span class="canvasgrad"></span>
+          <span class="blob"></span><span class="tread"></span><span class="heel"></span>
+        </div>
+
+        <div class="stage-cta">
+          <span class="badge stock" id="stockBadge">재고 8켤레</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- info -->
+    <div class="info">
+      <div class="eyebrow">
+        <span class="brand-tag">MUJINE</span>
+        <span class="badge soft-sale">한정 특가</span>
+      </div>
+      <h1 class="p-title">에어니트 스니커즈</h1>
+
+      <div class="rating">
+        <span class="stars" aria-hidden="true">
+          <span class="base">★★★★★</span>
+          <span class="fill" style="width:96%">★★★★★</span>
+        </span>
+        <span class="score num">4.8</span>
+        <span class="cnt">리뷰 <a href="#reviews" class="num" id="revCount">1,284</a>개</span>
+      </div>
+
+      <div class="price-row">
+        <span class="discount num">31%</span>
+        <span class="price num">89,000<span class="won">원</span></span>
+        <span class="price-was num">129,000원</span>
+      </div>
+      <p class="ship-note">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        무료배송 · 오늘 오후 2시 전 주문 시 내일 도착
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- color -->
+      <div class="opt">
+        <div class="opt-head">
+          <span class="lbl">색상</span>
+          <span class="sel" id="colorLabel">코랄 크림</span>
+        </div>
+        <div class="swatches" role="group" aria-label="색상 선택">
+          <button class="swatch" aria-pressed="true" aria-label="코랄 크림" data-c1="#FF7A7E" data-c2="#E8484D" data-name="코랄 크림"><i style="background:linear-gradient(150deg,#FF7A7E,#E8484D)"></i></button>
+          <button class="swatch" aria-pressed="false" aria-label="딥 퍼플" data-c1="#9B5CFF" data-c2="#6522D6" data-name="딥 퍼플"><i style="background:linear-gradient(150deg,#9B5CFF,#6522D6)"></i></button>
+          <button class="swatch" aria-pressed="false" aria-label="잉크 네이비" data-c1="#3A3560" data-c2="#1B1533" data-name="잉크 네이비"><i style="background:linear-gradient(150deg,#3A3560,#1B1533)"></i></button>
+          <button class="swatch" aria-pressed="false" aria-label="세이지 그린" data-c1="#7FB39B" data-c2="#4E8F73" data-name="세이지 그린"><i style="background:linear-gradient(150deg,#7FB39B,#4E8F73)"></i></button>
+        </div>
+      </div>
+
+      <!-- size -->
+      <div class="opt">
+        <div class="opt-head">
+          <span class="lbl">사이즈 (mm)</span>
+          <a href="#tab-size" class="sel" style="color:var(--purple-strong)">사이즈 가이드</a>
+        </div>
+        <div class="sizes" role="group" aria-label="사이즈 선택">
+          <button class="size" aria-pressed="false">230</button>
+          <button class="size" aria-pressed="false">235</button>
+          <button class="size" aria-pressed="false">240</button>
+          <button class="size" aria-pressed="false">245</button>
+          <button class="size" disabled aria-disabled="true" title="품절">250</button>
+          <button class="size" aria-pressed="false">255</button>
+          <button class="size" aria-pressed="false">260</button>
+          <button class="size" aria-pressed="false">265</button>
+          <button class="size" disabled aria-disabled="true" title="품절">270</button>
+          <button class="size" aria-pressed="false">275</button>
+        </div>
+        <p class="size-help" id="sizeHelp" role="status">사이즈를 선택해 주세요. 품절 사이즈는 선택할 수 없습니다.</p>
+      </div>
+
+      <!-- buy -->
+      <div class="buy">
+        <div class="qty" role="group" aria-label="수량 선택">
+          <button type="button" id="qtyMinus" aria-label="수량 감소" disabled>−</button>
+          <output id="qtyVal" class="num" aria-live="polite">1</output>
+          <button type="button" id="qtyPlus" aria-label="수량 증가">+</button>
+        </div>
+        <button class="btn btn-secondary" id="addCart">장바구니 담기</button>
+        <button class="btn btn-wish" id="wishBtn" aria-pressed="false" aria-label="찜하기">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 17S3 12.7 3 7.7A3.7 3.7 0 0 1 10 5.6a3.7 3.7 0 0 1 7 2.1C17 12.7 10 17 10 17z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-primary" id="buyNow" style="width:100%">바로 구매하기</button>
+
+      <div class="assure">
+        <div><span class="t">무료 반품</span><span class="d">수령 후 14일</span></div>
+        <div><span class="t">정품 보증</span><span class="d">공식 브랜드관</span></div>
+        <div><span class="t">간편 결제</span><span class="d">무이자 3개월</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- detail tabs -->
+  <section class="tabsec" id="reviews">
+    <div class="tablist" role="tablist" aria-label="상품 상세 정보">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="tab-info" id="t-info">상품정보</button>
+      <button class="tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-size" id="t-size">사이즈 가이드</button>
+      <button class="tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-ship" id="t-ship">배송·교환</button>
+      <button class="tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="tab-rev" id="t-rev">리뷰<span class="cnt num">1,284</span></button>
+    </div>
+
+    <div class="panel is-on" id="tab-info" role="tabpanel" aria-labelledby="t-info">
+      <div class="spec-grid">
+        <div class="prose">
+          <h3>가볍게, 온종일</h3>
+          <p>발등 전체를 감싸는 심리스 에어니트 어퍼가 통기성과 유연함을 동시에 잡았습니다. 접힘 없이 발 모양을 따라 늘어나 오래 신어도 눌리지 않습니다.</p>
+          <ul class="feature-list">
+            <li><span class="k">◆</span><span>3D 니트 어퍼 — 봉제선 최소화로 발 압박 감소</span></li>
+            <li><span class="k">◆</span><span>초경량 EVA 미드솔 — 한 켤레 약 220g</span></li>
+            <li><span class="k">◆</span><span>미끄럼 방지 러버 아웃솔 — 젖은 노면 대응</span></li>
+            <li><span class="k">◆</span><span>탈부착 인솔 — 세탁·교체 가능</span></li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h3>소재 정보</h3>
+          <div class="spec-scroll">
+            <table class="spec">
+              <tbody>
+                <tr><th scope="row">어퍼</th><td>리사이클 폴리에스터 니트 82%</td></tr>
+                <tr><th scope="row">미드솔</th><td>고반발 EVA 폼</td></tr>
+                <tr><th scope="row">아웃솔</th><td>천연 러버 컴파운드</td></tr>
+                <tr><th scope="row">무게</th><td class="num">약 220g (260mm 기준)</td></tr>
+                <tr><th scope="row">원산지</th><td>베트남</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-size" role="tabpanel" aria-labelledby="t-size">
+      <div class="spec-scroll">
+        <table class="spec">
+          <caption>사이즈 실측 (편차 ±3mm)</caption>
+          <thead>
+            <tr><th scope="col">사이즈</th><th scope="col">발길이</th><th scope="col">발볼</th><th scope="col">추천</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="num">240</td><td class="num">240mm</td><td class="num">92mm</td><td>표준 발볼</td></tr>
+            <tr><td class="num">250</td><td class="num">250mm</td><td class="num">95mm</td><td>표준 발볼</td></tr>
+            <tr class="row-me"><td class="num">260</td><td class="num">260mm</td><td class="num">98mm</td><td>내 사이즈</td></tr>
+            <tr><td class="num">270</td><td class="num">270mm</td><td class="num">101mm</td><td>넓은 발볼</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose" style="margin-top:16px"><span style="color:var(--sub)">발볼이 넓다면 한 치수 크게 신는 것을 권장합니다.</span></p>
+    </div>
+
+    <div class="panel" id="tab-ship" role="tabpanel" aria-labelledby="t-ship">
+      <div class="spec-grid">
+        <div class="prose">
+          <h3>배송 안내</h3>
+          <p>오후 2시 이전 결제 건은 당일 출고되며, 평균 1~2일 내 도착합니다. 도서·산간 지역은 1일 추가될 수 있습니다. 5만 원 이상 구매 시 배송비는 무료입니다.</p>
+        </div>
+        <div class="prose">
+          <h3>교환·반품</h3>
+          <p>수령 후 14일 이내 교환·반품이 가능합니다. 착화 흔적이 없는 미사용 상태여야 하며, 단순 변심의 경우 왕복 배송비가 부과됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="tab-rev" role="tabpanel" aria-labelledby="t-rev">
+      <div class="rev-summary">
+        <div style="text-align:center">
+          <div class="rev-big">4.8</div>
+          <div style="color:var(--stock);font-size:16px;margin:6px 0">★★★★★</div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600">리뷰 <span class="num">1,284</span>개</div>
+        </div>
+        <div class="rev-bars">
+          <div class="rev-bar"><span class="lab num">5점</span><span class="track"><span class="val" style="width:82%"></span></span><span class="pct num">82%</span></div>
+          <div class="rev-bar"><span class="lab num">4점</span><span class="track"><span class="val" style="width:12%"></span></span><span class="pct num">12%</span></div>
+          <div class="rev-bar"><span class="lab num">3점</span><span class="track"><span class="val" style="width:4%"></span></span><span class="pct num">4%</span></div>
+          <div class="rev-bar"><span class="lab num">2점</span><span class="track"><span class="val" style="width:1%"></span></span><span class="pct num">1%</span></div>
+          <div class="rev-bar"><span class="lab num">1점</span><span class="track"><span class="val" style="width:1%"></span></span><span class="pct num">1%</span></div>
+        </div>
+      </div>
+
+      <article class="rev-card">
+        <span class="rev-av" style="background:linear-gradient(150deg,#FF7A7E,#E8484D)" aria-hidden="true">J</span>
+        <div style="flex:1">
+          <div class="rev-meta">
+            <span class="who">j****</span>
+            <span class="verify"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>구매 확인</span>
+            <span class="when">2026.07.02</span>
+          </div>
+          <div class="rev-stars" aria-label="별점 5점">★★★★★</div>
+          <p class="rev-body">니트라 발등이 편하고 진짜 가벼워요. 하루 종일 걸어도 눌리는 느낌이 없네요. 발볼 넓은 편인데 정사이즈로 딱 맞습니다.</p>
+          <p class="rev-opt">옵션 · 코랄 크림 / 260mm</p>
+        </div>
+      </article>
+
+      <article class="rev-card">
+        <span class="rev-av" style="background:linear-gradient(150deg,#9B5CFF,#6522D6)" aria-hidden="true">S</span>
+        <div style="flex:1">
+          <div class="rev-meta">
+            <span class="who">s****</span>
+            <span class="verify"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6l2.5 2.5L10 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>구매 확인</span>
+            <span class="when">2026.06.28</span>
+          </div>
+          <div class="rev-stars" aria-label="별점 4점">★★★★<span style="color:var(--line)">★</span></div>
+          <p class="rev-body">색감이 화면이랑 거의 같아요. 통기성 좋아서 여름에 딱입니다. 반 치수 크게 나온 느낌이라 얇은 양말엔 조금 헐렁했어요.</p>
+          <p class="rev-opt">옵션 · 딥 퍼플 / 245mm</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- related -->
+  <div class="section-head">
+    <h2>함께 보면 좋은 상품</h2>
+    <a href="#">전체 보기</a>
+  </div>
+  <section class="rel-grid" aria-label="관련 상품">
+    <article class="card" style="--pc1:#FF7A7E;--pc2:#E8484D">
+      <div class="card-media">
+        <span class="canvasgrad"></span><span class="knit"></span>
+        <span class="blob"></span><span class="sole"></span><span class="mono">R2</span>
+        <div class="card-badges"><span class="badge sale">Sale 22%</span></div>
+        <button class="card-wish" aria-pressed="false" aria-label="에어니트 러너 II 찜하기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5S2.8 10.2 2.8 6.4A2.9 2.9 0 0 1 8 4.7a2.9 2.9 0 0 1 5.2 1.7C13.2 10.2 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="card-body">
+        <div class="card-brand">MUJINE</div>
+        <a href="#" class="card-name">에어니트 러너 II</a>
+        <div class="card-foot">
+          <span class="card-price num"><span class="off">22%</span>79,000원</span>
+          <span class="card-rate"><span class="st">★</span>4.7</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="card" style="--pc1:#9B5CFF;--pc2:#6522D6">
+      <div class="card-media">
+        <span class="canvasgrad"></span><span class="knit"></span>
+        <span class="blob"></span><span class="sole"></span><span class="mono">CL</span>
+        <div class="card-badges"><span class="badge new">New</span></div>
+        <button class="card-wish" aria-pressed="false" aria-label="코어 캔버스 로우 찜하기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5S2.8 10.2 2.8 6.4A2.9 2.9 0 0 1 8 4.7a2.9 2.9 0 0 1 5.2 1.7C13.2 10.2 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="card-body">
+        <div class="card-brand">MUJINE</div>
+        <a href="#" class="card-name">코어 캔버스 로우</a>
+        <div class="card-foot">
+          <span class="card-price num">69,000원</span>
+          <span class="card-rate"><span class="st">★</span>4.9</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="card" style="--pc1:#7FB39B;--pc2:#4E8F73">
+      <div class="card-media">
+        <span class="canvasgrad"></span><span class="knit"></span>
+        <span class="blob"></span><span class="sole"></span><span class="mono">MT</span>
+        <div class="card-badges"><span class="badge sale">Sale 15%</span></div>
+        <button class="card-wish" aria-pressed="true" aria-label="메쉬 트레이너 찜 취소"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5S2.8 10.2 2.8 6.4A2.9 2.9 0 0 1 8 4.7a2.9 2.9 0 0 1 5.2 1.7C13.2 10.2 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="card-body">
+        <div class="card-brand">MUJINE</div>
+        <a href="#" class="card-name">메쉬 트레이너</a>
+        <div class="card-foot">
+          <span class="card-price num"><span class="off">15%</span>93,000원</span>
+          <span class="card-rate"><span class="st">★</span>4.6</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="card" style="--pc1:#F5A623;--pc2:#E8484D">
+      <div class="card-media">
+        <span class="canvasgrad"></span><span class="knit"></span>
+        <span class="blob"></span><span class="sole"></span><span class="mono">SC</span>
+        <div class="card-badges"><span class="badge soft-sale">한정</span></div>
+        <button class="card-wish" aria-pressed="false" aria-label="스웨이드 코트 로우 찜하기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5S2.8 10.2 2.8 6.4A2.9 2.9 0 0 1 8 4.7a2.9 2.9 0 0 1 5.2 1.7C13.2 10.2 8 13.5 8 13.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      </div>
+      <div class="card-body">
+        <div class="card-brand">MUJINE</div>
+        <a href="#" class="card-name">스웨이드 코트 로우</a>
+        <div class="card-foot">
+          <span class="card-price num">99,000원</span>
+          <span class="card-rate"><span class="st">★</span>4.8</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="fb">MUJINE</span>
+    <span class="meta">상품 상세 · 커머스 리테일</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="ic" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9.5l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </span>
+  <span id="toastMsg">장바구니에 담았습니다</span>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var stage = document.getElementById('stage');
+  var views = stage.querySelectorAll('.view');
+  var thumbs = document.querySelectorAll('.thumb');
+
+  // gallery thumbnail switching
+  function showView(name){
+    views.forEach(function(v){ v.classList.toggle('is-on', v.getAttribute('data-view')===name); });
+    thumbs.forEach(function(t){ t.setAttribute('aria-current', String(t.getAttribute('data-view')===name)); });
+  }
+  thumbs.forEach(function(t){
+    t.addEventListener('click', function(){ showView(t.getAttribute('data-view')); });
+  });
+
+  // color swatches -> recolor gallery
+  var swatches = document.querySelectorAll('.swatch');
+  var colorLabel = document.getElementById('colorLabel');
+  swatches.forEach(function(s){
+    s.addEventListener('click', function(){
+      swatches.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      s.setAttribute('aria-pressed','true');
+      stage.style.setProperty('--pc1', s.getAttribute('data-c1'));
+      stage.style.setProperty('--pc2', s.getAttribute('data-c2'));
+      colorLabel.textContent = s.getAttribute('data-name');
+    });
+  });
+
+  // size selection
+  var sizes = document.querySelectorAll('.size');
+  var sizeHelp = document.getElementById('sizeHelp');
+  var selectedSize = null;
+  sizes.forEach(function(b){
+    if(b.disabled) return;
+    b.addEventListener('click', function(){
+      sizes.forEach(function(x){ if(!x.disabled) x.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      selectedSize = b.textContent.trim();
+      sizeHelp.classList.remove('is-warn');
+      sizeHelp.textContent = selectedSize + 'mm 선택됨 · 재고 여유';
+    });
+  });
+
+  // quantity stepper
+  var qty = 1, max = 8;
+  var qv = document.getElementById('qtyVal');
+  var minus = document.getElementById('qtyMinus');
+  var plus = document.getElementById('qtyPlus');
+  function renderQty(){
+    qv.textContent = qty;
+    minus.disabled = qty <= 1;
+    plus.disabled = qty >= max;
+  }
+  minus.addEventListener('click', function(){ if(qty>1){ qty--; renderQty(); } });
+  plus.addEventListener('click', function(){ if(qty<max){ qty++; renderQty(); } });
+
+  // wishlist toggle (main)
+  var wish = document.getElementById('wishBtn');
+  wish.addEventListener('click', function(){
+    var on = wish.getAttribute('aria-pressed')==='true';
+    wish.setAttribute('aria-pressed', String(!on));
+    wish.setAttribute('aria-label', !on ? '찜 취소' : '찜하기');
+    if(!reduce){ wish.classList.remove('pop'); void wish.offsetWidth; wish.classList.add('pop'); }
+  });
+
+  // related card wishlists
+  document.querySelectorAll('.card-wish').forEach(function(w){
+    w.addEventListener('click', function(e){
+      e.preventDefault();
+      var on = w.getAttribute('aria-pressed')==='true';
+      w.setAttribute('aria-pressed', String(!on));
+    });
+  });
+
+  // toast
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  var toastTimer;
+  function showToast(msg){
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
+
+  // add to cart / buy with size guard
+  function requireSize(){
+    if(!selectedSize){
+      sizeHelp.classList.add('is-warn');
+      sizeHelp.textContent = '사이즈를 먼저 선택해 주세요.';
+      var firstSize = document.querySelector('.size:not(:disabled)');
+      if(firstSize) firstSize.focus();
+      return false;
+    }
+    return true;
+  }
+  document.getElementById('addCart').addEventListener('click', function(){
+    if(!requireSize()) return;
+    showToast(selectedSize + 'mm · ' + qty + '개 담았습니다');
+  });
+  document.getElementById('buyNow').addEventListener('click', function(){
+    if(!requireSize()) return;
+    showToast('구매 페이지로 이동합니다');
+  });
+
+  // tabs (roving tabindex)
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panels = document.querySelectorAll('.panel');
+  function selectTab(tab){
+    tabs.forEach(function(t){
+      var on = t===tab;
+      t.setAttribute('aria-selected', String(on));
+      t.setAttribute('tabindex', on ? '0' : '-1');
+    });
+    var id = tab.getAttribute('aria-controls');
+    panels.forEach(function(p){ p.classList.toggle('is-on', p.id===id); });
+  }
+  tabs.forEach(function(tab, i){
+    tab.addEventListener('click', function(){ selectTab(tab); });
+    tab.addEventListener('keydown', function(e){
+      var idx = i;
+      if(e.key==='ArrowRight') idx = (i+1)%tabs.length;
+      else if(e.key==='ArrowLeft') idx = (i-1+tabs.length)%tabs.length;
+      else return;
+      e.preventDefault();
+      selectTab(tabs[idx]);
+      tabs[idx].focus();
+    });
+  });
+  // jump link to size tab
+  document.querySelectorAll('a[href="#tab-size"]').forEach(function(a){
+    a.addEventListener('click', function(){ selectTab(document.getElementById('t-size')); });
+  });
+
+  // review count-up (tabular count-up signature) — reduced-motion safe
+  if(!reduce){
+    var el = document.getElementById('revCount');
+    if(el){
+      var target = parseInt(el.textContent.replace(/,/g,''),10);
+      var start = null, dur = 700;
+      var step = function(ts){
+        if(start===null) start = ts;
+        var p = Math.min((ts-start)/dur, 1);
+        var eased = 1-Math.pow(1-p,3);
+        el.textContent = Math.round(target*eased).toLocaleString('ko-KR');
+        if(p<1) requestAnimationFrame(step);
+        else el.textContent = target.toLocaleString('ko-KR');
+      };
+      requestAnimationFrame(step);
+    }
+  }
+
+  // hero badge pop on load
+  if(!reduce){
+    window.addEventListener('load', function(){
+      var b = document.getElementById('heroBadge');
+      if(b) b.classList.add('pop');
+    });
+  }
+
+  renderQty();
+})();
+</script>
+</body>
+</html>

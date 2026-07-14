@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Terra — 함께 자라는 사람들</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root {
+    /* 웜 뉴트럴 — 크림 배경 + 흙 계열 강조 */
+    --bg: #FAF6F0;
+    --surface: #FFFDF9;
+    --surface-sunken: #F3ECE2;
+    --border: #E7DDCF;
+    --border-strong: #DDD0BE;
+
+    --fg: #3A342E;
+    --muted: #6B6157;
+    --faint: #9A8F82;
+
+    --terra: #C97B5A;
+    --terra-dark: #B4633F;
+    --terra-soft: #F3E0D6;
+
+    --olive: #8A9A5B;
+    --olive-dark: #6E7D45;
+    --olive-soft: #E7EBD8;
+
+    --mustard: #D8973C;
+    --brick: #B15A48;
+    --sand: #C9B79C;
+
+    --shadow-sm: 0 1px 2px rgba(80,60,40,.05);
+    --shadow-card: 0 1px 2px rgba(80,60,40,.05), 0 8px 24px rgba(120,90,60,.06);
+    --shadow-card-hover: 0 2px 4px rgba(80,60,40,.06), 0 14px 32px rgba(120,90,60,.10);
+
+    --r-card: 14px;
+    --r-btn: 10px;
+    --r-pill: 999px;
+
+    --ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--terra);
+
+    --maxw: 1120px;
+    --gutter: 24px;
+
+    /* 타이포 스케일 — 제한 */
+    --fs-display: 34px;
+    --fs-h1: 26px;
+    --fs-h2: 20px;
+    --fs-h3: 17px;
+    --fs-body: 15px;
+    --fs-sm: 13px;
+    --fs-label: 12px;
+
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 520px at 82% -8%, rgba(201,123,90,.10), transparent 60%),
+      radial-gradient(760px 460px at -6% 4%, rgba(138,154,91,.08), transparent 58%),
+      var(--bg);
+    color: var(--fg);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--terra-soft); color: var(--terra-dark); }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap {
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  .eyebrow {
+    font-size: var(--fs-label);
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--terra-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 2px;
+    border-radius: var(--r-pill);
+    background: var(--terra);
+  }
+
+  /* ---------- Focus (전역, 접근성) ---------- */
+  a:focus-visible,
+  button:focus-visible,
+  .row:focus-visible,
+  .nav-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-btn);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    --_bg: var(--terra);
+    --_fg: #FFFCF8;
+    --_bd: transparent;
+    appearance: none;
+    border: 1px solid var(--_bd);
+    background: var(--_bg);
+    color: var(--_fg);
+    font: inherit;
+    font-weight: 600;
+    font-size: var(--fs-body);
+    line-height: 1;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: var(--r-btn);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background .24s var(--ease), transform .16s var(--ease), box-shadow .24s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+  }
+  .btn:hover { background: var(--terra-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(180,99,63,.22); }
+  .btn:active { transform: translateY(0); box-shadow: var(--shadow-sm); background: var(--terra-dark); }
+  .btn:focus-visible { outline: none; box-shadow: var(--ring); }
+
+  .btn--secondary {
+    --_bg: var(--surface);
+    --_fg: var(--fg);
+    --_bd: var(--border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn--secondary:hover { --_bg: #FFFFFF; --_bd: var(--terra); color: var(--terra-dark); transform: translateY(-1px); box-shadow: var(--shadow-card); }
+  .btn--secondary:active { transform: translateY(0); background: var(--surface-sunken); }
+
+  .btn--ghost {
+    --_bg: transparent;
+    --_fg: var(--muted);
+    --_bd: transparent;
+    box-shadow: none;
+    height: 36px;
+    padding: 0 12px;
+  }
+  .btn--ghost:hover { --_fg: var(--fg); background: var(--surface-sunken); transform: none; box-shadow: none; }
+  .btn--ghost:active { background: var(--border); }
+
+  .btn--sm { height: 34px; padding: 0 14px; font-size: var(--fs-sm); }
+
+  .btn[disabled], .btn[aria-disabled="true"] {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(250,246,240,.82);
+    backdrop-filter: saturate(1.2) blur(10px);
+    -webkit-backdrop-filter: saturate(1.2) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar__inner {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .brand__mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(150deg, var(--terra), var(--terra-dark));
+    display: grid;
+    place-items: center;
+    color: #FFF7F1;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.28), var(--shadow-sm);
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+  }
+  .nav-link {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: var(--r-btn);
+    transition: color .2s var(--ease), background .2s var(--ease);
+  }
+  .nav-link:hover { color: var(--fg); background: var(--surface-sunken); }
+  .nav-link[aria-current="page"] { color: var(--terra-dark); font-weight: 600; }
+  .topbar__cta { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  /* ---------- Section rhythm ---------- */
+  section { padding-top: 64px; padding-bottom: 64px; }
+  .section-head { max-width: 640px; margin-bottom: 32px; }
+  .section-head h2 {
+    margin: 12px 0 8px;
+    font-size: var(--fs-h1);
+    line-height: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .section-head p { margin: 0; color: var(--muted); font-size: var(--fs-body); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-top: 72px; padding-bottom: 40px; }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .hero h1 {
+    margin: 16px 0 16px;
+    font-size: var(--fs-display);
+    line-height: 42px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 em { font-style: normal; color: var(--terra-dark); }
+  .hero p.lead {
+    margin: 0 0 28px;
+    font-size: var(--fs-h3);
+    line-height: 28px;
+    color: var(--muted);
+    max-width: 44ch;
+  }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .stat__num {
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--fg);
+  }
+  .stat__label {
+    margin-top: 4px;
+    font-size: var(--fs-label);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+  }
+
+  /* Hero visual — CSS 도형/그라디언트 콜라주 */
+  .hero__visual {
+    position: relative;
+    aspect-ratio: 5 / 4.4;
+    border-radius: var(--r-card);
+    background:
+      radial-gradient(120% 120% at 80% 0%, rgba(201,123,90,.20), transparent 55%),
+      linear-gradient(160deg, #FFFDF9, #F3ECE2);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: var(--r-pill);
+    opacity: .95;
+  }
+  .blob--terra { width: 190px; height: 190px; right: -34px; top: -30px; background: radial-gradient(circle at 35% 30%, #E4A184, var(--terra)); box-shadow: inset 0 8px 20px rgba(255,255,255,.25); }
+  .blob--olive { width: 128px; height: 128px; left: 26px; bottom: 44px; background: radial-gradient(circle at 35% 30%, #A9B87E, var(--olive)); }
+  .hero__card {
+    position: absolute;
+    left: 28px;
+    top: 32px;
+    right: 96px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .hero__card .t { font-weight: 600; font-size: var(--fs-sm); }
+  .hero__card .s { font-size: var(--fs-label); color: var(--faint); letter-spacing: 0.3px; text-transform: uppercase; font-weight: 600; }
+  .hero__chip {
+    position: absolute;
+    right: 24px;
+    bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    padding: 8px 14px 8px 10px;
+    box-shadow: var(--shadow-card);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--olive); box-shadow: 0 0 0 3px var(--olive-soft); }
+
+  /* Avatar (이니셜) */
+  .av {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #FFF9F4;
+    letter-spacing: 0.3px;
+    flex: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.3), var(--shadow-sm);
+  }
+  .av--t { background: linear-gradient(150deg, #D68A68, var(--terra-dark)); }
+  .av--o { background: linear-gradient(150deg, #9BAA6D, var(--olive-dark)); }
+  .av--m { background: linear-gradient(150deg, #E1A85A, var(--mustard)); }
+  .av--s { background: linear-gradient(150deg, #D4C3A6, #A8946F); color: #423a2c; }
+
+  /* ---------- Values (가치 3) ---------- */
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .value {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 28px 24px;
+    box-shadow: var(--shadow-card);
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);
+  }
+  .value:hover { transform: translateY(-2px); box-shadow: var(--shadow-card-hover); border-color: var(--border-strong); }
+  .value__ico {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .value__ico svg { width: 22px; height: 22px; }
+  .value h3 { margin: 0 0 8px; font-size: var(--fs-h3); line-height: 24px; font-weight: 600; }
+  .value p { margin: 0; color: var(--muted); font-size: var(--fs-sm); line-height: 22px; }
+  .ico--terra { background: linear-gradient(150deg, var(--terra), var(--terra-dark)); }
+  .ico--olive { background: linear-gradient(150deg, var(--olive), var(--olive-dark)); }
+  .ico--sand { background: linear-gradient(150deg, var(--sand), #A8946F); }
+
+  /* ---------- Open positions (리스트 5) ---------- */
+  .positions {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .positions__head {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 24px;
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--border);
+    font-size: var(--fs-label);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--faint);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    transition: background .16s var(--ease);
+  }
+  .row::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 3px;
+    border-radius: var(--r-pill);
+    background: var(--olive);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform .18s var(--ease);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row:hover { background: var(--terra-soft); }
+  .row:hover::before { transform: scaleY(1); }
+  .row__role { display: flex; flex-direction: column; gap: 4px; }
+  .row__role .title { font-weight: 600; font-size: var(--fs-body); color: var(--fg); }
+  .row__role .sub { font-size: var(--fs-sm); color: var(--faint); }
+  .cell-label { display: none; font-size: var(--fs-label); text-transform: uppercase; letter-spacing: 0.4px; color: var(--faint); font-weight: 600; }
+  .row__team, .row__loc { font-size: var(--fs-sm); color: var(--muted); }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    border: 1px solid transparent;
+  }
+  .tag--remote { background: var(--olive-soft); color: var(--olive-dark); border-color: rgba(110,125,69,.22); }
+  .tag--onsite { background: var(--surface-sunken); color: var(--muted); border-color: var(--border); }
+  .tag--hybrid { background: var(--terra-soft); color: var(--terra-dark); border-color: rgba(180,99,63,.20); }
+  .tag--dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ---------- Benefits (그리드 6) ---------- */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .benefit {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);
+  }
+  .benefit:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); border-color: var(--border-strong); }
+  .benefit__ico {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--terra-soft);
+    color: var(--terra-dark);
+    margin-bottom: 16px;
+  }
+  .benefit__ico svg { width: 20px; height: 20px; }
+  .benefit h3 { margin: 0 0 6px; font-size: var(--fs-h3); line-height: 24px; font-weight: 600; }
+  .benefit p { margin: 0; color: var(--muted); font-size: var(--fs-sm); line-height: 22px; }
+
+  /* ---------- Team culture image slot ---------- */
+  .culture__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .culture__copy { align-self: center; }
+  .culture__copy h2 { margin: 12px 0 12px; font-size: var(--fs-h1); line-height: 34px; font-weight: 700; letter-spacing: -0.02em; }
+  .culture__copy p { margin: 0 0 20px; color: var(--muted); }
+  .culture__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .culture__list li { display: flex; gap: 12px; align-items: flex-start; font-size: var(--fs-sm); color: var(--fg); }
+  .culture__list .ck {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 7px;
+    background: var(--olive-soft);
+    color: var(--olive-dark);
+    display: grid; place-items: center;
+    margin-top: 1px;
+  }
+  .culture__list .ck svg { width: 13px; height: 13px; }
+
+  .culture__gallery {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 12px;
+    min-height: 360px;
+  }
+  .photo {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    place-items: end start;
+    padding: 14px;
+  }
+  .photo span {
+    position: relative;
+    z-index: 1;
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: rgba(58,52,46,.72);
+    background: rgba(255,253,249,.74);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    backdrop-filter: blur(2px);
+  }
+  .photo--a { grid-row: 1 / span 2; background: radial-gradient(120% 90% at 20% 10%, rgba(255,255,255,.5), transparent 55%), linear-gradient(155deg, #E7A585, var(--terra)); }
+  .photo--b { background: linear-gradient(150deg, #B7C489, var(--olive)); }
+  .photo--c { background: linear-gradient(150deg, #E7CE9C, var(--mustard)); }
+  .photo--a .av-cluster { position: absolute; top: 16px; left: 16px; display: flex; z-index: 1; }
+  .av-cluster .av { width: 34px; height: 34px; font-size: 12px; border: 2px solid rgba(255,253,249,.9); }
+  .av-cluster .av + .av { margin-left: -10px; }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    position: relative;
+    border-radius: 18px;
+    padding: 56px 48px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 160% at 88% 8%, rgba(255,255,255,.14), transparent 55%),
+      linear-gradient(150deg, var(--terra), var(--terra-dark));
+    color: #FFF8F3;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+  }
+  .cta__deco { position: absolute; border-radius: 50%; }
+  .cta__deco--1 { width: 220px; height: 220px; left: -60px; bottom: -90px; background: radial-gradient(circle at 40% 40%, rgba(138,154,91,.5), transparent 62%); }
+  .cta__deco--2 { width: 160px; height: 160px; right: -30px; top: -50px; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.22), transparent 60%); }
+  .cta h2 { margin: 0 0 12px; font-size: var(--fs-h1); line-height: 34px; font-weight: 700; letter-spacing: -0.02em; position: relative; }
+  .cta p { margin: 0 auto 28px; max-width: 46ch; color: rgba(255,248,243,.86); position: relative; }
+  .cta__actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; position: relative; }
+  .cta .btn--secondary { --_bg: rgba(255,253,249,.14); --_fg: #FFF8F3; --_bd: rgba(255,253,249,.34); box-shadow: none; }
+  .cta .btn--secondary:hover { --_bg: rgba(255,253,249,.24); --_bd: rgba(255,253,249,.6); color: #FFF8F3; }
+  .cta .btn:not(.btn--secondary) { --_bg: #FFF8F3; --_fg: var(--terra-dark); }
+  .cta .btn:not(.btn--secondary):hover { --_bg: #FFFFFF; box-shadow: 0 6px 18px rgba(60,40,25,.25); }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 40px;
+  }
+  .footer__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .footer__meta { font-size: var(--fs-sm); color: var(--faint); }
+  .footer__links { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- Entrance motion ---------- */
+  .reveal { opacity: 0; transform: translateY(10px); animation: rise .5s var(--ease) forwards; }
+  .d1 { animation-delay: .05s; }
+  .d2 { animation-delay: .11s; }
+  .d3 { animation-delay: .17s; }
+  .d4 { animation-delay: .23s; }
+  .d5 { animation-delay: .29s; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .hero__grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero__visual { max-width: 520px; }
+    .culture__grid { grid-template-columns: 1fr; }
+    .culture__gallery { min-height: 300px; }
+  }
+  @media (max-width: 860px) {
+    .values-grid { grid-template-columns: 1fr; }
+    .benefits-grid { grid-template-columns: 1fr 1fr; }
+    .nav { display: none; }
+  }
+  @media (max-width: 720px) {
+    :root { --fs-display: 28px; }
+    .hero h1 { line-height: 36px; }
+    .positions__head { display: none; }
+    .row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 18px 20px;
+    }
+    .row .cell-label { display: block; margin-bottom: 2px; }
+    .row__apply { justify-self: start; }
+    .row__apply .btn { width: 100%; }
+  }
+  @media (max-width: 520px) {
+    :root { --gutter: 18px; }
+    .benefits-grid { grid-template-columns: 1fr; }
+    .culture__gallery { grid-template-columns: 1fr; grid-template-rows: repeat(3, 140px); }
+    .photo--a { grid-row: auto; }
+    .cta { padding: 40px 24px; }
+    .topbar__cta .btn--ghost { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { animation: none; opacity: 1; transform: none; }
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="brand" href="#top" aria-label="Terra 홈">
+        <span class="brand__mark" aria-hidden="true">T</span>
+        Terra
+      </a>
+      <nav class="nav" aria-label="주요 메뉴">
+        <a class="nav-link" href="#values">가치</a>
+        <a class="nav-link" href="#positions" aria-current="page">채용</a>
+        <a class="nav-link" href="#benefits">복지</a>
+        <a class="nav-link" href="#culture">팀 문화</a>
+      </nav>
+      <div class="topbar__cta">
+        <a class="btn btn--ghost btn--sm" href="#culture">우리 이야기</a>
+        <a class="btn btn--sm" href="#positions">지원하기</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <span class="eyebrow reveal d1">Careers at Terra</span>
+          <h1 id="hero-title" class="reveal d2">천천히, 그러나 <em>깊이</em> 뿌리내리는<br>팀을 찾습니다</h1>
+          <p class="lead reveal d3">과시하지 않는 전문성. Terra는 흙처럼 단단한 기본기 위에서 조용히 탁월한 제품을 만듭니다. 함께 자랄 사람을 기다립니다.</p>
+          <div class="hero__actions reveal d4">
+            <a class="btn" href="#positions">열린 포지션 보기</a>
+            <a class="btn btn--secondary" href="#culture">팀 문화 둘러보기</a>
+          </div>
+          <div class="hero__meta reveal d5">
+            <div class="stat">
+              <div class="stat__num">42</div>
+              <div class="stat__label">전체 구성원</div>
+            </div>
+            <div class="stat">
+              <div class="stat__num">5</div>
+              <div class="stat__label">열린 포지션</div>
+            </div>
+            <div class="stat">
+              <div class="stat__num">4.6</div>
+              <div class="stat__label">근무 만족도</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__visual reveal d3" aria-hidden="true">
+          <div class="blob blob--terra"></div>
+          <div class="blob blob--olive"></div>
+          <div class="hero__card">
+            <span class="av av--o">DS</span>
+            <div>
+              <div class="t">디자인 시스템 스터디</div>
+              <div class="s">매주 수요일 · 15:00</div>
+            </div>
+          </div>
+          <div class="hero__chip">
+            <span class="dot"></span>
+            리모트 우선 · 코어타임 4h
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUES 3 -->
+    <section id="values" aria-labelledby="values-title">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Our values</span>
+          <h2 id="values-title">우리가 일하는 세 가지 원칙</h2>
+          <p>화려한 구호 대신 매일의 결정에서 지켜지는 기준입니다.</p>
+        </div>
+        <div class="values-grid">
+          <article class="value">
+            <div class="value__ico ico--terra" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M12 9c-3 0-5-2-5-5 3 0 5 2 5 5Z"/><path d="M12 12c3 0 5-2 5-5-3 0-5 2-5 5Z"/></svg>
+            </div>
+            <h3>흙에 뿌리내린 기본기</h3>
+            <p>빠른 유행보다 오래 버티는 원칙을 택합니다. 단단한 기초 위에서만 과감한 실험이 안전합니다.</p>
+          </article>
+          <article class="value">
+            <div class="value__ico ico--olive" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11a5 5 0 1 0-10 0"/><path d="M12 11v9"/><path d="M8 16h8"/></svg>
+            </div>
+            <h3>함께 자라는 속도</h3>
+            <p>혼자 빨리 가기보다 팀 전체의 성장을 봅니다. 서로의 배움이 곧 조직의 복리입니다.</p>
+          </article>
+          <article class="value">
+            <div class="value__ico ico--sand" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h3>조용한 탁월함</h3>
+            <p>소리 내지 않아도 마감으로 증명합니다. 디테일에 대한 존중이 신뢰를 만든다고 믿습니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPEN POSITIONS 5 -->
+    <section id="positions" aria-labelledby="positions-title">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Open roles</span>
+          <h2 id="positions-title">지금 열린 포지션</h2>
+          <p>지원서는 3영업일 안에 검토하고, 결과는 합격 여부와 관계없이 안내드립니다.</p>
+        </div>
+
+        <div class="positions" role="table" aria-label="채용 포지션 목록">
+          <div class="positions__head" role="row">
+            <span role="columnheader">직무</span>
+            <span role="columnheader">팀</span>
+            <span role="columnheader">지역</span>
+            <span role="columnheader" aria-label="지원"></span>
+          </div>
+
+          <a class="row" role="row" href="#apply">
+            <div class="row__role" role="cell">
+              <span class="title">프로덕트 디자이너</span>
+              <span class="sub">경력 3년+ · 정규직</span>
+            </div>
+            <div class="row__team" role="cell"><span class="cell-label">팀</span>디자인</div>
+            <div class="row__loc" role="cell"><span class="cell-label">지역</span>
+              <span class="tag tag--hybrid"><span class="tag--dot"></span>서울 · 하이브리드</span>
+            </div>
+            <div class="row__apply" role="cell"><span class="btn btn--secondary btn--sm">지원하기</span></div>
+          </a>
+
+          <a class="row" role="row" href="#apply">
+            <div class="row__role" role="cell">
+              <span class="title">백엔드 엔지니어</span>
+              <span class="sub">경력 4년+ · 정규직</span>
+            </div>
+            <div class="row__team" role="cell"><span class="cell-label">팀</span>플랫폼</div>
+            <div class="row__loc" role="cell"><span class="cell-label">지역</span>
+              <span class="tag tag--onsite"><span class="tag--dot"></span>서울 · 온사이트</span>
+            </div>
+            <div class="row__apply" role="cell"><span class="btn btn--secondary btn--sm">지원하기</span></div>
+          </a>
+
+          <a class="row" role="row" href="#apply">
+            <div class="row__role" role="cell">
+              <span class="title">그로스 마케터</span>
+              <span class="sub">경력 3년+ · 정규직</span>
+            </div>
+            <div class="row__team" role="cell"><span class="cell-label">팀</span>마케팅</div>
+            <div class="row__loc" role="cell"><span class="cell-label">지역</span>
+              <span class="tag tag--remote"><span class="tag--dot"></span>리모트</span>
+            </div>
+            <div class="row__apply" role="cell"><span class="btn btn--secondary btn--sm">지원하기</span></div>
+          </a>
+
+          <a class="row" role="row" href="#apply">
+            <div class="row__role" role="cell">
+              <span class="title">데이터 애널리스트</span>
+              <span class="sub">경력 2년+ · 정규직</span>
+            </div>
+            <div class="row__team" role="cell"><span class="cell-label">팀</span>데이터</div>
+            <div class="row__loc" role="cell"><span class="cell-label">지역</span>
+              <span class="tag tag--hybrid"><span class="tag--dot"></span>서울 · 하이브리드</span>
+            </div>
+            <div class="row__apply" role="cell"><span class="btn btn--secondary btn--sm">지원하기</span></div>
+          </a>
+
+          <a class="row" role="row" href="#apply">
+            <div class="row__role" role="cell">
+              <span class="title">고객 성공 매니저</span>
+              <span class="sub">경력 3년+ · 정규직</span>
+            </div>
+            <div class="row__team" role="cell"><span class="cell-label">팀</span>CX</div>
+            <div class="row__loc" role="cell"><span class="cell-label">지역</span>
+              <span class="tag tag--remote"><span class="tag--dot"></span>부산 · 리모트</span>
+            </div>
+            <div class="row__apply" role="cell"><span class="btn btn--secondary btn--sm">지원하기</span></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFITS 6 -->
+    <section id="benefits" aria-labelledby="benefits-title">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Benefits</span>
+          <h2 id="benefits-title">잘 일하기 위한 최소한의 여유</h2>
+          <p>복지는 보상이 아니라 좋은 일을 오래 하기 위한 조건이라고 생각합니다.</p>
+        </div>
+        <div class="benefits-grid">
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <h3>유연 근무</h3>
+            <p>코어타임 4시간을 뺀 나머지는 스스로 설계합니다. 결과로 이야기합니다.</p>
+          </article>
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-5a8 8 0 0 1 16 0v5"/><rect x="2" y="16" width="5" height="5" rx="1.5"/><rect x="17" y="16" width="5" height="5" rx="1.5"/></svg>
+            </div>
+            <h3>리모트 우선</h3>
+            <p>어디서 일하든 좋습니다. 반기마다 한 번은 오프라인으로 모여 호흡을 맞춥니다.</p>
+          </article>
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="m6 14 6-6 6 6"/><path d="M4 20h16"/></svg>
+            </div>
+            <h3>성장 지원금</h3>
+            <p>도서·강의·컨퍼런스에 연 200만원. 배운 것을 팀에 나누면 그걸로 충분합니다.</p>
+          </article>
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8.5c0 5-8 10-8 10s-8-5-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 8.5Z"/></svg>
+            </div>
+            <h3>건강 케어</h3>
+            <p>연 1회 종합검진과 가족 포함 실비 보험. 심리 상담 세션도 조용히 지원합니다.</p>
+          </article>
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3"/><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 11h16"/></svg>
+            </div>
+            <h3>안식 휴가</h3>
+            <p>3년마다 4주의 완전한 쉼. 다녀와서 더 멀리 갈 수 있도록 비웁니다.</p>
+          </article>
+          <article class="benefit">
+            <div class="benefit__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a10 10 0 0 1-11 11"/><circle cx="12" cy="12" r="9"/><path d="M12 3a15 15 0 0 0 0 18"/></svg>
+            </div>
+            <h3>워케이션</h3>
+            <p>연 2주는 원하는 도시에서. 숙소와 이동은 회사가 함께 부담합니다.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM CULTURE + IMAGE SLOT -->
+    <section id="culture" aria-labelledby="culture-title">
+      <div class="wrap">
+        <div class="culture__grid">
+          <div class="culture__copy">
+            <span class="eyebrow">Life at Terra</span>
+            <h2 id="culture-title">따뜻한 사무실, 단단한 결과</h2>
+            <p>오후 햇살이 드는 공간처럼, 편안하지만 들뜨지 않게 일합니다. 서로를 배려하는 태도와 마감을 지키는 책임감은 함께 갑니다.</p>
+            <ul class="culture__list">
+              <li>
+                <span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                수요일 오후는 함께 배우는 러닝 세션으로 비워둡니다.
+              </li>
+              <li>
+                <span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                결정은 문서로 남기고, 누구나 배경을 되짚을 수 있게 합니다.
+              </li>
+              <li>
+                <span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                피드백은 사람이 아니라 일에, 그리고 구체적인 근거에 답니다.
+              </li>
+            </ul>
+          </div>
+
+          <div class="culture__gallery" role="img" aria-label="팀 문화를 담은 이미지 자리">
+            <div class="photo photo--a">
+              <div class="av-cluster" aria-hidden="true">
+                <span class="av av--t">TP</span>
+                <span class="av av--o">DS</span>
+                <span class="av av--m">GX</span>
+              </div>
+              <span>워크숍 데이</span>
+            </div>
+            <div class="photo photo--b"><span>러닝 세션</span></div>
+            <div class="photo photo--c"><span>오프사이트</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta" id="apply">
+          <span class="cta__deco cta__deco--1" aria-hidden="true"></span>
+          <span class="cta__deco cta__deco--2" aria-hidden="true"></span>
+          <h2 id="cta-title">여기까지 읽으셨다면, 이미 우리 팀입니다</h2>
+          <p>딱 맞는 포지션이 없어도 괜찮습니다. 어떤 문제를 함께 풀고 싶은지 편하게 들려주세요.</p>
+          <div class="cta__actions">
+            <a class="btn" href="#positions">포지션 지원하기</a>
+            <a class="btn btn--secondary" href="#culture">커피챗 요청하기</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__meta">© 2026 Terra — 채용/컬처 · 웜 프로페셔널</div>
+      <nav class="footer__links" aria-label="푸터 메뉴">
+        <a class="btn btn--ghost btn--sm" href="#values">가치</a>
+        <a class="btn btn--ghost btn--sm" href="#positions">채용</a>
+        <a class="btn btn--ghost btn--sm" href="#benefits">복지</a>
+        <a class="btn btn--ghost btn--sm" href="#culture">팀 문화</a>
+      </nav>
+    </div>
+  </footer>
+
+</body>
+</html>

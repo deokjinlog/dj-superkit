@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ProGuild — e스포츠 팀 관제</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<style>
+  :root{
+    --bg:#0C0E12; --panel:#111419; --amber:#F5A623; --green:#3DDC84;
+    --red:#FF5252; --blue:#4DA3FF; --text:#D6DAE0; --dim:#6B7482;
+    --line:#1C222B; --hover:#151A22;
+    --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+    --kr:'IBM Plex Mono','Pretendard',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:var(--kr); font-size:12px; line-height:1.35;
+    font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  .num{font-variant-numeric:tabular-nums}
+  .lbl{font-size:10px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase}
+  .idx{color:var(--amber); font-weight:600}
+
+  /* ── HEADER ─────────────────────────────── */
+  header{
+    display:flex; align-items:center; gap:16px;
+    padding:8px 12px; border-bottom:1px solid var(--line); background:var(--panel);
+    flex-wrap:wrap;
+  }
+  .brand{font-family:var(--mono); font-size:16px; font-weight:600; color:var(--amber); letter-spacing:.04em}
+  .brand small{color:var(--dim); font-size:10px; font-weight:400; letter-spacing:.14em; margin-left:8px}
+  .hdr-right{margin-left:auto; display:flex; align-items:center; gap:14px; font-size:11px}
+  .hdr-right .k{color:var(--dim); letter-spacing:.08em}
+  .hdr-right .v{color:var(--text)}
+  .live{display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.14em; color:var(--green)}
+  .dot{width:7px; height:7px; background:var(--green); border-radius:0; display:inline-block; animation:blink 2s steps(1) infinite}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.18}}
+  #clock{font-family:var(--mono); color:var(--text); letter-spacing:.06em}
+
+  /* ── MAIN GRID ──────────────────────────── */
+  main{
+    flex:1; display:grid;
+    grid-template-columns:0.92fr 1.15fr 1.5fr;
+    border-bottom:1px solid var(--line);
+    min-height:0;
+  }
+  .col{border-right:1px solid var(--line); display:flex; flex-direction:column; min-width:0}
+  .col:last-child{border-right:0}
+  .panel{border-bottom:1px solid var(--line)}
+  .panel:last-child{border-bottom:0}
+  .ph{
+    display:flex; align-items:center; gap:8px;
+    padding:6px 10px; border-bottom:1px dotted var(--line);
+    font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+    background:#0E1116;
+  }
+  .ph .r{margin-left:auto; color:var(--dim); letter-spacing:.1em}
+
+  /* ── KPI ────────────────────────────────── */
+  .kpi{display:grid; grid-template-columns:1fr 1fr}
+  .kpi>div{padding:9px 10px; border-right:1px dotted var(--line); border-bottom:1px dotted var(--line)}
+  .kpi>div:nth-child(2n){border-right:0}
+  .kpi>div:nth-last-child(-n+2){border-bottom:0}
+  .kpi .k{font-size:10px; letter-spacing:.09em; color:var(--dim)}
+  .kpi .val{font-family:var(--mono); font-size:20px; font-weight:600; color:var(--text); margin:3px 0 2px; line-height:1.05}
+  .kpi .val.amber{color:var(--amber)}
+  .kpi .delta{font-size:10px; letter-spacing:.03em}
+  .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--dim)}
+
+  /* ── EVENT LOG ──────────────────────────── */
+  .log{padding:4px 0; font-family:var(--mono); font-size:11px}
+  .log .row{display:flex; gap:8px; padding:3px 10px; border-bottom:1px dotted #14181F; white-space:nowrap; overflow:hidden}
+  .log .row:hover{background:var(--hover)}
+  .log .t{color:var(--dim); flex:none}
+  .log .m{color:var(--text); overflow:hidden; text-overflow:ellipsis}
+  .log .row[data-player]{cursor:default}
+  .log .row.new .m::after{content:'▍'; color:var(--amber); animation:caret .8s steps(1) infinite}
+  @keyframes caret{50%{opacity:0}}
+
+  /* ── CHART ──────────────────────────────── */
+  .chart{padding:8px 10px}
+  .cbar{display:grid; grid-template-columns:30px 1fr 34px; align-items:center; gap:8px; padding:3px 0}
+  .cbar .wk{font-family:var(--mono); font-size:10px; color:var(--dim); letter-spacing:.06em}
+  .track{height:12px; background:#0E1116; border:1px solid var(--line); position:relative; overflow:hidden}
+  .track>span{position:absolute; inset:0 auto 0 0; background:var(--blue);
+    background-image:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.28) 5px 6px);}
+  .cbar.peak .track>span{background:var(--amber); background-image:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.22) 5px 6px)}
+  .cbar .v{font-family:var(--mono); font-size:12px; text-align:right; color:var(--text)}
+  .cbar.peak .v{color:var(--amber); font-weight:600}
+  .peaktag{font-size:9px; letter-spacing:.14em; color:var(--amber); border:1px solid var(--amber); padding:0 3px; margin-left:6px}
+  .caxis{display:flex; justify-content:space-between; font-family:var(--mono); font-size:9px; color:var(--dim); letter-spacing:.06em; border-top:1px dotted var(--line); margin-top:6px; padding-top:4px}
+  .clegend{display:flex; gap:14px; padding:6px 10px; border-top:1px dotted var(--line); font-size:10px; letter-spacing:.06em; color:var(--dim)}
+  .clegend i{display:inline-block; width:9px; height:9px; margin-right:5px; vertical-align:middle}
+  .sw-blue{background:var(--blue)} .sw-amber{background:var(--amber)}
+
+  /* ── ROSTER TABLE ───────────────────────── */
+  .tbl{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11px}
+  .tbl th{
+    text-align:left; padding:6px 10px; border-bottom:1px solid var(--line);
+    font-size:9px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; font-weight:500; white-space:nowrap;
+  }
+  .tbl td{padding:7px 10px; border-bottom:1px dotted #14181F; white-space:nowrap}
+  .tbl tr{}
+  .tbl tbody tr:hover{background:var(--hover)}
+  .tbl tbody tr.linked{background:var(--hover); box-shadow:inset 2px 0 0 var(--amber)}
+  .tbl .name{color:var(--text); font-weight:500; font-family:var(--kr)}
+  .tbl .pos{color:var(--dim)}
+  .tbl .kda{text-align:right}
+  .kda.hi{color:var(--green)} .kda.lo{color:var(--red)} .kda.mid{color:var(--text)}
+  .form .u{color:var(--green)} .form .d{color:var(--red)} .form .s{color:var(--dim)}
+  .badge{display:inline-block; font-size:10px; letter-spacing:.05em; padding:1px 7px; border:1px solid currentColor; font-family:var(--kr)}
+  .b-fix{color:var(--green)}   /* 주전확정 — 완료계열 */
+  .b-act{color:var(--blue)}    /* 활성 — 진행계열 */
+  .b-low{color:var(--red)}     /* 폼저하 — 문제계열 */
+  .b-wait{color:var(--amber)}  /* 로테이션대기 — 대기계열 */
+
+  /* ── FUNCTION KEY BAR ───────────────────── */
+  footer{background:var(--panel); border-top:1px solid var(--line)}
+  .fkeys{display:flex; flex-wrap:wrap; font-family:var(--mono); font-size:10px; letter-spacing:.06em}
+  .fkeys .fk{display:flex; align-items:center; gap:6px; padding:6px 12px; border-right:1px solid var(--line); color:var(--dim)}
+  .fkeys .fk b{color:var(--bg); background:var(--dim); padding:0 4px; font-weight:600}
+  .fkeys .fk span{color:var(--text)}
+  .fmeta{margin-left:auto; padding:6px 12px; color:var(--dim); font-size:10px; letter-spacing:.1em; border-left:1px solid var(--line)}
+  .fmeta b{color:var(--amber); font-weight:600}
+
+  /* ── RESPONSIVE ─────────────────────────── */
+  @media (max-width:900px){
+    main{grid-template-columns:1fr}
+    .col{border-right:0; border-bottom:1px solid var(--line)}
+    .col:last-child{border-bottom:0}
+    .log .row{white-space:normal}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .dot{animation:none}
+    .log .row.new .m::after{content:none; animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">ProGuild<small>ESPORTS OPS TERMINAL</small></div>
+  <div class="hdr-right">
+    <span><span class="k">갱신</span> <span class="v num">2026-07-10 16:00</span></span>
+    <span class="live"><span class="dot" aria-hidden="true"></span>LIVE <span id="clock" class="num">16:00:00</span></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── COLUMN 1 : 요약 + 로그 ── -->
+  <section class="col">
+    <div class="panel">
+      <div class="ph"><span class="idx">[1]</span> 요약 · KEY METRICS <span class="r">Q3 SEASON</span></div>
+      <div class="kpi">
+        <div>
+          <div class="k">시즌 승률</div>
+          <div class="val num">68.4%</div>
+          <div class="delta up num">▲ 전주 대비 +3.2%p</div>
+        </div>
+        <div>
+          <div class="k">리그 순위</div>
+          <div class="val num">2위</div>
+          <div class="delta up num">▲ 1계단</div>
+        </div>
+        <div>
+          <div class="k">누적 상금</div>
+          <div class="val num">1억 8,400만원</div>
+          <div class="delta up num">▲ +2,300만원</div>
+        </div>
+        <div>
+          <div class="k">다음 경기</div>
+          <div class="val amber num">D-2</div>
+          <div class="delta flat">vs 팀 이클립스</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span class="idx">[2]</span> 이벤트 로그 · STREAM
+        <span class="r live"><span class="dot" aria-hidden="true"></span>LIVE</span>
+      </div>
+      <div class="log" id="log" aria-live="polite">
+        <div class="row" data-player="raven"><span class="t num">15:58</span><span class="m">레이븐 스나이퍼 헤드샷률 61% 도달</span></div>
+        <div class="row"><span class="t num">15:54</span><span class="m">스크림 세트 3-1 승리 기록</span></div>
+        <div class="row" data-player="nova"><span class="t num">15:49</span><span class="m">노바 폼 지표 하락 감지 — 코칭 플래그</span></div>
+        <div class="row"><span class="t num">15:41</span><span class="m">이클립스 밴픽 패턴 분석 완료</span></div>
+        <div class="row" data-player="blaze"><span class="t num">15:33</span><span class="m">블레이즈 엔트리 진입률 +4.1% 갱신</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COLUMN 2 : 차트 ── -->
+  <section class="col">
+    <div class="panel" style="flex:1; display:flex; flex-direction:column">
+      <div class="ph"><span class="idx">[3]</span> 승률 추이 · 최근 8주 (%) <span class="r">PEAK W6 71</span></div>
+      <div class="chart" style="flex:1">
+        <div class="cbar"><span class="wk">W1</span><div class="track"><span style="width:52%"></span></div><span class="v num">52</span></div>
+        <div class="cbar"><span class="wk">W2</span><div class="track"><span style="width:58%"></span></div><span class="v num">58</span></div>
+        <div class="cbar"><span class="wk">W3</span><div class="track"><span style="width:61%"></span></div><span class="v num">61</span></div>
+        <div class="cbar"><span class="wk">W4</span><div class="track"><span style="width:55%"></span></div><span class="v num">55</span></div>
+        <div class="cbar"><span class="wk">W5</span><div class="track"><span style="width:64%"></span></div><span class="v num">64</span></div>
+        <div class="cbar peak"><span class="wk">W6</span><div class="track"><span style="width:71%"></span></div><span class="v num">71<span class="peaktag">PEAK</span></span></div>
+        <div class="cbar"><span class="wk">W7</span><div class="track"><span style="width:67%"></span></div><span class="v num">67</span></div>
+        <div class="cbar"><span class="wk">W8</span><div class="track"><span style="width:68%"></span></div><span class="v num">68</span></div>
+        <div class="caxis"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+      </div>
+      <div class="clegend">
+        <span><i class="sw-blue"></i>주간 승률</span>
+        <span><i class="sw-amber"></i>시즌 피크</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COLUMN 3 : 로스터 피드 ── -->
+  <section class="col">
+    <div class="panel" style="flex:1">
+      <div class="ph"><span class="idx">[4]</span> 로스터 · ACTIVE FEED <span class="r">6 ENTRIES</span></div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>선수</th><th>포지션</th><th style="text-align:right">KDA</th><th>폼</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="roster">
+          <tr data-player="blaze">
+            <td class="name">블레이즈</td><td class="pos">엔트리</td>
+            <td class="kda num hi">1.42</td><td class="form"><span class="u">▲ 상승</span></td>
+            <td><span class="badge b-fix">주전확정</span></td>
+          </tr>
+          <tr data-player="frost">
+            <td class="name">프로스트</td><td class="pos">서포터</td>
+            <td class="kda num lo">0.98</td><td class="form"><span class="s">■ 유지</span></td>
+            <td><span class="badge b-act">활성</span></td>
+          </tr>
+          <tr data-player="raven">
+            <td class="name">레이븐</td><td class="pos">스나이퍼</td>
+            <td class="kda num hi">1.67</td><td class="form"><span class="u">▲ 상승</span></td>
+            <td><span class="badge b-fix">주전확정</span></td>
+          </tr>
+          <tr data-player="nova">
+            <td class="name">노바</td><td class="pos">리퍼</td>
+            <td class="kda num lo">0.71</td><td class="form"><span class="d">▼ 하락</span></td>
+            <td><span class="badge b-low">폼저하</span></td>
+          </tr>
+          <tr data-player="quartz">
+            <td class="name">쿼츠</td><td class="pos">인게이저</td>
+            <td class="kda num mid">1.15</td><td class="form"><span class="s">■ 유지</span></td>
+            <td><span class="badge b-act">활성</span></td>
+          </tr>
+          <tr data-player="echo">
+            <td class="name">에코</td><td class="pos">플렉스</td>
+            <td class="kda num mid">1.03</td><td class="form"><span class="s">■ 유지</span></td>
+            <td><span class="badge b-wait">로테이션대기</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fkeys">
+    <span class="fk"><b>F1</b><span>도움말</span></span>
+    <span class="fk"><b>F2</b><span>로스터</span></span>
+    <span class="fk"><b>F3</b><span>전적</span></span>
+    <span class="fk"><b>F4</b><span>스카우팅</span></span>
+    <span class="fk"><b>F5</b><span>새로고침</span></span>
+    <span class="fmeta">STYLE <b>04</b> · 고밀도 터미널</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  try{
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── 로그 ↔ 로스터 연결 하이라이트 ──
+    function bindLink(row){
+      var p = row.getAttribute('data-player');
+      if(!p) return;
+      row.addEventListener('mouseenter', function(){
+        var t = document.querySelector('#roster tr[data-player="'+p+'"]');
+        if(t) t.classList.add('linked');
+      });
+      row.addEventListener('mouseleave', function(){
+        var t = document.querySelector('#roster tr[data-player="'+p+'"]');
+        if(t) t.classList.remove('linked');
+      });
+    }
+    var logEl = document.getElementById('log');
+    Array.prototype.forEach.call(logEl.querySelectorAll('.row'), bindLink);
+
+    // ── 실시간 시계 ──
+    var clock = document.getElementById('clock');
+    function pad(n){return (n<10?'0':'')+n;}
+    function tick(){
+      var d = new Date();
+      clock.textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    }
+    tick();
+    if(!reduce) setInterval(tick, 1000);
+
+    if(reduce) return; // 모션 최소화 시 로그 스트림 정지 (정적 5줄 유지)
+
+    // ── 흐르는 이벤트 로그 ──
+    var feed = [
+      {p:'quartz', m:'쿼츠 인게이저 진입 타이밍 최적화 반영'},
+      {p:'', m:'상대 이클립스 미드 로테이션 빈도 상승 감지'},
+      {p:'frost', m:'프로스트 서포터 시야 점유율 +3.4% 기록'},
+      {p:'', m:'다음 경기 D-2 · 컨디션 리포트 자동 수집'},
+      {p:'echo', m:'에코 플렉스 서브 포지션 시뮬레이션 완료'}
+    ];
+    var fi = 0;
+
+    function typeIn(mEl, text, done){
+      var i = 0;
+      (function step(){
+        mEl.textContent = text.slice(0, i);
+        if(i++ <= text.length){ setTimeout(step, 16); }
+        else if(done){ done(); }
+      })();
+    }
+
+    function stamp(){
+      var d = new Date();
+      return pad(d.getHours())+':'+pad(d.getMinutes());
+    }
+
+    function push(){
+      var item = feed[fi % feed.length]; fi++;
+      var row = document.createElement('div');
+      row.className = 'row new';
+      if(item.p) row.setAttribute('data-player', item.p);
+      var t = document.createElement('span'); t.className='t num'; t.textContent = stamp();
+      var m = document.createElement('span'); m.className='m';
+      row.appendChild(t); row.appendChild(m);
+      logEl.insertBefore(row, logEl.firstChild);
+      bindLink(row);
+      typeIn(m, item.m, function(){ row.classList.remove('new'); });
+      // 최대 7줄 유지
+      while(logEl.children.length > 7){ logEl.removeChild(logEl.lastChild); }
+      schedule();
+    }
+    function schedule(){
+      var wait = 8000 + Math.floor(Math.random()*7000); // 8~15초
+      setTimeout(push, wait);
+    }
+    schedule();
+
+  }catch(e){ /* JS 실패해도 초기 5줄 로그 + 정적 화면 유지 */ }
+})();
+</script>
+</body>
+</html>

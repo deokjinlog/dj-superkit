@@ -1,0 +1,1502 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MUJINE · 프리미엄 오가닉 코튼 베이직 반팔티</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  /* ============ 디자인 토큰 (versatile — 커머스 + 어드민 재사용) ============ */
+  :root {
+    /* 색 — 커머스 표면 */
+    --bg: #FBFAFF;
+    --surface: #FFFFFF;
+    --surface-2: #F6F4FE;
+    --ink: #17143A;
+    --muted: #6B6885;
+    --muted-soft: #9C99B4;
+    --primary: #7C5CFF;
+    --primary-ink: #5A3FE0;
+    --pink: #FF8FC0;
+    --mint: #5EE6C8;
+    --border: rgba(23, 20, 58, 0.08);
+    --border-strong: rgba(23, 20, 58, 0.14);
+
+    /* 시맨틱 */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #F43F5E;
+    --info: #7C5CFF;
+
+    /* 그라디언트 — 바이올렛→핑크 한 방향만 */
+    --grad: linear-gradient(135deg, #7C5CFF 0%, #FF8FC0 100%);
+    --grad-soft: linear-gradient(135deg, rgba(124, 92, 255, 0.14) 0%, rgba(255, 143, 192, 0.14) 100%);
+
+    /* 반경 */
+    --r-xs: 8px;
+    --r-sm: 12px;
+    --r-md: 18px;
+    --r-lg: 24px;
+    --r-xl: 28px;
+    --r-pill: 999px;
+
+    /* 그림자 — 절제된 elevation */
+    --shadow-sm: 0 1px 2px rgba(23, 20, 58, 0.04), 0 10px 30px rgba(23, 20, 58, 0.06);
+    --shadow-md: 0 12px 32px rgba(23, 20, 58, 0.1);
+    --shadow-lift: 0 20px 40px rgba(124, 92, 255, 0.15);
+    --ring: 0 0 0 3px rgba(124, 92, 255, 0.28);
+
+    /* 타이포 */
+    --font: "Pretendard", "Pretendard Variable", -apple-system, system-ui, sans-serif;
+
+    /* 스페이싱 — 8px 그리드 */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+    --sp-8: 64px;
+
+    --maxw: 1240px;
+    --nav-h: 68px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01";
+    overflow-x: hidden;
+  }
+
+  /* L0 배경 — 파스텔 블롭 2개 */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    opacity: 0.55;
+  }
+  body::before {
+    width: 520px;
+    height: 520px;
+    top: -160px;
+    right: -120px;
+    background: radial-gradient(circle at 30% 30%, rgba(124, 92, 255, 0.5), transparent 70%);
+  }
+  body::after {
+    width: 480px;
+    height: 480px;
+    bottom: -180px;
+    left: -140px;
+    background: radial-gradient(circle at 60% 40%, rgba(94, 230, 200, 0.45), transparent 70%);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 var(--sp-5);
+  }
+
+  /* ============ 네비게이션 ============ */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--nav-h);
+    background: rgba(251, 250, 255, 0.82);
+    backdrop-filter: saturate(160%) blur(14px);
+    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--border);
+    animation: navDrop 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  @keyframes navDrop {
+    from { transform: translateY(-8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .nav-inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    flex-shrink: 0;
+  }
+  .cats {
+    display: flex;
+    gap: var(--sp-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .cats a {
+    display: block;
+    padding: var(--sp-2) var(--sp-3);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    border-radius: var(--r-xs);
+    transition: color 0.18s ease, background 0.18s ease;
+  }
+  .cats a:hover,
+  .cats a:focus-visible {
+    color: var(--ink);
+    background: var(--surface-2);
+    outline: none;
+  }
+  .search {
+    margin-left: auto;
+    position: relative;
+    width: 280px;
+    max-width: 32vw;
+  }
+  .search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-soft);
+  }
+  .search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--sp-3) 0 38px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .search input::placeholder { color: var(--muted-soft); }
+  .search input:hover { border-color: var(--border-strong); }
+  .search input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--ring);
+  }
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  .icon-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-radius: var(--r-xs);
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+  }
+  .icon-btn:hover,
+  .icon-btn:focus-visible {
+    color: var(--primary-ink);
+    background: var(--surface-2);
+    outline: none;
+    transform: translateY(-1px);
+  }
+  .icon-btn:active { transform: translateY(0) scale(0.94); }
+  .badge {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 17px;
+    text-align: center;
+    color: #fff;
+    background: var(--grad);
+    border-radius: var(--r-pill);
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .login-btn {
+    height: 40px;
+    padding: 0 var(--sp-4);
+    margin-left: var(--sp-1);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+  .login-btn:hover { border-color: var(--primary); box-shadow: var(--ring); }
+  .login-btn:active { transform: scale(0.97); }
+
+  /* ============ 브레드크럼 ============ */
+  .crumb {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-5) 0 var(--sp-2);
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .crumb a:hover { color: var(--primary-ink); }
+  .crumb .sep { color: var(--muted-soft); }
+
+  /* ============ 상품 히어로 ============ */
+  .product {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--sp-7);
+    padding: var(--sp-4) 0 var(--sp-8);
+    align-items: start;
+  }
+
+  /* --- 갤러리 --- */
+  .gallery {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: 0.1s;
+  }
+  .hero-img {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-xl);
+    background:
+      radial-gradient(120% 90% at 70% 12%, rgba(255, 143, 192, 0.35), transparent 55%),
+      radial-gradient(130% 100% at 15% 95%, rgba(94, 230, 200, 0.32), transparent 55%),
+      linear-gradient(160deg, #F3EFFF 0%, #FDF3F8 100%);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  /* 티셔츠 실루엣 — CSS 도형 */
+  .tee {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 62%;
+    aspect-ratio: 1 / 1.02;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F0ECFB 100%);
+    box-shadow: inset 0 -30px 60px rgba(124, 92, 255, 0.08), 0 24px 44px rgba(23, 20, 58, 0.1);
+    clip-path: polygon(
+      30% 8%, 42% 2%, 58% 2%, 70% 8%,
+      100% 26%, 90% 40%, 78% 33%,
+      78% 100%, 22% 100%, 22% 33%,
+      10% 40%, 0% 26%
+    );
+  }
+  .tee::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 6%;
+    transform: translateX(-50%);
+    width: 26%;
+    height: 12%;
+    border: 3px solid rgba(124, 92, 255, 0.12);
+    border-top: none;
+    border-radius: 0 0 60% 60%;
+  }
+  .hero-watermark {
+    position: absolute;
+    left: 50%;
+    top: 51%;
+    transform: translate(-50%, -50%);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    color: rgba(124, 92, 255, 0.32);
+    z-index: 2;
+  }
+  .hero-tag {
+    position: absolute;
+    top: var(--sp-4);
+    left: var(--sp-4);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px var(--sp-3);
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #fff;
+    background: var(--grad);
+    border-radius: var(--r-pill);
+    box-shadow: var(--shadow-sm);
+    z-index: 3;
+  }
+  .live-view {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(8px);
+    border-radius: var(--r-pill);
+    box-shadow: var(--shadow-sm);
+    z-index: 3;
+  }
+  .pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  }
+  .thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-3);
+    margin-top: var(--sp-3);
+  }
+  .thumb {
+    aspect-ratio: 1;
+    border-radius: var(--r-md);
+    border: 2px solid transparent;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .thumb i {
+    position: absolute;
+    inset: 12%;
+    border-radius: var(--r-sm);
+    display: block;
+  }
+  .thumb:nth-child(1) i { background: linear-gradient(160deg, #F3EFFF, #FDF3F8); }
+  .thumb:nth-child(2) i { background: linear-gradient(160deg, #17143A, #3A3170); }
+  .thumb:nth-child(3) i { background: linear-gradient(160deg, #E8FBF5, #D6F3F9); }
+  .thumb:nth-child(4) i { background: linear-gradient(160deg, #FFF0F6, #FFE3EF); }
+  .thumb:hover,
+  .thumb:focus-visible {
+    transform: translateY(-3px);
+    border-color: rgba(124, 92, 255, 0.4);
+    box-shadow: var(--shadow-lift);
+    outline: none;
+  }
+  .thumb.active {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* --- 정보 패널 --- */
+  .info {
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: 0.18s;
+  }
+  @keyframes rise {
+    from { transform: translateY(14px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-2);
+  }
+  .brand {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--primary-ink);
+  }
+  .brand-chip {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--primary-ink);
+    background: var(--grad-soft);
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+  }
+  .title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin: 0 0 var(--sp-3);
+  }
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-5);
+  }
+  .stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px var(--sp-3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    box-shadow: var(--shadow-sm);
+  }
+  .stars .glyph { color: var(--warning); font-size: 14px; letter-spacing: 1px; }
+  .stars b { font-size: 15px; font-weight: 800; }
+  .review-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 1px;
+    transition: color 0.18s ease, border-color 0.18s ease;
+  }
+  .review-link:hover { color: var(--primary-ink); border-color: var(--primary); }
+
+  /* --- 가격 카드 --- */
+  .price-card {
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--sp-5);
+  }
+  .price-top {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+  .discount {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--danger);
+    letter-spacing: -0.02em;
+  }
+  .price-now {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+  .price-now .won { font-size: 22px; font-weight: 700; }
+  .price-list {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: var(--sp-2);
+  }
+  .price-list .strike {
+    font-size: 15px;
+    color: var(--muted-soft);
+    text-decoration: line-through;
+  }
+  .price-list .save {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+  }
+
+  /* --- 옵션 --- */
+  .opt-block { margin-bottom: var(--sp-5); }
+  .opt-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: var(--sp-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .opt-label .picked { color: var(--ink); font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .colors { display: flex; gap: var(--sp-3); }
+  .color-chip {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border-strong), var(--shadow-sm);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .color-chip:hover,
+  .color-chip:focus-visible { transform: scale(1.08); outline: none; }
+  .color-chip.active {
+    box-shadow: 0 0 0 2px var(--primary), var(--shadow-sm);
+    transform: scale(1.06);
+  }
+  .c-cream { background: linear-gradient(160deg, #FBF7EC, #EFE7D2); }
+  .c-ink { background: linear-gradient(160deg, #2A2550, #17143A); }
+  .c-mint { background: linear-gradient(160deg, #7DF0D6, #4CD4B5); }
+  .c-pink { background: linear-gradient(160deg, #FFB3D3, #FF8FC0); }
+
+  .sizes { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .size-btn {
+    min-width: 52px;
+    height: 44px;
+    padding: 0 var(--sp-3);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .size-btn:hover:not(:disabled),
+  .size-btn:focus-visible {
+    border-color: var(--primary);
+    background: var(--surface-2);
+    outline: none;
+    transform: translateY(-1px);
+  }
+  .size-btn.active {
+    border-color: var(--primary);
+    background: var(--grad-soft);
+    color: var(--primary-ink);
+    box-shadow: var(--ring);
+  }
+  .size-btn:disabled {
+    color: var(--muted-soft);
+    background: var(--surface-2);
+    border-color: var(--border);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    text-decoration-color: var(--muted-soft);
+  }
+
+  /* --- 수량 + 소계 --- */
+  .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-4) 0;
+    border-top: 1px dashed var(--border-strong);
+    border-bottom: 1px dashed var(--border-strong);
+    margin-bottom: var(--sp-5);
+  }
+  .stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .stepper button {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .stepper button:hover:not(:disabled) { background: var(--surface-2); color: var(--primary-ink); }
+  .stepper button:active:not(:disabled) { background: var(--grad-soft); }
+  .stepper button:disabled { color: var(--muted-soft); cursor: not-allowed; }
+  .stepper .val {
+    width: 48px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    line-height: 40px;
+  }
+  .subtotal { text-align: right; }
+  .subtotal .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .subtotal .v { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .subtotal .v .won { font-size: 14px; font-weight: 700; }
+
+  /* --- CTA --- */
+  .cta-row {
+    display: grid;
+    grid-template-columns: 52px 1.4fr 1fr;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .btn {
+    height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    font-family: inherit;
+    font-size: 15.5px;
+    font-weight: 800;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .btn-primary {
+    color: #fff;
+    background: var(--grad);
+    box-shadow: 0 8px 20px rgba(124, 92, 255, 0.28);
+  }
+  .btn-primary:hover,
+  .btn-primary:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+    outline: none;
+  }
+  .btn-primary:active { transform: translateY(0) scale(0.99); }
+  .btn-secondary {
+    color: var(--primary-ink);
+    background: var(--surface);
+    border-color: var(--primary);
+  }
+  .btn-secondary:hover,
+  .btn-secondary:focus-visible {
+    background: var(--surface-2);
+    transform: translateY(-2px);
+    box-shadow: var(--ring);
+    outline: none;
+  }
+  .btn-secondary:active { transform: translateY(0) scale(0.99); }
+  .wish {
+    display: grid;
+    place-items: center;
+    height: 54px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  }
+  .wish:hover,
+  .wish:focus-visible { color: var(--pink); border-color: var(--pink); outline: none; transform: translateY(-2px); }
+  .wish.active { color: #fff; background: var(--pink); border-color: var(--pink); }
+  .wish.active svg { fill: #fff; }
+
+  .perks {
+    display: grid;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+  }
+  .perk {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .perk svg { color: var(--primary); flex-shrink: 0; }
+  .perk b { font-weight: 800; }
+
+  /* ============ 탭 ============ */
+  .tabs-sec { padding: var(--sp-6) 0 var(--sp-8); }
+  .tabs {
+    position: sticky;
+    top: var(--nav-h);
+    z-index: 20;
+    display: flex;
+    gap: var(--sp-1);
+    padding: var(--sp-2);
+    background: rgba(251, 250, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--sp-6);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    min-width: max-content;
+    padding: var(--sp-3) var(--sp-4);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.18s ease, background 0.18s ease;
+  }
+  .tab .cnt { font-size: 12px; color: var(--muted-soft); margin-left: 4px; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: #fff; background: var(--grad); }
+  .tab.active .cnt { color: rgba(255, 255, 255, 0.8); }
+
+  .panel { display: none; animation: fade 0.3s ease both; }
+  .panel.active { display: block; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--sp-6);
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--sp-4);
+  }
+  .card p { color: var(--muted); font-size: 14.5px; margin: 0 0 var(--sp-3); }
+
+  /* 상세정보 스펙 그리드 */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+  .spec {
+    padding: var(--sp-4);
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+  }
+  .spec .k { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .spec .v { font-size: 16px; font-weight: 700; margin-top: 4px; letter-spacing: -0.01em; }
+
+  /* 리뷰 요약 */
+  .rev-summary {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--sp-6);
+    align-items: center;
+    padding: var(--sp-5);
+    background: var(--grad-soft);
+    border-radius: var(--r-lg);
+    margin-bottom: var(--sp-5);
+  }
+  .rev-score { text-align: center; }
+  .rev-score .big {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .rev-score .glyph { color: var(--warning); font-size: 16px; letter-spacing: 2px; }
+  .rev-score .of { font-size: 12.5px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+  .rev-bars { display: grid; gap: var(--sp-2); }
+  .rev-bar { display: flex; align-items: center; gap: var(--sp-3); font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .rev-bar .lbl { width: 34px; }
+  .rev-bar .track { flex: 1; height: 8px; background: rgba(23, 20, 58, 0.07); border-radius: var(--r-pill); overflow: hidden; }
+  .rev-bar .fill { height: 100%; background: var(--grad); border-radius: var(--r-pill); }
+  .rev-bar .pct { width: 40px; text-align: right; }
+
+  .reviews { display: grid; gap: var(--sp-3); }
+  .review {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: var(--sp-4);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .review:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+    border-color: rgba(124, 92, 255, 0.28);
+  }
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .avatar.a1 { background: linear-gradient(135deg, #7C5CFF, #FF8FC0); }
+  .avatar.a2 { background: linear-gradient(135deg, #5EE6C8, #7C5CFF); }
+  .avatar.a3 { background: linear-gradient(135deg, #FF8FC0, #F59E0B); }
+  .rev-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 6px; }
+  .rev-head .who { font-size: 14px; font-weight: 800; }
+  .rev-head .glyph { color: var(--warning); font-size: 12px; letter-spacing: 1px; }
+  .rev-head .verified {
+    font-size: 10.5px; font-weight: 700; color: var(--success);
+    background: rgba(16, 185, 129, 0.1); padding: 2px 7px; border-radius: var(--r-pill);
+  }
+  .rev-head .date { font-size: 12px; color: var(--muted-soft); margin-left: auto; font-weight: 500; }
+  .rev-body { font-size: 14.5px; color: var(--ink); margin: 0 0 var(--sp-3); line-height: 1.6; }
+  .rev-opts { font-size: 12px; color: var(--muted); font-weight: 600; display: flex; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+  .rev-opts span { background: var(--surface-2); padding: 3px 8px; border-radius: var(--r-pill); }
+  .helpful {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px var(--sp-3);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+  }
+  .helpful:hover,
+  .helpful:focus-visible {
+    color: var(--primary-ink);
+    border-color: var(--primary);
+    background: var(--surface-2);
+    outline: none;
+  }
+  .helpful:active { transform: scale(0.95); }
+  .helpful.voted { color: var(--primary-ink); border-color: var(--primary); background: var(--grad-soft); }
+
+  .qa-item, .ship-row { padding: var(--sp-4) 0; border-bottom: 1px solid var(--border); }
+  .qa-item:last-child, .ship-row:last-child { border-bottom: none; }
+  .qa-q { display: flex; gap: var(--sp-3); font-size: 14.5px; font-weight: 700; }
+  .qa-q .badge-q { color: var(--primary-ink); font-weight: 800; }
+  .qa-a { display: flex; gap: var(--sp-3); font-size: 14px; color: var(--muted); margin-top: var(--sp-2); }
+  .qa-a .badge-a { color: var(--pink); font-weight: 800; }
+  .qa-status { font-size: 11px; font-weight: 700; color: var(--success); background: rgba(16,185,129,.1); padding: 2px 8px; border-radius: var(--r-pill); margin-left: auto; }
+  .ship-row { display: flex; gap: var(--sp-4); align-items: flex-start; }
+  .ship-row .k { width: 100px; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+  .ship-row .v { font-size: 14px; color: var(--muted); }
+
+  /* ============ 관련 상품 ============ */
+  .related { padding: 0 0 var(--sp-8); }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--sp-5); }
+  .sec-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+  .sec-head a { font-size: 13px; font-weight: 700; color: var(--primary-ink); }
+  .sec-head a:hover { text-decoration: underline; }
+  .rel-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+  }
+  .rel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .rel-card:hover,
+  .rel-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+    border-color: rgba(124, 92, 255, 0.28);
+    outline: none;
+  }
+  .rel-img {
+    aspect-ratio: 1;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .rel-img .mini-tee {
+    width: 52%;
+    aspect-ratio: 1 / 1.02;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 24px rgba(23, 20, 58, 0.1);
+    clip-path: polygon(30% 8%, 42% 2%, 58% 2%, 70% 8%, 100% 26%, 90% 40%, 78% 33%, 78% 100%, 22% 100%, 22% 33%, 10% 40%, 0% 26%);
+  }
+  .rel-img.g1 { background: linear-gradient(160deg, #F3EFFF, #FDF3F8); }
+  .rel-img.g2 { background: linear-gradient(160deg, #E8FBF5, #D6F3F9); }
+  .rel-img.g3 { background: linear-gradient(160deg, #FFF0F6, #FFE3EF); }
+  .rel-img.g4 { background: linear-gradient(160deg, #EEEBFF, #E4F7F1); }
+  .rel-badge {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 10.5px; font-weight: 800; color: #fff;
+    background: var(--grad); padding: 3px 9px; border-radius: var(--r-pill);
+  }
+  .rel-body { padding: var(--sp-4); }
+  .rel-brand { font-size: 11px; font-weight: 800; color: var(--primary-ink); letter-spacing: 0.06em; }
+  .rel-name { font-size: 14px; font-weight: 700; margin: 4px 0 var(--sp-2); letter-spacing: -0.01em; line-height: 1.4; }
+  .rel-price { display: flex; align-items: baseline; gap: var(--sp-2); }
+  .rel-price .now { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+  .rel-price .now .won { font-size: 12px; font-weight: 700; }
+  .rel-price .off { font-size: 12px; font-weight: 800; color: var(--danger); }
+  .rel-rating { font-size: 11.5px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+  .rel-rating .glyph { color: var(--warning); }
+
+  /* ============ 푸터 ============ */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .foot-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-6) var(--sp-5);
+    max-width: var(--maxw);
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  .foot-brand { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .foot-path { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .foot-path .sep { color: var(--muted-soft); margin: 0 8px; }
+  .foot-links { display: flex; gap: var(--sp-4); font-size: 13px; font-weight: 600; color: var(--muted); }
+  .foot-links a:hover { color: var(--primary-ink); }
+
+  /* ============ 반응형 ============ */
+  @media (max-width: 1024px) {
+    .product { grid-template-columns: 1fr; gap: var(--sp-6); }
+    .gallery { position: static; }
+    .rel-grid { grid-template-columns: repeat(2, 1fr); }
+    .rev-summary { grid-template-columns: 1fr; text-align: center; }
+  }
+  @media (max-width: 768px) {
+    .cats { display: none; }
+    .search { max-width: none; width: auto; flex: 1; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 var(--sp-4); }
+    .title { font-size: 24px; }
+    .price-now { font-size: 34px; }
+    .rel-grid { grid-template-columns: 1fr; }
+    .cta-row { grid-template-columns: 52px 1fr; }
+    .cta-row .btn-secondary { grid-column: 1 / -1; }
+    .login-btn { display: none; }
+  }
+
+  /* ============ 접근성 ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+
+<!-- ============ 네비게이션 ============ -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo">MUJINE</a>
+    <ul class="cats">
+      <li><a href="#">의류</a></li>
+      <li><a href="#">전자</a></li>
+      <li><a href="#">리빙</a></li>
+      <li><a href="#">뷰티</a></li>
+    </ul>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" placeholder="브랜드, 상품을 검색하세요" aria-label="상품 검색" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="찜 목록">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="장바구니">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <span class="badge num">2</span>
+      </button>
+      <button class="login-btn">로그인</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <!-- 브레드크럼 -->
+  <nav class="crumb" aria-label="위치">
+    <a href="#">홈</a><span class="sep">/</span>
+    <a href="#">의류</a><span class="sep">/</span>
+    <a href="#">티셔츠</a><span class="sep">/</span>
+    <span>프리미엄 오가닉 코튼 베이직 반팔티</span>
+  </nav>
+
+  <!-- ============ 상품 히어로 ============ -->
+  <section class="product">
+    <!-- 갤러리 -->
+    <div class="gallery">
+      <div class="hero-img">
+        <span class="hero-tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 15 9l7 .5-5.4 4.5L18.5 21 12 17l-6.5 4 1.9-7L2 9.5 9 9z"/></svg>
+          BEST · 20% OFF
+        </span>
+        <span class="live-view"><span class="pulse"></span>지금 <b class="num">12</b>명이 보는 중</span>
+        <div class="tee"></div>
+        <span class="hero-watermark">MUJINE</span>
+      </div>
+      <div class="thumbs">
+        <button class="thumb active" aria-label="크림 색상 이미지"><i></i></button>
+        <button class="thumb" aria-label="잉크 색상 이미지"><i></i></button>
+        <button class="thumb" aria-label="민트 색상 이미지"><i></i></button>
+        <button class="thumb" aria-label="핑크 색상 이미지"><i></i></button>
+      </div>
+    </div>
+
+    <!-- 정보 -->
+    <div class="info">
+      <div class="brand-row">
+        <span class="brand">MUJINE</span>
+        <span class="brand-chip">공식 스토어</span>
+      </div>
+      <h1 class="title">프리미엄 오가닉 코튼 베이직 반팔티</h1>
+
+      <div class="rating-row">
+        <span class="stars">
+          <span class="glyph">★★★★★</span>
+          <b class="num" data-count="4.8" data-decimals="1">4.8</b>
+        </span>
+        <a href="#reviews" class="review-link">리뷰 <span class="num" data-count="128">128</span>개 보기</a>
+      </div>
+
+      <!-- 가격 -->
+      <div class="price-card">
+        <div class="price-top">
+          <span class="discount num">20%</span>
+          <span class="price-now num" data-count="39000">39,000<span class="won">원</span></span>
+        </div>
+        <div class="price-list">
+          <span class="strike num">정가 49,000원</span>
+          <span class="save num">10,000원 절약</span>
+        </div>
+      </div>
+
+      <!-- 색상 -->
+      <div class="opt-block">
+        <div class="opt-label"><span>색상</span><span class="picked" id="colorPick">크림</span></div>
+        <div class="colors" role="radiogroup" aria-label="색상 선택">
+          <button class="color-chip c-cream active" role="radio" aria-checked="true" data-color="크림" aria-label="크림"></button>
+          <button class="color-chip c-ink" role="radio" aria-checked="false" data-color="잉크 블랙" aria-label="잉크 블랙"></button>
+          <button class="color-chip c-mint" role="radio" aria-checked="false" data-color="소프트 민트" aria-label="소프트 민트"></button>
+          <button class="color-chip c-pink" role="radio" aria-checked="false" data-color="블러시 핑크" aria-label="블러시 핑크"></button>
+        </div>
+      </div>
+
+      <!-- 사이즈 -->
+      <div class="opt-block">
+        <div class="opt-label"><span>사이즈</span><a href="#" class="picked" style="color:var(--primary-ink);font-size:12px;font-weight:700;">사이즈 가이드</a></div>
+        <div class="sizes" role="radiogroup" aria-label="사이즈 선택">
+          <button class="size-btn" role="radio" aria-checked="false">S</button>
+          <button class="size-btn active" role="radio" aria-checked="true">M</button>
+          <button class="size-btn" role="radio" aria-checked="false">L</button>
+          <button class="size-btn" role="radio" aria-checked="false">XL</button>
+          <button class="size-btn" role="radio" aria-checked="false" disabled title="품절">XXL</button>
+        </div>
+      </div>
+
+      <!-- 수량 + 소계 -->
+      <div class="qty-row">
+        <div>
+          <div class="opt-label" style="margin-bottom:8px;">수량</div>
+          <div class="stepper">
+            <button id="minus" aria-label="수량 감소" disabled>−</button>
+            <span class="val num" id="qty">1</span>
+            <button id="plus" aria-label="수량 증가">+</button>
+          </div>
+        </div>
+        <div class="subtotal">
+          <div class="k">주문 금액</div>
+          <div class="v num" id="subtotal">39,000<span class="won">원</span></div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-row">
+        <button class="wish" id="wish" aria-label="찜하기" aria-pressed="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+        <button class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+          장바구니 담기
+        </button>
+        <button class="btn btn-secondary">바로 구매</button>
+      </div>
+
+      <!-- 혜택 -->
+      <div class="perks">
+        <div class="perk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1.5"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg>
+          <span><b>무료배송</b> · 오늘 오후 3시 이전 주문 시 내일 도착</span>
+        </div>
+        <div class="perk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span>구매 시 <b class="num">1,170원</b> 적립 (<span class="num">3%</span>) · 리뷰 작성 시 추가 적립</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 탭 ============ -->
+  <section class="tabs-sec" id="reviews">
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-panel="p-detail">상세정보</button>
+      <button class="tab" role="tab" data-panel="p-review">리뷰<span class="cnt num">128</span></button>
+      <button class="tab" role="tab" data-panel="p-qa">Q&amp;A<span class="cnt num">12</span></button>
+      <button class="tab" role="tab" data-panel="p-ship">배송/교환</button>
+    </div>
+
+    <!-- 상세정보 -->
+    <div class="panel active" id="p-detail" role="tabpanel">
+      <div class="card">
+        <h3>정직한 소재, 매일 입는 기본</h3>
+        <p>GOTS 인증 오가닉 코튼 100%로 짜인 30수 원단은 사계절 편안한 두께감을 유지합니다. 세탁 후에도 목 늘어짐이 적도록 넥라인에 리브 배색을 더했고, 무형광 처리로 민감한 피부에도 안심하고 착용할 수 있습니다.</p>
+        <p>과하지 않은 세미 오버핏 실루엣으로 이너와 아우터 어느 쪽으로도 활용하기 좋습니다.</p>
+        <div class="spec-grid">
+          <div class="spec"><div class="k">소재</div><div class="v">오가닉 코튼 100%</div></div>
+          <div class="spec"><div class="k">두께</div><div class="v num">30수 · 미디엄</div></div>
+          <div class="spec"><div class="k">핏</div><div class="v">세미 오버핏</div></div>
+          <div class="spec"><div class="k">세탁</div><div class="v">찬물 손세탁 권장</div></div>
+          <div class="spec"><div class="k">제조</div><div class="v">대한민국</div></div>
+          <div class="spec"><div class="k">인증</div><div class="v">GOTS 오가닉</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리뷰 -->
+    <div class="panel" id="p-review" role="tabpanel">
+      <div class="rev-summary">
+        <div class="rev-score">
+          <div class="big num">4.8</div>
+          <div class="glyph">★★★★★</div>
+          <div class="of num">128개 리뷰 · 96% 추천</div>
+        </div>
+        <div class="rev-bars">
+          <div class="rev-bar"><span class="lbl num">5점</span><span class="track"><span class="fill" style="width:82%"></span></span><span class="pct num">82%</span></div>
+          <div class="rev-bar"><span class="lbl num">4점</span><span class="track"><span class="fill" style="width:12%"></span></span><span class="pct num">12%</span></div>
+          <div class="rev-bar"><span class="lbl num">3점</span><span class="track"><span class="fill" style="width:4%"></span></span><span class="pct num">4%</span></div>
+          <div class="rev-bar"><span class="lbl num">2점</span><span class="track"><span class="fill" style="width:1%"></span></span><span class="pct num">1%</span></div>
+          <div class="rev-bar"><span class="lbl num">1점</span><span class="track"><span class="fill" style="width:1%"></span></span><span class="pct num">1%</span></div>
+        </div>
+      </div>
+
+      <div class="reviews">
+        <article class="review">
+          <div class="avatar a1">JH</div>
+          <div>
+            <div class="rev-head">
+              <span class="who">J. H.</span>
+              <span class="glyph">★★★★★</span>
+              <span class="verified">구매 확인</span>
+              <span class="date num">2026.07.02</span>
+            </div>
+            <p class="rev-body">원단이 도톰하고 비침이 없어서 이너 없이도 입을 수 있어요. 세탁 두 번 했는데 목이 하나도 안 늘어났습니다. 색감도 화면 그대로예요.</p>
+            <div class="rev-opts"><span>크림</span><span>M</span></div>
+            <button class="helpful">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11H3V10zM7 10l4-8a2 2 0 0 1 2.7 2.5L12.5 9H20a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 18.8 20H7"/></svg>
+              도움돼요 <b class="num">47</b>
+            </button>
+          </div>
+        </article>
+
+        <article class="review">
+          <div class="avatar a2">SY</div>
+          <div>
+            <div class="rev-head">
+              <span class="who">S. Y.</span>
+              <span class="glyph">★★★★★</span>
+              <span class="verified">구매 확인</span>
+              <span class="date num">2026.06.28</span>
+            </div>
+            <p class="rev-body">세미 오버핏이라 팔뚝 부담 없이 딱 좋아요. 175cm에 L 사이즈가 여유 있게 맞습니다. 재구매 의사 100%.</p>
+            <div class="rev-opts"><span>잉크 블랙</span><span>L</span></div>
+            <button class="helpful">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11H3V10zM7 10l4-8a2 2 0 0 1 2.7 2.5L12.5 9H20a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 18.8 20H7"/></svg>
+              도움돼요 <b class="num">31</b>
+            </button>
+          </div>
+        </article>
+
+        <article class="review">
+          <div class="avatar a3">MK</div>
+          <div>
+            <div class="rev-head">
+              <span class="who">M. K.</span>
+              <span class="glyph">★★★★☆</span>
+              <span class="verified">구매 확인</span>
+              <span class="date num">2026.06.19</span>
+            </div>
+            <p class="rev-body">품질은 만족스러운데 민트 색이 생각보다 연했어요. 그래도 촉감이 부드럽고 마감이 깔끔해서 잘 입고 있습니다.</p>
+            <div class="rev-opts"><span>소프트 민트</span><span>S</span></div>
+            <button class="helpful">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11H3V10zM7 10l4-8a2 2 0 0 1 2.7 2.5L12.5 9H20a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 18.8 20H7"/></svg>
+              도움돼요 <b class="num">18</b>
+            </button>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Q&A -->
+    <div class="panel" id="p-qa" role="tabpanel">
+      <div class="card">
+        <h3>상품 Q&amp;A <span class="num" style="color:var(--muted);font-weight:700;">12</span></h3>
+        <div class="qa-item">
+          <div class="qa-q"><span class="badge-q">Q</span>XXL 재입고 예정이 있을까요?<span class="qa-status">답변완료</span></div>
+          <div class="qa-a"><span class="badge-a">A</span>다음 주 중 XXL 물량이 입고될 예정입니다. 재입고 알림을 신청해 두시면 문자로 안내드립니다.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q"><span class="badge-q">Q</span>건조기 사용해도 되나요?<span class="qa-status">답변완료</span></div>
+          <div class="qa-a"><span class="badge-a">A</span>수축 방지를 위해 자연 건조를 권장드립니다. 부득이한 경우 저온 코스로 짧게 사용해 주세요.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q"><span class="badge-q">Q</span>크림 색상 실물이 화면보다 노란가요?<span class="qa-status">답변완료</span></div>
+          <div class="qa-a"><span class="badge-a">A</span>모니터 환경에 따라 차이가 있으나 실물은 아이보리에 가까운 내추럴 톤입니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 배송/교환 -->
+    <div class="panel" id="p-ship" role="tabpanel">
+      <div class="card">
+        <h3>배송 및 교환·반품 안내</h3>
+        <div class="ship-row"><div class="k">배송비</div><div class="v">무료배송 (도서·산간 3,000원 추가)</div></div>
+        <div class="ship-row"><div class="k">배송기간</div><div class="v">평균 1~2일 · 오후 3시 이전 결제 시 당일 출고</div></div>
+        <div class="ship-row"><div class="k">교환·반품</div><div class="v">수령 후 7일 이내 · 착용 흔적 없는 상품에 한함</div></div>
+        <div class="ship-row"><div class="k">반품비용</div><div class="v">단순 변심 왕복 5,000원 · 상품 하자 시 무료</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 관련 상품 ============ -->
+  <section class="related">
+    <div class="sec-head">
+      <h2>함께 보면 좋은 상품</h2>
+      <a href="#">전체보기 →</a>
+    </div>
+    <div class="rel-grid">
+      <article class="rel-card" tabindex="0">
+        <div class="rel-img g1"><span class="rel-badge">NEW</span><span class="mini-tee"></span></div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">에센셜 옥스포드 긴팔 셔츠</div>
+          <div class="rel-price"><span class="now num">54,000<span class="won">원</span></span></div>
+          <div class="rel-rating"><span class="glyph">★</span> <span class="num">4.7</span> · 리뷰 <span class="num">92</span></div>
+        </div>
+      </article>
+      <article class="rel-card" tabindex="0">
+        <div class="rel-img g2"><span class="rel-badge">15% OFF</span><span class="mini-tee"></span></div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">소프트 터치 라운드 니트</div>
+          <div class="rel-price"><span class="now num">42,500<span class="won">원</span></span><span class="off num">15%</span></div>
+          <div class="rel-rating"><span class="glyph">★</span> <span class="num">4.9</span> · 리뷰 <span class="num">211</span></div>
+        </div>
+      </article>
+      <article class="rel-card" tabindex="0">
+        <div class="rel-img g3"><span class="rel-badge">BEST</span><span class="mini-tee"></span></div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">데일리 스트레치 슬랙스</div>
+          <div class="rel-price"><span class="now num">48,000<span class="won">원</span></span></div>
+          <div class="rel-rating"><span class="glyph">★</span> <span class="num">4.6</span> · 리뷰 <span class="num">156</span></div>
+        </div>
+      </article>
+      <article class="rel-card" tabindex="0">
+        <div class="rel-img g4"><span class="rel-badge">25% OFF</span><span class="mini-tee"></span></div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">라이트 워시드 데님 팬츠</div>
+          <div class="rel-price"><span class="now num">59,000<span class="won">원</span></span><span class="off num">25%</span></div>
+          <div class="rel-rating"><span class="glyph">★</span> <span class="num">4.8</span> · 리뷰 <span class="num">88</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<!-- ============ 푸터 ============ -->
+<footer>
+  <div class="foot-inner">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <span class="foot-brand">MUJINE</span>
+      <span class="foot-path">상품상세<span class="sep">·</span>트렌디 SaaS</span>
+    </div>
+    <nav class="foot-links">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">고객센터</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* --- 살아있는 숫자: 카운트업 (JS는 연출만, 최종값은 HTML에 존재) --- */
+    function countUp(el) {
+      var target = parseFloat(el.getAttribute("data-count"));
+      var decimals = parseInt(el.getAttribute("data-decimals") || "0", 10);
+      var isPrice = el.classList.contains("price-now");
+      var wonHTML = isPrice ? '<span class="won">원</span>' : "";
+      function fmt(n) {
+        if (decimals > 0) return n.toFixed(decimals);
+        return Math.round(n).toLocaleString("ko-KR");
+      }
+      if (reduce) return; // 최종값 그대로 유지
+      var start = performance.now(), dur = 800;
+      function frame(now) {
+        var p = Math.min((now - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.innerHTML = fmt(target * eased) + wonHTML;
+        if (p < 1) requestAnimationFrame(frame);
+        else el.innerHTML = fmt(target) + wonHTML;
+      }
+      requestAnimationFrame(frame);
+    }
+    document.querySelectorAll("[data-count]").forEach(function (el) {
+      // 최초 프레임 전 초기값 0 세팅은 생략 — HTML 최종값이 fallback
+      setTimeout(function () { countUp(el); }, 120);
+    });
+
+    /* --- 스태거 등장 (히어로 카드/리뷰) --- */
+    if (!reduce) {
+      document.querySelectorAll(".thumb").forEach(function (el, i) {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(10px)";
+        setTimeout(function () {
+          el.style.transition = "opacity .25s ease, transform .25s ease";
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+        }, 260 + i * 60);
+      });
+    }
+
+    /* --- 썸네일 선택 --- */
+    document.querySelectorAll(".thumb").forEach(function (t) {
+      t.addEventListener("click", function () {
+        document.querySelectorAll(".thumb").forEach(function (x) { x.classList.remove("active"); });
+        t.classList.add("active");
+      });
+    });
+
+    /* --- 색상 선택 --- */
+    var colorPick = document.getElementById("colorPick");
+    document.querySelectorAll(".color-chip").forEach(function (c) {
+      c.addEventListener("click", function () {
+        document.querySelectorAll(".color-chip").forEach(function (x) {
+          x.classList.remove("active"); x.setAttribute("aria-checked", "false");
+        });
+        c.classList.add("active"); c.setAttribute("aria-checked", "true");
+        colorPick.textContent = c.getAttribute("data-color");
+      });
+    });
+
+    /* --- 사이즈 선택 --- */
+    document.querySelectorAll(".size-btn").forEach(function (s) {
+      s.addEventListener("click", function () {
+        if (s.disabled) return;
+        document.querySelectorAll(".size-btn").forEach(function (x) {
+          x.classList.remove("active"); x.setAttribute("aria-checked", "false");
+        });
+        s.classList.add("active"); s.setAttribute("aria-checked", "true");
+      });
+    });
+
+    /* --- 수량 스테퍼 + 소계 --- */
+    var UNIT = 39000, qty = 1;
+    var qtyEl = document.getElementById("qty");
+    var subEl = document.getElementById("subtotal");
+    var minus = document.getElementById("minus");
+    var plus = document.getElementById("plus");
+    function render() {
+      qtyEl.textContent = qty;
+      subEl.innerHTML = (UNIT * qty).toLocaleString("ko-KR") + '<span class="won">원</span>';
+      minus.disabled = qty <= 1;
+      plus.disabled = qty >= 10;
+    }
+    minus.addEventListener("click", function () { if (qty > 1) { qty--; render(); } });
+    plus.addEventListener("click", function () { if (qty < 10) { qty++; render(); } });
+
+    /* --- 찜 토글 --- */
+    var wish = document.getElementById("wish");
+    wish.addEventListener("click", function () {
+      var on = wish.classList.toggle("active");
+      wish.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    /* --- 도움돼요 토글 --- */
+    document.querySelectorAll(".helpful").forEach(function (h) {
+      var b = h.querySelector("b");
+      var base = parseInt(b.textContent.replace(/\D/g, ""), 10);
+      h.addEventListener("click", function () {
+        var voted = h.classList.toggle("voted");
+        b.textContent = base + (voted ? 1 : 0);
+      });
+    });
+
+    /* --- 탭 --- */
+    document.querySelectorAll(".tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll(".tab").forEach(function (x) { x.classList.remove("active"); });
+        document.querySelectorAll(".panel").forEach(function (x) { x.classList.remove("active"); });
+        tab.classList.add("active");
+        document.getElementById(tab.getAttribute("data-panel")).classList.add("active");
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SubTrack — 오늘의 구독 리포트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
+<style>
+  :root{
+    --bg:#0E0D0B;
+    --panel:#171512;
+    --panel-hi:#1C1915;
+    --gold:#C9A96A;
+    --gold-bright:#E5CFA3;
+    --ivory:#EDE8DF;
+    --muted:#8A8477;
+    --bad:#B0665C;
+    --hair:rgba(201,169,106,.25);
+    --hair-soft:rgba(201,169,106,.12);
+
+    --st-active:#9BA88A;
+    --st-renew:#C9A96A;
+    --st-problem:#B0665C;
+    --st-idle:#6E685D;
+
+    --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --sans:"Pretendard", system-ui, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; background:var(--bg); }
+
+  body{
+    font-family:var(--sans);
+    color:var(--ivory);
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    min-height:100vh;
+    padding:clamp(24px,5vw,72px) clamp(18px,5vw,64px);
+  }
+
+  .frame{
+    max-width:1140px;
+    margin:0 auto;
+  }
+
+  /* ── 소형 대문자 레이블 문법 ───────────────────────── */
+  .label{
+    font-family:var(--sans);
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ── 그려지는 골드 헤어라인 ────────────────────────── */
+  .rule{
+    height:1px;
+    background:var(--gold);
+    opacity:.25;
+    transform-origin:left center;
+  }
+
+  /* ── 헤더 ─────────────────────────────────────────── */
+  .topline{ margin-bottom:clamp(28px,5vw,56px); }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:20px;
+  }
+
+  .brand h1{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(34px,5vw,46px);
+    line-height:1;
+    letter-spacing:.01em;
+    margin:0;
+    color:var(--ivory);
+  }
+  .brand .sub{
+    margin-top:10px;
+  }
+
+  .refresh{ text-align:right; }
+  .refresh .label{ display:block; margin-bottom:6px; }
+  .refresh .stamp{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:22px;
+    color:var(--gold);
+    letter-spacing:.02em;
+  }
+
+  .head-rule{ margin-top:20px; }
+
+  /* ── KPI ──────────────────────────────────────────── */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;                       /* 얇은 골드 괘선이 구획을 전담 */
+    background:var(--hair);        /* 셀 사이 헤어라인 */
+    border:1px solid var(--hair);
+    margin-top:clamp(32px,5vw,52px);
+  }
+
+  .kpi{
+    position:relative;
+    background:var(--panel);
+    padding:clamp(22px,3vw,34px) clamp(20px,2.6vw,30px) clamp(26px,3vw,34px);
+    overflow:hidden;
+    transition:background .35s ease-out;
+  }
+  /* 위에서 떨어지는 조명 — 그림자 대신 소재감 */
+  .kpi::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:55%;
+    background:linear-gradient(rgba(201,169,106,.06),rgba(201,169,106,0));
+    pointer-events:none;
+  }
+  .kpi:hover{ background:var(--panel-hi); }
+  .kpi:hover::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; top:0;
+    height:1px;
+    background:var(--gold);
+    opacity:.55;
+  }
+
+  .kpi .label{ position:relative; }
+
+  .kpi .value{
+    position:relative;
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:clamp(48px,6.2vw,62px);
+    line-height:1.02;
+    letter-spacing:.005em;
+    color:var(--ivory);
+    margin:16px 0 0;
+  }
+  .kpi .value .won{
+    font-size:.42em;
+    color:var(--muted);
+    margin-left:2px;
+    letter-spacing:.04em;
+  }
+  .kpi .value .unit{
+    font-size:.4em;
+    color:var(--muted);
+    margin-left:4px;
+  }
+  .kpi .delta{
+    position:relative;
+    margin-top:12px;
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--muted);
+  }
+  .kpi .delta .fig{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:16px;
+    color:var(--gold);
+    margin-right:6px;
+  }
+
+  /* ── 패널 (차트 / 테이블) ──────────────────────────── */
+  .panel{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--hair);
+    padding:clamp(24px,3.4vw,40px);
+    margin-top:clamp(24px,3.4vw,40px);
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:46%;
+    background:linear-gradient(rgba(201,169,106,.06),rgba(201,169,106,0));
+    pointer-events:none;
+  }
+  .panel-head{
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .panel-head h2{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:26px;
+    letter-spacing:.02em;
+    margin:0;
+    color:var(--ivory);
+  }
+  .panel-head .note{ font-size:12px; letter-spacing:.03em; color:var(--muted); }
+
+  /* ── 차트 (CSS 직접) ──────────────────────────────── */
+  .chart-wrap{ position:relative; }
+  .chart{
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    gap:clamp(10px,2.4vw,30px);
+    height:250px;
+    padding-top:26px;
+  }
+  /* 가로 괘선 — 골드 헤어라인 */
+  .gridline{
+    position:absolute;
+    left:0; right:0;
+    height:1px;
+    background:var(--gold);
+    opacity:.10;
+    pointer-events:none;
+  }
+  .baseline{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:1px;
+    background:var(--gold);
+    opacity:.30;
+    transform-origin:left center;
+  }
+
+  .bar{
+    position:relative;
+    flex:1 1 0;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+  }
+  .bar-fill{
+    width:100%;
+    max-width:74px;
+    height:var(--h);
+    background:linear-gradient(to top, rgba(237,232,223,.03), rgba(201,169,106,.14));
+    border-top:1px solid rgba(201,169,106,.55);
+    transition:background .35s ease-out, border-color .35s ease-out;
+  }
+  .bar:hover .bar-fill{
+    background:linear-gradient(to top, rgba(237,232,223,.05), rgba(201,169,106,.22));
+    border-top-color:var(--gold);
+  }
+  /* 피크 캡 — 밝은 골드는 오직 여기 극소량 */
+  .bar.peak .bar-fill{ border-top:none; }
+  .bar.peak .cap{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:var(--h);
+    width:100%;
+    max-width:74px;
+    height:2px;
+    background:var(--gold-bright);
+  }
+  /* hover 시 세리프 이탤릭 수치가 조용히 페이드인 */
+  .bar-tip{
+    position:absolute;
+    bottom:calc(var(--h) + 12px);
+    left:50%;
+    transform:translateX(-50%);
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:500;
+    font-size:20px;
+    color:var(--gold-bright);
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .35s ease-out;
+    pointer-events:none;
+  }
+  .bar:hover .bar-tip{ opacity:1; }
+
+  .chart-labels{
+    display:flex;
+    gap:clamp(10px,2.4vw,30px);
+    margin-top:14px;
+  }
+  .chart-labels span{
+    flex:1 1 0;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--muted);
+  }
+
+  /* ── 테이블 ───────────────────────────────────────── */
+  .table-scroll{ position:relative; overflow-x:auto; }
+  table{
+    width:100%;
+    min-width:560px;
+    border-collapse:collapse;
+  }
+  thead th{
+    text-align:left;
+    padding:0 18px 14px;
+    border-bottom:1px solid var(--hair);
+    white-space:nowrap;
+  }
+  thead th.num{ text-align:right; }
+
+  tbody td{
+    padding:18px;
+    border-bottom:1px solid var(--hair-soft);
+    font-size:15px;
+    color:var(--ivory);
+    vertical-align:middle;
+  }
+  tbody tr{ position:relative; }
+  /* 행 하단 골드 헤어라인이 좌→우로 그어진다 */
+  tbody tr::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:1px;
+    background:var(--gold);
+    opacity:0;
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform .4s ease-out, opacity .4s ease-out;
+  }
+  tbody tr:hover::after{ opacity:.55; transform:scaleX(1); }
+  tbody tr:hover td{ background:rgba(201,169,106,.03); }
+
+  .svc{ font-weight:500; letter-spacing:.01em; }
+  .amount, .due{
+    font-family:var(--serif);
+    font-weight:500;
+    font-size:17px;
+    letter-spacing:.02em;
+  }
+  td.num{ text-align:right; white-space:nowrap; }
+  .amount .won{ font-family:var(--sans); font-size:11px; color:var(--muted); margin-left:3px; }
+  .cat{ color:var(--muted); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+
+  /* 상태 — 알약 태그 금지, 소형 대문자 텍스트 + 색점 */
+  .status{ display:inline-flex; align-items:center; gap:9px; white-space:nowrap; }
+  .status .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--muted);
+    flex:0 0 auto;
+  }
+  .status .txt{
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .st-active .dot{ background:var(--st-active); }
+  .st-active .txt{ color:var(--st-active); }
+  .st-renew .dot{ background:var(--st-renew); }
+  .st-renew .txt{ color:var(--st-renew); }
+  .st-problem .dot{ background:var(--st-problem); }
+  .st-problem .txt{ color:var(--st-problem); }
+  .st-idle .dot{ background:var(--st-idle); }
+  .st-idle .txt{ color:var(--st-idle); }
+  .status .sub{
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.02em;
+    text-transform:none;
+    margin-left:2px;
+  }
+
+  /* ── 푸터 ─────────────────────────────────────────── */
+  footer{ margin-top:clamp(36px,5vw,60px); }
+  footer .foot-rule{ margin-bottom:16px; }
+  footer .sig{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ── 반응형 ───────────────────────────────────────── */
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:560px){
+    .kpi-grid{ grid-template-columns:1fr; }
+    .refresh{ text-align:left; }
+  }
+
+  /* ── 히어로 연출 — "장이 열린다" (총 2.0초, 느리게) ── */
+  /* 기본 = 완성 상태. JS 실패 / reduced-motion 시 그대로 렌더 */
+  @keyframes draw   { from { transform:scaleX(0); } }
+  @keyframes fadein { from { opacity:0; } }
+  @keyframes rise   { from { height:0; } }
+
+  .play .rule,
+  .play .baseline{ animation:draw .8s ease-out both; }
+  .play .head-rule{ animation-delay:.15s; }
+
+  .play .brand h1{ animation:fadein .7s ease-out .5s both; }
+  .play .brand .sub,
+  .play .refresh{ animation:fadein .7s ease-out .7s both; }
+
+  .play .kpi{ animation:fadein .7s ease-out both; }
+  .play .kpi:nth-child(1){ animation-delay:.60s; }
+  .play .kpi:nth-child(2){ animation-delay:.74s; }
+  .play .kpi:nth-child(3){ animation-delay:.88s; }
+  .play .kpi:nth-child(4){ animation-delay:1.02s; }
+
+  .play .panel{ animation:fadein .7s ease-out .9s both; }
+
+  .play .bar-fill{ animation:rise .7s ease-out both; }
+  .play .bar:nth-child(1) .bar-fill{ animation-delay:1.20s; }
+  .play .bar:nth-child(2) .bar-fill{ animation-delay:1.29s; }
+  .play .bar:nth-child(3) .bar-fill{ animation-delay:1.38s; }
+  .play .bar:nth-child(4) .bar-fill{ animation-delay:1.47s; }
+  .play .bar:nth-child(5) .bar-fill{ animation-delay:1.56s; }
+  .play .bar:nth-child(6) .bar-fill{ animation-delay:1.65s; }
+
+  .play .bar.peak .cap{ animation:fadein .5s ease-out 2.0s both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .play *{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+
+    <!-- 장이 열린다: 첫 골드 선 -->
+    <div class="rule topline"></div>
+
+    <header>
+      <div class="brand">
+        <h1>SubTrack</h1>
+        <div class="sub label">구독 관리 대시보드</div>
+      </div>
+      <div class="refresh">
+        <span class="label">갱신 시각</span>
+        <span class="stamp">2026-07-10 15:10</span>
+      </div>
+    </header>
+    <div class="rule head-rule"></div>
+
+    <!-- KPI -->
+    <section class="kpi-grid" aria-label="핵심 지표">
+      <div class="kpi">
+        <span class="label">월 구독료 합계</span>
+        <div class="value">187,400<span class="won">원</span></div>
+        <div class="delta"><span class="fig">+8.2%</span>전월 대비</div>
+      </div>
+      <div class="kpi">
+        <span class="label">활성 구독</span>
+        <div class="value">23<span class="unit">건</span></div>
+        <div class="delta"><span class="fig">+3</span>전월 대비 · 건</div>
+      </div>
+      <div class="kpi">
+        <span class="label">이번달 갱신 예정</span>
+        <div class="value">7<span class="unit">건</span></div>
+        <div class="delta"><span class="fig">−1</span>전월 대비 · 건</div>
+      </div>
+      <div class="kpi">
+        <span class="label">미사용 (3개월+)</span>
+        <div class="value">4<span class="unit">건</span></div>
+        <div class="delta"><span class="fig">−2</span>해지 · 건</div>
+      </div>
+    </section>
+
+    <!-- 차트 -->
+    <section class="panel" aria-label="최근 6개월 월 구독료 추이">
+      <div class="panel-head">
+        <h2>월 구독료 추이</h2>
+        <span class="note">최근 6개월 · 단위 만원</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart" role="img" aria-label="1월 14.2, 2월 15.1, 3월 16.8, 4월 17.3, 5월 18.9 피크, 6월 18.7 만원">
+          <div class="gridline" style="bottom:100%"></div>
+          <div class="gridline" style="bottom:75%"></div>
+          <div class="gridline" style="bottom:50%"></div>
+          <div class="gridline" style="bottom:25%"></div>
+
+          <div class="bar" style="--h:75.1%">
+            <span class="bar-tip">14.2</span>
+            <div class="bar-fill"></div>
+          </div>
+          <div class="bar" style="--h:79.9%">
+            <span class="bar-tip">15.1</span>
+            <div class="bar-fill"></div>
+          </div>
+          <div class="bar" style="--h:88.9%">
+            <span class="bar-tip">16.8</span>
+            <div class="bar-fill"></div>
+          </div>
+          <div class="bar" style="--h:91.5%">
+            <span class="bar-tip">17.3</span>
+            <div class="bar-fill"></div>
+          </div>
+          <div class="bar peak" style="--h:100%">
+            <span class="bar-tip">18.9</span>
+            <div class="bar-fill"></div>
+            <span class="cap"></span>
+          </div>
+          <div class="bar" style="--h:98.9%">
+            <span class="bar-tip">18.7</span>
+            <div class="bar-fill"></div>
+          </div>
+
+          <div class="baseline"></div>
+        </div>
+        <div class="chart-labels" aria-hidden="true">
+          <span>1월</span><span>2월</span><span>3월</span>
+          <span>4월</span><span>5월</span><span>6월</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 테이블 -->
+    <section class="panel" aria-label="구독 상세">
+      <div class="panel-head">
+        <h2>구독 상세</h2>
+        <span class="note">6건</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="label">서비스</th>
+              <th class="label num">요금</th>
+              <th class="label num">다음 결제</th>
+              <th class="label">카테고리</th>
+              <th class="label">상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="svc">넷플릭스</td>
+              <td class="num amount">17,000<span class="won">원</span></td>
+              <td class="num due">07-15</td>
+              <td class="cat">엔터</td>
+              <td>
+                <span class="status st-active"><span class="dot"></span><span class="txt">활성</span></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="svc">유튜브 프리미엄</td>
+              <td class="num amount">14,900<span class="won">원</span></td>
+              <td class="num due">07-22</td>
+              <td class="cat">엔터</td>
+              <td>
+                <span class="status st-active"><span class="dot"></span><span class="txt">활성</span></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="svc">노션</td>
+              <td class="num amount">12,000<span class="won">원</span></td>
+              <td class="num due">07-18</td>
+              <td class="cat">생산성</td>
+              <td>
+                <span class="status st-renew"><span class="dot"></span><span class="txt">갱신예정</span></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="svc">어도비 CC</td>
+              <td class="num amount">24,000<span class="won">원</span></td>
+              <td class="num due">07-09</td>
+              <td class="cat">디자인</td>
+              <td>
+                <span class="status st-problem"><span class="dot"></span><span class="txt">문제</span><span class="sub">결제실패</span></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="svc">챗GPT Plus</td>
+              <td class="num amount">29,000<span class="won">원</span></td>
+              <td class="num due">07-11</td>
+              <td class="cat">AI</td>
+              <td>
+                <span class="status st-active"><span class="dot"></span><span class="txt">활성</span></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="svc">멜론</td>
+              <td class="num amount">10,900<span class="won">원</span></td>
+              <td class="num due">07-25</td>
+              <td class="cat">음악</td>
+              <td>
+                <span class="status st-idle"><span class="dot"></span><span class="txt">미사용</span></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <div class="rule foot-rule"></div>
+      <div class="sig">STYLE 08 · 럭셔리 다크</div>
+    </footer>
+
+  </div>
+
+  <script>
+    // 히어로 연출은 진행(enhancement)일 뿐 — 실패해도 화면은 완성 상태로 렌더된다.
+    (function(){
+      try{
+        var root = document.documentElement;
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if(!reduce){
+          requestAnimationFrame(function(){ root.classList.add('play'); });
+        }
+      }catch(e){ /* no-op: 완성 상태 유지 */ }
+    })();
+  </script>
+</body>
+</html>

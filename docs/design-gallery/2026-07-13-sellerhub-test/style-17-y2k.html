@@ -1,0 +1,743 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>셀러허브 — STYLE 17 Y2K 베이퍼웨이브</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Chakra+Petch:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-top:#1A0B2E;
+    --bg-mid:#2D0B45;
+    --bg-bot:#0B0221;
+    --magenta:#FF2FB9;
+    --cyan:#22E1FF;
+    --purple:#A24BFF;
+    --pink:#FF6EC7;
+    --danger:#FF3B6B;
+    --success:#3BFFB0;
+    --ink:#E7EEF7;
+    --ink-dim:#B8C4E0;
+    --card:rgba(45,11,69,.60);
+    --font-disp:'Orbitron','Chakra Petch',sans-serif;
+    --font-body:'Pretendard',system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--bg-top) 0%,var(--bg-mid) 48%,var(--bg-bot) 100%);
+    background-attachment:fixed;
+    position:relative;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+  }
+
+  /* ── 신스웨이브 원근 그리드 지평선 (순수 CSS, JS 무관 폴백) ── */
+  .synthgrid{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    height:46vh;
+    z-index:0;
+    pointer-events:none;
+    perspective:340px;
+    overflow:hidden;
+    mask-image:linear-gradient(180deg,transparent 0%,#000 32%,#000 100%);
+    -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 32%,#000 100%);
+  }
+  .synthgrid::before{
+    content:"";
+    position:absolute;
+    left:-60%; right:-60%; top:0; bottom:-4%;
+    background-image:
+      repeating-linear-gradient(90deg,rgba(255,47,185,.55) 0 2px,transparent 2px 64px),
+      repeating-linear-gradient(0deg,rgba(34,225,255,.55) 0 2px,transparent 2px 56px);
+    background-position:center bottom;
+    transform:rotateX(74deg);
+    transform-origin:center bottom;
+    animation:gridRun 6s linear infinite;
+  }
+  .synthgrid::after{
+    content:"";
+    position:absolute;
+    left:0; right:0; top:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--magenta),var(--cyan),transparent);
+    box-shadow:0 0 18px var(--magenta),0 0 30px var(--cyan);
+  }
+  @keyframes gridRun{
+    from{background-position:center bottom}
+    to{background-position:center calc(100% + 56px)}
+  }
+
+  /* ── 스캔라인 오버레이 ── */
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+
+  .wrap{
+    position:relative;
+    z-index:2;
+    max-width:1160px;
+    margin:0 auto;
+    padding:28px 22px 96px;
+  }
+
+  /* ── 크롬 그라디언트 텍스트 시그니처 ── */
+  .chrome{
+    background:linear-gradient(180deg,#EFF6FF 0%,#9FB4CC 34%,#FFFFFF 52%,#6B7A99 70%,#E7EEF7 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 0 1px rgba(255,255,255,.15);
+  }
+
+  /* ── 헤더 ── */
+  header.top{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    gap:18px 24px;
+    padding-bottom:22px;
+    border-bottom:1px solid rgba(255,47,185,.35);
+    margin-bottom:24px;
+  }
+  .brand{display:flex;flex-direction:column;gap:6px}
+  .brand h1{
+    margin:0;
+    font-family:var(--font-disp);
+    font-weight:900;
+    font-style:italic;
+    font-size:clamp(30px,5vw,46px);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    line-height:1;
+    position:relative;
+    overflow:hidden;
+  }
+  .brand h1 .sheen{
+    position:absolute; inset:0;
+    background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.85) 50%,transparent 62%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    transform:translateX(-120%);
+    animation:sheen 3.4s ease-in-out 1s infinite;
+  }
+  @keyframes sheen{0%,72%{transform:translateX(-120%)}86%,100%{transform:translateX(120%)}}
+  .brand .updated{
+    font-size:13px;
+    color:var(--ink-dim);
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .brand .updated b{color:var(--cyan);font-weight:600}
+
+  .top-actions{margin-left:auto;display:flex;gap:12px;flex-wrap:wrap}
+
+  .btn{
+    font-family:var(--font-disp);
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:11px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    border:1px solid transparent;
+    color:var(--ink);
+    background:rgba(45,11,69,.7);
+    position:relative;
+    transition:transform .12s ease,box-shadow .2s ease,filter .2s ease;
+  }
+  .btn:active{transform:translate(2px,0);filter:invert(.06)}
+  .btn-primary{
+    background:linear-gradient(120deg,var(--magenta),var(--purple),var(--cyan));
+    background-size:200% 100%;
+    color:#0B0221;
+    font-weight:700;
+    box-shadow:0 0 20px rgba(255,47,185,.5);
+  }
+  .btn-primary:hover{background-position:100% 0;box-shadow:0 0 28px rgba(34,225,255,.6)}
+  .btn-ghost{
+    border:1px solid;
+    border-image:linear-gradient(120deg,var(--magenta),var(--cyan)) 1;
+    background:rgba(45,11,69,.5);
+  }
+  .btn-ghost:hover{box-shadow:0 0 18px rgba(162,75,255,.5)}
+  .btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+  /* ── 기간 탭 ── */
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:26px;
+    padding:6px;
+    border-radius:14px;
+    background:rgba(11,2,33,.55);
+    border:1px solid rgba(162,75,255,.3);
+    width:fit-content;
+  }
+  .tab{
+    font-family:var(--font-disp);
+    font-weight:500;
+    font-size:13px;
+    letter-spacing:.05em;
+    padding:9px 18px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    color:var(--ink-dim);
+    background:transparent;
+    transition:color .18s,background .18s,box-shadow .18s;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{
+    color:#0B0221;
+    background:linear-gradient(120deg,var(--cyan),var(--magenta));
+    box-shadow:0 0 16px rgba(255,47,185,.5);
+    font-weight:700;
+  }
+  .tab:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+  /* ── KPI 그리드 ── */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:26px;
+  }
+  .card{
+    position:relative;
+    border-radius:14px;
+    padding:20px 18px;
+    background:var(--card);
+    border:1px solid transparent;
+    background-clip:padding-box;
+    box-shadow:0 0 24px rgba(255,47,185,.35);
+    isolation:isolate;
+    transition:box-shadow .25s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:14px;
+    padding:1px;
+    background:linear-gradient(var(--angle,120deg),var(--magenta),var(--purple),var(--cyan));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
+    z-index:-1;
+  }
+  .card:hover{box-shadow:0 0 32px rgba(34,225,255,.5)}
+  .card:hover::before{animation:spin 1.2s linear}
+  @keyframes spin{to{--angle:480deg}}
+  /* 크롬 브래킷 장식 */
+  .card .bracket{position:absolute;color:var(--cyan);opacity:.5;font-family:var(--font-disp);font-size:14px;pointer-events:none}
+  .card .bracket.tl{top:8px;left:10px}
+  .card .bracket.br{bottom:8px;right:10px;transform:rotate(180deg)}
+
+  .kpi-label{
+    font-size:13px;
+    color:var(--ink-dim);
+    letter-spacing:.02em;
+    margin-bottom:12px;
+    min-height:2.2em;
+  }
+  .kpi-value{
+    font-family:var(--font-disp);
+    font-weight:800;
+    font-style:italic;
+    font-size:clamp(20px,2.4vw,27px);
+    line-height:1.05;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.01em;
+    word-break:keep-all;
+    position:relative;
+    overflow:hidden;
+    display:inline-block;
+    max-width:100%;
+  }
+  .kpi-value .unit{font-size:.62em;font-weight:600;color:var(--ink-dim);margin-left:2px;-webkit-text-fill-color:var(--ink-dim)}
+  .kpi-value .sweep{
+    position:absolute; inset:0;
+    background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.9) 50%,transparent 60%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    transform:translateX(-130%);
+  }
+  .kpi-value:hover .sweep{animation:kpiSweep .5s ease}
+  @keyframes kpiSweep{from{transform:translateX(-130%)}to{transform:translateX(130%)}}
+  .kpi-delta{
+    margin-top:10px;
+    font-size:13px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .kpi-delta .arrow{font-family:var(--font-disp);font-size:12px}
+  .delta-up{color:var(--success)}
+  .delta-down{color:var(--danger)}
+  .delta-flat{color:var(--ink-dim)}
+
+  /* ── 섹션 타이틀 ── */
+  .sec-title{
+    font-family:var(--font-disp);
+    font-weight:700;
+    font-style:italic;
+    font-size:16px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin:0 0 14px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .sec-title .kr{
+    font-family:var(--font-body);
+    font-style:normal;
+    text-transform:none;
+    letter-spacing:0;
+    font-size:14px;
+    color:var(--ink-dim);
+    font-weight:500;
+  }
+
+  .panels{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  .panel{
+    position:relative;
+    border-radius:14px;
+    padding:22px 20px;
+    background:var(--card);
+    box-shadow:0 0 24px rgba(162,75,255,.3);
+    isolation:isolate;
+  }
+  .panel::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:14px; padding:1px;
+    background:linear-gradient(120deg,var(--magenta),var(--cyan));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    pointer-events:none;z-index:-1;
+  }
+
+  /* ── 차트 (순수 CSS/SVG, 축 0부터) ── */
+  .chart-wrap{display:flex;gap:12px}
+  .y-axis{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    font-family:var(--font-disp);
+    font-size:11px;
+    color:var(--ink-dim);
+    font-variant-numeric:tabular-nums;
+    text-align:right;
+    padding-bottom:26px;
+    min-width:40px;
+  }
+  .plot{
+    position:relative;
+    flex:1;
+    height:270px;
+  }
+  .plot .gridlines{position:absolute;inset:0 0 26px 0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+  .plot .gridlines span{display:block;height:1px;background:rgba(162,75,255,.22)}
+  .bars{
+    position:absolute;
+    inset:0 0 26px 0;
+    display:flex;
+    align-items:flex-end;
+    gap:clamp(6px,1.6vw,18px);
+    padding:0 4px;
+  }
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+  .bar{
+    width:100%;
+    max-width:46px;
+    border-radius:6px 6px 2px 2px;
+    background:linear-gradient(180deg,var(--cyan),var(--magenta));
+    box-shadow:0 0 10px rgba(255,47,185,.5);
+    position:relative;
+    transition:filter .2s,box-shadow .3s;
+    min-height:3px;
+  }
+  .bar.peak{background:linear-gradient(180deg,#fff,var(--pink),var(--magenta));box-shadow:0 0 18px var(--pink),0 0 28px var(--magenta)}
+  .bar-col:hover .bar{filter:brightness(1.25);box-shadow:0 0 22px var(--cyan),0 0 34px var(--magenta);animation:pulse .7s ease}
+  @keyframes pulse{50%{box-shadow:0 0 30px var(--cyan),0 0 42px var(--magenta)}}
+  .bar .val{
+    position:absolute;
+    top:-24px;left:50%;transform:translateX(-50%);
+    font-family:var(--font-disp);
+    font-size:11px;font-weight:600;
+    color:var(--cyan);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .bar-col:hover .val{opacity:1}
+  .bar .val::after{
+    content:"";position:absolute;inset:-4px -8px;border-radius:6px;z-index:-1;
+    background:rgba(11,2,33,.9);border:1px solid var(--magenta);box-shadow:0 0 10px rgba(34,225,255,.6);
+  }
+  .x-label{
+    position:absolute;
+    bottom:-24px;
+    font-family:var(--font-disp);
+    font-size:11px;color:var(--ink-dim);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  .chart-cap{margin-top:6px;font-size:12px;color:var(--ink-dim);letter-spacing:.02em}
+
+  /* ── 테이블 ── */
+  .table-scroll{overflow-x:auto;border-radius:10px}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:680px;
+    font-size:14px;
+  }
+  thead th{
+    font-family:var(--font-disp);
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    text-align:left;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(34,225,255,.4);
+    white-space:nowrap;
+  }
+  thead th.num,tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td{
+    padding:13px 14px;
+    border-bottom:1px solid rgba(162,75,255,.16);
+    color:var(--ink);
+    vertical-align:middle;
+  }
+  tbody tr{position:relative;transition:background .18s}
+  tbody tr:hover{background:rgba(162,75,255,.12)}
+  tbody tr::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:linear-gradient(180deg,var(--magenta),var(--cyan));
+    opacity:0;transition:opacity .18s;
+  }
+  tbody tr:hover::before{opacity:1;box-shadow:0 0 10px var(--magenta)}
+
+  .prod-name{
+    max-width:320px;
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    word-break:keep-all;
+    line-height:1.35;
+  }
+  td.num.missing{color:var(--ink-dim)}
+
+  /* ── 상태 뱃지 (색 + 텍스트 병행) ── */
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--font-disp);
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:.04em;
+    padding:5px 11px;
+    border-radius:20px;
+    white-space:nowrap;
+    border:1px solid;
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .badge.progress{color:var(--cyan);border-color:var(--cyan);background:rgba(34,225,255,.1)}
+  .badge.progress .dot{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+  .badge.done{color:var(--success);border-color:var(--success);background:rgba(59,255,176,.1)}
+  .badge.done .dot{background:var(--success);box-shadow:0 0 6px var(--success)}
+  .badge.problem{color:var(--danger);border-color:var(--danger);background:rgba(255,59,107,.12)}
+  .badge.problem .dot{background:var(--danger);box-shadow:0 0 6px var(--danger)}
+  .badge.wait{color:var(--pink);border-color:var(--pink);background:rgba(255,110,199,.1)}
+  .badge.wait .dot{background:var(--pink);box-shadow:0 0 6px var(--pink)}
+
+  /* 행 hover 시 [상세] 버튼 */
+  .row-action{text-align:right;width:1%;white-space:nowrap}
+  .detail-btn{
+    font-family:var(--font-disp);
+    font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 13px;border-radius:9px;cursor:pointer;
+    color:var(--ink);
+    background:rgba(45,11,69,.8);
+    border:1px solid;
+    border-image:linear-gradient(120deg,var(--magenta),var(--cyan)) 1;
+    opacity:0;transform:translateX(6px);
+    transition:opacity .18s,transform .18s,box-shadow .2s;
+  }
+  tbody tr:hover .detail-btn,tbody tr:focus-within .detail-btn{opacity:1;transform:translateX(0)}
+  .detail-btn:hover{box-shadow:0 0 14px rgba(34,225,255,.6)}
+  .detail-btn:focus-visible{opacity:1;transform:none;outline:2px solid var(--cyan);outline-offset:2px}
+
+  /* ── 별 파티클 ── */
+  .stars{position:fixed;top:0;right:0;width:40vw;height:40vh;z-index:2;pointer-events:none}
+  .star{position:absolute;color:#fff;font-size:14px;opacity:0;text-shadow:0 0 8px var(--cyan)}
+  @keyframes twinkle{0%,100%{opacity:0;transform:scale(.5)}50%{opacity:1;transform:scale(1)}}
+
+  /* ── 푸터 ── */
+  footer.foot{
+    margin-top:40px;
+    padding-top:20px;
+    border-top:1px solid rgba(255,47,185,.3);
+    font-family:var(--font-disp);
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    text-align:center;
+  }
+  footer.foot b{color:var(--cyan);font-weight:700}
+
+  /* ── 반응형 ── */
+  @media (max-width:900px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .brand h1{font-size:32px}
+  }
+  @media (max-width:560px){
+    .kpi-grid{grid-template-columns:1fr}
+    .top-actions{width:100%;margin-left:0}
+  }
+
+  /* ── 로드 시퀀스 ──
+     기본은 완전 노출(폴백). JS 가 .anim 을 붙일 때만 등장 애니메이션.
+     따라서 JS 완전 비활성/실패여도 모든 요소가 그대로 보인다. */
+  .anim .reveal{opacity:0;transform:translateY(18px);animation:rise .5s ease forwards}
+  .anim .kpi-grid .reveal:nth-child(1){animation-delay:.05s}
+  .anim .kpi-grid .reveal:nth-child(2){animation-delay:.17s}
+  .anim .kpi-grid .reveal:nth-child(3){animation-delay:.29s}
+  .anim .kpi-grid .reveal:nth-child(4){animation-delay:.41s}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+    .anim .reveal{opacity:1 !important;transform:none !important}
+    .synthgrid::before{animation:none !important}
+    .bar .val{opacity:0}
+    .bar-col:hover .val{opacity:1}
+  }
+</style>
+
+<div class="synthgrid" aria-hidden="true"></div>
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <h1 class="chrome">셀러허브<span class="sheen" aria-hidden="true">셀러허브</span></h1>
+      <div class="updated">갱신 시각 <b>2026-07-13 14:00</b></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-primary" type="button">리포트 내보내기</button>
+      <button class="btn btn-ghost" type="button">새로고침</button>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="기간 선택">
+    <button class="tab" role="tab" aria-selected="false" type="button">오늘</button>
+    <button class="tab" role="tab" aria-selected="false" type="button">이번 주</button>
+    <button class="tab" role="tab" aria-selected="true" type="button">이번 달</button>
+    <button class="tab" role="tab" aria-selected="false" type="button">올해</button>
+  </div>
+
+  <section class="kpi-grid" aria-label="핵심 지표">
+    <div class="card reveal">
+      <span class="bracket tl" aria-hidden="true">&#9488;</span><span class="bracket br" aria-hidden="true">&#9488;</span>
+      <div class="kpi-label">이번 달 총 매출</div>
+      <div class="kpi-value chrome">12,840,500,000<span class="unit">원</span><span class="sweep" aria-hidden="true">12,840,500,000</span></div>
+      <div class="kpi-delta delta-up"><span class="arrow" aria-hidden="true">&#9650;</span>전월 대비 +8.2%</div>
+    </div>
+
+    <div class="card reveal">
+      <span class="bracket tl" aria-hidden="true">&#9488;</span><span class="bracket br" aria-hidden="true">&#9488;</span>
+      <div class="kpi-label">신규 주문</div>
+      <div class="kpi-value chrome">3,472<span class="unit">건</span><span class="sweep" aria-hidden="true">3,472</span></div>
+      <div class="kpi-delta delta-up"><span class="arrow" aria-hidden="true">&#9650;</span>+12%</div>
+    </div>
+
+    <div class="card reveal">
+      <span class="bracket tl" aria-hidden="true">&#9488;</span><span class="bracket br" aria-hidden="true">&#9488;</span>
+      <div class="kpi-label">전환율</div>
+      <div class="kpi-value chrome">3.8<span class="unit">%</span><span class="sweep" aria-hidden="true">3.8</span></div>
+      <div class="kpi-delta delta-down"><span class="arrow" aria-hidden="true">&#9660;</span>&minus;0.4%p</div>
+    </div>
+
+    <div class="card reveal">
+      <span class="bracket tl" aria-hidden="true">&#9488;</span><span class="bracket br" aria-hidden="true">&#9488;</span>
+      <div class="kpi-label">정산 대기</div>
+      <div class="kpi-value chrome">284,000,000<span class="unit">원</span><span class="sweep" aria-hidden="true">284,000,000</span></div>
+      <div class="kpi-delta delta-flat"><span class="arrow" aria-hidden="true">&#9679;</span>지연 0건</div>
+    </div>
+  </section>
+
+  <div class="panels">
+
+    <section class="panel">
+      <h2 class="sec-title">Revenue Trend <span class="kr">최근 8주 매출 추이 (백만원)</span></h2>
+      <div class="chart-wrap">
+        <div class="y-axis" aria-hidden="true">
+          <span>1,400</span><span>1,050</span><span>700</span><span>350</span><span>0</span>
+        </div>
+        <div class="plot">
+          <div class="gridlines" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="bars" role="img" aria-label="최근 8주 매출 추이: 1주 820, 2주 910, 3주 1,050, 4주 970, 5주 1,180, 6주 1,340 (피크), 7주 1,220, 8주 1,284 백만원. 세로축 0부터 시작.">
+            <div class="bar-col"><div class="bar" style="height:58.6%"><span class="val">820</span></div><span class="x-label">1주</span></div>
+            <div class="bar-col"><div class="bar" style="height:65.0%"><span class="val">910</span></div><span class="x-label">2주</span></div>
+            <div class="bar-col"><div class="bar" style="height:75.0%"><span class="val">1,050</span></div><span class="x-label">3주</span></div>
+            <div class="bar-col"><div class="bar" style="height:69.3%"><span class="val">970</span></div><span class="x-label">4주</span></div>
+            <div class="bar-col"><div class="bar" style="height:84.3%"><span class="val">1,180</span></div><span class="x-label">5주</span></div>
+            <div class="bar-col"><div class="bar peak" style="height:95.7%"><span class="val">1,340</span></div><span class="x-label">6주</span></div>
+            <div class="bar-col"><div class="bar" style="height:87.1%"><span class="val">1,220</span></div><span class="x-label">7주</span></div>
+            <div class="bar-col"><div class="bar" style="height:91.7%"><span class="val">1,284</span></div><span class="x-label">8주</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="chart-cap">단위: 백만원 · 세로축 0부터 시작 · 6주차 피크 1,340</p>
+    </section>
+
+    <section class="panel">
+      <h2 class="sec-title">Products <span class="kr">상품별 현황</span></h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">상품명</th>
+              <th scope="col">카테고리</th>
+              <th scope="col" class="num">재고</th>
+              <th scope="col" class="num">판매</th>
+              <th scope="col">상태</th>
+              <th scope="col"><span class="sr-only">동작</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="prod-name">[한정판] 프리미엄 오가닉 코튼 베이직 반팔티 5종 컬러 세트</span></td>
+              <td>의류</td>
+              <td class="num">1,240</td>
+              <td class="num">856</td>
+              <td><span class="badge progress"><span class="dot" aria-hidden="true"></span>판매중</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-name">무선 블루투스 이어폰 Pro</span></td>
+              <td>전자</td>
+              <td class="num">0</td>
+              <td class="num">2,103</td>
+              <td><span class="badge problem"><span class="dot" aria-hidden="true"></span>품절</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-name">스테인리스 텀블러 500ml</span></td>
+              <td>리빙</td>
+              <td class="num">340</td>
+              <td class="num missing">&mdash;</td>
+              <td><span class="badge wait"><span class="dot" aria-hidden="true"></span>준비중</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-name">친환경 대나무 칫솔 4개입</span></td>
+              <td>생활</td>
+              <td class="num">5,820</td>
+              <td class="num">1,472</td>
+              <td><span class="badge progress"><span class="dot" aria-hidden="true"></span>판매중</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-name">아로마 캔들 세트</span></td>
+              <td>리빙</td>
+              <td class="num">88</td>
+              <td class="num">640</td>
+              <td><span class="badge done"><span class="dot" aria-hidden="true"></span>정산완료</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+            <tr>
+              <td><span class="prod-name">요가 매트 6mm 논슬립</span></td>
+              <td>스포츠</td>
+              <td class="num">210</td>
+              <td class="num">95</td>
+              <td><span class="badge wait"><span class="dot" aria-hidden="true"></span>준비중</span></td>
+              <td class="row-action"><button class="detail-btn" type="button">상세</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="foot">STYLE <b>17</b> &middot; Y2K 베이퍼웨이브</footer>
+
+</div>
+
+<style>
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+
+<script>
+  // JS 성공 시에만 로드 시퀀스 활성 (실패/비활성이면 요소가 기본 노출되어 완전 화면 보장)
+  (function(){
+    var root=document.documentElement;
+    var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+    // 모션 허용 시에만 등장 애니메이션 활성 (미허용/JS실패 시 요소는 이미 완전 노출)
+    if(!reduce) root.classList.add('anim');
+
+    // 탭 상호작용은 모션 여부와 무관하게 항상 동작
+    var tabs=document.querySelectorAll('.tab');
+    tabs.forEach(function(t){
+      t.addEventListener('click',function(){
+        tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
+        t.setAttribute('aria-selected','true');
+      });
+    });
+
+    if(reduce) return;
+
+    // 별 트윙클 파티클
+    var host=document.getElementById('stars');
+    if(host){
+      var n=5;
+      for(var i=0;i<n;i++){
+        var s=document.createElement('span');
+        s.className='star';
+        s.textContent='✦';
+        s.style.top=(Math.random()*80)+'%';
+        s.style.right=(Math.random()*80)+'%';
+        s.style.fontSize=(10+Math.random()*10)+'px';
+        s.style.animation='twinkle '+(2.2+Math.random()*2)+'s ease-in-out '+(1.2+Math.random()*1.5)+'s infinite';
+        host.appendChild(s);
+      }
+    }
+  })();
+</script>

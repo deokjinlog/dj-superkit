@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE 셀러 대시보드 · 다크 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --track:#21262d; --border:#30363d;
+    --fg:#c9d1d9; --muted:#8b949e; --row-hover:#1c2230;
+    --teal:#2dd4bf; --blue:#58a6ff; --purple:#bc8cff; --magenta:#f778ba;
+    --green:#3fb950; --yellow:#d29922; --orange:#db6d28; --red:#f85149;
+    --nav-w:220px; --top-h:56px;
+    --r:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Pretendard','Inter',system-ui,sans-serif;
+    background:var(--bg); color:var(--fg);
+    font-size:13px; line-height:1.35; letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased;
+  }
+  .tnum{font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1}
+  svg{display:block}
+  ::selection{background:rgba(88,166,255,.3)}
+
+  /* ---------- APP SHELL ---------- */
+  .app{display:grid; grid-template-columns:var(--nav-w) 1fr; min-height:100vh}
+
+  /* ---------- SIDEBAR ---------- */
+  .side{
+    background:var(--bg); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  }
+  .brand{
+    display:flex; align-items:center; gap:9px; height:var(--top-h);
+    padding:0 18px; border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .brand .mark{
+    width:24px; height:24px; border-radius:5px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--teal),var(--blue));
+    display:grid; place-items:center; color:#04211d; font-weight:800; font-size:14px;
+  }
+  .brand .name{font-weight:800; font-size:15px; letter-spacing:0.06em; color:#f0f6fc}
+  .nav{padding:12px 10px; display:flex; flex-direction:column; gap:2px; flex:1; overflow-y:auto}
+  .nav-h{font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#586069; padding:8px 10px 4px}
+  .nav a{
+    display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:var(--r);
+    color:var(--muted); text-decoration:none; font-size:13px; font-weight:500;
+    border-left:2px solid transparent; transition:background .1s,color .1s,border-color .1s;
+  }
+  .nav a svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .nav a .lbl{white-space:nowrap}
+  .nav a:hover{background:var(--card); color:var(--fg)}
+  .nav a.active{background:rgba(45,212,191,.1); color:var(--teal); border-left-color:var(--teal)}
+  .nav a:focus-visible{outline:2px solid var(--blue); outline-offset:-2px}
+  .ws{
+    border-top:1px solid var(--border); padding:12px; display:flex; align-items:center;
+    gap:10px; flex-shrink:0;
+  }
+  .avatar{
+    width:30px; height:30px; border-radius:6px; flex-shrink:0; display:grid; place-items:center;
+    background:var(--track); border:1px solid var(--border); color:var(--fg);
+    font-weight:700; font-size:12px; letter-spacing:0.02em;
+  }
+  .ws .meta{display:flex; flex-direction:column; min-width:0}
+  .ws .meta b{font-size:12px; color:var(--fg); font-weight:600}
+  .ws .meta span{font-size:11px; color:var(--muted)}
+
+  /* ---------- MAIN ---------- */
+  .main{display:flex; flex-direction:column; min-width:0}
+  .topbar{
+    height:var(--top-h); position:sticky; top:0; z-index:20;
+    background:rgba(13,17,23,.85); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px; padding:0 20px; flex-shrink:0;
+  }
+  .search{position:relative; flex:1; max-width:420px}
+  .search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:16px;height:16px;stroke:var(--muted);stroke-width:1.6;fill:none;stroke-linecap:round}
+  .search input{
+    width:100%; height:34px; background:var(--card); border:1px solid var(--border);
+    border-radius:var(--r); color:var(--fg); font-size:13px; padding:0 12px 0 34px; font-family:inherit;
+  }
+  .search input::placeholder{color:var(--muted)}
+  .search input:hover{border-color:#3d4450}
+  .search input:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(88,166,255,.15)}
+  .spacer{flex:1}
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px;
+    border-radius:var(--r); border:1px solid var(--border); background:var(--card);
+    color:var(--fg); font-size:13px; font-weight:500; font-family:inherit; cursor:pointer;
+    transition:background .1s,border-color .1s,transform .05s;
+  }
+  .btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .btn:hover{background:var(--track); border-color:#3d4450}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:2px solid var(--blue); outline-offset:1px}
+  .btn.primary{background:var(--teal); border-color:var(--teal); color:#04211d; font-weight:700}
+  .btn.primary:hover{background:#4ee0cf; border-color:#4ee0cf}
+  .bell{position:relative; width:34px; height:34px; padding:0; display:grid; place-items:center}
+  .bell svg{width:18px;height:18px}
+  .bell .badge{
+    position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 4px;
+    background:var(--red); color:#fff; font-size:10px; font-weight:700; border-radius:8px;
+    display:grid; place-items:center; border:2px solid var(--bg);
+  }
+  .icon-btn{width:34px;height:34px;padding:0;justify-content:center}
+
+  .content{padding:20px; display:flex; flex-direction:column; gap:16px}
+
+  /* ---------- PAGE HEAD ---------- */
+  .page-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .page-head h1{font-size:18px; font-weight:700; color:#f0f6fc; letter-spacing:-0.02em}
+  .live{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600;
+    letter-spacing:0.06em; color:var(--green); background:rgba(63,185,80,.1);
+    padding:3px 8px; border-radius:20px; border:1px solid rgba(63,185,80,.25);
+  }
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.4s ease-in-out infinite}
+  .page-head .upd{font-size:11px; color:var(--muted); margin-left:auto}
+
+  /* ---------- BANNER ---------- */
+  .banner{
+    display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:var(--r);
+    background:rgba(88,166,255,.08); border:1px solid rgba(88,166,255,.28); font-size:13px;
+  }
+  .banner .bi{width:18px;height:18px;flex-shrink:0;stroke:var(--blue);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .banner b{color:#f0f6fc; font-weight:700}
+  .banner .amt{color:var(--blue); font-weight:700}
+
+  /* ---------- CARD ---------- */
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--r);
+    transition:border-color .12s, background .12s;
+    animation:fadeUp .4s ease both; animation-delay:var(--d,0ms);
+  }
+  .card:hover{border-color:var(--blue)}
+  .card-h{
+    display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border);
+  }
+  .card-h .t{font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  .card-h .r{margin-left:auto; display:flex; align-items:center; gap:8px}
+  .chip{
+    font-size:10px; letter-spacing:0.04em; color:var(--muted); background:var(--track);
+    padding:2px 7px; border-radius:20px; border:1px solid var(--border);
+  }
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  .kpi{padding:14px}
+  .kpi .lbl{font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  .kpi .row{display:flex; align-items:flex-end; justify-content:space-between; gap:8px; margin-top:10px}
+  .kpi .val{font-size:24px; font-weight:700; color:#f0f6fc; letter-spacing:-0.02em; line-height:1.1}
+  .kpi .val .u{font-size:14px; font-weight:600; color:var(--muted); margin-left:1px}
+  .kpi .spark{width:96px; height:32px; flex-shrink:0}
+  .delta{display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; margin-top:9px}
+  .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--green)}
+  .delta .m{font-size:9px}
+
+  /* ---------- GRID ROWS ---------- */
+  .row{display:grid; gap:16px}
+  .row.b{grid-template-columns:1.7fr 1fr}
+  .row.c{grid-template-columns:1.9fr 1fr}
+  .stack{display:flex; flex-direction:column; gap:16px}
+  .pad{padding:14px}
+
+  /* ---------- LINE CHART ---------- */
+  .linechart{width:100%; height:auto; aspect-ratio:660/210}
+  .grid-l{stroke:var(--border); stroke-width:1; opacity:.6}
+  .axis-t{fill:var(--muted); font-size:10px}
+  .line-area{fill:url(#areaGrad); opacity:0; animation:fadeIn .5s .7s ease forwards}
+  .line-path{fill:none; stroke:var(--teal); stroke-width:1.7; stroke-linejoin:round; stroke-linecap:round;
+    stroke-dasharray:620; stroke-dashoffset:0; animation:draw 1.1s .15s ease both}
+  .pt{cursor:crosshair}
+  .pt .hit{fill:transparent}
+  .pt .cross{stroke:var(--blue); stroke-width:1; stroke-dasharray:3 3; opacity:0; transition:opacity .1s}
+  .pt .dot{fill:var(--card); stroke:var(--teal); stroke-width:1.7; transition:r .1s}
+  .pt .dot.peak{fill:var(--teal)}
+  .pt .tip{opacity:0; transition:opacity .1s; pointer-events:none}
+  .pt .tip rect{fill:#04070d; stroke:var(--border); stroke-width:1}
+  .pt .tip text{fill:var(--fg); font-size:10px; text-anchor:middle}
+  .pt .tip .v{fill:var(--teal); font-weight:700}
+  .pt:hover .cross,.pt:hover .tip{opacity:1}
+  .pt:hover .dot{r:5}
+
+  /* ---------- DONUT ---------- */
+  .donut-wrap{display:flex; flex-direction:column; align-items:center; gap:12px; padding:14px}
+  .donut{width:150px; height:150px}
+  .dseg{fill:none; stroke-width:20; transition:opacity .1s, stroke-width .1s; cursor:pointer}
+  .dseg:hover{opacity:.85; stroke-width:23}
+  .dcenter .big{font-size:22px; font-weight:700; fill:#f0f6fc}
+  .dcenter .sub{font-size:10px; fill:var(--muted); letter-spacing:0.05em}
+  .legend{width:100%; display:flex; flex-direction:column; gap:7px}
+  .legend .lg{display:flex; align-items:center; gap:8px; font-size:12px}
+  .legend .sw{width:9px; height:9px; border-radius:2px; flex-shrink:0}
+  .legend .nm{color:var(--fg)}
+  .legend .pc{margin-left:auto; color:var(--muted); font-weight:600}
+
+  /* ---------- GAUGE ---------- */
+  .gauge-wrap{display:flex; flex-direction:column; align-items:center; padding:14px 14px 16px}
+  .gauge{width:200px; height:120px}
+  .gauge-track{fill:none; stroke:var(--track); stroke-width:12; stroke-linecap:round}
+  .gauge-val{fill:none; stroke:var(--green); stroke-width:12; stroke-linecap:round;
+    stroke-dasharray:215.14 251.33; stroke-dashoffset:0; animation:sweep 1s .2s ease both}
+  .gauge .gv{font-size:26px; font-weight:700; fill:#f0f6fc}
+  .gauge .gl{font-size:10px; fill:var(--muted)}
+  .gauge-foot{display:flex; justify-content:space-between; width:200px; margin-top:2px; font-size:11px; color:var(--muted)}
+  .gauge-meta{margin-top:12px; text-align:center; font-size:12px; color:var(--muted)}
+  .gauge-meta b{color:var(--fg); font-weight:700}
+
+  /* ---------- TABLE ---------- */
+  .tbl-scroll{overflow-x:auto}
+  table{width:100%; border-collapse:collapse; font-size:13px; min-width:640px}
+  thead th{
+    text-align:left; font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--muted); font-weight:600; padding:9px 14px; border-bottom:1px solid var(--border);
+    white-space:nowrap; user-select:none;
+  }
+  thead th.sortable{cursor:pointer}
+  thead th.sortable:hover{color:var(--fg)}
+  thead th .sar{opacity:.55; margin-left:3px; font-size:9px}
+  thead th.num,tbody td.num{text-align:right}
+  tbody td{padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{position:relative; transition:background .1s}
+  tbody tr td:first-child{position:relative}
+  tbody tr:hover{background:var(--row-hover)}
+  tbody tr:hover td:first-child::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--acc,var(--blue));
+  }
+  .oid{font-family:'JetBrains Mono','SFMono-Regular',ui-monospace,monospace; font-size:12px; color:var(--blue)}
+  .cust{display:inline-flex; align-items:center; gap:8px}
+  .cust .av{width:24px;height:24px;border-radius:5px;background:var(--track);border:1px solid var(--border);
+    display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--fg)}
+  .prod{color:var(--fg)}
+  .amt-c{font-weight:600; color:var(--fg)}
+  .amt-c.empty{color:var(--muted); font-weight:400}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+    padding:2px 8px; border-radius:20px; white-space:nowrap; letter-spacing:0.01em;
+  }
+  .badge .mk{font-size:9px; line-height:1}
+  .b-green{background:rgba(63,185,80,.13); color:var(--green)}
+  .b-blue{background:rgba(88,166,255,.13); color:var(--blue)}
+  .b-yellow{background:rgba(210,153,34,.14); color:var(--yellow)}
+  .b-teal{background:rgba(45,212,191,.13); color:var(--teal)}
+  .b-red{background:rgba(248,81,73,.13); color:var(--red); animation:pulse2 1.6s ease-in-out infinite}
+  .rowact{opacity:0; transition:opacity .1s}
+  tbody tr:hover .rowact{opacity:1}
+  .rowact .btn{height:26px; padding:0 10px; font-size:12px}
+
+  /* ---------- CHANNELS ---------- */
+  .chan{padding:14px; display:flex; flex-direction:column; gap:12px}
+  .chan .ch{display:flex; flex-direction:column; gap:5px}
+  .chan .ch-top{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+  .chan .ch-nm{font-size:12px; color:var(--fg); display:flex; align-items:center; gap:7px}
+  .chan .ch-rk{width:16px;height:16px;border-radius:4px;background:var(--track);border:1px solid var(--border);
+    display:grid;place-items:center;font-size:9px;font-weight:700;color:var(--muted)}
+  .chan .ch-v{font-size:12px; font-weight:700; color:var(--fg)}
+  .chan .bar{height:6px; background:var(--track); border-radius:3px; overflow:hidden}
+  .chan .bar i{display:block; height:100%; background:var(--teal); border-radius:3px;
+    transform-origin:left; animation:barGrow .8s .3s ease both}
+
+  footer{
+    padding:16px 20px 24px; color:var(--muted); font-size:12px; border-top:1px solid var(--border);
+    display:flex; align-items:center; gap:8px;
+  }
+  footer .dot{width:3px;height:3px;border-radius:50%;background:var(--muted)}
+
+  /* ---------- ANIMATIONS ---------- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{to{opacity:1}}
+  @keyframes draw{from{stroke-dashoffset:620}to{stroke-dashoffset:0}}
+  @keyframes sweep{from{stroke-dashoffset:215.14}to{stroke-dashoffset:0}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes pulse2{0%,100%{opacity:1}50%{opacity:.6}}
+  @keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:1160px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .row.b,.row.c{grid-template-columns:1fr}
+  }
+  @media (max-width:900px){
+    :root{--nav-w:60px}
+    .brand{padding:0; justify-content:center}
+    .brand .name{display:none}
+    .nav{padding:12px 8px}
+    .nav-h{display:none}
+    .nav a{justify-content:center; padding:9px; gap:0}
+    .nav a .lbl{display:none}
+    .ws{justify-content:center; padding:12px 8px}
+    .ws .meta{display:none}
+    .search{max-width:none}
+  }
+  @media (max-width:620px){
+    .kpis{grid-template-columns:1fr}
+    .content{padding:14px}
+    .topbar{padding:0 12px; gap:8px}
+    .btn.primary .lbl{display:none}
+    .search{flex:0 1 160px}
+    .page-head .upd{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important; transition:none!important}
+    .line-path{stroke-dashoffset:0!important}
+    .gauge-val{stroke-dashoffset:0!important}
+    .line-area{opacity:1!important}
+    .chan .bar i{transform:none!important}
+    .card{opacity:1!important; transform:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div class="name">MUJINE</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-h">메뉴</div>
+      <a href="#" class="active" aria-current="page" title="대시보드">
+        <svg viewBox="0 0 18 18"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="9.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="9.5" width="6" height="6" rx="1"/><rect x="9.5" y="9.5" width="6" height="6" rx="1"/></svg>
+        <span class="lbl">대시보드</span>
+      </a>
+      <a href="#" title="주문">
+        <svg viewBox="0 0 18 18"><path d="M4 2.5h10v13l-2-1.2-2 1.2-2-1.2-2 1.2z"/><path d="M6.5 6.2h5M6.5 9.2h5"/></svg>
+        <span class="lbl">주문</span>
+      </a>
+      <a href="#" title="상품">
+        <svg viewBox="0 0 18 18"><path d="M9 2.2 15.5 6v6L9 15.8 2.5 12V6z"/><path d="M2.5 6 9 9.8 15.5 6M9 9.8v6"/></svg>
+        <span class="lbl">상품</span>
+      </a>
+      <a href="#" title="고객">
+        <svg viewBox="0 0 18 18"><circle cx="9" cy="6.2" r="2.8"/><path d="M3.5 15c0-3 2.5-4.6 5.5-4.6s5.5 1.6 5.5 4.6"/></svg>
+        <span class="lbl">고객</span>
+      </a>
+      <a href="#" title="정산">
+        <svg viewBox="0 0 18 18"><rect x="2.5" y="4" width="13" height="10" rx="1.5"/><path d="M2.5 7.5h13"/></svg>
+        <span class="lbl">정산</span>
+      </a>
+      <a href="#" title="통계">
+        <svg viewBox="0 0 18 18"><path d="M4 14V8M9 14V4M14 14v-4"/></svg>
+        <span class="lbl">통계</span>
+      </a>
+      <a href="#" title="설정">
+        <svg viewBox="0 0 18 18"><path d="M3 5.5h8M13.5 5.5h1.5M3 12.5h1.5M7 12.5h8"/><circle cx="12" cy="5.5" r="1.6"/><circle cx="5" cy="12.5" r="1.6"/></svg>
+        <span class="lbl">설정</span>
+      </a>
+    </nav>
+    <div class="ws">
+      <div class="avatar" aria-hidden="true">CO</div>
+      <div class="meta">
+        <b>셀러 워크스페이스</b>
+        <span>무진상회</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <label class="search">
+        <svg viewBox="0 0 18 18"><circle cx="7.5" cy="7.5" r="4.2"/><path d="M11 11 14.5 14.5"/></svg>
+        <input type="search" placeholder="주문·상품 검색" aria-label="주문·상품 검색">
+      </label>
+      <div class="spacer"></div>
+      <button class="btn" type="button">
+        기간
+        <svg viewBox="0 0 18 18" style="width:12px;height:12px"><path d="M4.5 7 9 11l4.5-4"/></svg>
+      </button>
+      <button class="btn bell icon-btn" type="button" aria-label="알림 5건">
+        <svg viewBox="0 0 18 18"><path d="M9 3a4 4 0 0 0-4 4c0 4-1.5 5-1.5 5h11S13 11 13 7a4 4 0 0 0-4-4z"/><path d="M7.5 14.5a1.6 1.6 0 0 0 3 0"/></svg>
+        <span class="badge tnum">5</span>
+      </button>
+      <button class="btn primary" type="button">
+        <svg viewBox="0 0 18 18"><path d="M9 4v10M4 9h10"/></svg>
+        <span class="lbl">새 주문</span>
+      </button>
+      <div class="avatar" title="셀러 계정" aria-label="셀러 계정">CO</div>
+    </header>
+
+    <div class="content">
+
+      <!-- PAGE HEAD -->
+      <div class="page-head">
+        <h1>대시보드</h1>
+        <span class="live"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+        <span class="upd">마지막 갱신 · 방금 전</span>
+      </div>
+
+      <!-- BANNER -->
+      <div class="banner" role="status">
+        <svg class="bi" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7"/><path d="M9 8.2v4M9 5.6h.01"/></svg>
+        <span><b>정산 예정</b> — 3일 후 <span class="amt tnum">2억 8,400만원</span>이 등록 계좌로 지급됩니다.</span>
+      </div>
+
+      <!-- KPI ROW -->
+      <div class="kpis">
+        <!-- 총 매출 -->
+        <div class="card kpi" style="--d:0ms">
+          <div class="lbl">총 매출</div>
+          <div class="row">
+            <div class="val tnum" data-count="1284050000" data-dec="0" data-suffix="원">1,284,050,000원</div>
+            <svg class="spark" viewBox="0 0 96 32" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="sp1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2dd4bf" stop-opacity=".28"/><stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/></linearGradient></defs>
+              <polygon fill="url(#sp1)" points="0,29 0,29 13.7,24.4 27.4,27.1 41.1,19.7 54.9,15.1 68.6,10.4 82.3,12.3 96,3 96,32 0,32"/>
+              <polyline fill="none" stroke="#2dd4bf" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="0,29 13.7,24.4 27.4,27.1 41.1,19.7 54.9,15.1 68.6,10.4 82.3,12.3 96,3"/>
+              <circle cx="96" cy="3" r="2.4" fill="#3fb950"/>
+            </svg>
+          </div>
+          <div class="delta up"><span class="m">▲</span> +8.2% <span style="color:var(--muted);font-weight:400">전월 대비</span></div>
+        </div>
+        <!-- 신규 주문 -->
+        <div class="card kpi" style="--d:40ms">
+          <div class="lbl">신규 주문</div>
+          <div class="row">
+            <div class="val tnum" data-count="3472" data-dec="0" data-suffix="건">3,472건</div>
+            <svg class="spark" viewBox="0 0 96 32" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="sp2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58a6ff" stop-opacity=".28"/><stop offset="1" stop-color="#58a6ff" stop-opacity="0"/></linearGradient></defs>
+              <polygon fill="url(#sp2)" points="0,27.1 13.7,29 27.4,25.3 41.1,19.7 54.9,16 68.6,13.2 82.3,8.6 96,3 96,32 0,32"/>
+              <polyline fill="none" stroke="#58a6ff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="0,27.1 13.7,29 27.4,25.3 41.1,19.7 54.9,16 68.6,13.2 82.3,8.6 96,3"/>
+              <circle cx="96" cy="3" r="2.4" fill="#3fb950"/>
+            </svg>
+          </div>
+          <div class="delta up"><span class="m">▲</span> +12% <span style="color:var(--muted);font-weight:400">전월 대비</span></div>
+        </div>
+        <!-- 전환율 -->
+        <div class="card kpi" style="--d:80ms">
+          <div class="lbl">전환율</div>
+          <div class="row">
+            <div class="val tnum" data-count="3.8" data-dec="1" data-suffix="%">3.8%</div>
+            <svg class="spark" viewBox="0 0 96 32" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="sp3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#db6d28" stop-opacity=".28"/><stop offset="1" stop-color="#db6d28" stop-opacity="0"/></linearGradient></defs>
+              <polygon fill="url(#sp3)" points="0,3 13.7,7.1 27.4,9.8 41.1,12.6 54.9,16.7 68.6,20.8 82.3,23.5 96,29 96,32 0,32"/>
+              <polyline fill="none" stroke="#db6d28" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="0,3 13.7,7.1 27.4,9.8 41.1,12.6 54.9,16.7 68.6,20.8 82.3,23.5 96,29"/>
+              <circle cx="96" cy="29" r="2.4" fill="#f85149"/>
+            </svg>
+          </div>
+          <div class="delta down"><span class="m">▼</span> −0.4%p 하락</div>
+        </div>
+        <!-- 정산 대기 -->
+        <div class="card kpi" style="--d:120ms">
+          <div class="lbl">정산 대기</div>
+          <div class="row">
+            <div class="val tnum" data-count="284000000" data-dec="0" data-suffix="원">284,000,000원</div>
+            <svg class="spark" viewBox="0 0 96 32" preserveAspectRatio="none" aria-hidden="true">
+              <defs><linearGradient id="sp4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bc8cff" stop-opacity=".28"/><stop offset="1" stop-color="#bc8cff" stop-opacity="0"/></linearGradient></defs>
+              <polygon fill="url(#sp4)" points="0,22.5 13.7,29 27.4,16 41.1,22.5 54.9,9.5 68.6,16 82.3,3 96,9.5 96,32 0,32"/>
+              <polyline fill="none" stroke="#bc8cff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="0,22.5 13.7,29 27.4,16 41.1,22.5 54.9,9.5 68.6,16 82.3,3 96,9.5"/>
+              <circle cx="96" cy="9.5" r="2.4" fill="#3fb950"/>
+            </svg>
+          </div>
+          <div class="delta flat"><span class="m">●</span> 0건 지연</div>
+        </div>
+      </div>
+
+      <!-- CHART ROW -->
+      <div class="row b">
+        <!-- LINE CHART -->
+        <div class="card" style="--d:120ms">
+          <div class="card-h">
+            <span class="t">최근 8주 매출 추이</span>
+            <div class="r"><span class="chip">단위 · 백만원</span></div>
+          </div>
+          <div class="pad">
+            <svg class="linechart" viewBox="0 0 660 210" role="img" aria-label="최근 8주 매출 추이 라인 차트">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#2dd4bf" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#2dd4bf" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- grid + y axis -->
+              <line class="grid-l" x1="40" y1="20"  x2="640" y2="20"/>
+              <line class="grid-l" x1="40" y1="57.5" x2="640" y2="57.5"/>
+              <line class="grid-l" x1="40" y1="95"  x2="640" y2="95"/>
+              <line class="grid-l" x1="40" y1="132.5" x2="640" y2="132.5"/>
+              <line class="grid-l" x1="40" y1="170" x2="640" y2="170"/>
+              <text class="axis-t tnum" x="34" y="23"  text-anchor="end">1,400</text>
+              <text class="axis-t tnum" x="34" y="98"  text-anchor="end">700</text>
+              <text class="axis-t tnum" x="34" y="173" text-anchor="end">0</text>
+              <!-- area + line -->
+              <polygon class="line-area" points="40,170 40,82.14 122.86,72.5 205.71,57.5 288.57,66.07 371.43,43.57 454.29,26.43 537.14,39.29 620,32.43 620,170"/>
+              <path class="line-path" d="M40 82.14 L122.86 72.5 L205.71 57.5 L288.57 66.07 L371.43 43.57 L454.29 26.43 L537.14 39.29 L620 32.43"/>
+              <!-- week labels -->
+              <text class="axis-t" x="40"     y="192" text-anchor="middle">1주</text>
+              <text class="axis-t" x="122.86" y="192" text-anchor="middle">2주</text>
+              <text class="axis-t" x="205.71" y="192" text-anchor="middle">3주</text>
+              <text class="axis-t" x="288.57" y="192" text-anchor="middle">4주</text>
+              <text class="axis-t" x="371.43" y="192" text-anchor="middle">5주</text>
+              <text class="axis-t" x="454.29" y="192" text-anchor="middle">6주</text>
+              <text class="axis-t" x="537.14" y="192" text-anchor="middle">7주</text>
+              <text class="axis-t" x="620"    y="192" text-anchor="middle">8주</text>
+              <!-- interactive points (pure-CSS crosshair + tooltip) -->
+              <g class="pt"><rect class="hit" x="0"      y="20" width="81" height="150"/><line class="cross" x1="40" y1="20" x2="40" y2="170"/><circle class="dot" cx="40" cy="82.14" r="2.6"/><g class="tip" transform="translate(40,54)"><rect x="-30" y="-16" width="60" height="24" rx="4"/><text x="0" y="-5">1주</text><text class="v tnum" x="0" y="5">820</text></g></g>
+              <g class="pt"><rect class="hit" x="81"     y="20" width="83" height="150"/><line class="cross" x1="122.86" y1="20" x2="122.86" y2="170"/><circle class="dot" cx="122.86" cy="72.5" r="2.6"/><g class="tip" transform="translate(122.86,44)"><rect x="-30" y="-16" width="60" height="24" rx="4"/><text x="0" y="-5">2주</text><text class="v tnum" x="0" y="5">910</text></g></g>
+              <g class="pt"><rect class="hit" x="164"    y="20" width="83" height="150"/><line class="cross" x1="205.71" y1="20" x2="205.71" y2="170"/><circle class="dot" cx="205.71" cy="57.5" r="2.6"/><g class="tip" transform="translate(205.71,29)"><rect x="-32" y="-16" width="64" height="24" rx="4"/><text x="0" y="-5">3주</text><text class="v tnum" x="0" y="5">1,050</text></g></g>
+              <g class="pt"><rect class="hit" x="247"    y="20" width="83" height="150"/><line class="cross" x1="288.57" y1="20" x2="288.57" y2="170"/><circle class="dot" cx="288.57" cy="66.07" r="2.6"/><g class="tip" transform="translate(288.57,38)"><rect x="-30" y="-16" width="60" height="24" rx="4"/><text x="0" y="-5">4주</text><text class="v tnum" x="0" y="5">970</text></g></g>
+              <g class="pt"><rect class="hit" x="330"    y="20" width="83" height="150"/><line class="cross" x1="371.43" y1="20" x2="371.43" y2="170"/><circle class="dot" cx="371.43" cy="43.57" r="2.6"/><g class="tip" transform="translate(371.43,16)"><rect x="-32" y="-16" width="64" height="24" rx="4"/><text x="0" y="-5">5주</text><text class="v tnum" x="0" y="5">1,180</text></g></g>
+              <g class="pt"><rect class="hit" x="413"    y="20" width="83" height="150"/><line class="cross" x1="454.29" y1="20" x2="454.29" y2="170"/><circle class="dot peak" cx="454.29" cy="26.43" r="3"/><g class="tip" transform="translate(454.29,-1)"><rect x="-38" y="-15" width="76" height="24" rx="4"/><text x="0" y="-4">6주 · 피크</text><text class="v tnum" x="0" y="6">1,340</text></g></g>
+              <g class="pt"><rect class="hit" x="496"    y="20" width="83" height="150"/><line class="cross" x1="537.14" y1="20" x2="537.14" y2="170"/><circle class="dot" cx="537.14" cy="39.29" r="2.6"/><g class="tip" transform="translate(537.14,11)"><rect x="-32" y="-16" width="64" height="24" rx="4"/><text x="0" y="-5">7주</text><text class="v tnum" x="0" y="5">1,220</text></g></g>
+              <g class="pt"><rect class="hit" x="579"    y="20" width="81" height="150"/><line class="cross" x1="620" y1="20" x2="620" y2="170"/><circle class="dot peak" cx="620" cy="32.43" r="3"/><g class="tip" transform="translate(612,4)"><rect x="-40" y="-16" width="72" height="24" rx="4"/><text x="-4" y="-5">8주</text><text class="v tnum" x="-4" y="5">1,284</text></g></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- RIGHT STACK: DONUT + GAUGE -->
+        <div class="stack">
+          <!-- DONUT -->
+          <div class="card" style="--d:160ms">
+            <div class="card-h"><span class="t">카테고리 구성비</span><div class="r"><span class="chip">단위 · %</span></div></div>
+            <div class="donut-wrap">
+              <svg class="donut" viewBox="0 0 140 140" role="img" aria-label="카테고리 구성비 도넛 차트">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="#21262d" stroke-width="20"/>
+                <circle class="dseg" cx="70" cy="70" r="54" stroke="#2dd4bf" stroke-dasharray="126.931 339.292" transform="rotate(-90 70 70)"><title>의류 38%</title></circle>
+                <circle class="dseg" cx="70" cy="70" r="54" stroke="#58a6ff" stroke-dasharray="79.430 339.292" transform="rotate(46.8 70 70)"><title>전자 24%</title></circle>
+                <circle class="dseg" cx="70" cy="70" r="54" stroke="#bc8cff" stroke-dasharray="65.858 339.292" transform="rotate(133.2 70 70)"><title>리빙 20%</title></circle>
+                <circle class="dseg" cx="70" cy="70" r="54" stroke="#f778ba" stroke-dasharray="38.715 339.292" transform="rotate(205.2 70 70)"><title>생활 12%</title></circle>
+                <circle class="dseg" cx="70" cy="70" r="54" stroke="#8b949e" stroke-dasharray="18.358 339.292" transform="rotate(248.4 70 70)"><title>스포츠 6%</title></circle>
+                <g class="dcenter" text-anchor="middle">
+                  <text class="big tnum" x="70" y="68">100%</text>
+                  <text class="sub" x="70" y="83">5개 카테고리</text>
+                </g>
+              </svg>
+              <div class="legend">
+                <div class="lg"><span class="sw" style="background:#2dd4bf"></span><span class="nm">의류</span><span class="pc tnum">38%</span></div>
+                <div class="lg"><span class="sw" style="background:#58a6ff"></span><span class="nm">전자</span><span class="pc tnum">24%</span></div>
+                <div class="lg"><span class="sw" style="background:#bc8cff"></span><span class="nm">리빙</span><span class="pc tnum">20%</span></div>
+                <div class="lg"><span class="sw" style="background:#f778ba"></span><span class="nm">생활</span><span class="pc tnum">12%</span></div>
+                <div class="lg"><span class="sw" style="background:#8b949e"></span><span class="nm">스포츠</span><span class="pc tnum">6%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GAUGE -->
+          <div class="card" style="--d:200ms">
+            <div class="card-h"><span class="t">이번 달 목표 진행률</span><div class="r"><span class="badge b-green"><span class="mk">●</span>정상</span></div></div>
+            <div class="gauge-wrap">
+              <svg class="gauge" viewBox="0 0 200 120" role="img" aria-label="목표 진행률 85.6퍼센트">
+                <path class="gauge-track" d="M20 105 A 80 80 0 0 1 180 105"/>
+                <path class="gauge-val"   d="M20 105 A 80 80 0 0 1 180 105"/>
+                <text class="gv tnum" x="100" y="92" text-anchor="middle">85.6%</text>
+                <text class="gl" x="100" y="108" text-anchor="middle">목표 달성률</text>
+              </svg>
+              <div class="gauge-foot"><span class="tnum">0억</span><span class="tnum">15억</span></div>
+              <div class="gauge-meta">이번 달 목표 <b class="tnum">15억</b> 중 <b class="tnum">12.84억</b> 달성</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE + CHANNELS ROW -->
+      <div class="row c">
+        <!-- ORDERS TABLE -->
+        <div class="card" style="--d:200ms">
+          <div class="card-h">
+            <span class="t">최근 주문</span>
+            <div class="r"><span class="chip tnum">6건</span></div>
+          </div>
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="sortable">주문번호 <span class="sar">↓</span></th>
+                  <th>고객</th>
+                  <th>상품</th>
+                  <th class="num sortable">금액 <span class="sar">↕</span></th>
+                  <th>상태</th>
+                  <th aria-label="액션"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="--acc:var(--green)">
+                  <td><span class="oid">#10482</span></td>
+                  <td><span class="cust"><span class="av">K.D</span></span></td>
+                  <td class="prod">프리미엄 오가닉 코튼 반팔티 외2건</td>
+                  <td class="num amt-c tnum">89,000원</td>
+                  <td><span class="badge b-green"><span class="mk">●</span>결제완료</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+                <tr style="--acc:var(--blue)">
+                  <td><span class="oid">#10481</span></td>
+                  <td><span class="cust"><span class="av">J.S</span></span></td>
+                  <td class="prod">무선 이어폰 Pro</td>
+                  <td class="num amt-c tnum">219,000원</td>
+                  <td><span class="badge b-blue"><span class="mk">▸</span>배송중</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+                <tr style="--acc:var(--yellow)">
+                  <td><span class="oid">#10480</span></td>
+                  <td><span class="cust"><span class="av">M.L</span></span></td>
+                  <td class="prod">스테인리스 텀블러</td>
+                  <td class="num amt-c empty tnum">—</td>
+                  <td><span class="badge b-yellow"><span class="mk">▲</span>결제대기</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+                <tr style="--acc:var(--teal)">
+                  <td><span class="oid">#10479</span></td>
+                  <td><span class="cust"><span class="av">H.K</span></span></td>
+                  <td class="prod">대나무 칫솔 4개입</td>
+                  <td class="num amt-c tnum">12,400원</td>
+                  <td><span class="badge b-teal"><span class="mk">✓</span>배송완료</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+                <tr style="--acc:var(--red)">
+                  <td><span class="oid">#10478</span></td>
+                  <td><span class="cust"><span class="av">S.C</span></span></td>
+                  <td class="prod">아로마 캔들 세트</td>
+                  <td class="num amt-c tnum">46,000원</td>
+                  <td><span class="badge b-red"><span class="mk">✕</span>취소</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+                <tr style="--acc:var(--green)">
+                  <td><span class="oid">#10477</span></td>
+                  <td><span class="cust"><span class="av">Y.P</span></span></td>
+                  <td class="prod">요가 매트</td>
+                  <td class="num amt-c tnum">39,000원</td>
+                  <td><span class="badge b-green"><span class="mk">●</span>결제완료</span></td>
+                  <td class="num"><span class="rowact"><button class="btn" type="button">상세</button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TOP CHANNELS -->
+        <div class="card" style="--d:240ms">
+          <div class="card-h"><span class="t">상위 채널</span><div class="r"><span class="chip">매출 기준</span></div></div>
+          <div class="chan">
+            <div class="ch">
+              <div class="ch-top"><span class="ch-nm"><span class="ch-rk">1</span>스마트스토어</span><span class="ch-v tnum">4.2억</span></div>
+              <div class="bar"><i style="width:100%"></i></div>
+            </div>
+            <div class="ch">
+              <div class="ch-top"><span class="ch-nm"><span class="ch-rk">2</span>쿠팡</span><span class="ch-v tnum">3.1억</span></div>
+              <div class="bar"><i style="width:73.8%"></i></div>
+            </div>
+            <div class="ch">
+              <div class="ch-top"><span class="ch-nm"><span class="ch-rk">3</span>자사몰</span><span class="ch-v tnum">2.4억</span></div>
+              <div class="bar"><i style="width:57.1%"></i></div>
+            </div>
+            <div class="ch">
+              <div class="ch-top"><span class="ch-nm"><span class="ch-rk">4</span>인스타샵</span><span class="ch-v tnum">1.8억</span></div>
+              <div class="bar"><i style="width:42.9%"></i></div>
+            </div>
+            <div class="ch">
+              <div class="ch-top"><span class="ch-nm"><span class="ch-rk">5</span>카카오</span><span class="ch-v tnum">0.9억</span></div>
+              <div class="bar"><i style="width:21.4%"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <footer>MUJINE 대시보드 <span class="dot"></span> 다크 대시보드</footer>
+  </div><!-- /main -->
+</div>
+
+<script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return;
+    var els = document.querySelectorAll('[data-count]');
+    els.forEach(function(el){
+      var target = parseFloat(el.dataset.count);
+      var dec = parseInt(el.dataset.dec || '0', 10);
+      var suf = el.dataset.suffix || '';
+      var dur = 850, t0 = performance.now();
+      function fmt(v){ return v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf; }
+      function tick(t){
+        var p = Math.min(1,(t - t0)/dur);
+        p = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * p);
+        if(p < 1){ requestAnimationFrame(tick); } else { el.textContent = fmt(target); }
+      }
+      el.textContent = fmt(0);
+      requestAnimationFrame(tick);
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vecta API — Vectors 업서트</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* 표면 — 저채도 다크 */
+    --bg:            #0E0E11;
+    --surface:       #131317;
+    --surface-raised:#17171C;
+    --surface-hover: #1C1C22;
+    /* 헤어라인 */
+    --border:        #232326;
+    --border-strong: #2E2E33;
+    /* 텍스트 3단 위계 */
+    --fg:            #EDEDEF;
+    --fg-secondary:  #A0A0A8;
+    --fg-tertiary:   #6E6E76;
+    /* 액센트 1 — 저채도 인디고 */
+    --accent:        #8B8BF5;
+    --accent-dim:    rgba(139,139,245,.14);
+    --accent-line:   rgba(139,139,245,.30);
+    /* 상태색 — 저채도 */
+    --success:       #4E9A76;
+    --warning:       #C7A15A;
+    --danger:        #C96A6A;
+    /* 스페이싱 8px 그리드 */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+    --sp-12: 48px; --sp-16: 64px;
+    /* 형태 */
+    --r-card: 10px; --r-ctl: 8px; --r-sm: 6px;
+    --shadow-pop: 0 8px 24px rgba(0,0,0,.40);
+    --ff-mono: "SFMono-Regular", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --ff-sans: "Inter", "Pretendard", -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: inherit; text-decoration: none; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* 로드 시퀀스 — 조용히 자리잡기 */
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  body { animation: fadeIn 220ms ease-out both; }
+
+  /* focus-visible — 액센트 2px 아웃라인 */
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  /* ── 상단바 ─────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    height: 56px;
+    display: flex; align-items: center; gap: var(--sp-4);
+    padding: 0 var(--sp-6);
+    background: rgba(14,14,17,.82);
+    backdrop-filter: saturate(160%) blur(12px);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: var(--sp-3); flex-shrink: 0; }
+  .brand__mark {
+    width: 28px; height: 28px; border-radius: var(--r-sm);
+    display: grid; place-items: center;
+    background: linear-gradient(150deg, var(--surface-raised), #202030);
+    border: 1px solid var(--border-strong);
+    color: var(--accent);
+    font-family: var(--ff-mono); font-weight: 700; font-size: 15px;
+    letter-spacing: 0;
+  }
+  .brand__name { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .brand__badge {
+    font-family: var(--ff-mono); font-size: 11px; color: var(--fg-tertiary);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 2px var(--sp-2); line-height: 1.4;
+    margin-left: var(--sp-1);
+  }
+
+  .search {
+    position: relative; flex: 1 1 auto; max-width: 420px; margin-left: var(--sp-4);
+  }
+  .search__icon {
+    position: absolute; left: var(--sp-3); top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: var(--fg-tertiary); pointer-events: none;
+  }
+  .search input {
+    width: 100%; height: 36px;
+    background: var(--surface); color: var(--fg);
+    border: 1px solid var(--border); border-radius: var(--r-ctl);
+    padding: 0 var(--sp-3) 0 var(--sp-8);
+    font: inherit; font-size: 13px; letter-spacing: -0.01em;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .search input::placeholder { color: var(--fg-tertiary); }
+  .search input:hover { border-color: var(--border-strong); }
+  .search input:focus { border-color: var(--accent); background: var(--surface-raised); }
+  .search__kbd {
+    position: absolute; right: var(--sp-2); top: 50%; transform: translateY(-50%);
+    font-family: var(--ff-mono); font-size: 11px; color: var(--fg-tertiary);
+    border: 1px solid var(--border); border-radius: var(--r-sm);
+    padding: 1px var(--sp-2); line-height: 1.5; pointer-events: none;
+  }
+
+  .topbar__spacer { flex: 1 1 auto; }
+  .topnav { display: flex; align-items: center; gap: var(--sp-1); }
+  .topnav a {
+    padding: var(--sp-2) var(--sp-3); border-radius: var(--r-ctl);
+    color: var(--fg-secondary); font-size: 13px;
+    transition: color 120ms ease, background 120ms ease;
+  }
+  .topnav a:hover { color: var(--fg); background: var(--surface-hover); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 36px; padding: 0 var(--sp-4);
+    border-radius: var(--r-ctl); border: 1px solid transparent;
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    letter-spacing: -0.01em;
+    transition: background 120ms ease, border-color 120ms ease, transform 80ms ease, filter 80ms ease;
+  }
+  .btn--primary { background: var(--accent); color: #0C0C16; }
+  .btn--primary:hover { filter: brightness(1.06); }
+  .btn--primary:active { transform: scale(.97); filter: brightness(.94); }
+  .btn--ghost { background: var(--surface); color: var(--fg); border-color: var(--border); }
+  .btn--ghost:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+  .btn--ghost:active { transform: scale(.97); filter: brightness(.94); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ── 3열 레이아웃 ───────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 220px;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  /* ── 좌 사이드바 (목차 트리) ──────────────── */
+  .sidebar {
+    position: sticky; top: 56px; align-self: start;
+    height: calc(100vh - 56px); overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: var(--sp-6) var(--sp-4) var(--sp-12);
+  }
+  .nav-group { margin-bottom: var(--sp-6); }
+  .nav-group__label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-tertiary);
+    padding: 0 var(--sp-3) var(--sp-2);
+  }
+  .nav-item {
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    margin: 1px 0;
+    border-radius: var(--r-sm);
+    color: var(--fg-secondary); font-size: 13px;
+    transition: color 120ms ease, background 120ms ease;
+  }
+  .nav-item::before {
+    content: ""; position: absolute; left: 0; top: 50%;
+    width: 0; height: 16px; transform: translateY(-50%);
+    background: var(--accent); border-radius: 0 2px 2px 0;
+    transition: width 120ms ease;
+  }
+  .nav-item:hover { background: var(--surface-hover); color: var(--fg); }
+  .nav-item:hover::before { width: 2px; }
+  .nav-item--active { color: var(--fg); background: var(--surface-raised); }
+  .nav-item--active::before { width: 2px; }
+  .nav-item__method {
+    font-family: var(--ff-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.02em; color: var(--fg-tertiary);
+    padding: 1px var(--sp-1); border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .nav-item__method--post { color: var(--accent); border-color: var(--accent-line); }
+  .nav-item__method--get  { color: var(--success); border-color: rgba(78,154,118,.30); }
+
+  /* ── 본문 ──────────────────────────────── */
+  .main {
+    min-width: 0;
+    padding: var(--sp-10) var(--sp-12);
+  }
+  .breadcrumb {
+    display: flex; align-items: center; gap: var(--sp-2);
+    font-size: 12px; color: var(--fg-tertiary); margin-bottom: var(--sp-5);
+    animation: riseIn 240ms ease-out both;
+  }
+  .breadcrumb b { color: var(--fg-secondary); font-weight: 500; }
+
+  .doc-head { animation: riseIn 300ms ease-out both; }
+  .method-row {
+    display: flex; align-items: center; gap: var(--sp-3);
+    margin-bottom: var(--sp-4); flex-wrap: wrap;
+  }
+  .pill-method {
+    font-family: var(--ff-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    color: var(--accent); background: var(--accent-dim);
+    border: 1px solid var(--accent-line);
+    padding: var(--sp-1) var(--sp-2); border-radius: var(--r-sm);
+  }
+  .endpoint-path {
+    font-family: var(--ff-mono); font-size: 14px; color: var(--fg-secondary);
+    letter-spacing: 0;
+  }
+  .endpoint-path b { color: var(--fg); font-weight: 500; }
+
+  h1.doc-title {
+    font-family: var(--ff-sans);
+    font-size: 30px; line-height: 1.27; font-weight: 620;
+    letter-spacing: -0.025em; margin: 0 0 var(--sp-3);
+  }
+  .doc-lede {
+    font-size: 15px; line-height: 1.6; color: var(--fg-secondary);
+    max-width: 62ch; margin: 0 0 var(--sp-8);
+  }
+  .doc-lede code, p code, td code {
+    font-family: var(--ff-mono); font-size: .86em; color: var(--fg);
+    background: var(--surface-raised); border: 1px solid var(--border);
+    border-radius: 5px; padding: 1px 5px;
+  }
+
+  section { scroll-margin-top: 72px; }
+  h2.sec-title {
+    font-size: 20px; line-height: 1.4; font-weight: 600; letter-spacing: -0.015em;
+    margin: var(--sp-12) 0 var(--sp-4);
+    padding-top: var(--sp-8); border-top: 1px solid var(--border);
+  }
+  h2.sec-title.first { border-top: none; padding-top: 0; margin-top: var(--sp-4); }
+  .sec-desc { color: var(--fg-secondary); margin: 0 0 var(--sp-5); max-width: 62ch; }
+
+  /* ── 코드 블록 ─────────────────────────── */
+  .code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin: 0 0 var(--sp-6);
+  }
+  .code__head {
+    display: flex; align-items: center; gap: var(--sp-2);
+    height: 40px; padding: 0 var(--sp-2) 0 var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-raised);
+  }
+  .code__label {
+    font-family: var(--ff-mono); font-size: 12px; color: var(--fg-tertiary);
+    letter-spacing: 0.02em; margin-right: auto;
+  }
+  .tabs { display: flex; gap: 2px; }
+  .tab {
+    font-family: var(--ff-mono); font-size: 12px;
+    color: var(--fg-tertiary); background: transparent;
+    border: 1px solid transparent; border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-2); cursor: pointer;
+    transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  }
+  .tab:hover { color: var(--fg-secondary); background: var(--surface-hover); }
+  .tab[aria-selected="true"] { color: var(--fg); background: var(--surface-hover); border-color: var(--border); }
+
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: var(--sp-1);
+    font-size: 12px; color: var(--fg-tertiary);
+    background: transparent; border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: var(--sp-1) var(--sp-2);
+    cursor: pointer; line-height: 1;
+    transition: color 120ms ease, background 120ms ease, border-color 120ms ease, transform 80ms ease;
+  }
+  .copy-btn svg { width: 13px; height: 13px; }
+  .copy-btn:hover { color: var(--fg); background: var(--surface-hover); border-color: var(--border-strong); }
+  .copy-btn:active { transform: scale(.95); }
+  .copy-btn.is-copied { color: var(--success); border-color: rgba(78,154,118,.35); }
+
+  pre.code__body {
+    margin: 0; padding: var(--sp-4) var(--sp-5);
+    overflow-x: auto;
+    font-family: var(--ff-mono); font-size: 13px; line-height: 1.7;
+    letter-spacing: 0; color: var(--fg-secondary);
+    -webkit-font-smoothing: auto;
+    font-variant-numeric: tabular-nums;
+  }
+  pre code { font: inherit; }
+  .tabpanel[hidden] { display: none; }
+  /* 저채도 syntax */
+  .t-method { color: var(--accent); }
+  .t-str    { color: var(--success); }
+  .t-key    { color: var(--fg); }
+  .t-num    { color: #B29AD6; }
+  .t-flag   { color: var(--warning); }
+
+  /* ── 파라미터 표 ───────────────────────── */
+  .table-wrap {
+    border: 1px solid var(--border); border-radius: var(--r-card);
+    overflow: hidden; margin: 0 0 var(--sp-6);
+  }
+  .ptable { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ptable thead th {
+    text-align: left; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-tertiary);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ptable tbody td {
+    padding: var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--fg-secondary);
+  }
+  .ptable tbody tr:last-child td { border-bottom: none; }
+  .ptable tbody tr { transition: background 120ms ease; }
+  .ptable tbody tr:hover { background: var(--surface-hover); }
+  .p-name {
+    font-family: var(--ff-mono); font-size: 12.5px; color: var(--fg);
+    white-space: nowrap;
+  }
+  .p-type {
+    font-family: var(--ff-mono); font-size: 12px; color: var(--fg-tertiary);
+    white-space: nowrap;
+  }
+  .req {
+    display: inline-flex; align-items: center; gap: var(--sp-1);
+    font-size: 11px; font-weight: 500; white-space: nowrap;
+  }
+  .req::before { content: ""; width: 5px; height: 5px; border-radius: 50%; }
+  .req--yes { color: var(--danger); }
+  .req--yes::before { background: var(--danger); }
+  .req--no { color: var(--fg-tertiary); }
+  .req--no::before { background: var(--fg-tertiary); }
+  .p-desc { color: var(--fg-secondary); line-height: 1.55; }
+
+  /* 응답 상태 배지 */
+  .status-badges { display: flex; gap: var(--sp-2); margin: 0 0 var(--sp-4); flex-wrap: wrap; }
+  .sbadge {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    font-family: var(--ff-mono); font-size: 12px;
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: var(--sp-1) var(--sp-3); color: var(--fg-secondary);
+  }
+  .sbadge b { color: var(--fg); font-weight: 600; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot--ok { background: var(--success); }
+  .dot--warn { background: var(--warning); }
+  .dot--err { background: var(--danger); }
+
+  .callout {
+    display: flex; gap: var(--sp-3);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: var(--sp-4) var(--sp-5);
+    margin: 0 0 var(--sp-6);
+  }
+  .callout__mark {
+    flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px;
+    color: var(--accent);
+  }
+  .callout__body { font-size: 13px; color: var(--fg-secondary); line-height: 1.6; }
+  .callout__body b { color: var(--fg); font-weight: 600; }
+
+  .pager {
+    display: flex; gap: var(--sp-3); margin-top: var(--sp-12);
+    padding-top: var(--sp-6); border-top: 1px solid var(--border);
+  }
+  .pager a {
+    flex: 1; padding: var(--sp-4);
+    border: 1px solid var(--border); border-radius: var(--r-card);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .pager a:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+  .pager__dir { font-size: 11px; color: var(--fg-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+  .pager__t { font-size: 14px; color: var(--fg); margin-top: var(--sp-1); font-weight: 500; }
+  .pager a.next { text-align: right; }
+
+  /* ── 우 페이지 목차 ───────────────────────── */
+  .toc {
+    position: sticky; top: 56px; align-self: start;
+    height: calc(100vh - 56px); overflow-y: auto;
+    padding: var(--sp-10) var(--sp-5);
+  }
+  .toc__label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-tertiary); margin-bottom: var(--sp-3);
+  }
+  .toc a {
+    display: block; position: relative;
+    padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
+    font-size: 13px; color: var(--fg-tertiary);
+    border-left: 1px solid var(--border);
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .toc a:hover { color: var(--fg-secondary); }
+  .toc a.is-active { color: var(--fg); border-left-color: var(--accent); }
+  .toc a.sub { padding-left: var(--sp-6); font-size: 12.5px; }
+
+  /* ── 푸터 ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: var(--sp-6) var(--sp-12);
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--fg-tertiary); font-size: 12px; gap: var(--sp-4); flex-wrap: wrap;
+  }
+  footer .foot-dot { color: var(--border-strong); }
+
+  /* ── 반응형 ────────────────────────────── */
+  @media (max-width: 1180px) {
+    .layout { grid-template-columns: 240px minmax(0,1fr); }
+    .toc { display: none; }
+    .main { padding: var(--sp-10) var(--sp-8); }
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .search { max-width: none; }
+    .main { padding: var(--sp-8) var(--sp-5); }
+    footer { padding: var(--sp-6) var(--sp-5); }
+    h1.doc-title { font-size: 26px; }
+  }
+  @media (max-width: 560px) {
+    .topnav { display: none; }
+    .brand__badge { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body, .breadcrumb, .doc-head { animation: none !important; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 상단바 -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand__mark" aria-hidden="true">V</div>
+      <span class="brand__name">Vecta</span>
+      <span class="brand__badge tnum">v2.1</span>
+    </div>
+
+    <form class="search" role="search" onsubmit="return false;">
+      <svg class="search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" placeholder="문서 검색…" aria-label="문서 검색">
+      <span class="search__kbd">⌘K</span>
+    </form>
+
+    <div class="topbar__spacer"></div>
+
+    <nav class="topnav" aria-label="주요">
+      <a href="#">가이드</a>
+      <a href="#">SDK</a>
+      <a href="#">상태</a>
+    </nav>
+    <a class="btn btn--ghost" href="#">대시보드</a>
+    <a class="btn btn--primary" href="#">API 키 발급</a>
+  </header>
+
+  <div class="layout">
+
+    <!-- 좌 사이드바 목차 트리 -->
+    <aside class="sidebar" aria-label="문서 목차">
+      <div class="nav-group">
+        <div class="nav-group__label">시작하기</div>
+        <a class="nav-item" href="#">개요</a>
+        <a class="nav-item" href="#">인증</a>
+        <a class="nav-item" href="#">빠른 시작</a>
+        <a class="nav-item" href="#">속도 제한</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group__label">코어 리소스</div>
+        <a class="nav-item nav-item--active" href="#" aria-current="page">
+          Vectors
+          <span class="nav-item__method nav-item__method--post">POST</span>
+        </a>
+        <a class="nav-item" href="#">
+          Query
+          <span class="nav-item__method nav-item__method--post">POST</span>
+        </a>
+        <a class="nav-item" href="#">
+          Fetch
+          <span class="nav-item__method nav-item__method--get">GET</span>
+        </a>
+        <a class="nav-item" href="#">Collections</a>
+        <a class="nav-item" href="#">Namespaces</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group__label">가이드</div>
+        <a class="nav-item" href="#">임베딩 생성</a>
+        <a class="nav-item" href="#">메타데이터 필터링</a>
+        <a class="nav-item" href="#">배치 업서트</a>
+        <a class="nav-item" href="#">하이브리드 검색</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group__label">레퍼런스</div>
+        <a class="nav-item" href="#">에러 코드</a>
+        <a class="nav-item" href="#">페이지네이션</a>
+        <a class="nav-item" href="#">웹훅</a>
+      </div>
+    </aside>
+
+    <!-- 본문 -->
+    <main class="main">
+      <nav class="breadcrumb" aria-label="위치">
+        <span>레퍼런스</span> <span>/</span> <b>코어 리소스</b> <span>/</span> <b>Vectors 업서트</b>
+      </nav>
+
+      <div class="doc-head">
+        <div class="method-row">
+          <span class="pill-method">POST</span>
+          <span class="endpoint-path">https://api.vecta.io<b>/v1/vectors/upsert</b></span>
+        </div>
+        <h1 class="doc-title">Vectors 업서트</h1>
+        <p class="doc-lede">
+          벡터를 컬렉션에 삽입하거나 갱신합니다. 동일한 <code>id</code>가 이미 존재하면 값과 메타데이터를 덮어쓰고, 없으면 새로 생성합니다. 한 요청에 최대 <code>1000</code>개의 벡터를 배치로 처리할 수 있습니다.
+        </p>
+      </div>
+
+      <section id="request">
+        <h2 class="sec-title first">요청 예시</h2>
+        <p class="sec-desc">
+          <code>Authorization</code> 헤더에 API 키를 담아 전송합니다. 아래 탭에서 언어별 예시를 확인하세요.
+        </p>
+
+        <div class="code" data-code="req">
+          <div class="code__head">
+            <span class="code__label">요청</span>
+            <div class="tabs" role="tablist" aria-label="언어 선택">
+              <button class="tab" role="tab" aria-selected="true"  data-tab="curl">cURL</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="node">Node</button>
+              <button class="tab" role="tab" aria-selected="false" data-tab="py">Python</button>
+            </div>
+            <button class="copy-btn" type="button" data-copy>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              <span class="copy-btn__t">복사</span>
+            </button>
+          </div>
+
+          <pre class="code__body tabpanel" role="tabpanel" data-panel="curl"><code><span class="t-method">curl</span> <span class="t-flag">-X</span> POST https://api.vecta.io/v1/vectors/upsert \
+  <span class="t-flag">-H</span> <span class="t-str">"Authorization: Bearer $VECTA_API_KEY"</span> \
+  <span class="t-flag">-H</span> <span class="t-str">"Content-Type: application/json"</span> \
+  <span class="t-flag">-d</span> <span class="t-str">'{
+    "namespace": "products",
+    "vectors": [
+      { "id": "sku_8821", "values": [0.021, -0.44, 0.87], "metadata": { "brand": "orbit" } }
+    ]
+  }'</span></code></pre>
+
+          <pre class="code__body tabpanel" role="tabpanel" data-panel="node" hidden><code><span class="t-key">import</span> { Vecta } <span class="t-key">from</span> <span class="t-str">"@vecta/sdk"</span>;
+
+<span class="t-key">const</span> vecta = <span class="t-method">new</span> Vecta(process.env.VECTA_API_KEY);
+
+<span class="t-key">await</span> vecta.vectors.<span class="t-method">upsert</span>({
+  namespace: <span class="t-str">"products"</span>,
+  vectors: [
+    { id: <span class="t-str">"sku_8821"</span>, values: [<span class="t-num">0.021</span>, <span class="t-num">-0.44</span>, <span class="t-num">0.87</span>], metadata: { brand: <span class="t-str">"orbit"</span> } }
+  ]
+});</code></pre>
+
+          <pre class="code__body tabpanel" role="tabpanel" data-panel="py" hidden><code><span class="t-key">from</span> vecta <span class="t-key">import</span> Vecta
+
+client = <span class="t-method">Vecta</span>(api_key=os.environ[<span class="t-str">"VECTA_API_KEY"</span>])
+
+client.vectors.<span class="t-method">upsert</span>(
+    namespace=<span class="t-str">"products"</span>,
+    vectors=[
+        {<span class="t-str">"id"</span>: <span class="t-str">"sku_8821"</span>, <span class="t-str">"values"</span>: [<span class="t-num">0.021</span>, <span class="t-num">-0.44</span>, <span class="t-num">0.87</span>], <span class="t-str">"metadata"</span>: {<span class="t-str">"brand"</span>: <span class="t-str">"orbit"</span>}},
+    ],
+)</code></pre>
+        </div>
+      </section>
+
+      <section id="response">
+        <h2 class="sec-title">응답</h2>
+        <p class="sec-desc">
+          성공 시 업서트된 벡터 수와 처리에 걸린 시간을 반환합니다.
+        </p>
+
+        <div class="status-badges" aria-label="응답 상태">
+          <span class="sbadge"><span class="dot dot--ok"></span><b>200</b>&nbsp;OK</span>
+          <span class="sbadge"><span class="dot dot--warn"></span><b>429</b>&nbsp;속도 제한</span>
+          <span class="sbadge"><span class="dot dot--err"></span><b>422</b>&nbsp;검증 실패</span>
+        </div>
+
+        <div class="code" data-code="res">
+          <div class="code__head">
+            <span class="code__label">200 · application/json</span>
+            <button class="copy-btn" type="button" data-copy>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              <span class="copy-btn__t">복사</span>
+            </button>
+          </div>
+          <pre class="code__body"><code>{
+  <span class="t-key">"upserted_count"</span>: <span class="t-num">1</span>,
+  <span class="t-key">"namespace"</span>: <span class="t-str">"products"</span>,
+  <span class="t-key">"took_ms"</span>: <span class="t-num">18</span>,
+  <span class="t-key">"usage"</span>: {
+    <span class="t-key">"write_units"</span>: <span class="t-num">1</span>
+  }
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="params">
+        <h2 class="sec-title">본문 파라미터</h2>
+        <p class="sec-desc">
+          요청 본문은 JSON 객체입니다. 중첩 필드는 <code>vectors[].field</code> 형식으로 표기합니다.
+        </p>
+
+        <div class="table-wrap">
+          <table class="ptable">
+            <thead>
+              <tr>
+                <th scope="col">파라미터</th>
+                <th scope="col">타입</th>
+                <th scope="col">필수</th>
+                <th scope="col">설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="p-name">namespace</span></td>
+                <td><span class="p-type">string</span></td>
+                <td><span class="req req--no">선택</span></td>
+                <td class="p-desc">벡터를 저장할 네임스페이스. 생략하면 <code>default</code>에 기록됩니다.</td>
+              </tr>
+              <tr>
+                <td><span class="p-name">vectors</span></td>
+                <td><span class="p-type">array</span></td>
+                <td><span class="req req--yes">필수</span></td>
+                <td class="p-desc">업서트할 벡터 객체의 배열. 한 요청에 최대 <code>1000</code>개까지 허용합니다.</td>
+              </tr>
+              <tr>
+                <td><span class="p-name">vectors[].id</span></td>
+                <td><span class="p-type">string</span></td>
+                <td><span class="req req--yes">필수</span></td>
+                <td class="p-desc">벡터의 고유 식별자. 같은 값이 있으면 기존 벡터를 덮어씁니다.</td>
+              </tr>
+              <tr>
+                <td><span class="p-name">vectors[].values</span></td>
+                <td><span class="p-type">float[]</span></td>
+                <td><span class="req req--yes">필수</span></td>
+                <td class="p-desc">임베딩 값 배열. 차원 수는 컬렉션 설정과 정확히 일치해야 합니다.</td>
+              </tr>
+              <tr>
+                <td><span class="p-name">vectors[].metadata</span></td>
+                <td><span class="p-type">object</span></td>
+                <td><span class="req req--no">선택</span></td>
+                <td class="p-desc">검색 시 필터링에 쓰이는 키-값 쌍. 값은 문자열·숫자·불리언만 지원합니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <svg class="callout__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <div class="callout__body">
+            <b>차원 불일치는 422로 거부됩니다.</b> 컬렉션 생성 시 지정한 차원과 다른 길이의 <code>values</code>를 보내면 배치 전체가 실패합니다. 업서트 전 임베딩 모델의 출력 차원을 확인하세요.
+          </div>
+        </div>
+      </section>
+
+      <nav class="pager" aria-label="문서 이동">
+        <a class="prev" href="#">
+          <div class="pager__dir">이전</div>
+          <div class="pager__t">인증</div>
+        </a>
+        <a class="next" href="#">
+          <div class="pager__dir">다음</div>
+          <div class="pager__t">Query 벡터</div>
+        </a>
+      </nav>
+    </main>
+
+    <!-- 우 페이지 목차 -->
+    <nav class="toc" aria-label="이 페이지">
+      <div class="toc__label">이 페이지</div>
+      <a href="#request" class="is-active">요청 예시</a>
+      <a href="#response">응답</a>
+      <a href="#params">본문 파라미터</a>
+      <a href="#params" class="sub">필수 파라미터</a>
+      <a href="#params" class="sub">에러 처리</a>
+    </nav>
+
+  </div>
+
+  <footer>
+    <span>Vecta API · v2.1 · 마지막 갱신 2026-07-13</span>
+    <span>API 문서 <span class="foot-dot">·</span> 다크 프로 미니멀</span>
+  </footer>
+
+<script>
+(function () {
+  // 언어 탭 전환
+  document.querySelectorAll('.code[data-code="req"] .tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var block = tab.closest('.code');
+      block.querySelectorAll('.tab').forEach(function (t) { t.setAttribute('aria-selected', 'false'); });
+      tab.setAttribute('aria-selected', 'true');
+      var key = tab.getAttribute('data-tab');
+      block.querySelectorAll('.tabpanel').forEach(function (p) {
+        p.hidden = (p.getAttribute('data-panel') !== key);
+      });
+    });
+  });
+
+  // 복사 버튼
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var block = btn.closest('.code');
+      var visible = block.querySelector('.tabpanel:not([hidden])') || block.querySelector('.code__body');
+      var text = visible ? visible.innerText : '';
+      var label = btn.querySelector('.copy-btn__t');
+      var done = function () {
+        btn.classList.add('is-copied');
+        if (label) label.textContent = '복사됨';
+        setTimeout(function () {
+          btn.classList.remove('is-copied');
+          if (label) label.textContent = '복사';
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else { done(); }
+    });
+  });
+
+  // 스크롤 스파이 (우 목차)
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a[href^="#"]:not(.sub)'));
+  var sections = links.map(function (l) { return document.querySelector(l.getAttribute('href')); });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          var id = '#' + e.target.id;
+          document.querySelectorAll('.toc a').forEach(function (a) {
+            a.classList.toggle('is-active', a.getAttribute('href') === id && !a.classList.contains('sub'));
+          });
+        }
+      });
+    }, { rootMargin: '-64px 0px -70% 0px', threshold: 0 });
+    sections.forEach(function (s) { if (s) io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>

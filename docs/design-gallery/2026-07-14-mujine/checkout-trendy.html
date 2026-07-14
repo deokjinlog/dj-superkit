@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 체크아웃 · 트렌디 SaaS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* palette — 트렌디 SaaS */
+    --bg: #FBFAFF;
+    --surface: #FFFFFF;
+    --surface-2: #F5F3FF;
+    --violet: #7C5CFF;
+    --violet-strong: #6A46F0;
+    --pink: #FF8FC0;
+    --mint: #5EE6C8;
+    --ink: #17143A;
+    --muted: #7B7897;
+    --muted-2: #9C99B4;
+    --border: #ECE9F7;
+    --border-strong: #DDD8F0;
+    --grad: linear-gradient(100deg, #7C5CFF 0%, #FF8FC0 100%);
+
+    /* semantic */
+    --success: #12A57A;
+    --success-bg: #E4F8F1;
+    --warning: #C77A12;
+    --info: #4B63E6;
+
+    /* radius */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 20px;
+    --r-xl: 26px;
+
+    /* shadow */
+    --sh-1: 0 10px 30px rgba(23,20,58,.06);
+    --sh-2: 0 20px 40px rgba(124,92,255,.15);
+    --ring: 0 0 0 3px rgba(124,92,255,.20);
+
+    --focus: #7C5CFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* L0 — 배경 파스텔 블롭 2개 */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    z-index: 0;
+    filter: blur(90px);
+    opacity: .55;
+    pointer-events: none;
+  }
+  body::before {
+    width: 440px; height: 440px;
+    top: -140px; right: -120px;
+    background: radial-gradient(circle, rgba(124,92,255,.55), transparent 68%);
+  }
+  body::after {
+    width: 400px; height: 400px;
+    bottom: -160px; left: -140px;
+    background: radial-gradient(circle, rgba(94,230,200,.45), transparent 68%);
+  }
+
+  .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  /* ---------- shell ---------- */
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px 64px;
+  }
+
+  /* ---------- header ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 4px 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--grad);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.04em;
+    box-shadow: 0 8px 18px rgba(124,92,255,.28);
+  }
+  .brand-name {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--violet);
+  }
+  .brand-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+
+  .secure-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--success-bg);
+    color: var(--success);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--success);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%   { transform: scale(1);   opacity: .55; }
+    50%  { transform: scale(2.6); opacity: 0;   }
+    100% { transform: scale(2.6); opacity: 0;   }
+  }
+
+  /* ---------- stepper ---------- */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 18px 28px;
+    box-shadow: var(--sh-1);
+    margin-bottom: 24px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex: 0 0 auto;
+  }
+  .step-txt { display: flex; flex-direction: column; line-height: 1.25; }
+  .step-label { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+  .step-meta { font-size: 11px; font-weight: 600; }
+
+  .step.done .step-num   { background: var(--surface-2); color: var(--violet); }
+  .step.done .step-label { color: var(--ink); }
+  .step.done .step-meta  { color: var(--success); }
+
+  .step.current .step-num {
+    background: var(--grad);
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(124,92,255,.32);
+  }
+  .step.current .step-label { color: var(--ink); }
+  .step.current .step-meta  { color: var(--violet); }
+
+  .step.todo .step-num   { background: var(--surface-2); color: var(--muted-2); }
+  .step.todo .step-label { color: var(--muted); }
+  .step.todo .step-meta  { color: var(--muted-2); }
+
+  .step-line {
+    flex: 1 1 auto;
+    height: 2px;
+    background: var(--border-strong);
+    margin: 0 20px;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    min-width: 24px;
+  }
+  .step-line.filled { background: var(--grad); }
+
+  /* ---------- grid ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 24px;
+    align-items: start;
+  }
+  .col-left { display: flex; flex-direction: column; gap: 24px; }
+
+  /* ---------- card ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-1);
+    padding: 28px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise .5s cubic-bezier(.22,.9,.32,1) forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .card-title .ic {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--surface-2);
+    display: grid; place-items: center;
+    color: var(--violet);
+    flex: 0 0 auto;
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--violet);
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    letter-spacing: -0.01em;
+    transition: background .18s ease, color .18s ease;
+  }
+  .link-btn:hover { background: var(--surface-2); }
+  .link-btn:focus-visible { outline: none; box-shadow: var(--ring); }
+  .link-btn:active { color: var(--violet-strong); }
+
+  /* ---------- form ---------- */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .req { color: var(--pink); font-weight: 800; }
+
+  .input, .select {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    letter-spacing: -0.01em;
+  }
+  .input::placeholder { color: var(--muted-2); }
+  .input:hover, .select:hover { border-color: var(--violet); }
+  .input:focus, .select:focus {
+    outline: none;
+    border-color: var(--violet);
+    box-shadow: var(--ring);
+    background: #fff;
+  }
+  .select {
+    appearance: none;
+    cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                      linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 19px, calc(100% - 13px) 19px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 40px;
+  }
+  .helper { font-size: 11.5px; font-weight: 500; color: var(--muted-2); letter-spacing: -0.01em; }
+
+  .recipient-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    margin-bottom: 20px;
+  }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 13px;
+    background: var(--grad);
+    display: grid; place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    flex: 0 0 auto;
+    box-shadow: 0 6px 14px rgba(124,92,255,.24);
+  }
+  .recipient-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .recipient-meta .rn { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+  .recipient-meta .rd { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .badge-default {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--violet);
+    background: #fff;
+    border: 1px solid var(--border-strong);
+    padding: 5px 10px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+  }
+
+  /* ---------- order items ---------- */
+  .items { display: flex; flex-direction: column; gap: 4px; }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 8px;
+    border-radius: var(--r-md);
+    transition: background .18s ease;
+  }
+  .item:hover { background: var(--surface-2); }
+  .item + .item { border-top: 1px solid var(--border); }
+  .thumb {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    flex: 0 0 auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(23,20,58,.05);
+  }
+  /* CSS 도형 이미지 3종 */
+  .thumb.t1 { background: linear-gradient(135deg, #EDE9FF, #DCD3FF); }
+  .thumb.t1::before {
+    content: ""; position: absolute; inset: 16px;
+    border-radius: 10px 10px 4px 4px;
+    background: linear-gradient(160deg, #7C5CFF, #9C7BFF);
+  }
+  .thumb.t1::after {
+    content: ""; position: absolute; left: 22px; right: 22px; top: 20px; height: 8px;
+    border-radius: 999px; background: rgba(255,255,255,.55);
+  }
+  .thumb.t2 { background: linear-gradient(135deg, #FFE7F1, #FFD3E6); }
+  .thumb.t2::before {
+    content: ""; position: absolute; left: 50%; top: 14px;
+    width: 34px; height: 34px; transform: translateX(-50%);
+    border-radius: 50%; background: linear-gradient(160deg, #FF8FC0, #FF69AB);
+  }
+  .thumb.t2::after {
+    content: ""; position: absolute; left: 18px; right: 18px; bottom: 14px; height: 14px;
+    border-radius: 8px; background: rgba(255,255,255,.6);
+  }
+  .thumb.t3 { background: linear-gradient(135deg, #DFF9F1, #C6F3E6); }
+  .thumb.t3::before {
+    content: ""; position: absolute; inset: 16px;
+    border-radius: 12px; background: linear-gradient(160deg, #5EE6C8, #33C9A6);
+  }
+  .thumb.t3::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 20px; height: 20px; transform: translate(-50%,-50%) rotate(45deg);
+    background: rgba(255,255,255,.7); border-radius: 4px;
+  }
+  .item-info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .item-name { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+  .item-opt { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .item-tag {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-top: 2px;
+  }
+  .item-tag.ship { color: var(--info); background: #EAEDFD; }
+  .item-tag.soon { color: var(--warning); background: #FDF2E2; }
+  .item-price { text-align: right; flex: 0 0 auto; }
+  .item-price .ip { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; }
+  .item-price .iq { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+
+  /* ---------- payment methods ---------- */
+  .pay-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pm {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+  .pm:hover { border-color: var(--violet); background: var(--surface-2); }
+  .pm input { position: absolute; opacity: 0; pointer-events: none; }
+  .pm .radio {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    flex: 0 0 auto;
+    display: grid; place-items: center;
+    transition: border-color .18s ease;
+  }
+  .pm .radio::after {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--grad);
+    transform: scale(0);
+    transition: transform .18s cubic-bezier(.22,.9,.32,1);
+  }
+  .pm-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pm-name { font-size: 13.5px; font-weight: 700; letter-spacing: -0.02em; }
+  .pm-desc { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .pm .pm-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--violet);
+    background: var(--surface-2);
+    padding: 3px 7px;
+    border-radius: 6px;
+    flex: 0 0 auto;
+  }
+  .pm:has(input:checked) {
+    border-color: var(--violet);
+    background: var(--surface-2);
+    box-shadow: 0 8px 18px rgba(124,92,255,.14);
+  }
+  .pm:has(input:checked) .radio { border-color: var(--violet); }
+  .pm:has(input:checked) .radio::after { transform: scale(1); }
+  .pm:has(input:focus-visible) { box-shadow: var(--ring); }
+
+  /* ---------- summary (right, sticky) ---------- */
+  .summary { position: sticky; top: 24px; }
+  .summary .card { padding: 26px; }
+  .summary-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sum-rows { display: flex; flex-direction: column; gap: 14px; }
+  .sum-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  .sum-row .k { color: var(--muted); font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px; }
+  .sum-row .v { font-weight: 700; letter-spacing: -0.02em; }
+  .sum-row .v.discount { color: var(--success); }
+  .sum-row .v.earn { color: var(--pink); }
+  .mini-tag {
+    font-size: 10px; font-weight: 800;
+    padding: 2px 6px; border-radius: 5px;
+    background: var(--success-bg); color: var(--success);
+  }
+
+  .sum-divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .total-box {
+    background: linear-gradient(135deg, rgba(124,92,255,.07), rgba(255,143,192,.07));
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: 18px 18px 16px;
+    margin-bottom: 20px;
+  }
+  .total-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .total-label { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+  .total-value {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--violet);
+    line-height: 1.1;
+  }
+  .total-value .won { font-size: 18px; margin-left: 2px; }
+  .total-note {
+    margin-top: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .total-earn { color: var(--pink); font-weight: 800; }
+
+  /* terms */
+  .terms { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .term {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+  }
+  .term.all { font-weight: 800; color: var(--ink); font-size: 13.5px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .term input { position: absolute; opacity: 0; pointer-events: none; }
+  .check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border-strong);
+    flex: 0 0 auto;
+    display: grid; place-items: center;
+    transition: background .18s ease, border-color .18s ease;
+    margin-top: 1px;
+  }
+  .check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 3.5; fill: none; opacity: 0; transition: opacity .15s ease; }
+  .term input:checked + .check { background: var(--grad); border-color: transparent; }
+  .term input:checked + .check svg { opacity: 1; }
+  .term input:focus-visible + .check { box-shadow: var(--ring); }
+  .term .term-req { color: var(--muted-2); font-weight: 700; margin-left: 2px; }
+  .term .term-view {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--violet);
+    flex: 0 0 auto;
+  }
+
+  /* primary button */
+  .pay-btn {
+    width: 100%;
+    height: 54px;
+    border: none;
+    border-radius: var(--r-md);
+    background: var(--grad);
+    color: #fff;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 24px rgba(124,92,255,.30);
+    transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+  }
+  .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(124,92,255,.38); }
+  .pay-btn:active { transform: translateY(0); box-shadow: 0 8px 18px rgba(124,92,255,.30); filter: brightness(.97); }
+  .pay-btn:focus-visible { outline: none; box-shadow: 0 10px 24px rgba(124,92,255,.30), 0 0 0 4px rgba(124,92,255,.28); }
+  .pay-btn:disabled {
+    background: var(--border-strong);
+    color: var(--muted);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .pay-btn .amt { font-variant-numeric: tabular-nums; }
+
+  .pay-guard {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+  .pay-guard svg { width: 13px; height: 13px; stroke: var(--success); fill: none; stroke-width: 2; }
+
+  .pay-warn {
+    margin-top: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--warning);
+    text-align: center;
+    letter-spacing: -0.01em;
+    min-height: 15px;
+    transition: opacity .2s ease;
+  }
+
+  /* ---------- footer ---------- */
+  .foot {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 28px 40px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-2);
+    letter-spacing: -0.01em;
+  }
+
+  /* staggered entrance */
+  .col-left .card:nth-child(1) { animation-delay: .06s; }
+  .col-left .card:nth-child(2) { animation-delay: .12s; }
+  .col-left .card:nth-child(3) { animation-delay: .18s; }
+  .summary .card { animation-delay: .24s; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .summary { position: static; }
+    .summary .card { animation-delay: .18s; }
+  }
+  @media (max-width: 640px) {
+    .shell { padding: 16px 16px 48px; }
+    .card { padding: 20px; }
+    .field-grid { grid-template-columns: 1fr; }
+    .pay-methods { grid-template-columns: 1fr; }
+    .stepper { padding: 14px 16px; overflow-x: auto; }
+    .step-label { font-size: 13px; }
+    .step-meta { display: none; }
+    .step-line { margin: 0 10px; }
+    .foot { padding: 0 16px 32px; }
+    .total-value { font-size: 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .card { opacity: 1; transform: none; }
+    .pulse-dot::after { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <!-- header -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">MUJINE</div>
+          <div class="brand-sub">주문/결제</div>
+        </div>
+      </div>
+      <div class="secure-chip">
+        <span class="pulse-dot"></span>
+        SSL 보안 결제 연결됨
+      </div>
+    </header>
+
+    <!-- stepper -->
+    <nav class="stepper" aria-label="주문 진행 단계">
+      <div class="step done">
+        <div class="step-num">1</div>
+        <div class="step-txt">
+          <span class="step-label">장바구니</span>
+          <span class="step-meta">3개 담김 · 완료</span>
+        </div>
+      </div>
+      <div class="step-line filled"></div>
+      <div class="step current" aria-current="step">
+        <div class="step-num">2</div>
+        <div class="step-txt">
+          <span class="step-label">주문/결제</span>
+          <span class="step-meta">진행 중</span>
+        </div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step todo">
+        <div class="step-num">3</div>
+        <div class="step-txt">
+          <span class="step-label">주문 완료</span>
+          <span class="step-meta">대기</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- layout -->
+    <div class="layout">
+      <!-- LEFT -->
+      <div class="col-left">
+        <!-- 배송지 -->
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="ic" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+              배송지
+            </div>
+            <button type="button" class="link-btn">배송지 목록</button>
+          </div>
+
+          <div class="recipient-row">
+            <div class="avatar">J.K</div>
+            <div class="recipient-meta">
+              <span class="rn">받는분 J.K</span>
+              <span class="rd tabular">서울 마포구 · 010-••••-3927</span>
+            </div>
+            <span class="badge-default">기본 배송지</span>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label>받는분 이니셜 <span class="req">*</span></label>
+              <input class="input" type="text" value="J.K" aria-label="받는분 이니셜">
+            </div>
+            <div class="field">
+              <label>연락처 <span class="req">*</span></label>
+              <input class="input tabular" type="tel" value="010-1234-3927" aria-label="연락처">
+            </div>
+            <div class="field full">
+              <label>주소 <span class="req">*</span></label>
+              <input class="input" type="text" value="서울특별시 마포구 양화로 000, 무진빌딩 12층" aria-label="주소">
+            </div>
+            <div class="field full">
+              <label>상세주소</label>
+              <input class="input" type="text" placeholder="동/호수, 방문 시 참고사항을 입력하세요" aria-label="상세주소">
+              <span class="helper">공동현관 비밀번호가 있으면 함께 남겨주세요.</span>
+            </div>
+            <div class="field full">
+              <label>배송 메모</label>
+              <select class="select" aria-label="배송 메모">
+                <option>문 앞에 놓아주세요</option>
+                <option>경비실에 맡겨주세요</option>
+                <option>택배함에 넣어주세요</option>
+                <option>배송 전 연락 바랍니다</option>
+                <option>직접 입력</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 주문 상품 -->
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="ic" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              </span>
+              주문 상품 <span style="font-size:14px;color:var(--muted);font-weight:700;">3</span>
+            </div>
+            <button type="button" class="link-btn">수정</button>
+          </div>
+
+          <div class="items">
+            <div class="item">
+              <div class="thumb t1" aria-hidden="true"></div>
+              <div class="item-info">
+                <span class="item-name">무지 코튼 오버핏 셔츠</span>
+                <span class="item-opt">색상: 라벤더 · 사이즈: M</span>
+                <span class="item-tag ship">● 내일 도착 보장</span>
+              </div>
+              <div class="item-price">
+                <div class="ip tabular">38,000원</div>
+                <div class="iq tabular">수량 1</div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="thumb t2" aria-hidden="true"></div>
+              <div class="item-info">
+                <span class="item-name">소프트 니트 라운드백</span>
+                <span class="item-opt">색상: 로즈핑크 · 단일옵션</span>
+                <span class="item-tag ship">● 내일 도착 보장</span>
+              </div>
+              <div class="item-price">
+                <div class="ip tabular">52,000원</div>
+                <div class="iq tabular">수량 1</div>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="thumb t3" aria-hidden="true"></div>
+              <div class="item-info">
+                <span class="item-name">데일리 세라믹 텀블러</span>
+                <span class="item-opt">색상: 민트 · 용량: 450ml</span>
+                <span class="item-tag soon">● 2~3일 내 출고</span>
+              </div>
+              <div class="item-price">
+                <div class="ip tabular">24,000원</div>
+                <div class="iq tabular">수량 2</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 결제수단 -->
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="ic" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+              </span>
+              결제수단
+            </div>
+          </div>
+
+          <div class="pay-methods" role="radiogroup" aria-label="결제수단 선택">
+            <label class="pm">
+              <input type="radio" name="pay" checked>
+              <span class="radio" aria-hidden="true"></span>
+              <span class="pm-body">
+                <span class="pm-name">MUJINE Pay</span>
+                <span class="pm-desc">등록 카드 즉시 결제</span>
+              </span>
+              <span class="pm-badge">5% 적립</span>
+            </label>
+
+            <label class="pm">
+              <input type="radio" name="pay">
+              <span class="radio" aria-hidden="true"></span>
+              <span class="pm-body">
+                <span class="pm-name">신용/체크카드</span>
+                <span class="pm-desc">국내 전 카드사</span>
+              </span>
+            </label>
+
+            <label class="pm">
+              <input type="radio" name="pay">
+              <span class="radio" aria-hidden="true"></span>
+              <span class="pm-body">
+                <span class="pm-name">실시간 계좌이체</span>
+                <span class="pm-desc">오픈뱅킹 연동</span>
+              </span>
+            </label>
+
+            <label class="pm">
+              <input type="radio" name="pay">
+              <span class="radio" aria-hidden="true"></span>
+              <span class="pm-body">
+                <span class="pm-name">휴대폰 결제</span>
+                <span class="pm-desc">통신사 소액결제</span>
+              </span>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT -->
+      <aside class="summary">
+        <div class="card">
+          <div class="summary-title">
+            <span>결제 요약</span>
+          </div>
+
+          <div class="sum-rows">
+            <div class="sum-row">
+              <span class="k">상품금액</span>
+              <span class="v tabular">138,000원</span>
+            </div>
+            <div class="sum-row">
+              <span class="k">배송비</span>
+              <span class="v tabular">3,000원</span>
+            </div>
+            <div class="sum-row">
+              <span class="k">쿠폰 할인 <span class="mini-tag">웰컴 15%</span></span>
+              <span class="v discount tabular">−20,700원</span>
+            </div>
+            <div class="sum-row">
+              <span class="k">적립 예정</span>
+              <span class="v earn tabular">+6,015P</span>
+            </div>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="total-box">
+            <div class="total-top">
+              <span class="total-label">최종 결제금액</span>
+              <span class="total-value"><span id="totalNum" class="tabular" data-target="120300">120,300</span><span class="won">원</span></span>
+            </div>
+            <div class="total-note">
+              결제 시 <span class="total-earn tabular">6,015P</span> 적립됩니다
+            </div>
+          </div>
+
+          <div class="terms">
+            <label class="term all">
+              <input type="checkbox" id="termAll">
+              <span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>
+              전체 약관에 동의합니다
+            </label>
+            <label class="term">
+              <input type="checkbox" class="term-req-chk">
+              <span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>
+              <span>구매조건 및 결제진행 동의 <span class="term-req">(필수)</span></span>
+              <span class="term-view">보기</span>
+            </label>
+            <label class="term">
+              <input type="checkbox" class="term-req-chk">
+              <span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>
+              <span>개인정보 수집·이용 동의 <span class="term-req">(필수)</span></span>
+              <span class="term-view">보기</span>
+            </label>
+            <label class="term">
+              <input type="checkbox">
+              <span class="check" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></span>
+              <span>마케팅 정보 수신 동의 <span class="term-req">(선택)</span></span>
+              <span class="term-view">보기</span>
+            </label>
+          </div>
+
+          <button type="button" class="pay-btn" id="payBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+            <span class="amt">120,300원 결제하기</span>
+          </button>
+          <div class="pay-warn" id="payWarn">필수 약관에 동의해야 결제할 수 있습니다</div>
+          <div class="pay-guard">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+            구매자 보호 · 안전거래가 적용됩니다
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="foot">
+    MUJINE · 체크아웃(고객) · 트렌디 SaaS
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* --- count-up (연출 전용, 최종값은 HTML에 이미 존재) --- */
+      var el = document.getElementById('totalNum');
+      if (el && !reduce) {
+        var target = parseInt(el.getAttribute('data-target'), 10);
+        var dur = 850, start = null;
+        el.textContent = '0';
+        function step(ts) {
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased).toLocaleString('ko-KR');
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = target.toLocaleString('ko-KR');
+        }
+        requestAnimationFrame(step);
+      }
+
+      /* --- terms gate --- */
+      var all = document.getElementById('termAll');
+      var reqs = Array.prototype.slice.call(document.querySelectorAll('.term-req-chk'));
+      var allBoxes = Array.prototype.slice.call(document.querySelectorAll('.term input[type=checkbox]'));
+      var optional = allBoxes.filter(function (c) { return c !== all && reqs.indexOf(c) === -1; });
+      var btn = document.getElementById('payBtn');
+      var warn = document.getElementById('payWarn');
+
+      function sync() {
+        var ok = reqs.every(function (c) { return c.checked; });
+        btn.disabled = !ok;
+        warn.style.opacity = ok ? '0' : '1';
+        all.checked = reqs.every(function (c) { return c.checked; }) && optional.every(function (c) { return c.checked; });
+      }
+      all.addEventListener('change', function () {
+        reqs.concat(optional).forEach(function (c) { c.checked = all.checked; });
+        sync();
+      });
+      reqs.concat(optional).forEach(function (c) { c.addEventListener('change', sync); });
+      sync();
+
+      btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        var span = btn.querySelector('.amt');
+        span.textContent = '결제 요청 중…';
+        btn.disabled = true;
+        setTimeout(function () { span.textContent = '120,300원 결제하기'; sync(); }, 1400);
+      });
+    })();
+  </script>
+</body>
+</html>

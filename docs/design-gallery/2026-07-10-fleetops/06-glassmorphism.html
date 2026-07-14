@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FleetOps · 배송 관제 대시보드</title>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<style>
+  :root {
+    --glass: rgba(255, 255, 255, 0.14);
+    --glass-strong: rgba(255, 255, 255, 0.22);
+    --border: rgba(255, 255, 255, 0.3);
+    --text: #ffffff;
+    --text-sub: rgba(255, 255, 255, 0.65);
+    --radius: 20px;
+    --radius-sm: 14px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Pretendard", system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    /* 대각 그라디언트 배경 — 인디고 → 퍼플 → 핑크 */
+    background:
+      radial-gradient(120% 90% at 12% 8%, rgba(255, 255, 255, 0.18), transparent 42%),
+      radial-gradient(90% 80% at 88% 96%, rgba(255, 255, 255, 0.12), transparent 46%),
+      linear-gradient(135deg, #4f46e5 0%, #9333ea 52%, #ec4899 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding: clamp(20px, 4vw, 48px);
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2.4vw, 28px);
+  }
+
+  /* ── 공통 유리 레이어 ── */
+  .glass {
+    position: relative;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow:
+      0 18px 40px rgba(35, 12, 60, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    overflow: hidden;
+  }
+
+  /* 유리 상단 내부 하이라이트 */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 46%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0)
+    );
+    pointer-events: none;
+  }
+
+  /* ── 헤더 ── */
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: clamp(20px, 2.6vw, 30px) clamp(22px, 3vw, 34px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: var(--glass-strong);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+  }
+
+  .brand-mark svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .brand p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sub);
+  }
+
+  .stamp {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--glass-strong);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .stamp .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #86efac;
+    box-shadow: 0 0 0 4px rgba(134, 239, 172, 0.28);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  .stamp .label {
+    color: var(--text-sub);
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /* ── KPI 그리드 ── */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(14px, 1.8vw, 20px);
+  }
+
+  .kpi {
+    padding: clamp(18px, 2.2vw, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 150px;
+  }
+
+  .kpi-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kpi-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sub);
+  }
+
+  .kpi-ic {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: var(--glass-strong);
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+
+  .kpi-ic svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kpi-val {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .kpi-val small {
+    font-size: 0.5em;
+    font-weight: 600;
+    color: var(--text-sub);
+    margin-left: 2px;
+  }
+
+  .kpi-delta {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--glass);
+    border: 1px solid var(--border);
+  }
+
+  .kpi-delta.up {
+    color: #d9f9e6;
+  }
+  .kpi-delta.down {
+    color: #ffe0ec;
+  }
+  .kpi-delta svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* ── 하단 2단 (차트 + 테이블) ── */
+  .lower {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(14px, 1.8vw, 20px);
+    align-items: start;
+  }
+
+  .panel {
+    padding: clamp(20px, 2.4vw, 28px);
+  }
+
+  .panel-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-head .meta {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-sub);
+  }
+
+  /* ── 차트 (시그니처: 유리 막대) ── */
+  .chart {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    align-items: end;
+    gap: clamp(8px, 1.4vw, 14px);
+    height: 240px;
+    padding-top: 6px;
+  }
+
+  .bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar-val {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-sub);
+  }
+
+  /* 시그니처 요소 — 막대가 반투명 유리라 배경 그라디언트가 비쳐 보임 */
+  .bar {
+    width: 100%;
+    max-width: 40px;
+    border-radius: 12px 12px 6px 6px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.34),
+      rgba(255, 255, 255, 0.08)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -8px 14px rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: bottom;
+  }
+
+  .bar-col.peak .bar {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.52),
+      rgba(255, 255, 255, 0.16)
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 0 22px rgba(255, 255, 255, 0.28);
+  }
+
+  .bar-col.peak .bar-val {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .bar-time {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-sub);
+  }
+
+  .peak-tag {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+    border: 1px solid var(--border);
+  }
+
+  @keyframes grow {
+    from {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+
+  /* ── 테이블 ── */
+  .table-wrap {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+    min-width: 480px;
+  }
+
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    color: var(--text-sub);
+    padding: 0 14px 12px;
+    white-space: nowrap;
+  }
+
+  thead th:last-child,
+  tbody td:last-child {
+    text-align: right;
+  }
+
+  tbody td {
+    padding: 13px 14px;
+    font-weight: 500;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  tbody tr:first-child td {
+    border-top: none;
+  }
+
+  tbody td:first-child {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .courier {
+    color: var(--text-sub);
+  }
+
+  /* ── 상태 뱃지 4종 ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* 배송중 — 시안 */
+  .badge.moving {
+    background: rgba(56, 189, 248, 0.28);
+    color: #e0f6ff;
+  }
+  .badge.moving::before {
+    background: #7dd3fc;
+    box-shadow: 0 0 8px rgba(125, 211, 252, 0.9);
+  }
+  /* 완료 — 민트 */
+  .badge.done {
+    background: rgba(52, 211, 153, 0.26);
+    color: #dcfce9;
+  }
+  .badge.done::before {
+    background: #6ee7b7;
+    box-shadow: 0 0 8px rgba(110, 231, 183, 0.9);
+  }
+  /* 지연 — 로즈 */
+  .badge.delay {
+    background: rgba(251, 113, 133, 0.3);
+    color: #ffe4ec;
+  }
+  .badge.delay::before {
+    background: #fda4af;
+    box-shadow: 0 0 8px rgba(253, 164, 175, 0.9);
+  }
+  /* 픽업대기 — 앰버 */
+  .badge.wait {
+    background: rgba(251, 191, 36, 0.28);
+    color: #fff3d6;
+  }
+  .badge.wait::before {
+    background: #fcd34d;
+    box-shadow: 0 0 8px rgba(252, 211, 77, 0.9);
+  }
+
+  /* ── 푸터 ── */
+  .foot {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-sub);
+    letter-spacing: 0.03em;
+    padding: 4px 0 2px;
+  }
+
+  /* ── 반응형 ── */
+  @media (max-width: 900px) {
+    .kpis {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .lower {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .kpis {
+      grid-template-columns: 1fr;
+    }
+    .chart {
+      gap: 6px;
+    }
+    .bar-val {
+      font-size: 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <!-- 헤더 -->
+    <header class="glass head">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7h11v9H3z" />
+            <path d="M14 10h4l3 3v3h-7z" />
+            <circle cx="7" cy="18" r="1.8" />
+            <circle cx="17.5" cy="18" r="1.8" />
+          </svg>
+        </div>
+        <div>
+          <h1>FleetOps</h1>
+          <p>배송 플릿 관제 대시보드</p>
+        </div>
+      </div>
+      <div class="stamp">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="label">갱신</span>
+        <span class="tnum">2026-07-10 14:32</span>
+      </div>
+    </header>
+
+    <!-- KPI 카드 4개 -->
+    <section class="kpis" aria-label="핵심 지표">
+      <article class="glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">오늘 배송</span>
+          <span class="kpi-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h12v10H4z" /><path d="M16 9h3l2 3v4h-5z" /><circle cx="8" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-val tnum">1,284<small>건</small></div>
+        <span class="kpi-delta up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+          <span class="tnum">+12.4%</span> 전일 대비
+        </span>
+      </article>
+
+      <article class="glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">정시 배송률</span>
+          <span class="kpi-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-val tnum">96.2<small>%</small></div>
+        <span class="kpi-delta up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+          <span class="tnum">+0.8%p</span>
+        </span>
+      </article>
+
+      <article class="glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">운행 중 차량</span>
+          <span class="kpi-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 16V8l7-3 7 3v8"/><path d="M5 16h14"/><path d="M12 5v11"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-val tnum">87<small>대</small></div>
+        <span class="kpi-delta down">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tnum">-2대</span>
+        </span>
+      </article>
+
+      <article class="glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-label">지연 · 이슈</span>
+          <span class="kpi-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4l9 15H3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="#fff"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-val tnum">14<small>건</small></div>
+        <span class="kpi-delta up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <span class="tnum">-5건</span> 해결
+        </span>
+      </article>
+    </section>
+
+    <!-- 차트 + 테이블 -->
+    <section class="lower">
+      <!-- 시간대별 차트 -->
+      <div class="glass panel">
+        <div class="panel-head">
+          <h2>시간대별 배송량</h2>
+          <span class="meta">2시간 단위 · 06–22시</span>
+        </div>
+        <div class="chart" role="img" aria-label="시간대별 배송량 막대 차트, 16시 230건 피크">
+          <!-- 최대값 230 기준, 막대 높이 % = val/230*100 -->
+          <div class="bar-col">
+            <span class="bar-val tnum">42</span>
+            <div class="bar" style="height: 18.3%; animation-delay: .00s"></div>
+            <span class="bar-time">06시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">95</span>
+            <div class="bar" style="height: 41.3%; animation-delay: .06s"></div>
+            <span class="bar-time">08시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">160</span>
+            <div class="bar" style="height: 69.6%; animation-delay: .12s"></div>
+            <span class="bar-time">10시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">210</span>
+            <div class="bar" style="height: 91.3%; animation-delay: .18s"></div>
+            <span class="bar-time">12시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">188</span>
+            <div class="bar" style="height: 81.7%; animation-delay: .24s"></div>
+            <span class="bar-time">14시</span>
+          </div>
+          <div class="bar-col peak">
+            <span class="bar-val tnum">230</span>
+            <div class="bar" style="height: 100%; animation-delay: .30s"></div>
+            <span class="bar-time">16시</span>
+            <span class="peak-tag">PEAK</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">205</span>
+            <div class="bar" style="height: 89.1%; animation-delay: .36s"></div>
+            <span class="bar-time">18시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">172</span>
+            <div class="bar" style="height: 74.8%; animation-delay: .42s"></div>
+            <span class="bar-time">20시</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-val tnum">120</span>
+            <div class="bar" style="height: 52.2%; animation-delay: .48s"></div>
+            <span class="bar-time">22시</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 배송 현황 테이블 -->
+      <div class="glass panel">
+        <div class="panel-head">
+          <h2>배송 현황</h2>
+          <span class="meta">실시간 · 6건</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>운송장번호</th>
+                <th>목적지</th>
+                <th>담당 기사</th>
+                <th>상태</th>
+                <th>예정시각</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tnum">T-20931</td>
+                <td>성수동 물류센터</td>
+                <td>김민준</td>
+                <td><span class="badge moving">배송중</span></td>
+                <td class="tnum courier">14:20</td>
+              </tr>
+              <tr>
+                <td class="tnum">T-20930</td>
+                <td>판교 테크노밸리</td>
+                <td>이서연</td>
+                <td><span class="badge done">완료</span></td>
+                <td class="tnum courier">13:55</td>
+              </tr>
+              <tr>
+                <td class="tnum">T-20929</td>
+                <td>인천 남동공단</td>
+                <td>박지훈</td>
+                <td><span class="badge delay">지연</span></td>
+                <td class="tnum courier">13:40</td>
+              </tr>
+              <tr>
+                <td class="tnum">T-20928</td>
+                <td>강남 파이낸스센터</td>
+                <td>최유진</td>
+                <td><span class="badge moving">배송중</span></td>
+                <td class="tnum courier">14:05</td>
+              </tr>
+              <tr>
+                <td class="tnum">T-20927</td>
+                <td>김포 골드밸리</td>
+                <td>정우성</td>
+                <td><span class="badge done">완료</span></td>
+                <td class="tnum courier">13:10</td>
+              </tr>
+              <tr>
+                <td class="tnum">T-20926</td>
+                <td>수원 영통지점</td>
+                <td>한소희</td>
+                <td><span class="badge wait">픽업대기</span></td>
+                <td class="tnum courier">15:00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">STYLE 06 · 글래스모피즘</footer>
+  </div>
+</body>
+</html>

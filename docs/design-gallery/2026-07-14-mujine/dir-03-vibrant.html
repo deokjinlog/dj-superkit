@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 프리미엄 오가닉 코튼 베이직 반팔티</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* palette — bright bg + vivid indigo */
+  --bg:#FFFFFF;
+  --surface:#F6F9FC;
+  --surface-alt:#EEF2FF;
+  --border:#E3E8EF;
+  --border-strong:#D5DBE6;
+  --primary:#635BFF;
+  --primary-hover:#5548E8;
+  --on-primary:#FFFFFF;
+  --violet:#7A5AF8;
+  --teal:#00C2B8;
+  --pink:#FF6699;
+  --amber:#FFB020;
+  --text:#0A2540;
+  --subtext:#425466;
+  --muted:#6B7A90;
+  --success:#00A87E;
+  --warning:#E5A000;
+  --danger:#E5484D;
+  --grad-primary:linear-gradient(135deg,#635BFF 0%,#7A5AF8 100%);
+  --grad-teal:linear-gradient(135deg,#00C2B8 0%,#635BFF 100%);
+  --grad-pink:linear-gradient(135deg,#FF6699 0%,#7A5AF8 100%);
+  --grad-amber:linear-gradient(135deg,#FFB020 0%,#FF6699 100%);
+  /* shadows — indigo tint */
+  --sh-rest:0 1px 2px rgba(10,37,64,.06),0 4px 12px rgba(10,37,64,.05);
+  --sh-hover:0 4px 8px rgba(99,91,255,.12),0 12px 28px rgba(99,91,255,.14);
+  --sh-sm:0 1px 2px rgba(10,37,64,.06);
+  /* radius */
+  --r-card:16px;
+  --r-ctrl:10px;
+  --r-pill:999px;
+  --r-modal:20px;
+  /* type */
+  --f-sans:"Pretendard","Inter","Plus Jakarta Sans",system-ui,sans-serif;
+  --f-num:"Inter","Pretendard",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--f-sans);
+  background:var(--surface);
+  color:var(--text);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-0.01em;
+}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:6px}
+::selection{background:rgba(99,91,255,.18)}
+
+/* ============ TOP NAV ============ */
+.topbar-wrap{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.88);backdrop-filter:none;border-bottom:1px solid var(--border)}
+.topbar{max-width:1240px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.brand-dot{width:11px;height:11px;border-radius:var(--r-pill);background:var(--grad-primary);box-shadow:0 0 0 3px rgba(99,91,255,.14);animation:dotIn .5s ease-out both}
+@keyframes dotIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.brand-name{font-family:"Plus Jakarta Sans","Inter",var(--f-sans);font-weight:700;font-size:22px;letter-spacing:-0.03em;color:var(--text)}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-link{position:relative;padding:8px 14px;border-radius:var(--r-ctrl);font-size:15px;font-weight:600;color:var(--subtext);transition:color .15s,background .15s}
+.nav-link::after{content:"";position:absolute;left:14px;right:14px;bottom:5px;height:2px;background:var(--primary);border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform .18s ease}
+.nav-link:hover{color:var(--primary)}
+.nav-link:hover::after{transform:scaleX(1)}
+.nav-link.active{color:var(--primary);background:var(--surface-alt)}
+.search{flex:1;max-width:360px;margin-left:auto;position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{width:100%;height:42px;border:1px solid var(--border);background:#fff;border-radius:var(--r-ctrl);padding:0 14px 0 42px;font-size:14px;color:var(--text);transition:border-color .15s,box-shadow .15s}
+.search input::placeholder{color:var(--muted)}
+.search input:hover{border-color:var(--border-strong)}
+.search input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,91,255,.15)}
+.nav-icons{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.icon-btn{position:relative;width:42px;height:42px;display:grid;place-items:center;border-radius:var(--r-ctrl);color:var(--subtext);transition:background .15s,color .15s}
+.icon-btn:hover{background:var(--surface-alt);color:var(--primary)}
+.icon-btn:active{transform:scale(.94)}
+.badge{position:absolute;top:5px;right:5px;min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-pill);background:var(--pink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;font-family:var(--f-num);box-shadow:0 0 0 2px #fff}
+.login-btn{margin-left:6px;height:42px;padding:0 18px;border-radius:var(--r-ctrl);background:var(--grad-primary);color:var(--on-primary);font-weight:600;font-size:14px;box-shadow:0 2px 8px rgba(99,91,255,.28);transition:filter .15s,transform .1s,box-shadow .15s;position:relative;overflow:hidden}
+.login-btn:hover{filter:brightness(1.06);box-shadow:0 4px 14px rgba(99,91,255,.36)}
+.login-btn:active{transform:scale(.98)}
+
+/* ============ LAYOUT ============ */
+.page{max-width:1240px;margin:0 auto;padding:28px 24px 64px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:20px;flex-wrap:wrap}
+.breadcrumb a{transition:color .15s}
+.breadcrumb a:hover{color:var(--primary)}
+.breadcrumb .sep{color:var(--border-strong)}
+.breadcrumb .cur{color:var(--subtext);font-weight:500}
+
+/* ============ PRODUCT — 2 col ============ */
+.product{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start}
+
+/* gallery */
+.gallery{position:sticky;top:96px;display:flex;flex-direction:column;gap:14px;animation:fadeUp .5s ease-out both}
+.hero-img{position:relative;aspect-ratio:1/1;border-radius:var(--r-card);overflow:hidden;background:
+  radial-gradient(120% 120% at 25% 20%,rgba(122,90,248,.16),transparent 55%),
+  radial-gradient(120% 120% at 80% 80%,rgba(0,194,184,.14),transparent 55%),
+  linear-gradient(160deg,#F6F9FC 0%,#EEF2FF 100%);
+  border:1px solid var(--border);box-shadow:var(--sh-rest);display:grid;place-items:center}
+.hero-shape{width:56%;aspect-ratio:5/6;border-radius:20px 20px 40px 40px;background:linear-gradient(145deg,#fff 0%,#F0F3FA 100%);box-shadow:0 20px 40px rgba(10,37,64,.10),inset 0 2px 8px rgba(255,255,255,.9);position:relative;display:grid;place-items:center}
+.hero-shape::before{content:"";position:absolute;top:0;left:22%;width:56%;height:16%;background:linear-gradient(180deg,#F0F3FA,#fff);border-radius:0 0 999px 999px;box-shadow:inset 0 -2px 6px rgba(10,37,64,.05)}
+.hero-shape::after{content:"MUJINE";position:absolute;bottom:14%;font-family:"Plus Jakarta Sans";font-weight:700;font-size:13px;letter-spacing:.28em;color:#C3CBDA}
+.hero-tag{position:absolute;top:16px;left:16px;padding:6px 12px;border-radius:var(--r-pill);background:var(--grad-primary);color:#fff;font-size:12px;font-weight:600;letter-spacing:.02em;box-shadow:0 4px 12px rgba(99,91,255,.3)}
+.hero-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:var(--r-pill);background:rgba(255,255,255,.92);box-shadow:var(--sh-sm);display:grid;place-items:center;color:var(--subtext);transition:background .15s,color .15s,transform .1s}
+.hero-nav:hover{background:#fff;color:var(--primary)}
+.hero-nav:active{transform:translateY(-50%) scale(.92)}
+.hero-nav.prev{left:14px}
+.hero-nav.next{right:14px}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.thumb{aspect-ratio:1/1;border-radius:12px;border:2px solid var(--border);overflow:hidden;background:linear-gradient(160deg,#F6F9FC,#EEF2FF);display:grid;place-items:center;transition:border-color .15s,transform .12s,box-shadow .15s;cursor:pointer}
+.thumb:hover{border-color:rgba(99,91,255,.4);transform:translateY(-2px);box-shadow:var(--sh-sm)}
+.thumb.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,91,255,.14)}
+.thumb-shape{width:52%;aspect-ratio:5/6;border-radius:8px 8px 16px 16px;background:linear-gradient(145deg,#fff,#EDF1F8);box-shadow:0 4px 10px rgba(10,37,64,.08)}
+.thumb:nth-child(2) .thumb-shape{background:linear-gradient(145deg,#fff,#E6EEFF)}
+.thumb:nth-child(3) .thumb-shape{background:linear-gradient(145deg,#fff,#E0F7F5)}
+.thumb:nth-child(4) .thumb-shape{background:linear-gradient(145deg,#fff,#FBE9F1)}
+
+/* info */
+.info{display:flex;flex-direction:column;animation:fadeUp .5s ease-out .08s both}
+.info-brand{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--primary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+.info-brand .b-dot{width:7px;height:7px;border-radius:50%;background:var(--grad-primary)}
+.info-title{font-size:30px;line-height:1.28;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:14px}
+.rating-row{display:flex;align-items:center;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.stars{display:inline-flex;gap:2px;color:var(--amber)}
+.rating-val{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;color:var(--text)}
+.rating-count{font-size:13px;color:var(--muted)}
+.rating-count a{color:var(--primary);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* price block — vivid section */
+.price-block{background:linear-gradient(135deg,rgba(99,91,255,.06),rgba(0,194,184,.05));border:1px solid var(--border);border-radius:var(--r-card);padding:22px 24px;margin-bottom:24px}
+.price-line{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.discount-pct{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:26px;color:var(--pink)}
+.price-now{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:34px;letter-spacing:-0.02em;color:var(--text)}
+.price-won{font-size:20px;font-weight:600}
+.price-orig{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:16px;color:var(--muted);text-decoration:line-through}
+.price-sub{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--subtext)}
+.pill-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:600}
+.pill-teal{background:rgba(0,194,184,.12);color:#009a92}
+.pill-amber{background:rgba(255,176,32,.16);color:#b47700}
+
+/* options */
+.opt-group{margin-bottom:22px}
+.opt-label{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+.opt-label .picked{text-transform:none;letter-spacing:0;color:var(--text);font-weight:600}
+.color-chips{display:flex;gap:12px}
+.color-chip{width:40px;height:40px;border-radius:var(--r-pill);border:2px solid var(--border);padding:3px;transition:border-color .15s,transform .12s;position:relative}
+.color-chip span{display:block;width:100%;height:100%;border-radius:50%;box-shadow:inset 0 1px 3px rgba(0,0,0,.14)}
+.color-chip:hover{transform:scale(1.08)}
+.color-chip.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,91,255,.14)}
+.color-chip.active::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.c-ivory span{background:linear-gradient(145deg,#FCFAF4,#EFEAD9)}
+.c-black span{background:linear-gradient(145deg,#3A3A42,#16161A)}
+.c-indigo span{background:linear-gradient(145deg,#7A72FF,#4C43D6)}
+.c-teal span{background:linear-gradient(145deg,#2ED8CE,#009A92)}
+.size-row{display:flex;gap:10px;flex-wrap:wrap}
+.size-chip{min-width:52px;height:44px;padding:0 8px;border-radius:var(--r-ctrl);border:1px solid var(--border);background:#fff;font-weight:600;font-size:14px;color:var(--subtext);font-family:var(--f-num);font-variant-numeric:tabular-nums;transition:border-color .15s,color .15s,background .15s,transform .1s;position:relative}
+.size-chip:hover:not(.soldout){border-color:rgba(99,91,255,.45);color:var(--primary)}
+.size-chip:active:not(.soldout){transform:scale(.96)}
+.size-chip.active{border-color:var(--primary);background:var(--surface-alt);color:var(--primary)}
+.size-chip.soldout{color:var(--border-strong);cursor:not-allowed;background:var(--surface);text-decoration:line-through}
+
+/* qty + actions */
+.buy-block{padding:22px 0 6px;border-top:1px solid var(--border);margin-top:2px}
+.qty-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.qty-label{font-size:14px;font-weight:600;color:var(--subtext)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--r-ctrl);background:#fff;overflow:hidden}
+.stepper button{width:40px;height:42px;display:grid;place-items:center;color:var(--subtext);font-size:18px;transition:background .15s,color .15s}
+.stepper button:hover{background:var(--surface-alt);color:var(--primary)}
+.stepper button:active{background:var(--surface-alt);transform:scale(.94)}
+.stepper button:disabled{color:var(--border-strong);cursor:not-allowed}
+.stepper .qty-val{min-width:48px;text-align:center;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;border-left:1px solid var(--border);border-right:1px solid var(--border);height:42px;line-height:42px}
+.total-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px}
+.total-label{font-size:14px;color:var(--subtext)}
+.total-val{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:22px;color:var(--text)}
+.total-val small{font-size:14px;font-weight:600}
+.actions{display:flex;gap:12px}
+.btn{height:54px;border-radius:var(--r-ctrl);font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .1s,box-shadow .15s,background .15s,border-color .15s;position:relative;overflow:hidden}
+.btn-cart{flex:1.3;background:var(--grad-primary);color:var(--on-primary);box-shadow:0 4px 14px rgba(99,91,255,.32)}
+.btn-cart::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:shimmer 3.2s ease-in-out 1s 1}
+@keyframes shimmer{0%{left:-60%}55%,100%{left:130%}}
+.btn-cart:hover{background:linear-gradient(120deg,#635BFF,#7A5AF8);filter:brightness(1.05);box-shadow:0 6px 20px rgba(99,91,255,.42)}
+.btn-cart:active{transform:scale(.98)}
+.btn-buy{flex:1;background:#fff;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-buy:hover{background:var(--surface-alt);box-shadow:0 4px 14px rgba(99,91,255,.14)}
+.btn-buy:active{transform:scale(.98)}
+.btn-wish{width:54px;flex:none;background:#fff;border:1px solid var(--border);color:var(--muted)}
+.btn-wish:hover{border-color:var(--pink);color:var(--pink);background:#FFF5F8}
+.btn-wish:active{transform:scale(.94)}
+.btn-wish.on{color:var(--pink);border-color:var(--pink);background:#FFF0F5}
+.btn-wish.on svg{fill:var(--pink)}
+.perks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.perk{display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid var(--border);border-radius:12px;transition:border-color .15s,box-shadow .15s}
+.perk:hover{border-color:rgba(99,91,255,.3);box-shadow:var(--sh-sm)}
+.perk-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.pi-teal{background:rgba(0,194,184,.12);color:#009a92}
+.pi-indigo{background:rgba(99,91,255,.12);color:var(--primary)}
+.perk-txt strong{display:block;font-size:13px;font-weight:600;color:var(--text)}
+.perk-txt span{font-size:12px;color:var(--muted)}
+
+/* ============ TABS ============ */
+.tabs-section{margin-top:52px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);position:relative;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;padding:14px 18px;font-size:15px;font-weight:600;color:var(--muted);white-space:nowrap;transition:color .18s;display:inline-flex;align-items:center;gap:7px}
+.tab .cnt{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;padding:1px 8px;border-radius:var(--r-pill);background:var(--surface-alt);color:var(--primary)}
+.tab:hover{color:var(--subtext)}
+.tab.active{color:var(--primary)}
+.tab-underline{position:absolute;bottom:-1px;height:2.5px;background:var(--grad-primary);border-radius:2px;transition:left .22s cubic-bezier(.34,1.4,.64,1),width .22s cubic-bezier(.34,1.4,.64,1)}
+.panel{display:none;padding-top:28px;animation:fadeUp .35s ease-out both}
+.panel.active{display:block}
+
+/* detail panel */
+.detail-hero{border-radius:var(--r-card);padding:40px;background:var(--grad-primary);color:#fff;box-shadow:var(--sh-rest);margin-bottom:24px;position:relative;overflow:hidden}
+.detail-hero::after{content:"";position:absolute;right:-40px;bottom:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%)}
+.detail-hero .eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin-bottom:10px}
+.detail-hero h3{font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-bottom:12px;line-height:1.3}
+.detail-hero p{font-size:15px;max-width:60ch;opacity:.94;line-height:1.65}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.spec-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:22px;transition:transform .18s,box-shadow .15s,border-color .15s}
+.spec-card:hover{transform:translateY(-2px);box-shadow:var(--sh-hover);border-color:rgba(99,91,255,.2)}
+.spec-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px}
+.si-1{background:rgba(0,194,184,.12);color:#009a92}
+.si-2{background:rgba(99,91,255,.12);color:var(--primary)}
+.si-3{background:rgba(255,102,153,.12);color:#e0417a}
+.si-4{background:rgba(255,176,32,.16);color:#b47700}
+.spec-card h4{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.spec-card p{font-size:13px;color:var(--subtext);line-height:1.55}
+.info-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden}
+.info-table th,.info-table td{padding:14px 20px;text-align:left;font-size:14px;border-bottom:1px solid var(--border)}
+.info-table tr:last-child th,.info-table tr:last-child td{border-bottom:none}
+.info-table th{width:160px;background:var(--surface);color:var(--muted);font-weight:600}
+.info-table td{color:var(--text)}
+.info-table tr:hover td,.info-table tr:hover th{background:rgba(99,91,255,.03)}
+
+/* reviews panel */
+.review-summary{display:grid;grid-template-columns:200px 1fr;gap:32px;background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:28px;margin-bottom:24px;box-shadow:var(--sh-rest)}
+.rs-score{text-align:center;border-right:1px solid var(--border);padding-right:24px}
+.rs-big{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:52px;line-height:1;letter-spacing:-0.03em;color:var(--text)}
+.rs-stars{color:var(--amber);margin:8px 0 4px;font-size:18px}
+.rs-total{font-size:13px;color:var(--muted)}
+.rs-bars{display:flex;flex-direction:column;gap:10px;justify-content:center}
+.rs-bar{display:flex;align-items:center;gap:12px;font-size:13px}
+.rs-bar .lbl{width:34px;color:var(--subtext);font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600}
+.rs-track{flex:1;height:8px;border-radius:var(--r-pill);background:var(--surface-alt);overflow:hidden}
+.rs-fill{height:100%;border-radius:var(--r-pill);background:var(--grad-teal)}
+.rs-bar .pct{width:40px;text-align:right;color:var(--muted);font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.review-list{display:flex;flex-direction:column;gap:14px}
+.review-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:22px;transition:box-shadow .15s,border-color .15s}
+.review-card:hover{box-shadow:var(--sh-hover);border-color:rgba(99,91,255,.18)}
+.rc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;font-family:"Plus Jakarta Sans"}
+.av-1{background:var(--grad-primary)}
+.av-2{background:var(--grad-teal)}
+.av-3{background:var(--grad-pink)}
+.rc-meta{flex:1;min-width:0}
+.rc-name{font-size:14px;font-weight:600;color:var(--text)}
+.rc-sub{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-top:2px}
+.rc-stars{color:var(--amber);font-size:13px;flex-shrink:0}
+.rc-body{font-size:14px;color:var(--subtext);line-height:1.6;margin-bottom:14px}
+.rc-foot{display:flex;align-items:center;gap:10px}
+.help-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--r-pill);border:1px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--subtext);transition:border-color .15s,color .15s,background .15s}
+.help-btn:hover{border-color:rgba(99,91,255,.4);color:var(--primary);background:var(--surface-alt)}
+.help-btn:active{transform:scale(.96)}
+.help-btn .hc{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700}
+.rc-badge{margin-left:auto;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--r-pill);background:rgba(0,168,126,.12);color:var(--success);display:inline-flex;align-items:center;gap:4px}
+
+/* qa panel */
+.qa-item{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:18px 22px;margin-bottom:12px;transition:box-shadow .15s}
+.qa-item:hover{box-shadow:var(--sh-sm)}
+.qa-q{display:flex;align-items:flex-start;gap:12px}
+.qa-tag{flex-shrink:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:13px;font-family:"Plus Jakarta Sans"}
+.qa-q .qa-tag{background:var(--surface-alt);color:var(--primary)}
+.qa-a .qa-tag{background:rgba(0,194,184,.12);color:#009a92}
+.qa-text{flex:1;font-size:14px;color:var(--text);line-height:1.55}
+.qa-a{display:flex;align-items:flex-start;gap:12px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.qa-a .qa-text{color:var(--subtext)}
+.qa-status{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;padding:3px 9px;border-radius:var(--r-pill);background:rgba(0,168,126,.12);color:var(--success)}
+
+/* shipping panel */
+.ship-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ship-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);padding:24px}
+.ship-card h4{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)}
+.ship-card h4 .sc-ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center}
+.ship-card ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.ship-card li{display:flex;gap:10px;font-size:14px;color:var(--subtext);line-height:1.5}
+.ship-card li .ck{color:var(--teal);flex-shrink:0;margin-top:2px}
+
+/* ============ RELATED ============ */
+.related{margin-top:56px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.section-head h2{font-size:22px;font-weight:700;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px}
+.section-head h2 .hbar{width:5px;height:22px;border-radius:3px;background:var(--grad-primary)}
+.see-all{font-size:14px;font-weight:600;color:var(--primary);display:inline-flex;align-items:center;gap:5px;transition:gap .15s}
+.see-all:hover{gap:9px}
+.rel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.rel-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .15s;cursor:pointer}
+.rel-card:hover{transform:translateY(-4px);box-shadow:var(--sh-hover);border-color:rgba(99,91,255,.22)}
+.rel-img{aspect-ratio:1/1;display:grid;place-items:center;position:relative;overflow:hidden}
+.ri-1{background:radial-gradient(120% 120% at 30% 25%,rgba(99,91,255,.14),transparent 55%),linear-gradient(160deg,#F6F9FC,#EEF2FF)}
+.ri-2{background:radial-gradient(120% 120% at 30% 25%,rgba(0,194,184,.14),transparent 55%),linear-gradient(160deg,#F6F9FC,#E6F7F5)}
+.ri-3{background:radial-gradient(120% 120% at 30% 25%,rgba(255,102,153,.14),transparent 55%),linear-gradient(160deg,#F6F9FC,#FCEEF4)}
+.ri-4{background:radial-gradient(120% 120% at 30% 25%,rgba(255,176,32,.16),transparent 55%),linear-gradient(160deg,#F6F9FC,#FCF3E4)}
+.ri-shape{width:50%;aspect-ratio:5/6;border-radius:14px 14px 24px 24px;background:linear-gradient(145deg,#fff,#EDF1F8);box-shadow:0 12px 24px rgba(10,37,64,.1);transition:transform .3s}
+.rel-card:hover .ri-shape{transform:scale(1.05) rotate(-1.5deg)}
+.rel-wish{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9);display:grid;place-items:center;color:var(--muted);box-shadow:var(--sh-sm);transition:color .15s,transform .1s}
+.rel-wish:hover{color:var(--pink)}
+.rel-wish:active{transform:scale(.9)}
+.rel-body{padding:16px}
+.rel-brand{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--primary);margin-bottom:5px}
+.rel-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:39px}
+.rel-price{display:flex;align-items:baseline;gap:8px}
+.rel-pct{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:var(--pink)}
+.rel-now{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:700;font-size:16px;color:var(--text)}
+.rel-rating{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:12px;color:var(--muted)}
+.rel-rating .st{color:var(--amber)}
+.rel-rating .num{font-variant-numeric:tabular-nums}
+
+/* ============ FOOTER ============ */
+.footer{margin-top:64px;border-top:1px solid var(--border);background:#fff}
+.footer-inner{max-width:1240px;margin:0 auto;padding:36px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-brand{display:flex;align-items:center;gap:9px}
+.footer-brand .brand-name{font-size:18px}
+.footer-crumbs{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.footer-crumbs .sep{color:var(--border-strong)}
+.footer-note{font-size:12px;color:var(--muted)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1024px){
+  .product{grid-template-columns:1fr;gap:32px}
+  .gallery{position:static}
+  .rel-grid{grid-template-columns:repeat(2,1fr)}
+  .search{max-width:240px}
+}
+@media (max-width:768px){
+  .nav-menu{display:none}
+  .review-summary{grid-template-columns:1fr;gap:20px}
+  .rs-score{border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:20px}
+  .spec-grid{grid-template-columns:1fr}
+  .ship-grid{grid-template-columns:1fr}
+  .perks{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .topbar{gap:12px;padding:0 16px}
+  .search{display:none}
+  .page{padding:20px 16px 48px}
+  .info-title{font-size:24px}
+  .price-now{font-size:28px}
+  .rel-grid{grid-template-columns:1fr}
+  .actions{flex-wrap:wrap}
+  .btn-cart,.btn-buy{flex:1 1 100%}
+  .btn-wish{width:100%;flex:1 1 100%}
+  .footer-inner{flex-direction:column;align-items:flex-start}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .btn-cart::before{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== TOP NAV ========== -->
+<header class="topbar-wrap">
+  <div class="topbar">
+    <a class="brand" href="#" aria-label="MUJINE 홈">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span class="brand-name">MUJINE</span>
+    </a>
+    <nav class="nav-menu" aria-label="카테고리">
+      <a class="nav-link active" href="#">의류</a>
+      <a class="nav-link" href="#">전자</a>
+      <a class="nav-link" href="#">리빙</a>
+      <a class="nav-link" href="#">뷰티</a>
+    </nav>
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" placeholder="브랜드, 상품을 검색하세요" aria-label="검색">
+    </div>
+    <div class="nav-icons">
+      <button class="icon-btn" aria-label="찜 목록">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="장바구니, 2개">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <span class="badge num">2</span>
+      </button>
+      <button class="login-btn">로그인</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <nav class="breadcrumb" aria-label="위치">
+    <a href="#">홈</a><span class="sep">/</span>
+    <a href="#">의류</a><span class="sep">/</span>
+    <a href="#">티셔츠</a><span class="sep">/</span>
+    <span class="cur">오가닉 코튼 베이직 반팔티</span>
+  </nav>
+
+  <!-- ========== PRODUCT ========== -->
+  <section class="product">
+    <!-- GALLERY -->
+    <div class="gallery">
+      <div class="hero-img">
+        <span class="hero-tag">BEST · 오가닉</span>
+        <div class="hero-shape" role="img" aria-label="프리미엄 오가닉 코튼 베이직 반팔티 대표 이미지"></div>
+        <button class="hero-nav prev" aria-label="이전 이미지"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="hero-nav next" aria-label="다음 이미지"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <div class="thumbs">
+        <button class="thumb active" aria-label="썸네일 1" aria-current="true"><span class="thumb-shape"></span></button>
+        <button class="thumb" aria-label="썸네일 2"><span class="thumb-shape"></span></button>
+        <button class="thumb" aria-label="썸네일 3"><span class="thumb-shape"></span></button>
+        <button class="thumb" aria-label="썸네일 4"><span class="thumb-shape"></span></button>
+      </div>
+    </div>
+
+    <!-- INFO -->
+    <div class="info">
+      <span class="info-brand"><span class="b-dot" aria-hidden="true"></span>MUJINE</span>
+      <h1 class="info-title">프리미엄 오가닉 코튼 베이직 반팔티</h1>
+      <div class="rating-row">
+        <span class="stars" aria-hidden="true">★★★★★</span>
+        <span class="rating-val num">4.8</span>
+        <span class="rating-count">· 리뷰 <a href="#reviews" class="num">128</a>개</span>
+      </div>
+
+      <div class="price-block">
+        <div class="price-line">
+          <span class="discount-pct num">20%</span>
+          <span class="price-now num">39,000<span class="price-won">원</span></span>
+          <span class="price-orig num">49,000원</span>
+        </div>
+        <div class="price-sub">
+          <span class="pill-tag pill-teal">쿠폰가 적용</span>
+          <span class="pill-tag pill-amber">한정 특가</span>
+        </div>
+      </div>
+
+      <div class="opt-group">
+        <div class="opt-label">색상 <span class="picked">아이보리</span></div>
+        <div class="color-chips" role="group" aria-label="색상 선택">
+          <button class="color-chip c-ivory active" aria-label="아이보리" aria-pressed="true"><span></span></button>
+          <button class="color-chip c-black" aria-label="블랙" aria-pressed="false"><span></span></button>
+          <button class="color-chip c-indigo" aria-label="인디고" aria-pressed="false"><span></span></button>
+          <button class="color-chip c-teal" aria-label="틸그린" aria-pressed="false"><span></span></button>
+        </div>
+      </div>
+
+      <div class="opt-group">
+        <div class="opt-label">사이즈 <span class="picked">M</span></div>
+        <div class="size-row" role="group" aria-label="사이즈 선택">
+          <button class="size-chip" aria-pressed="false">S</button>
+          <button class="size-chip active" aria-pressed="true">M</button>
+          <button class="size-chip" aria-pressed="false">L</button>
+          <button class="size-chip" aria-pressed="false">XL</button>
+          <button class="size-chip soldout" disabled aria-disabled="true">XXL</button>
+        </div>
+      </div>
+
+      <div class="buy-block">
+        <div class="qty-row">
+          <span class="qty-label">수량</span>
+          <div class="stepper" role="group" aria-label="수량 조절">
+            <button id="minus" aria-label="수량 감소" disabled>−</button>
+            <span class="qty-val num" id="qty" aria-live="polite">1</span>
+            <button id="plus" aria-label="수량 증가">+</button>
+          </div>
+        </div>
+        <div class="total-row">
+          <span class="total-label">총 상품금액</span>
+          <span class="total-val num" id="total">39,000<small>원</small></span>
+        </div>
+        <div class="actions">
+          <button class="btn btn-cart">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+            장바구니 담기
+          </button>
+          <button class="btn btn-buy">바로 구매</button>
+          <button class="btn btn-wish" aria-label="찜하기" aria-pressed="false">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>
+        </div>
+        <div class="perks">
+          <div class="perk">
+            <span class="perk-icon pi-teal" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
+            <div class="perk-txt"><strong>무료배송</strong><span>내일(화) 도착 예정</span></div>
+          </div>
+          <div class="perk">
+            <span class="perk-icon pi-indigo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <div class="perk-txt"><strong>적립 1,170원</strong><span>구매 시 3% 적립</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TABS ========== -->
+  <section class="tabs-section" id="reviews">
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" aria-selected="true" data-panel="detail">상세정보</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="review">리뷰 <span class="cnt num">128</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="qa">Q&amp;A <span class="cnt num">12</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="ship">배송/교환</button>
+      <span class="tab-underline" aria-hidden="true"></span>
+    </div>
+
+    <!-- DETAIL -->
+    <div class="panel active" role="tabpanel" data-name="detail">
+      <div class="detail-hero">
+        <div class="eyebrow">Organic Cotton · Everyday Basic</div>
+        <h3>매일 입어도 편안한, 오가닉 코튼 베이직</h3>
+        <p>GOTS 인증 유기농 면 100%로 짜낸 30수 원단은 부드럽고 통기성이 좋아 사계절 데일리로 입기 좋습니다. 군더더기 없는 실루엣과 탄탄한 봉제로 오래 두고 입을 수 있는 한 벌입니다.</p>
+      </div>
+      <div class="spec-grid">
+        <div class="spec-card">
+          <div class="spec-icon si-1" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+          <h4>GOTS 유기농 인증</h4>
+          <p>화학 처리 없이 재배한 유기농 면만 사용해 피부에 순합니다.</p>
+        </div>
+        <div class="spec-card">
+          <div class="spec-icon si-2" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6a8 8 0 0 1-16 0V4z"/><path d="M8 20h8"/></svg></div>
+          <h4>30수 탄탄한 원단</h4>
+          <p>비침 없는 적당한 두께로 사계절 안정적으로 착용할 수 있습니다.</p>
+        </div>
+        <div class="spec-card">
+          <div class="spec-icon si-3" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 4-5h10l4 5-4 3v10H7V11L3 8z"/></svg></div>
+          <h4>깔끔한 세미오버핏</h4>
+          <p>몸에 붙지 않는 여유로운 실루엣으로 체형을 편하게 감싸줍니다.</p>
+        </div>
+        <div class="spec-card">
+          <div class="spec-icon si-4" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z"/></svg></div>
+          <h4>덜 마르는 저온 세탁</h4>
+          <p>30도 이하 손세탁과 그늘 건조로 형태를 오래 유지할 수 있습니다.</p>
+        </div>
+      </div>
+      <table class="info-table">
+        <tbody>
+          <tr><th>소재</th><td>유기농 면(오가닉 코튼) 100%, GOTS 인증</td></tr>
+          <tr><th>핏</th><td>세미오버핏 (S~XXL)</td></tr>
+          <tr><th>두께</th><td>30수 미디엄 (비침 없음)</td></tr>
+          <tr><th>제조</th><td>대한민국 · 자체 봉제 라인</td></tr>
+          <tr><th>세탁</th><td>30도 이하 중성세제 손세탁, 그늘 건조 권장</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="panel" role="tabpanel" data-name="review" hidden>
+      <div class="review-summary">
+        <div class="rs-score">
+          <div class="rs-big num">4.8</div>
+          <div class="rs-stars" aria-hidden="true">★★★★★</div>
+          <div class="rs-total"><span class="num">128</span>개 리뷰</div>
+        </div>
+        <div class="rs-bars">
+          <div class="rs-bar"><span class="lbl num">5점</span><span class="rs-track"><span class="rs-fill" style="width:82%"></span></span><span class="pct num">82%</span></div>
+          <div class="rs-bar"><span class="lbl num">4점</span><span class="rs-track"><span class="rs-fill" style="width:12%"></span></span><span class="pct num">12%</span></div>
+          <div class="rs-bar"><span class="lbl num">3점</span><span class="rs-track"><span class="rs-fill" style="width:4%"></span></span><span class="pct num">4%</span></div>
+          <div class="rs-bar"><span class="lbl num">2점</span><span class="rs-track"><span class="rs-fill" style="width:1%"></span></span><span class="pct num">1%</span></div>
+          <div class="rs-bar"><span class="lbl num">1점</span><span class="rs-track"><span class="rs-fill" style="width:1%"></span></span><span class="pct num">1%</span></div>
+        </div>
+      </div>
+      <div class="review-list">
+        <article class="review-card">
+          <div class="rc-head">
+            <span class="avatar av-1" aria-hidden="true">JK</span>
+            <div class="rc-meta">
+              <div class="rc-name">J.K</div>
+              <div class="rc-sub"><span>아이보리 · M</span><span>·</span><span class="num">2026.06.28</span></div>
+            </div>
+            <span class="rc-stars" aria-label="별점 5점">★★★★★</span>
+          </div>
+          <p class="rc-body">원단이 정말 부드럽고 비침도 없어요. 세탁 후에도 목이 늘어나지 않아서 만족합니다. 색상별로 더 사려고요.</p>
+          <div class="rc-foot">
+            <button class="help-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.5a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 18 21H7V10l4-8a2.5 2.5 0 0 1 4 3.9z"/></svg>도움돼요 <span class="hc num">47</span></button>
+            <span class="rc-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+          </div>
+        </article>
+        <article class="review-card">
+          <div class="rc-head">
+            <span class="avatar av-2" aria-hidden="true">SY</span>
+            <div class="rc-meta">
+              <div class="rc-name">S.Y</div>
+              <div class="rc-sub"><span>인디고 · L</span><span>·</span><span class="num">2026.06.21</span></div>
+            </div>
+            <span class="rc-stars" aria-label="별점 5점">★★★★★</span>
+          </div>
+          <p class="rc-body">핏이 딱 세미오버라 편하게 입기 좋아요. 인디고 컬러 발색이 화면이랑 똑같아서 놀랐습니다. 재구매 의사 있어요.</p>
+          <div class="rc-foot">
+            <button class="help-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.5a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 18 21H7V10l4-8a2.5 2.5 0 0 1 4 3.9z"/></svg>도움돼요 <span class="hc num">31</span></button>
+            <span class="rc-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+          </div>
+        </article>
+        <article class="review-card">
+          <div class="rc-head">
+            <span class="avatar av-3" aria-hidden="true">DH</span>
+            <div class="rc-meta">
+              <div class="rc-name">D.H</div>
+              <div class="rc-sub"><span>블랙 · XL</span><span>·</span><span class="num">2026.06.15</span></div>
+            </div>
+            <span class="rc-stars" aria-label="별점 4점">★★★★☆</span>
+          </div>
+          <p class="rc-body">전체적으로 좋은데 생각보다 살짝 크게 나왔어요. 그래도 원단 질은 가격 대비 훌륭합니다. 한 사이즈 작게 추천해요.</p>
+          <div class="rc-foot">
+            <button class="help-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.9 14 10h5.5a2 2 0 0 1 2 2.3l-1.4 7A2 2 0 0 1 18 21H7V10l4-8a2.5 2.5 0 0 1 4 3.9z"/></svg>도움돼요 <span class="hc num">18</span></button>
+            <span class="rc-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>구매 확인</span>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- QA -->
+    <div class="panel" role="tabpanel" data-name="qa" hidden>
+      <div class="qa-item">
+        <div class="qa-q">
+          <span class="qa-tag" aria-label="질문">Q</span>
+          <span class="qa-text">XXL 사이즈 재입고 예정이 있을까요? 품절이라 문의드립니다.</span>
+          <span class="qa-status">답변완료</span>
+        </div>
+        <div class="qa-a">
+          <span class="qa-tag" aria-label="답변">A</span>
+          <span class="qa-text">문의 감사합니다. XXL은 다음 주 중 재입고 예정이며, 재입고 알림 신청 시 도착 즉시 안내드립니다.</span>
+        </div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">
+          <span class="qa-tag" aria-label="질문">Q</span>
+          <span class="qa-text">아이보리 색상은 세탁 시 이염 걱정 없나요?</span>
+          <span class="qa-status">답변완료</span>
+        </div>
+        <div class="qa-a">
+          <span class="qa-tag" aria-label="답변">A</span>
+          <span class="qa-text">단독 세탁을 권장드리며, 초기 1~2회는 찬물 손세탁을 추천합니다. 이염 테스트는 통과한 제품입니다.</span>
+        </div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">
+          <span class="qa-tag" aria-label="질문">Q</span>
+          <span class="qa-text">키 175cm에 66kg인데 어떤 사이즈가 맞을까요?</span>
+          <span class="qa-status">답변완료</span>
+        </div>
+        <div class="qa-a">
+          <span class="qa-tag" aria-label="답변">A</span>
+          <span class="qa-text">세미오버핏 기준으로 L 사이즈를 추천드립니다. 딱 맞게 입고 싶으시면 M도 좋습니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHIP -->
+    <div class="panel" role="tabpanel" data-name="ship" hidden>
+      <div class="ship-grid">
+        <div class="ship-card">
+          <h4><span class="sc-ic pi-teal" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>배송 안내</h4>
+          <ul>
+            <li><span class="ck" aria-hidden="true">✓</span>3만원 이상 구매 시 무료배송 (미만 시 3,000원)</li>
+            <li><span class="ck" aria-hidden="true">✓</span>오후 2시 이전 결제 시 당일 출고</li>
+            <li><span class="ck" aria-hidden="true">✓</span>택배 배송 · 평균 1~2일 소요 (도서산간 제외)</li>
+            <li><span class="ck" aria-hidden="true">✓</span>제주·도서산간 추가 3,000원</li>
+          </ul>
+        </div>
+        <div class="ship-card">
+          <h4><span class="sc-ic pi-indigo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6a9 9 0 0 0 18 0"/><path d="m3 7 4-4M3 7l4 4"/></svg></span>교환 / 반품</h4>
+          <ul>
+            <li><span class="ck" aria-hidden="true">✓</span>수령 후 7일 이내 교환·반품 신청 가능</li>
+            <li><span class="ck" aria-hidden="true">✓</span>단순 변심 시 왕복 배송비 6,000원 고객 부담</li>
+            <li><span class="ck" aria-hidden="true">✓</span>상품 하자·오배송은 배송비 전액 무료</li>
+            <li><span class="ck" aria-hidden="true">✓</span>세탁·착용 흔적이 있으면 교환·반품 제한</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== RELATED ========== -->
+  <section class="related">
+    <div class="section-head">
+      <h2><span class="hbar" aria-hidden="true"></span>함께 보면 좋은 상품</h2>
+      <a class="see-all" href="#">전체보기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+    </div>
+    <div class="rel-grid">
+      <article class="rel-card">
+        <div class="rel-img ri-1">
+          <div class="ri-shape"></div>
+          <button class="rel-wish" aria-label="찜하기"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        </div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">에센셜 오가닉 코튼 긴팔티</div>
+          <div class="rel-price"><span class="rel-pct num">15%</span><span class="rel-now num">42,000원</span></div>
+          <div class="rel-rating"><span class="st" aria-hidden="true">★</span><span class="num">4.7</span><span>(96)</span></div>
+        </div>
+      </article>
+      <article class="rel-card">
+        <div class="rel-img ri-2">
+          <div class="ri-shape"></div>
+          <button class="rel-wish" aria-label="찜하기"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        </div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">데일리 스트레치 치노 팬츠</div>
+          <div class="rel-price"><span class="rel-pct num">25%</span><span class="rel-now num">58,500원</span></div>
+          <div class="rel-rating"><span class="st" aria-hidden="true">★</span><span class="num">4.9</span><span>(214)</span></div>
+        </div>
+      </article>
+      <article class="rel-card">
+        <div class="rel-img ri-3">
+          <div class="ri-shape"></div>
+          <button class="rel-wish" aria-label="찜하기"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        </div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">소프트 코튼 후드 집업</div>
+          <div class="rel-price"><span class="rel-pct num">10%</span><span class="rel-now num">71,100원</span></div>
+          <div class="rel-rating"><span class="st" aria-hidden="true">★</span><span class="num">4.6</span><span>(73)</span></div>
+        </div>
+      </article>
+      <article class="rel-card">
+        <div class="rel-img ri-4">
+          <div class="ri-shape"></div>
+          <button class="rel-wish" aria-label="찜하기"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        </div>
+        <div class="rel-body">
+          <div class="rel-brand">MUJINE</div>
+          <div class="rel-name">라이트 코튼 크루넥 니트</div>
+          <div class="rel-price"><span class="rel-pct num">20%</span><span class="rel-now num">47,200원</span></div>
+          <div class="rel-rating"><span class="st" aria-hidden="true">★</span><span class="num">4.8</span><span>(158)</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-dot" aria-hidden="true" style="animation:none"></span>
+      <span class="brand-name">MUJINE</span>
+    </div>
+    <div class="footer-crumbs">
+      <span>MUJINE</span><span class="sep">·</span><span>상품상세</span><span class="sep">·</span><span>컬러풀 모던</span>
+    </div>
+    <div class="footer-note num">© 2026 MUJINE. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var UNIT = 39000;
+  var fmt = function(n){ return n.toLocaleString('ko-KR'); };
+
+  /* qty stepper */
+  var qty = 1, qtyEl = document.getElementById('qty'),
+      minus = document.getElementById('minus'), plus = document.getElementById('plus'),
+      totalEl = document.getElementById('total');
+  function render(){
+    qtyEl.textContent = qty;
+    totalEl.innerHTML = fmt(UNIT*qty) + '<small>원</small>';
+    minus.disabled = qty <= 1;
+    plus.disabled = qty >= 10;
+  }
+  minus.addEventListener('click', function(){ if(qty>1){qty--;render();} });
+  plus.addEventListener('click', function(){ if(qty<10){qty++;render();} });
+
+  /* color chips */
+  var colorLabel = document.querySelector('.opt-group .picked');
+  document.querySelectorAll('.color-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('.color-chip').forEach(function(c){c.classList.remove('active');c.setAttribute('aria-pressed','false');});
+      chip.classList.add('active'); chip.setAttribute('aria-pressed','true');
+      if(colorLabel) colorLabel.textContent = chip.getAttribute('aria-label');
+    });
+  });
+
+  /* size chips */
+  var sizeLabel = document.querySelectorAll('.opt-group .picked')[1];
+  document.querySelectorAll('.size-chip:not(.soldout)').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('.size-chip').forEach(function(c){c.classList.remove('active');c.setAttribute('aria-pressed','false');});
+      chip.classList.add('active'); chip.setAttribute('aria-pressed','true');
+      if(sizeLabel) sizeLabel.textContent = chip.textContent.trim();
+    });
+  });
+
+  /* thumbnails */
+  document.querySelectorAll('.thumb').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.thumb').forEach(function(x){x.classList.remove('active');x.removeAttribute('aria-current');});
+      t.classList.add('active'); t.setAttribute('aria-current','true');
+    });
+  });
+
+  /* wishlist toggle */
+  var wish = document.querySelector('.btn-wish');
+  wish.addEventListener('click', function(){
+    var on = wish.classList.toggle('on');
+    wish.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.rel-wish').forEach(function(w){
+    w.addEventListener('click', function(e){
+      e.stopPropagation();
+      w.style.color = (w.style.color === 'rgb(255, 102, 153)') ? '' : 'rgb(255, 102, 153)';
+    });
+  });
+
+  /* tabs */
+  var tabs = document.querySelectorAll('.tab'),
+      panels = document.querySelectorAll('.panel'),
+      underline = document.querySelector('.tab-underline');
+  function moveUnderline(tab){
+    underline.style.left = tab.offsetLeft + 'px';
+    underline.style.width = tab.offsetWidth + 'px';
+  }
+  function activate(tab){
+    tabs.forEach(function(t){t.classList.remove('active');t.setAttribute('aria-selected','false');});
+    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+    var name = tab.getAttribute('data-panel');
+    panels.forEach(function(p){
+      var on = p.getAttribute('data-name') === name;
+      p.classList.toggle('active', on);
+      if(on){ p.removeAttribute('hidden'); } else { p.setAttribute('hidden',''); }
+    });
+    moveUnderline(tab);
+  }
+  tabs.forEach(function(tab){ tab.addEventListener('click', function(){ activate(tab); }); });
+  window.addEventListener('load', function(){ moveUnderline(document.querySelector('.tab.active')); });
+  window.addEventListener('resize', function(){ moveUnderline(document.querySelector('.tab.active')); });
+
+  render();
+  moveUnderline(document.querySelector('.tab.active'));
+})();
+</script>
+</body>
+</html>

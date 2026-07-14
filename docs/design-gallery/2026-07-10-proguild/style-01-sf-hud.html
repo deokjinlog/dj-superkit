@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProGuild — e스포츠 팀 관제 콘솔</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Share+Tech+Mono&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#050810;
+  --panel:#070d18;
+  --cyan:#00E5FF;
+  --magenta:#FF2D78;
+  --amber:#FFB62E;
+  --mint:#3DF5C4;
+  --text:#C9EEF7;
+  --muted:#5D8FA3;
+  --clip:14px;
+  --mono:"Share Tech Mono",ui-monospace,monospace;
+  --disp:"Orbitron","Share Tech Mono",sans-serif;
+  --body:"Pretendard",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#080e1c}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  min-height:100vh;
+  padding:26px 24px 60px;
+  overflow-x:hidden;
+  position:relative;
+}
+/* background: deep radial pool so darkness dominates (>60%) */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(1200px 700px at 78% -10%, rgba(0,229,255,.06), transparent 60%),
+    radial-gradient(900px 600px at 6% 108%, rgba(255,45,120,.05), transparent 60%),
+    var(--bg);
+}
+.tabnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ---- scanline overlay + slow sweep (ambient) ---- */
+.scanlines{
+  position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:repeating-linear-gradient(0deg, rgba(0,229,255,.03) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;
+}
+.sweep{
+  position:fixed;left:0;right:0;top:0;height:150px;pointer-events:none;z-index:59;
+  background:linear-gradient(180deg, transparent, rgba(0,229,255,.05), transparent);
+  animation:sweep 8s linear infinite;
+}
+@keyframes sweep{0%{transform:translateY(-160px)}100%{transform:translateY(102vh)}}
+
+/* ---- shell ---- */
+.shell{max-width:1160px;margin:0 auto}
+
+/* boot log line */
+.init-line{
+  font-family:var(--mono);color:var(--muted);font-size:12px;letter-spacing:.14em;
+  white-space:nowrap;overflow:hidden;width:22ch;
+  border-right:2px solid var(--cyan);margin:0 0 16px 2px;
+  animation:type .32s steps(22) both, caret .8s step-end infinite;
+}
+@keyframes type{from{width:0}to{width:22ch}}
+@keyframes caret{50%{border-color:transparent}}
+
+/* ---- clipped panel primitive (1px glow border via layered clip) ---- */
+.panel{
+  position:relative;
+  clip-path:polygon(0 0, calc(100% - var(--clip)) 0, 100% var(--clip), 100% 100%, var(--clip) 100%, 0 calc(100% - var(--clip)));
+  background:rgba(0,229,255,.28);
+  padding:1px;
+}
+.panel > .inner{
+  position:relative;z-index:1;height:100%;
+  clip-path:polygon(0 0, calc(100% - var(--clip)) 0, 100% var(--clip), 100% 100%, var(--clip) 100%, 0 calc(100% - var(--clip)));
+  background:linear-gradient(180deg, #0a1424, var(--panel));
+  padding:18px 20px;
+}
+/* top-left glow marker */
+.panel .marker{
+  position:absolute;top:9px;left:9px;width:7px;height:7px;z-index:2;
+  background:var(--cyan);
+}
+/* bottom-right ㄱ corner bracket */
+.panel .bracket{
+  position:absolute;right:5px;bottom:5px;width:14px;height:14px;z-index:2;
+  border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);
+  transition:transform .18s ease, border-color .18s ease;
+}
+.panel:hover{background:rgba(0,229,255,.55)}
+.panel:hover .bracket{transform:translate(2px,2px);border-color:var(--cyan)}
+
+/* ---- header ---- */
+.head{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand h1{
+  font-family:var(--disp);font-weight:900;text-transform:uppercase;letter-spacing:.18em;
+  font-size:clamp(24px,4.4vw,34px);margin:0;color:var(--cyan);
+  text-shadow:0 0 14px rgba(0,229,255,.55), 0 0 2px rgba(0,229,255,.8);
+  animation:titleOn .34s ease .3s both;
+}
+@keyframes titleOn{
+  0%{opacity:.15;transform:translateX(0)}
+  18%{opacity:.6;transform:translateX(-3px)}
+  30%{transform:translateX(3px)}
+  42%{transform:translateX(0)}
+  100%{opacity:1}
+}
+.brand .tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.headmeta{text-align:right;font-family:var(--mono);line-height:1.7}
+.headmeta .row1{font-size:12px;color:var(--muted);letter-spacing:.12em}
+.headmeta .row1 b{color:var(--text)}
+.headmeta .clock{font-size:20px;color:var(--cyan);letter-spacing:.14em}
+
+/* status bar */
+.statusbar{
+  display:flex;align-items:center;gap:10px;margin:-6px 2px 22px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--mint);
+  text-transform:uppercase;
+  animation:fadeUp .4s ease 1.4s both;
+}
+.statusbar .dot{width:8px;height:8px;background:var(--mint)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---- KPI grid ---- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi{animation:powerOn .34s ease both}
+.kpi:nth-child(1){animation-delay:.50s}
+.kpi:nth-child(2){animation-delay:.59s}
+.kpi:nth-child(3){animation-delay:.68s}
+.kpi:nth-child(4){animation-delay:.77s}
+@keyframes powerOn{0%{opacity:0}45%{opacity:.35}100%{opacity:1}}
+.kpi .label{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.kpi .val{
+  font-family:var(--mono);font-weight:400;color:var(--text);line-height:1;
+  font-size:clamp(26px,3.4vw,34px);
+}
+.kpi .val .unit{font-size:.5em;color:var(--muted);margin-left:3px}
+.kpi .delta{margin-top:12px;font-family:var(--mono);font-size:13px;letter-spacing:.06em}
+.kpi .delta.up{color:var(--mint)}
+.kpi .delta.rank{color:var(--cyan)}
+.kpi .delta.wait{color:var(--amber)}
+.kpi .val.count{color:var(--cyan)}
+.kpi .val.wait{color:var(--amber)}
+
+/* ---- lower grid ---- */
+.lower{display:grid;grid-template-columns:1.05fr 1.35fr;gap:14px}
+
+/* chart */
+.chart-head,.table-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sect-title{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.sect-sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.plot{
+  position:relative;height:230px;margin-top:26px;
+  display:flex;align-items:flex-end;gap:10px;
+  padding-bottom:2px;
+}
+.plot::before{ /* baseline */
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(93,143,163,.35);
+}
+.gridline{position:absolute;left:0;right:0;height:1px;background:rgba(93,143,163,.12)}
+.bar{position:relative;flex:1;height:100%;display:flex;align-items:flex-end}
+.bar-fill{
+  width:100%;height:var(--h);
+  background:linear-gradient(180deg, rgba(0,229,255,.85), rgba(0,229,255,.18));
+  border-top:1.5px solid var(--cyan);
+  transform-origin:bottom;
+  animation:grow .55s cubic-bezier(.2,.9,.25,1) both;
+  transition:filter .15s ease;
+}
+@keyframes grow{0%{transform:scaleY(0)}70%{transform:scaleY(1.04)}100%{transform:scaleY(1)}}
+.bar:nth-child(1) .bar-fill{animation-delay:.90s}
+.bar:nth-child(2) .bar-fill{animation-delay:.96s}
+.bar:nth-child(3) .bar-fill{animation-delay:1.02s}
+.bar:nth-child(4) .bar-fill{animation-delay:1.08s}
+.bar:nth-child(5) .bar-fill{animation-delay:1.14s}
+.bar:nth-child(6) .bar-fill{animation-delay:1.20s}
+.bar:nth-child(7) .bar-fill{animation-delay:1.26s}
+.bar:nth-child(8) .bar-fill{animation-delay:1.32s}
+.bar.peak .bar-fill{
+  background:linear-gradient(180deg, rgba(255,45,120,.9), rgba(255,45,120,.2));
+  border-top-color:var(--magenta);
+  box-shadow:0 0 16px rgba(255,45,120,.5);
+}
+.bar-val{
+  position:absolute;left:0;right:0;bottom:calc(var(--h) + 7px);text-align:center;
+  font-family:var(--mono);font-size:12px;color:var(--muted);
+  transition:color .15s ease, transform .15s ease;
+}
+.bar.peak .bar-val{color:var(--magenta)}
+.bar-x{
+  position:absolute;left:0;right:0;bottom:-22px;text-align:center;
+  font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;
+}
+.peak-tag{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--h) + 26px);
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--magenta);
+  text-shadow:0 0 8px rgba(255,45,120,.5);white-space:nowrap;
+}
+/* chart hover crosshair / reticle */
+.bar::before{ /* vertical guide */
+  content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);
+  background:linear-gradient(180deg, transparent, rgba(0,229,255,.55));opacity:0;transition:opacity .15s;
+}
+.bar::after{ /* horizontal tick at value */
+  content:"";position:absolute;left:0;right:0;bottom:var(--h);height:1px;
+  background:rgba(0,229,255,.55);opacity:0;transition:opacity .15s;
+}
+.bar:hover::before,.bar:hover::after{opacity:1}
+.bar:hover .bar-fill{filter:brightness(1.3)}
+.bar:hover .bar-val{color:var(--cyan);transform:scale(1.15)}
+.bar.peak:hover .bar-val{color:var(--magenta)}
+
+/* table */
+.tbl-wrap{overflow-x:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+thead th{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);
+  text-transform:uppercase;text-align:left;font-weight:400;
+  padding:0 12px 12px;border-bottom:1px solid rgba(93,143,163,.28);
+}
+thead th.num,tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody td{
+  padding:14px 12px;border-bottom:1px solid rgba(93,143,163,.12);
+  font-size:14px;color:var(--text);
+}
+tbody tr{position:relative}
+tbody td.name{font-weight:600;letter-spacing:.02em}
+tbody td.pos{font-family:var(--mono);font-size:13px;color:var(--muted)}
+tbody td.kda{font-family:var(--mono);font-size:15px;color:var(--text)}
+tbody td.form{font-family:var(--mono);font-size:13px}
+.form.up{color:var(--mint)}
+.form.hold{color:var(--muted)}
+.form.down{color:var(--magenta)}
+/* row hover: cyan indicator bar on left */
+tbody tr td:first-child{position:relative}
+tbody tr:hover td{background:rgba(0,229,255,.05)}
+tbody tr:hover td:first-child::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);
+}
+
+/* status badges (sharp corners, color coded, no round) */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.05em;
+  padding:5px 10px;border:1px solid;white-space:nowrap;
+  clip-path:polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.badge .b-dot{width:6px;height:6px;flex:0 0 auto}
+/* 완료계열 = 주전확정 (mint green) */
+.badge.done{color:var(--mint);border-color:rgba(61,245,196,.5);background:rgba(61,245,196,.08)}
+.badge.done .b-dot{background:var(--mint)}
+/* 진행계열 = 활성 (cyan) + blinking cursor */
+.badge.live{color:var(--cyan);border-color:rgba(0,229,255,.5);background:rgba(0,229,255,.08)}
+.badge.live .b-dot{background:var(--cyan)}
+.cursor{font-family:var(--mono);color:var(--cyan);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+/* 문제계열 = 폼저하 (magenta) — warning pulse */
+.badge.warn{color:var(--magenta);border-color:rgba(255,45,120,.6);background:rgba(255,45,120,.10);animation:warnPulse 1.4s ease-in-out 1.4s infinite}
+.badge.warn .b-dot{background:var(--magenta)}
+@keyframes warnPulse{0%,100%{box-shadow:0 0 0 rgba(255,45,120,0)}50%{box-shadow:0 0 14px rgba(255,45,120,.6)}}
+/* 대기계열 = 로테이션대기 (amber) */
+.badge.hold-s{color:var(--amber);border-color:rgba(255,182,46,.5);background:rgba(255,182,46,.08)}
+.badge.hold-s .b-dot{background:var(--amber)}
+
+/* footer */
+.foot{
+  margin-top:34px;text-align:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;
+}
+.foot span{color:var(--cyan)}
+
+/* ---- responsive ---- */
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .lower{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .kpis{grid-template-columns:1fr}
+}
+
+/* ---- reduced motion: no boot / sweep / blink, final state immediate ---- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .init-line{border-right:none}
+  .sweep{display:none}
+}
+</style>
+</head>
+<body>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="sweep" aria-hidden="true"></div>
+
+<div class="shell">
+  <div class="init-line" aria-hidden="true">SYSTEM INITIALIZING...</div>
+
+  <header class="head">
+    <div class="brand">
+      <h1>ProGuild</h1>
+      <span class="tag">Esports Team Control</span>
+    </div>
+    <div class="headmeta">
+      <div class="row1 tabnum">갱신 시각 <b>2026-07-10 16:00</b></div>
+      <div class="clock tabnum" id="sysclock">16:00:00</div>
+    </div>
+  </header>
+
+  <div class="statusbar"><span class="dot"></span>● ALL SYSTEMS ONLINE</div>
+
+  <!-- KPI -->
+  <section class="kpis" aria-label="핵심 지표">
+    <div class="kpi panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="label">시즌 승률</div>
+      <div class="val tabnum">68.4<span class="unit">%</span></div>
+      <div class="delta up tabnum">▲ +3.2%p 전주 대비</div>
+    </div></div>
+
+    <div class="kpi panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="label">리그 순위</div>
+      <div class="val tabnum">2<span class="unit">위</span></div>
+      <div class="delta rank tabnum">▲ 1계단</div>
+    </div></div>
+
+    <div class="kpi panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="label">누적 상금</div>
+      <div class="val count tabnum">1억 8,400<span class="unit">만원</span></div>
+      <div class="delta up tabnum">▲ +2,300만원</div>
+    </div></div>
+
+    <div class="kpi panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="label">다음 경기</div>
+      <div class="val wait tabnum">D-2</div>
+      <div class="delta wait">vs 팀 이클립스</div>
+    </div></div>
+  </section>
+
+  <!-- lower: chart + table -->
+  <section class="lower">
+    <!-- chart -->
+    <div class="panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="chart-head">
+        <span class="sect-title">최근 8주 승률</span>
+        <span class="sect-sub">UNIT · %</span>
+      </div>
+      <div class="plot" role="img" aria-label="최근 8주 승률 추이. 6주차 71%로 피크.">
+        <div class="gridline" style="bottom:25%"></div>
+        <div class="gridline" style="bottom:50%"></div>
+        <div class="gridline" style="bottom:75%"></div>
+        <div class="bar" style="--h:65.0%"><div class="bar-val tabnum">52</div><div class="bar-fill"></div><div class="bar-x">1주</div></div>
+        <div class="bar" style="--h:72.5%"><div class="bar-val tabnum">58</div><div class="bar-fill"></div><div class="bar-x">2주</div></div>
+        <div class="bar" style="--h:76.25%"><div class="bar-val tabnum">61</div><div class="bar-fill"></div><div class="bar-x">3주</div></div>
+        <div class="bar" style="--h:68.75%"><div class="bar-val tabnum">55</div><div class="bar-fill"></div><div class="bar-x">4주</div></div>
+        <div class="bar" style="--h:80.0%"><div class="bar-val tabnum">64</div><div class="bar-fill"></div><div class="bar-x">5주</div></div>
+        <div class="bar peak" style="--h:88.75%"><div class="peak-tag">▲ PEAK</div><div class="bar-val tabnum">71</div><div class="bar-fill"></div><div class="bar-x">6주</div></div>
+        <div class="bar" style="--h:83.75%"><div class="bar-val tabnum">67</div><div class="bar-fill"></div><div class="bar-x">7주</div></div>
+        <div class="bar" style="--h:85.0%"><div class="bar-val tabnum">68</div><div class="bar-fill"></div><div class="bar-x">8주</div></div>
+      </div>
+    </div></div>
+
+    <!-- table -->
+    <div class="panel"><span class="marker"></span><span class="bracket"></span><div class="inner">
+      <div class="table-head">
+        <span class="sect-title">선수 로스터</span>
+        <span class="sect-sub">6 UNITS</span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>선수</th><th>포지션</th><th class="num">KDA</th><th>폼</th><th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">블레이즈</td><td class="pos">엔트리</td><td class="num kda tabnum">1.42</td>
+              <td class="form up">▲ 상승</td>
+              <td><span class="badge done"><span class="b-dot"></span>주전확정</span></td>
+            </tr>
+            <tr>
+              <td class="name">프로스트</td><td class="pos">서포터</td><td class="num kda tabnum">0.98</td>
+              <td class="form hold">— 유지</td>
+              <td><span class="badge live"><span class="b-dot"></span>활성<span class="cursor">_</span></span></td>
+            </tr>
+            <tr>
+              <td class="name">레이븐</td><td class="pos">스나이퍼</td><td class="num kda tabnum">1.67</td>
+              <td class="form up">▲ 상승</td>
+              <td><span class="badge done"><span class="b-dot"></span>주전확정</span></td>
+            </tr>
+            <tr>
+              <td class="name">노바</td><td class="pos">리퍼</td><td class="num kda tabnum">0.71</td>
+              <td class="form down">▼ 하락</td>
+              <td><span class="badge warn"><span class="b-dot"></span>폼저하</span></td>
+            </tr>
+            <tr>
+              <td class="name">쿼츠</td><td class="pos">인게이저</td><td class="num kda tabnum">1.15</td>
+              <td class="form hold">— 유지</td>
+              <td><span class="badge live"><span class="b-dot"></span>활성<span class="cursor">_</span></span></td>
+            </tr>
+            <tr>
+              <td class="name">에코</td><td class="pos">플렉스</td><td class="num kda tabnum">1.03</td>
+              <td class="form hold">— 유지</td>
+              <td><span class="badge hold-s"><span class="b-dot"></span>로테이션대기</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  </section>
+
+  <footer class="foot">STYLE <span>01</span> · SF 게임 HUD</footer>
+</div>
+
+<script>
+(function(){
+  var el=document.getElementById('sysclock');
+  if(!el) return;
+  function pad(n){return(n<10?'0':'')+n;}
+  function tick(){
+    try{
+      var d=new Date();
+      el.textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    }catch(e){/* static fallback text stays */}
+  }
+  tick();
+  setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>

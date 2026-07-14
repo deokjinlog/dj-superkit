@@ -1,0 +1,630 @@
+<title>Flowly — 에디토리얼</title>
+<style>
+  :root {
+    --paper: #FAF7F0;
+    --paper-2: #F2EDE1;
+    --ink: #1C1A16;
+    --ink-soft: #4A453C;
+    --rule: #D9D1BE;
+    --accent: #7B2D26;
+    --accent-2: #5C4A2E;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sans {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  a { color: inherit; }
+
+  img, svg { max-width: 100%; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ===== Masthead / Nav ===== */
+  header.masthead {
+    border-bottom: 3px double var(--ink);
+    background: var(--paper);
+    position: relative;
+    z-index: 10;
+  }
+
+  .masthead-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 22px 0 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .masthead .wrap { display: flex; align-items: baseline; justify-content: space-between; padding-top: 22px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; gap: 10px; }
+
+  .logo {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    font-style: italic;
+  }
+
+  .kicker-date {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  nav.subnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  nav.subnav .links {
+    display: flex;
+    gap: 28px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-wrap: wrap;
+  }
+
+  nav.subnav .links a {
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  nav.subnav .links a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: inline-block;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 11px 22px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper);
+  }
+  .btn-primary:hover {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+  }
+
+  .btn-block { display: block; text-align: center; }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 64px 0 56px;
+    position: relative;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1.headline {
+    font-size: clamp(2.6rem, 7vw, 5.2rem);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    margin: 0 0 26px;
+    font-weight: 400;
+  }
+
+  h1.headline em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .dropcap-block {
+    font-size: 1.28rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 62ch;
+  }
+
+  .dropcap-block::first-letter {
+    font-family: Georgia, serif;
+    float: left;
+    font-size: 4.6rem;
+    line-height: 0.82;
+    padding: 6px 10px 0 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin-top: 34px;
+    flex-wrap: wrap;
+  }
+
+  .demo-link {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .demo-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .hero-figure {
+    margin-top: 46px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 22px 0;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .hero-figure .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hero-figure .stat .num {
+    font-family: Georgia, serif;
+    font-size: 2rem;
+    font-style: italic;
+  }
+  .hero-figure .stat .cap {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* ===== Section label ===== */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin: 0 0 8px;
+  }
+  .section-num {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  h2.section-title {
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .section-rule {
+    height: 1px;
+    background: var(--ink);
+    margin: 18px 0 40px;
+  }
+  .section-deck {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    max-width: 60ch;
+    margin: -18px 0 40px;
+  }
+
+  section { padding: 64px 0; }
+  section.striped { background: var(--paper-2); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+
+  /* ===== Features: magazine 3-col with rules ===== */
+  .feature-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  @media (min-width: 860px) {
+    .feature-columns {
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 0;
+    }
+    .feature-columns > .feature:not(:first-child) {
+      border-left: 1px solid var(--rule);
+      padding-left: 40px;
+    }
+    .feature-columns > .feature {
+      padding-right: 40px;
+    }
+  }
+
+  .feature {
+    padding: 30px 0;
+    border-top: 1px solid var(--rule);
+  }
+  @media (min-width: 860px) {
+    .feature { border-top: none; padding-top: 0; }
+  }
+
+  .feature .drop {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .feature-icon {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+  }
+
+  .feature h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+
+  .feature p {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  /* ===== Pricing ===== */
+  .pricing-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  @media (min-width: 900px) {
+    .pricing-columns { grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .pricing-columns > .plan:not(:first-child) { border-left: 1px solid var(--rule); padding-left: 36px; }
+    .pricing-columns > .plan { padding-right: 36px; }
+  }
+
+  .plan {
+    position: relative;
+    padding-top: 6px;
+  }
+
+  .plan.featured {
+    background: var(--paper);
+    padding: 26px 30px;
+    border: 1px solid var(--ink);
+    margin-top: -14px;
+  }
+  @media (min-width: 900px) {
+    .plan.featured { border-left: 1px solid var(--ink) !important; }
+  }
+
+  .plan-badge {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: inline-block;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--accent);
+    padding: 4px 10px;
+    margin-bottom: 14px;
+  }
+
+  .plan-name {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .plan-price {
+    font-size: 2.6rem;
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .plan-price .unit {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    font-style: normal;
+  }
+
+  .plan-rule {
+    height: 1px;
+    background: var(--rule);
+    margin: 18px 0;
+  }
+
+  .plan ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 26px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .plan ul li {
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .plan ul li:before {
+    content: "— ";
+    color: var(--accent);
+  }
+
+  /* ===== Final CTA ===== */
+  .finale {
+    text-align: center;
+    padding: 90px 0;
+    border-top: 3px double var(--ink);
+    border-bottom: 3px double var(--ink);
+  }
+  .finale h2 {
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    font-weight: 400;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+  }
+  .finale p.sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    margin: 0 0 34px;
+  }
+  .finale .btn {
+    padding: 15px 36px;
+    font-size: 0.85rem;
+  }
+
+  footer {
+    padding: 34px 0 60px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  footer a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    margin-left: 18px;
+  }
+  footer a:hover { color: var(--accent); }
+  footer .fnav { display: flex; flex-wrap: wrap; }
+  footer .fnav a:first-child { margin-left: 0; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 18px; }
+    nav.subnav .links { gap: 16px; font-size: 0.72rem; }
+    .hero-cta { flex-direction: column; align-items: flex-start; }
+    footer { flex-direction: column; }
+    footer a { margin-left: 0; margin-right: 16px; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="logo">Flowly</div>
+    <div class="kicker-date sans">협업 저널 · 2026 SPRING ISSUE · No.03</div>
+  </div>
+  <nav class="subnav wrap">
+    <div class="links">
+      <a href="#features">기능</a>
+      <a href="#pricing">요금제</a>
+      <a href="#clients">고객사</a>
+      <a href="#login">로그인</a>
+    </div>
+    <a href="#start" class="btn btn-primary">무료로 시작</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="eyebrow sans">이미 12,000+ 팀이 Flowly로 일합니다</div>
+      <h1 class="headline">팀의 모든 일이,<br><em>한 곳</em>에서 흐르게</h1>
+      <p class="dropcap-block">흩어진 할 일·문서·대화를 하나로. 누가 무엇을 언제까지 하는지 한눈에 봅니다.</p>
+
+      <div class="hero-cta">
+        <a href="#start" class="btn btn-primary">무료로 시작하기</a>
+        <a href="#demo" class="demo-link sans">▷ 2분 데모 보기</a>
+      </div>
+
+      <div class="hero-figure">
+        <div class="stat">
+          <div class="num">12,000+</div>
+          <div class="cap">함께하는 팀</div>
+        </div>
+        <div class="stat">
+          <div class="num">3</div>
+          <div class="cap">핵심 기능</div>
+        </div>
+        <div class="stat">
+          <div class="num">14일</div>
+          <div class="cap">무료 체험</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-num sans">FEATURE — 01</span>
+        <h2 class="section-title">흐름을 만드는 3가지</h2>
+      </div>
+      <div class="section-rule"></div>
+
+      <div class="feature-columns">
+        <article class="feature">
+          <svg class="feature-icon" viewBox="0 0 46 46" fill="none">
+            <rect x="2" y="2" width="12" height="42" stroke="#7B2D26" stroke-width="1.4"/>
+            <rect x="17" y="2" width="12" height="28" stroke="#1C1A16" stroke-width="1.4"/>
+            <rect x="32" y="2" width="12" height="18" stroke="#1C1A16" stroke-width="1.4"/>
+          </svg>
+          <div class="drop sans">Board</div>
+          <h3>칸반 보드</h3>
+          <p>드래그 한 번으로 진행 상황을 정리하세요. 누가 뭘 맡고 있는지 실시간으로 보입니다.</p>
+        </article>
+
+        <article class="feature">
+          <svg class="feature-icon" viewBox="0 0 46 46" fill="none">
+            <line x1="3" y1="10" x2="43" y2="10" stroke="#1C1A16" stroke-width="1.4"/>
+            <line x1="3" y1="23" x2="43" y2="23" stroke="#1C1A16" stroke-width="1.4"/>
+            <line x1="3" y1="36" x2="43" y2="36" stroke="#1C1A16" stroke-width="1.4"/>
+            <circle cx="14" cy="10" r="3.4" fill="#7B2D26"/>
+            <circle cx="30" cy="23" r="3.4" fill="#7B2D26"/>
+            <circle cx="20" cy="36" r="3.4" fill="#7B2D26"/>
+          </svg>
+          <div class="drop sans">Timeline</div>
+          <h3>스마트 타임라인</h3>
+          <p>마감과 의존 관계를 한 화면에. 일정이 밀리기 전에 위험을 미리 봅니다.</p>
+        </article>
+
+        <article class="feature">
+          <svg class="feature-icon" viewBox="0 0 46 46" fill="none">
+            <path d="M23 3 L23 43 M3 23 L43 23" stroke="#1C1A16" stroke-width="1.4"/>
+            <circle cx="23" cy="23" r="10" stroke="#7B2D26" stroke-width="1.4"/>
+          </svg>
+          <div class="drop sans">Automation</div>
+          <h3>규칙 자동화</h3>
+          <p>반복 작업은 규칙에 맡기세요. 상태가 바뀌면 알림과 담당 배정이 자동으로.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="striped">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="section-num sans">PRICING — 02</span>
+        <h2 class="section-title">팀 크기에 맞게</h2>
+      </div>
+      <div class="section-rule"></div>
+
+      <div class="pricing-columns">
+        <div class="plan">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">₩0</div>
+          <div class="plan-rule"></div>
+          <ul>
+            <li>최대 5명</li>
+            <li>보드 3개</li>
+            <li>기본 통합</li>
+          </ul>
+          <a href="#start" class="btn btn-block">무료로 시작</a>
+        </div>
+
+        <div class="plan featured">
+          <span class="plan-badge sans">가장 인기</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">₩12,000 <span class="unit sans">/인·월</span></div>
+          <div class="plan-rule"></div>
+          <ul>
+            <li>무제한 보드</li>
+            <li>타임라인</li>
+            <li>자동화</li>
+            <li>우선순위 정렬</li>
+          </ul>
+          <a href="#start" class="btn btn-primary btn-block">Pro 시작하기</a>
+        </div>
+
+        <div class="plan">
+          <div class="plan-name">Business</div>
+          <div class="plan-price">₩24,000 <span class="unit sans">/인·월</span></div>
+          <div class="plan-rule"></div>
+          <ul>
+            <li>SSO</li>
+            <li>고급 권한</li>
+            <li>감사 로그</li>
+            <li>전담 지원</li>
+          </ul>
+          <a href="#contact" class="btn btn-block">영업팀 문의</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" class="finale">
+    <div class="wrap">
+      <h2>오늘부터 팀의 흐름을<br>바꿔보세요</h2>
+      <p class="sub">14일 무료 체험. 카드 등록 없이 시작합니다.</p>
+      <a href="#start" class="btn btn-primary">무료로 시작하기</a>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div>© 2026 Flowly</div>
+  <div class="fnav">
+    <a href="#terms">이용약관</a>
+    <a href="#privacy">개인정보</a>
+    <a href="#contact">문의</a>
+  </div>
+</footer>

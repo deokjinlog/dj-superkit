@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE 셀러 대시보드 · Y2K 베이퍼웨이브</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+:root{
+  /* ===== CSS 변수 (production-quality §4) ===== */
+  --bg-top:#1A0B2E; --bg-mid:#2D0B45; --bg-bot:#0B0221;
+  --card:rgba(45,11,69,.60); --card-solid:#2D0B45;
+  --fg:#E7EEF7; --fg-strong:#FFFFFF; --muted:#B7A9D6; --faint:#8B7DB0;
+  --holo-1:#FF2FB9; --holo-2:#22E1FF; --holo-3:#A24BFF; --holo-4:#66FFE3;
+  --neon-pink:#FF6EC7;
+  --danger:#FF3B6B; --success:#3BFFB0; --warn:#FFC24B; --info:#22E1FF;
+  --grid-line:rgba(255,47,185,.55);
+  --border:rgba(162,75,255,.30);
+  /* 8px 그리드 (production-quality §1) */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r:14px; --r-sm:10px; --r-xs:8px;
+  --chrome:linear-gradient(180deg,#FFFFFF 0%,#C7D6EA 18%,#6B7A99 40%,#EFF6FF 58%,#9FB4CC 78%,#E7EEF7 100%);
+  --chrome-bar:linear-gradient(180deg,#E7EEF7 0%,#B8C6DA 38%,#5C6B87 70%,#8090AC 100%);
+  --sidebar-w:248px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Pretendard',system-ui,sans-serif;
+  color:var(--fg);
+  background:var(--bg-bot);
+  background-image:
+    radial-gradient(1200px 700px at 15% -10%, rgba(162,75,255,.30), transparent 60%),
+    radial-gradient(1000px 600px at 100% 0%, rgba(34,225,255,.16), transparent 55%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 44%, var(--bg-bot) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* ===== 신스웨이브 원근 격자 지평선 (시그니처) ===== */
+.grid-floor{
+  position:fixed; left:-25%; right:-25%; bottom:0; height:46vh;
+  pointer-events:none; z-index:0; overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 100%);
+          mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 100%);
+}
+.grid-floor::before{
+  content:""; position:absolute; inset:-60% 0 -10% 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 38px, var(--grid-line) 38px 40px),
+    repeating-linear-gradient(90deg, rgba(34,225,255,.5) 0 78px, transparent 78px 80px);
+  background-position:0 0, 0 0;
+  transform:perspective(340px) rotateX(74deg);
+  transform-origin:50% 100%;
+  animation:floorScroll 8s linear infinite;
+}
+.grid-floor::after{
+  content:""; position:absolute; left:0; right:0; top:0; height:2px;
+  background:linear-gradient(90deg,transparent,#22E1FF 20%,#FF6EC7 50%,#22E1FF 80%,transparent);
+  box-shadow:0 0 34px 8px rgba(255,110,199,.45);
+}
+@keyframes floorScroll{from{background-position:0 0,0 0}to{background-position:0 40px,0 0}}
+
+/* ===== 스캔라인 오버레이 (시그니처) ===== */
+.scanlines{
+  position:fixed; inset:0; z-index:60; pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+  opacity:.55; mix-blend-mode:overlay;
+}
+
+/* ===== 별 파티클 ===== */
+.spark{position:fixed;z-index:1;color:#fff;pointer-events:none;font-size:14px;
+  text-shadow:0 0 8px #22E1FF;animation:twinkle 3.2s ease-in-out infinite}
+.spark.s2{color:#FF6EC7;text-shadow:0 0 8px #FF2FB9;animation-duration:4.1s}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.95;transform:scale(1.15)}}
+
+/* ===== 크롬 텍스트 (시그니처, 하이라이트 2회 교차) ===== */
+.chrome{
+  background:var(--chrome);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+  text-shadow:0 1px 0 #2A3450;
+  font-family:'Orbitron','Pretendard',sans-serif; font-weight:900;
+  letter-spacing:.06em;
+}
+.holo-txt{
+  background:linear-gradient(92deg,#FF2FB9,#22E1FF,#A24BFF,#66FFE3);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+}
+
+/* ===== 레이아웃 그리드 (production-quality §5) ===== */
+.shell{
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:var(--sidebar-w) 1fr;
+  min-height:100vh;
+}
+
+/* ===== 사이드바 ===== */
+.sidebar{
+  position:sticky; top:0; align-self:start; height:100vh;
+  display:flex; flex-direction:column;
+  padding:var(--s5) var(--s3);
+  background:linear-gradient(180deg, rgba(26,11,46,.82), rgba(11,2,33,.88));
+  border-right:1px solid transparent;
+  border-image:linear-gradient(180deg,var(--holo-1),var(--holo-2),var(--holo-3)) 1;
+  backdrop-filter:blur(8px);
+  z-index:10;
+}
+.brand{display:flex;align-items:center;gap:var(--s2);padding:0 var(--s2) var(--s5);}
+.brand .logo{width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+  background:conic-gradient(from var(--angle),#FF2FB9,#22E1FF,#A24BFF,#66FFE3,#FF2FB9);
+  display:grid;place-items:center;box-shadow:0 0 18px rgba(255,47,185,.5);
+  animation:spin 6s linear infinite;}
+.brand .logo span{width:26px;height:26px;border-radius:6px;background:var(--bg-bot);display:grid;place-items:center;
+  font-family:'Orbitron';font-weight:900;font-size:13px;color:#fff}
+@keyframes spin{to{--angle:360deg}}
+.brand .name{font-family:'Orbitron';font-weight:900;font-size:20px;letter-spacing:.14em;}
+
+.nav-label{font-size:11px;color:var(--faint);letter-spacing:.18em;text-transform:uppercase;
+  padding:0 var(--s3) var(--s2);}
+.nav{display:flex;flex-direction:column;gap:2px;}
+.nav a{
+  display:flex;align-items:center;gap:var(--s3);
+  height:42px;padding:0 var(--s3);border-radius:var(--r-sm);
+  color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;
+  position:relative;transition:background .16s,color .16s,box-shadow .16s;
+}
+.nav a svg{width:19px;height:19px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav a:hover{background:rgba(162,75,255,.16);color:var(--fg);}
+.nav a:focus-visible{outline:2px solid var(--holo-2);outline-offset:2px;}
+.nav a.active{
+  color:#fff;font-weight:600;
+  background:linear-gradient(90deg, rgba(255,47,185,.22), rgba(34,225,255,.10));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 20px rgba(255,47,185,.22);
+}
+.nav a.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;
+  background:linear-gradient(180deg,var(--holo-1),var(--holo-2));box-shadow:0 0 10px var(--holo-1);}
+
+.workspace{
+  margin-top:auto;display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s3);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,rgba(45,11,69,.7),rgba(11,2,33,.7));
+  border:1px solid var(--border);
+}
+.avatar{
+  width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+  display:grid;place-items:center;font-family:'Orbitron';font-weight:700;font-size:12px;color:#0B0221;
+  background:var(--chrome-bar);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 10px rgba(34,225,255,.3);
+  letter-spacing:.02em;
+}
+.workspace .meta{line-height:1.35;min-width:0}
+.workspace .meta b{font-size:13px;color:var(--fg-strong);display:block}
+.workspace .meta small{font-size:11px;color:var(--faint)}
+.ic-only{display:none}
+
+/* ===== 메인 ===== */
+.main{min-width:0;display:flex;flex-direction:column;}
+
+/* 상단바 */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s3) var(--s5);
+  background:linear-gradient(180deg,rgba(26,11,46,.86),rgba(26,11,46,.62));
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid transparent;
+  border-image:linear-gradient(90deg,var(--holo-1),var(--holo-2),var(--holo-3),var(--holo-4)) 1;
+}
+.search{position:relative;flex:1;max-width:420px;}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;
+  stroke:var(--faint);fill:none;stroke-width:1.8}
+.search input{
+  width:100%;height:40px;padding:0 var(--s4) 0 38px;
+  border-radius:var(--r-sm);border:1px solid var(--border);
+  background:rgba(11,2,33,.55);color:var(--fg);font-size:14px;font-family:inherit;
+  transition:border .16s,box-shadow .16s;
+}
+.search input::placeholder{color:var(--faint)}
+.search input:focus{outline:none;border-color:var(--holo-2);box-shadow:0 0 0 3px rgba(34,225,255,.22)}
+
+.btn{
+  display:inline-flex;align-items:center;gap:var(--s2);
+  height:40px;padding:0 var(--s4);border-radius:var(--r-sm);
+  font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;
+  border:1px solid transparent;transition:transform .1s,box-shadow .16s,filter .16s;
+}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.btn-ghost{
+  background:rgba(45,11,69,.5);border-color:var(--border);color:var(--fg);
+}
+.btn-ghost:hover{border-color:var(--holo-3);box-shadow:0 0 14px rgba(162,75,255,.3)}
+.btn-primary{
+  color:#0B0221;background:var(--chrome-bar);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 18px rgba(34,225,255,.35);
+  border-color:rgba(255,255,255,.5);font-weight:700;
+}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn:focus-visible{outline:2px solid var(--holo-2);outline-offset:2px}
+.btn-primary:active,.btn-ghost:active{transform:translateY(1px);background:linear-gradient(0deg,#E7EEF7,#5C6B87)}
+
+.iconbtn{
+  position:relative;width:40px;height:40px;border-radius:var(--r-sm);
+  display:grid;place-items:center;cursor:pointer;
+  background:rgba(45,11,69,.5);border:1px solid var(--border);color:var(--fg);
+  transition:box-shadow .16s,border-color .16s;
+}
+.iconbtn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
+.iconbtn:hover{border-color:var(--holo-1);box-shadow:0 0 14px rgba(255,47,185,.35)}
+.iconbtn:focus-visible{outline:2px solid var(--holo-2);outline-offset:2px}
+.badge-dot{
+  position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;
+  border-radius:9px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;
+  display:grid;place-items:center;box-shadow:0 0 10px rgba(255,59,107,.7);
+  font-family:'Orbitron';
+}
+.topbar .spacer{flex:1}
+.avatar.sm{width:40px;height:40px;border-radius:var(--r-sm);font-size:13px}
+
+/* 콘텐츠 */
+.content{padding:var(--s5);display:flex;flex-direction:column;gap:var(--s5);max-width:1420px;width:100%;}
+
+/* 알림 배너 */
+.banner{
+  display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s3) var(--s4);border-radius:var(--r);
+  position:relative;overflow:hidden;
+  background:linear-gradient(90deg, rgba(34,225,255,.14), rgba(162,75,255,.10));
+  border:1px solid transparent;
+  background-clip:padding-box;
+}
+.banner::before{content:"";position:absolute;inset:0;border-radius:var(--r);padding:1px;
+  background:linear-gradient(90deg,var(--holo-2),var(--holo-3),var(--holo-1));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+.banner .b-ic{width:34px;height:34px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(180deg,#22E1FF,#A24BFF);box-shadow:0 0 16px rgba(34,225,255,.5)}
+.banner .b-ic svg{width:19px;height:19px;stroke:#0B0221;fill:none;stroke-width:2}
+.banner p{font-size:14px;color:var(--fg);line-height:1.5}
+.banner b{color:#fff;font-weight:700}
+.banner .b-tag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--info);padding:4px 10px;border-radius:20px;border:1px solid rgba(34,225,255,.4);white-space:nowrap}
+
+/* KPI 그리드 */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4)}
+.card{
+  position:relative;border-radius:var(--r);padding:var(--s5);
+  background:var(--card);
+  border:1px solid transparent;
+  box-shadow:0 0 24px rgba(255,47,185,.14), inset 0 1px 0 rgba(255,255,255,.10);
+  overflow:hidden;
+  transition:box-shadow .22s;
+}
+/* 홀로그램 회전 보더 */
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:var(--r);padding:1px;
+  background:conic-gradient(from var(--angle),var(--holo-1),var(--holo-2),var(--holo-3),var(--holo-4),var(--holo-1));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.85;
+}
+/* 스캔라인 카드 질감 */
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px);opacity:.5}
+.card:hover{box-shadow:0 0 32px rgba(255,47,185,.30), inset 0 1px 0 rgba(255,255,255,.14)}
+.card:hover::before{animation:spin 1.2s linear infinite}
+
+/* 크롬 브래킷 장식 */
+.brackets::before{content:"⌐";position:absolute;top:8px;left:10px;color:rgba(34,225,255,.4);font-size:14px;z-index:2}
+.brackets::after{content:"⌐";position:absolute;bottom:8px;right:10px;color:rgba(255,47,185,.4);font-size:14px;transform:rotate(180deg);z-index:2}
+
+.kpi{display:flex;flex-direction:column;gap:var(--s3);min-height:132px}
+.kpi .k-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s2)}
+.kpi .k-label{font-size:12px;color:var(--muted);letter-spacing:.04em;font-weight:500}
+.kpi .k-spark{width:74px;height:30px;flex:0 0 auto;overflow:visible}
+.kpi .k-val{font-family:'Orbitron','Pretendard',sans-serif;font-weight:700;font-size:26px;line-height:1;
+  letter-spacing:.01em;color:var(--fg-strong);position:relative;z-index:1}
+.kpi .k-val .unit{font-size:14px;color:var(--muted);font-family:'Pretendard';font-weight:500;margin-left:2px}
+.kpi .k-delta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;
+  font-variant-numeric:tabular-nums}
+.k-delta.up{color:var(--success)}
+.k-delta.down{color:var(--danger)}
+.k-delta.flat{color:var(--faint)}
+.k-delta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.4}
+.k-delta .sub{color:var(--faint);font-weight:500}
+
+/* 차트 행 */
+.charts-row{display:grid;grid-template-columns:1.62fr 1fr;gap:var(--s4)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s4)}
+.panel-head h3{font-size:15px;font-weight:700;color:var(--fg-strong);letter-spacing:.02em;position:relative;z-index:1}
+.panel-head .sub{font-size:12px;color:var(--faint)}
+.chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.06em;
+  border:1px solid rgba(59,255,176,.4);color:var(--success);white-space:nowrap;position:relative;z-index:1}
+
+/* 라인 차트 */
+.linechart{width:100%;height:auto;display:block;position:relative;z-index:1}
+.linechart .axis-lbl{fill:var(--faint);font-size:10px;font-family:'Pretendard'}
+.linechart .wk-lbl{fill:var(--muted);font-size:10.5px;font-family:'Orbitron';font-weight:500}
+.linechart .peak-lbl{fill:#fff;font-size:11px;font-family:'Orbitron';font-weight:700}
+.linechart .dot{r:4;fill:var(--bg-bot);stroke:var(--holo-1);stroke-width:2;transition:r .16s,filter .16s}
+.linechart .dot:hover{r:6.5;filter:drop-shadow(0 0 6px var(--holo-1))}
+.linechart .dot.peak{stroke:var(--holo-2);r:6;filter:drop-shadow(0 0 8px var(--holo-2))}
+
+/* 도넛 */
+.donut-wrap{display:flex;align-items:center;gap:var(--s5);position:relative;z-index:1;flex-wrap:wrap}
+.donut{position:relative;width:168px;height:168px;flex:0 0 auto}
+.donut svg{transform:rotate(-90deg)}
+.donut .seg{fill:none;stroke-width:22;transition:stroke-width .18s,filter .18s;cursor:pointer}
+.donut .seg:hover{stroke-width:26;filter:drop-shadow(0 0 6px currentColor)}
+.donut .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut .center b{font-family:'Orbitron';font-weight:900;font-size:24px;color:#fff;line-height:1}
+.donut .center small{font-size:11px;color:var(--muted);letter-spacing:.08em}
+.legend{display:flex;flex-direction:column;gap:10px;flex:1;min-width:150px}
+.legend li{display:flex;align-items:center;gap:var(--s2);font-size:13px;list-style:none}
+.legend .sw{width:12px;height:12px;border-radius:4px;flex:0 0 auto;box-shadow:0 0 8px currentColor}
+.legend .lg-name{color:var(--fg);font-weight:500}
+.legend .lg-pct{margin-left:auto;font-family:'Orbitron';font-weight:700;font-size:13px;color:#fff;font-variant-numeric:tabular-nums}
+
+/* 목표 진행률 */
+.goal{position:relative;z-index:1}
+.goal .g-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s3);flex-wrap:wrap}
+.goal .g-nums{font-size:13px;color:var(--muted)}
+.goal .g-nums b{font-family:'Orbitron';color:#fff;font-weight:700;font-size:15px}
+.goal .g-pct{font-family:'Orbitron';font-weight:900;font-size:22px;letter-spacing:.02em}
+.progress{height:16px;border-radius:20px;background:rgba(11,2,33,.6);border:1px solid var(--border);
+  overflow:hidden;position:relative}
+.progress .fill{height:100%;width:85.6%;border-radius:20px;position:relative;
+  background:linear-gradient(90deg,var(--holo-3),var(--holo-1) 45%,var(--holo-2));
+  box-shadow:0 0 16px rgba(255,47,185,.55);}
+.progress .fill::after{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 6px,transparent 6px 16px)}
+.progress .mark{position:absolute;top:-3px;bottom:-3px;left:100%;width:2px;background:var(--faint);opacity:.4}
+
+/* 하단 행: 테이블 + 채널 */
+.bottom-row{display:grid;grid-template-columns:1fr 320px;gap:var(--s4);align-items:start}
+.table-panel{padding:0;overflow:hidden}
+.table-panel .panel-head{padding:var(--s5) var(--s5) var(--s4)}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+thead th{
+  text-align:left;padding:var(--s2) var(--s4);color:var(--muted);font-weight:600;font-size:12px;
+  letter-spacing:.04em;white-space:nowrap;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:rgba(11,2,33,.4);cursor:pointer;user-select:none;position:relative;z-index:1;
+}
+thead th .sort{margin-left:5px;color:var(--faint);font-size:9px}
+thead th.num{text-align:right}
+tbody td{padding:var(--s3) var(--s4);border-bottom:1px solid rgba(162,75,255,.14);vertical-align:middle}
+tbody tr{position:relative;transition:background .14s}
+tbody tr:hover{background:rgba(162,75,255,.12)}
+tbody tr:hover td:first-child::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--holo-1),var(--holo-2));box-shadow:0 0 8px var(--holo-1)}
+.ord-no{font-family:'Orbitron';font-weight:700;color:var(--fg-strong);font-variant-numeric:tabular-nums}
+.cust{display:inline-flex;align-items:center;gap:var(--s2)}
+.avatar.xs{width:26px;height:26px;border-radius:7px;font-size:10px}
+.prod{color:var(--fg);max-width:230px}
+.prod small{color:var(--faint);font-size:11px}
+td.amt{text-align:right;font-family:'Orbitron';font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+td.amt.empty{color:var(--faint);font-weight:500}
+.row-act{text-align:right;white-space:nowrap}
+.row-act .detail{opacity:0;transition:opacity .14s;font-size:12px;font-weight:600;
+  padding:5px 12px;border-radius:8px;border:1px solid var(--border);color:var(--fg);
+  background:rgba(45,11,69,.6);cursor:pointer}
+tbody tr:hover .detail{opacity:1}
+.row-act .detail:hover{border-color:var(--holo-2);box-shadow:0 0 10px rgba(34,225,255,.3)}
+.row-act .detail:focus-visible{outline:2px solid var(--holo-2);outline-offset:2px;opacity:1}
+
+/* 상태 배지 (색 + 텍스트) */
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  padding:4px 10px;border-radius:20px;white-space:nowrap}
+.status .d{width:7px;height:7px;border-radius:50%;box-shadow:0 0 8px currentColor;background:currentColor}
+.st-paid{color:#3BFFB0;background:rgba(59,255,176,.12);border:1px solid rgba(59,255,176,.4)}
+.st-ship{color:#22E1FF;background:rgba(34,225,255,.12);border:1px solid rgba(34,225,255,.4)}
+.st-wait{color:#FFC24B;background:rgba(255,194,75,.12);border:1px solid rgba(255,194,75,.4)}
+.st-done{color:#A9C4E6;background:rgba(169,196,230,.12);border:1px solid rgba(169,196,230,.4)}
+.st-cancel{color:#FF3B6B;background:rgba(255,59,107,.12);border:1px solid rgba(255,59,107,.4)}
+
+/* 채널 위젯 */
+.channels{position:relative;z-index:1;display:flex;flex-direction:column;gap:var(--s4)}
+.ch-item{display:flex;align-items:center;gap:var(--s3)}
+.ch-rank{width:22px;height:22px;border-radius:6px;flex:0 0 auto;display:grid;place-items:center;
+  font-family:'Orbitron';font-weight:700;font-size:11px;color:#0B0221;background:var(--chrome-bar)}
+.ch-body{flex:1;min-width:0}
+.ch-line{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s2);margin-bottom:5px}
+.ch-name{font-size:13px;color:var(--fg);font-weight:500}
+.ch-val{font-family:'Orbitron';font-weight:700;font-size:13px;color:#fff;font-variant-numeric:tabular-nums}
+.ch-bar{height:7px;border-radius:20px;background:rgba(11,2,33,.6);overflow:hidden}
+.ch-bar span{display:block;height:100%;border-radius:20px;
+  background:linear-gradient(90deg,var(--holo-1),var(--holo-2));box-shadow:0 0 8px rgba(255,47,185,.4)}
+.ch-item:nth-child(2) .ch-bar span{background:linear-gradient(90deg,var(--holo-3),var(--holo-2))}
+.ch-item:nth-child(3) .ch-bar span{background:linear-gradient(90deg,var(--holo-2),var(--holo-4))}
+.ch-item:nth-child(4) .ch-bar span{background:linear-gradient(90deg,var(--holo-1),var(--holo-3))}
+.ch-item:nth-child(5) .ch-bar span{background:linear-gradient(90deg,var(--neon-pink),var(--holo-3))}
+
+/* 푸터 */
+.foot{padding:var(--s5) var(--s5) var(--s7);color:var(--faint);font-size:12px;letter-spacing:.04em;
+  display:flex;align-items:center;gap:var(--s2)}
+.foot .dot{width:4px;height:4px;border-radius:50%;background:var(--holo-2);box-shadow:0 0 6px var(--holo-2)}
+
+/* ===== 반응형 ===== */
+@media (max-width:1180px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .bottom-row{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  :root{--sidebar-w:76px}
+  .brand .name,.nav-label,.nav a span,.workspace .meta{display:none}
+  .nav a{justify-content:center;padding:0}
+  .brand{justify-content:center;padding:0 0 var(--s5)}
+  .workspace{justify-content:center;padding:var(--s2)}
+  .ic-only{display:block}
+  .content{padding:var(--s4)}
+}
+@media (max-width:640px){
+  .kpi-grid{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;padding:var(--s3)}
+  .search{max-width:none;order:5;flex-basis:100%}
+  .btn-primary span{display:none}
+  .btn-primary{padding:0 var(--s3)}
+}
+
+/* ===== 접근성 — 모션 정지, 최종 상태 유지 ===== */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+  .grid-floor::before{animation:none}
+  .brand .logo{--angle:120deg}
+  .card::before{--angle:135deg}
+  /* 스캔라인 오버레이는 정적으로 유지 */
+}
+</style>
+</head>
+<body>
+
+<!-- 시그니처: 원근 격자 지평선 -->
+<div class="grid-floor" aria-hidden="true"></div>
+<!-- 시그니처: 스캔라인 오버레이 -->
+<div class="scanlines" aria-hidden="true"></div>
+<!-- 별 파티클 -->
+<div class="spark" style="top:12%;right:6%" aria-hidden="true">✦</div>
+<div class="spark s2" style="top:26%;right:14%;animation-delay:1.1s" aria-hidden="true">✧</div>
+<div class="spark" style="bottom:22%;left:5%;animation-delay:.6s" aria-hidden="true">✧</div>
+<div class="spark s2" style="top:40%;left:18%;animation-delay:1.8s" aria-hidden="true">✦</div>
+
+<div class="shell">
+
+  <!-- ===== 사이드바 ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><span>M</span></div>
+      <div class="name chrome">MUJINE</div>
+    </div>
+
+    <div class="nav-label">메뉴</div>
+    <nav class="nav" aria-label="주 메뉴">
+      <a href="#" class="active" aria-current="page">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>대시보드</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>주문</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        <span>상품</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>고객</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+        <span>정산</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="4" width="3" height="14"/></svg>
+        <span>통계</span>
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>설정</span>
+      </a>
+    </nav>
+
+    <div class="workspace">
+      <div class="avatar">CO</div>
+      <div class="meta">
+        <b>내 워크스페이스</b>
+        <small>셀러 콘솔</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 메인 ===== -->
+  <div class="main">
+
+    <!-- 상단바 -->
+    <header class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="주문·상품 검색" aria-label="주문·상품 검색">
+      </div>
+      <button class="btn btn-ghost" type="button">
+        기간
+        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="spacer"></div>
+      <button class="iconbtn" type="button" aria-label="알림 5건">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="badge-dot">5</span>
+      </button>
+      <button class="btn btn-primary" type="button">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>새 주문</span>
+      </button>
+      <div class="avatar sm" title="워크스페이스">CO</div>
+    </header>
+
+    <!-- 콘텐츠 -->
+    <main class="content">
+
+      <!-- 알림 배너 -->
+      <div class="banner" role="status">
+        <div class="b-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+        <p><b>정산 예정</b> — 3일 후 2억 8,400만원이 등록 계좌로 지급됩니다.</p>
+        <span class="b-tag">정산 알림</span>
+      </div>
+
+      <!-- KPI 4 -->
+      <section class="kpi-grid" aria-label="핵심 지표">
+
+        <div class="card brackets">
+          <div class="kpi">
+            <div class="k-top">
+              <span class="k-label">총 매출</span>
+              <svg class="k-spark" viewBox="0 0 74 30" preserveAspectRatio="none" aria-hidden="true">
+                <polyline fill="none" stroke="#3BFFB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="0,24 12,20 24,22 37,14 49,16 61,8 74,5"/>
+              </svg>
+            </div>
+            <div class="k-val">1,284,050,000<span class="unit">원</span></div>
+            <div class="k-delta up"><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg>+8.2% <span class="sub">전월 대비</span></div>
+          </div>
+        </div>
+
+        <div class="card brackets">
+          <div class="kpi">
+            <div class="k-top">
+              <span class="k-label">신규 주문</span>
+              <svg class="k-spark" viewBox="0 0 74 30" preserveAspectRatio="none" aria-hidden="true">
+                <polyline fill="none" stroke="#22E1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="0,22 12,24 24,17 37,19 49,12 61,10 74,4"/>
+              </svg>
+            </div>
+            <div class="k-val">3,472<span class="unit">건</span></div>
+            <div class="k-delta up"><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg>+12% <span class="sub">전월 대비</span></div>
+          </div>
+        </div>
+
+        <div class="card brackets">
+          <div class="kpi">
+            <div class="k-top">
+              <span class="k-label">전환율</span>
+              <svg class="k-spark" viewBox="0 0 74 30" preserveAspectRatio="none" aria-hidden="true">
+                <polyline fill="none" stroke="#FF3B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="0,8 12,10 24,7 37,13 49,12 61,18 74,20"/>
+              </svg>
+            </div>
+            <div class="k-val">3.8<span class="unit">%</span></div>
+            <div class="k-delta down"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>−0.4%p <span class="sub">하락</span></div>
+          </div>
+        </div>
+
+        <div class="card brackets">
+          <div class="kpi">
+            <div class="k-top">
+              <span class="k-label">정산 대기</span>
+              <svg class="k-spark" viewBox="0 0 74 30" preserveAspectRatio="none" aria-hidden="true">
+                <polyline fill="none" stroke="#A24BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="0,18 12,16 24,17 37,15 49,16 61,14 74,15"/>
+              </svg>
+            </div>
+            <div class="k-val">284,000,000<span class="unit">원</span></div>
+            <div class="k-delta flat"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>0건 지연 <span class="sub">정상</span></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 차트 2종 -->
+      <section class="charts-row" aria-label="차트">
+
+        <!-- (a) 라인 차트 -->
+        <div class="card">
+          <div class="panel-head">
+            <div>
+              <h3>최근 8주 매출 추이</h3>
+              <span class="sub">단위 백만원 · 6주차 피크</span>
+            </div>
+            <span class="chip">PEAK 1,340</span>
+          </div>
+          <svg class="linechart" viewBox="0 0 600 220" role="img" aria-label="최근 8주 매출 추이 라인 차트">
+            <defs>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#FF2FB9"/>
+                <stop offset="0.55" stop-color="#A24BFF"/>
+                <stop offset="1" stop-color="#22E1FF"/>
+              </linearGradient>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="rgba(255,47,185,.34)"/>
+                <stop offset="1" stop-color="rgba(34,225,255,.02)"/>
+              </linearGradient>
+            </defs>
+            <!-- 격자 헤어라인 -->
+            <g stroke="rgba(162,75,255,.16)" stroke-width="1">
+              <line x1="40" y1="20" x2="580" y2="20"/>
+              <line x1="40" y1="60" x2="580" y2="60"/>
+              <line x1="40" y1="100" x2="580" y2="100"/>
+              <line x1="40" y1="140" x2="580" y2="140"/>
+              <line x1="40" y1="180" x2="580" y2="180"/>
+            </g>
+            <!-- Y 라벨 (축 0) -->
+            <g class="axis-lbl" text-anchor="end">
+              <text x="34" y="24">1400</text>
+              <text x="34" y="104">700</text>
+              <text x="34" y="184">0</text>
+            </g>
+            <!-- 영역 -->
+            <path fill="url(#areaGrad)" d="M40,86 L117,76 L194,60 L271,69 L349,45 L426,27 L503,41 L580,33 L580,180 L40,180 Z"/>
+            <!-- 라인 -->
+            <polyline fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+              points="40,86 117,76 194,60 271,69 349,45 426,27 503,41 580,33"
+              style="filter:drop-shadow(0 0 6px rgba(255,47,185,.5))"/>
+            <!-- 데이터 포인트 -->
+            <circle class="dot" cx="40"  cy="86"><title>1주 820</title></circle>
+            <circle class="dot" cx="117" cy="76"><title>2주 910</title></circle>
+            <circle class="dot" cx="194" cy="60"><title>3주 1,050</title></circle>
+            <circle class="dot" cx="271" cy="69"><title>4주 970</title></circle>
+            <circle class="dot" cx="349" cy="45"><title>5주 1,180</title></circle>
+            <circle class="dot peak" cx="426" cy="27"><title>6주 1,340 (피크)</title></circle>
+            <circle class="dot" cx="503" cy="41"><title>7주 1,220</title></circle>
+            <circle class="dot" cx="580" cy="33"><title>8주 1,284</title></circle>
+            <text class="peak-lbl" x="426" y="16" text-anchor="middle">1,340</text>
+            <!-- 주차 라벨 -->
+            <g class="wk-lbl" text-anchor="middle">
+              <text x="40"  y="204">1주</text>
+              <text x="117" y="204">2주</text>
+              <text x="194" y="204">3주</text>
+              <text x="271" y="204">4주</text>
+              <text x="349" y="204">5주</text>
+              <text x="426" y="204">6주</text>
+              <text x="503" y="204">7주</text>
+              <text x="580" y="204">8주</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- (b) 도넛 -->
+        <div class="card">
+          <div class="panel-head">
+            <div>
+              <h3>카테고리 구성비</h3>
+              <span class="sub">매출 기준</span>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="168" height="168" viewBox="0 0 120 120" role="img" aria-label="카테고리 구성비 도넛 차트">
+                <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(11,2,33,.6)" stroke-width="22"/>
+                <!-- C = 339.292 -->
+                <circle class="seg" cx="60" cy="60" r="54" stroke="#FF2FB9" style="color:#FF2FB9"
+                  stroke-dasharray="128.93 210.36" stroke-dashoffset="0"><title>의류 38%</title></circle>
+                <circle class="seg" cx="60" cy="60" r="54" stroke="#22E1FF" style="color:#22E1FF"
+                  stroke-dasharray="81.43 257.86" stroke-dashoffset="-128.93"><title>전자 24%</title></circle>
+                <circle class="seg" cx="60" cy="60" r="54" stroke="#A24BFF" style="color:#A24BFF"
+                  stroke-dasharray="67.86 271.43" stroke-dashoffset="-210.36"><title>리빙 20%</title></circle>
+                <circle class="seg" cx="60" cy="60" r="54" stroke="#66FFE3" style="color:#66FFE3"
+                  stroke-dasharray="40.71 298.58" stroke-dashoffset="-278.22"><title>생활 12%</title></circle>
+                <circle class="seg" cx="60" cy="60" r="54" stroke="#FF6EC7" style="color:#FF6EC7"
+                  stroke-dasharray="20.36 318.93" stroke-dashoffset="-318.93"><title>스포츠 6%</title></circle>
+              </svg>
+              <div class="center">
+                <b>5</b>
+                <small>카테고리</small>
+              </div>
+            </div>
+            <ul class="legend">
+              <li><span class="sw" style="background:#FF2FB9;color:#FF2FB9"></span><span class="lg-name">의류</span><span class="lg-pct">38%</span></li>
+              <li><span class="sw" style="background:#22E1FF;color:#22E1FF"></span><span class="lg-name">전자</span><span class="lg-pct">24%</span></li>
+              <li><span class="sw" style="background:#A24BFF;color:#A24BFF"></span><span class="lg-name">리빙</span><span class="lg-pct">20%</span></li>
+              <li><span class="sw" style="background:#66FFE3;color:#66FFE3"></span><span class="lg-name">생활</span><span class="lg-pct">12%</span></li>
+              <li><span class="sw" style="background:#FF6EC7;color:#FF6EC7"></span><span class="lg-name">스포츠</span><span class="lg-pct">6%</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 목표 진행률 -->
+      <section class="card goal" aria-label="이번 달 목표 진행률">
+        <div class="g-top">
+          <div>
+            <h3 style="font-size:15px;color:var(--fg-strong);margin-bottom:6px">이번 달 목표 진행률</h3>
+            <span class="g-nums">목표 <b>15억</b> 중 <b>12.84억</b> 달성</span>
+          </div>
+          <span class="g-pct holo-txt">85.6%</span>
+        </div>
+        <div class="progress">
+          <div class="fill"><span class="mark"></span></div>
+        </div>
+      </section>
+
+      <!-- 하단: 테이블 + 채널 -->
+      <section class="bottom-row">
+
+        <!-- 최근 주문 테이블 -->
+        <div class="card table-panel">
+          <div class="panel-head">
+            <div>
+              <h3>최근 주문</h3>
+              <span class="sub">최신순 · 6건</span>
+            </div>
+            <button class="btn btn-ghost" type="button" style="height:34px;font-size:13px">전체 보기</button>
+          </div>
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>주문번호 <span class="sort">▼</span></th>
+                  <th>고객</th>
+                  <th>상품</th>
+                  <th class="num">금액 <span class="sort">▼</span></th>
+                  <th>상태</th>
+                  <th class="num"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="ord-no">#10482</td>
+                  <td><span class="cust"><span class="avatar xs">KD</span>K.D</span></td>
+                  <td class="prod">프리미엄 오가닉 코튼 반팔티 <small>외 2건</small></td>
+                  <td class="amt">89,000원</td>
+                  <td><span class="status st-paid"><span class="d"></span>결제완료</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+                <tr>
+                  <td class="ord-no">#10481</td>
+                  <td><span class="cust"><span class="avatar xs">JS</span>J.S</span></td>
+                  <td class="prod">무선 이어폰 Pro</td>
+                  <td class="amt">219,000원</td>
+                  <td><span class="status st-ship"><span class="d"></span>배송중</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+                <tr>
+                  <td class="ord-no">#10480</td>
+                  <td><span class="cust"><span class="avatar xs">ML</span>M.L</span></td>
+                  <td class="prod">스테인리스 텀블러</td>
+                  <td class="amt empty">—</td>
+                  <td><span class="status st-wait"><span class="d"></span>결제대기</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+                <tr>
+                  <td class="ord-no">#10479</td>
+                  <td><span class="cust"><span class="avatar xs">HK</span>H.K</span></td>
+                  <td class="prod">대나무 칫솔 4개입</td>
+                  <td class="amt">12,400원</td>
+                  <td><span class="status st-done"><span class="d"></span>배송완료</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+                <tr>
+                  <td class="ord-no">#10478</td>
+                  <td><span class="cust"><span class="avatar xs">SC</span>S.C</span></td>
+                  <td class="prod">아로마 캔들 세트</td>
+                  <td class="amt">46,000원</td>
+                  <td><span class="status st-cancel"><span class="d"></span>취소</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+                <tr>
+                  <td class="ord-no">#10477</td>
+                  <td><span class="cust"><span class="avatar xs">YP</span>Y.P</span></td>
+                  <td class="prod">요가 매트</td>
+                  <td class="amt">39,000원</td>
+                  <td><span class="status st-paid"><span class="d"></span>결제완료</span></td>
+                  <td class="row-act"><button class="detail" type="button">상세</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 채널 위젯 -->
+        <div class="card">
+          <div class="panel-head">
+            <div>
+              <h3>상위 채널</h3>
+              <span class="sub">매출 기준 TOP 5</span>
+            </div>
+          </div>
+          <div class="channels">
+            <div class="ch-item">
+              <div class="ch-rank">1</div>
+              <div class="ch-body">
+                <div class="ch-line"><span class="ch-name">스마트스토어</span><span class="ch-val">4.2억</span></div>
+                <div class="ch-bar"><span style="width:100%"></span></div>
+              </div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-rank">2</div>
+              <div class="ch-body">
+                <div class="ch-line"><span class="ch-name">쿠팡</span><span class="ch-val">3.1억</span></div>
+                <div class="ch-bar"><span style="width:73.8%"></span></div>
+              </div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-rank">3</div>
+              <div class="ch-body">
+                <div class="ch-line"><span class="ch-name">자사몰</span><span class="ch-val">2.4억</span></div>
+                <div class="ch-bar"><span style="width:57.1%"></span></div>
+              </div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-rank">4</div>
+              <div class="ch-body">
+                <div class="ch-line"><span class="ch-name">인스타샵</span><span class="ch-val">1.8억</span></div>
+                <div class="ch-bar"><span style="width:42.9%"></span></div>
+              </div>
+            </div>
+            <div class="ch-item">
+              <div class="ch-rank">5</div>
+              <div class="ch-body">
+                <div class="ch-line"><span class="ch-name">카카오</span><span class="ch-val">0.9억</span></div>
+                <div class="ch-bar"><span style="width:21.4%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 푸터 -->
+      <footer class="foot">
+        MUJINE 대시보드 <span class="dot"></span> Y2K 베이퍼웨이브
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

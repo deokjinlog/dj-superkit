@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProGuild — e스포츠 팀 관제 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAFF;
+    --violet:#7C5CFF;
+    --pink:#FF8FC0;
+    --mint:#5EE6C8;
+    --ink:#17143A;
+    --muted:#7B7897;
+    --card:#FFFFFF;
+    --line:rgba(23,20,58,.06);
+    --grad:linear-gradient(120deg,#7C5CFF,#FF8FC0);
+    --shadow:0 10px 30px rgba(23,20,58,.06);
+    --shadow-lift:0 20px 40px rgba(124,92,255,.15);
+    --disp:'Sora','Pretendard',sans-serif;
+    --body:'Pretendard','Sora',sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+
+  /* ── L0 배경: 파스텔 블롭 2개 ── */
+  .blob{
+    position:fixed; border-radius:50%; filter:blur(90px);
+    z-index:0; pointer-events:none;
+  }
+  .blob.v{ width:540px; height:540px; background:var(--violet); top:-170px; right:-130px; opacity:.26; }
+  .blob.m{ width:480px; height:480px; background:var(--mint); bottom:-190px; left:-150px; opacity:.24; }
+
+  .wrap{
+    position:relative; z-index:1;
+    max-width:1160px; margin:0 auto;
+    padding:clamp(22px,4vw,52px) clamp(18px,4vw,40px) 40px;
+  }
+
+  /* ── 헤더 ── */
+  .head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:18px; flex-wrap:wrap; margin-bottom:clamp(24px,3vw,38px);
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .brand-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .brand{
+    font-family:var(--disp); font-weight:800;
+    font-size:clamp(1.7rem,3.4vw,2.15rem); letter-spacing:-.03em; line-height:1;
+    background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-sub{ font-size:12px; color:var(--muted); font-weight:600; letter-spacing:.01em; }
+
+  .live-chip{
+    display:inline-flex; align-items:center; gap:9px;
+    background:var(--card); border-radius:999px;
+    padding:9px 16px; box-shadow:var(--shadow);
+    font-size:12.5px; font-weight:600; color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  .live-chip .lbl{ color:var(--muted); font-weight:600; }
+  .dot-live{
+    width:8px; height:8px; border-radius:50%; background:var(--mint);
+    box-shadow:0 0 0 0 rgba(94,230,200,.55);
+    animation:breathe 2s ease-in-out infinite;
+  }
+
+  /* ── KPI 그리드 ── */
+  .kpis{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:clamp(14px,1.6vw,20px); margin-bottom:clamp(20px,2.6vw,28px);
+  }
+  .kpi{
+    background:var(--card); border-radius:26px; padding:22px 22px 20px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease;
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+    outline:none;
+  }
+  .kpi::before{
+    content:""; position:absolute; top:0; left:0; height:4px; width:100%;
+    background:var(--grad); opacity:.9;
+  }
+  .kpi:nth-child(1){ animation-delay:.10s; }
+  .kpi:nth-child(2){ animation-delay:.16s; }
+  .kpi:nth-child(3){ animation-delay:.22s; }
+  .kpi:nth-child(4){ animation-delay:.28s; }
+  .kpi:hover, .kpi:focus-visible{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-lift);
+  }
+  .kpi-cap{
+    font-size:11.5px; font-weight:700; letter-spacing:.02em;
+    color:var(--muted); text-transform:none; margin-bottom:14px;
+  }
+  .kpi-value{
+    font-family:var(--disp); font-weight:800;
+    font-size:clamp(2.9rem,4.6vw,3.35rem); line-height:1; letter-spacing:-.03em;
+    color:var(--ink); display:flex; align-items:baseline; gap:2px;
+    font-variant-numeric:tabular-nums; font-feature-settings:"tnum";
+  }
+  .kpi-value .num{ font-variant-numeric:tabular-nums; }
+  .kpi-value .unit{ font-size:.44em; font-weight:700; color:var(--muted); letter-spacing:-.01em; }
+  .kpi-value .unit.pre{ margin-right:1px; color:var(--violet); }
+  .kpi-foot{ margin-top:15px; }
+  .delta{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:700; padding:6px 11px; border-radius:999px;
+    font-variant-numeric:tabular-nums;
+  }
+  .delta.up{ color:#0c9277; background:rgba(94,230,200,.18); }
+  .delta.neutral{ color:#6748dd; background:rgba(124,92,255,.12); }
+  .delta .arw{ font-size:10px; line-height:1; }
+
+  /* ── 메인: 차트 + 테이블 ── */
+  .main{ display:grid; grid-template-columns:1fr; gap:clamp(18px,2vw,22px); }
+  @media(min-width:1080px){ .main{ grid-template-columns:5fr 7fr; } }
+
+  .card{
+    background:var(--card); border-radius:28px; padding:24px 24px 22px;
+    box-shadow:var(--shadow);
+  }
+  .card-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:22px; }
+  .card-title{ font-family:var(--disp); font-weight:700; font-size:1.05rem; letter-spacing:-.01em; color:var(--ink); }
+  .card-note{ font-size:11.5px; font-weight:600; color:var(--muted); }
+
+  /* ── 차트 ── */
+  .chart{ position:relative; }
+  .bars{
+    display:flex; align-items:flex-end; gap:clamp(6px,1.4vw,14px);
+    height:238px; padding-top:44px; position:relative;
+  }
+  .bars::before{
+    /* 은은한 가이드 라인 (격자 보더 아님) */
+    content:""; position:absolute; left:0; right:0; top:44px; bottom:26px;
+    background:
+      linear-gradient(rgba(23,20,58,.05) 1px, transparent 1px);
+    background-size:100% 48px; pointer-events:none; border-radius:6px;
+  }
+  .bar{
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    min-width:0; outline:none;
+  }
+  .track{
+    position:relative; width:100%; height:190px;
+    display:flex; align-items:flex-end;
+  }
+  .fill{
+    width:100%; height:var(--h);
+    border-radius:11px 11px 5px 5px;
+    background:#a892ff;
+    box-shadow:0 6px 16px rgba(124,92,255,.16);
+    transition:filter .2s ease, box-shadow .2s ease;
+    animation:fill .5s cubic-bezier(.2,.7,.3,1) both;
+    animation-delay:calc(.4s + var(--i) * .04s);
+  }
+  .bar.peak .fill{
+    background:var(--grad);
+    box-shadow:0 10px 24px rgba(124,92,255,.30);
+    animation-name:fillPeak;
+    animation-timing-function:cubic-bezier(.34,1.4,.5,1);
+    animation-duration:.6s;
+  }
+  .bar:hover .fill, .bar:focus-visible .fill{
+    background:var(--grad);
+    box-shadow:0 12px 26px rgba(124,92,255,.28);
+  }
+  .bval{
+    position:absolute; left:50%; transform:translateX(-50%);
+    bottom:calc(var(--h) + 10px);
+    font-family:var(--disp); font-weight:700; font-size:13px;
+    color:var(--muted); font-variant-numeric:tabular-nums;
+    transition:color .2s ease, font-weight .2s ease; white-space:nowrap;
+  }
+  .bar:hover .bval, .bar:focus-visible .bval{ color:var(--ink); font-weight:800; }
+  .bar.peak .bval{ color:var(--violet); font-weight:800; }
+  .peak-badge{
+    position:absolute; left:50%; transform:translateX(-50%);
+    bottom:calc(var(--h) + 30px);
+    font-size:9.5px; font-weight:800; letter-spacing:.04em;
+    color:#fff; background:var(--grad);
+    padding:3px 8px; border-radius:999px; white-space:nowrap;
+    box-shadow:0 6px 14px rgba(124,92,255,.28);
+  }
+  .wk{ margin-top:11px; font-size:11px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .bar.peak .wk{ color:var(--ink); font-weight:700; }
+
+  /* ── 테이블 ── */
+  .table-scroll{ overflow-x:auto; margin:-4px; padding:4px; }
+  table{ width:100%; border-collapse:collapse; min-width:440px; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:700; letter-spacing:.03em;
+    color:var(--muted); padding:0 14px 12px; white-space:nowrap;
+  }
+  thead th.num-col, tbody td.num-col{ text-align:right; }
+  tbody tr{
+    transition:background .2s ease; border-radius:14px;
+  }
+  tbody tr:hover, tbody tr:focus-within{ background:rgba(124,92,255,.06); }
+  tbody td{
+    padding:14px; border-bottom:1px solid var(--line);
+    font-size:14px; vertical-align:middle;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  .p-name{
+    font-family:var(--disp); font-weight:600; font-size:15px;
+    color:#2c2757; transition:color .2s ease, font-weight .2s ease; letter-spacing:-.01em;
+  }
+  tbody tr:hover .p-name, tbody tr:focus-within .p-name{ color:var(--ink); font-weight:700; }
+  .p-pos{ color:var(--muted); font-weight:600; font-size:13px; }
+  .p-kda{ font-family:var(--disp); font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink); }
+
+  .form{ display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; }
+  .form .fa{ font-size:11px; line-height:1; }
+  .form.up{ color:#0c9277; }
+  .form.down{ color:#e05a92; }
+  .form.hold{ color:var(--muted); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; white-space:nowrap;
+  }
+  .bdot{ width:7px; height:7px; border-radius:50%; }
+  .bdot.live{ animation:breathe 2s ease-in-out infinite; }
+  .b-done{ color:#0c9277; background:rgba(94,230,200,.18); }
+  .b-done .bdot{ background:#1fbf9c; }
+  .b-active{ color:#6748dd; background:rgba(124,92,255,.13); }
+  .b-active .bdot{ background:var(--violet); box-shadow:0 0 0 0 rgba(124,92,255,.5); }
+  .b-warn{ color:#d84f8f; background:rgba(255,143,192,.20); }
+  .b-warn .bdot{ background:#ff6aa6; }
+  .b-wait{ color:var(--muted); background:rgba(123,120,151,.14); }
+  .b-wait .bdot{ background:#b3b0c4; }
+
+  /* ── 푸터 ── */
+  footer{
+    margin-top:34px; text-align:center;
+    font-size:11.5px; font-weight:600; color:var(--muted); letter-spacing:.03em;
+  }
+
+  /* ── 포커스 표시 ── */
+  .bar:focus-visible, .kpi:focus-visible{ box-shadow:var(--shadow-lift), 0 0 0 3px rgba(124,92,255,.35); }
+
+  /* ── 키프레임 ── */
+  @keyframes rise{ from{ opacity:0; transform:translateY(12px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes fill{ from{ height:0; } to{ height:var(--h); } }
+  @keyframes fillPeak{ 0%{ height:0; } 78%{ height:calc(var(--h) + 9px); } 100%{ height:var(--h); } }
+  @keyframes breathe{
+    0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(94,230,200,.5); }
+    50%{ opacity:.45; box-shadow:0 0 0 6px rgba(94,230,200,0); }
+  }
+  .b-active .bdot.live{ animation:breathe-v 2s ease-in-out infinite; }
+  @keyframes breathe-v{
+    0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(124,92,255,.5); }
+    50%{ opacity:.45; box-shadow:0 0 0 6px rgba(124,92,255,0); }
+  }
+
+  /* ── 반응형 ── */
+  @media(max-width:900px){
+    .kpis{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media(max-width:520px){
+    .kpis{ grid-template-columns:1fr; }
+    .bars{ gap:5px; }
+  }
+
+  /* ── 모션 최소화 대응 ── */
+  @media(prefers-reduced-motion:reduce){
+    *, *::before, *::after{
+      animation:none !important;
+      transition:none !important;
+    }
+    .fill{ height:var(--h) !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob v" aria-hidden="true"></div>
+  <div class="blob m" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <!-- 헤더 -->
+    <header class="head">
+      <div class="brand-row">
+        <span class="brand">ProGuild</span>
+        <span class="brand-sub">e스포츠 팀 관제 대시보드</span>
+      </div>
+      <div class="live-chip">
+        <span class="dot-live" aria-hidden="true"></span>
+        <span class="lbl">갱신</span>
+        <span>2026-07-10 16:00</span>
+      </div>
+    </header>
+
+    <!-- KPI -->
+    <section class="kpis" aria-label="핵심 지표">
+      <article class="kpi" tabindex="0" aria-label="시즌 승률 68.4%, 전주 대비 3.2%p 상승">
+        <div class="kpi-cap">시즌 승률</div>
+        <div class="kpi-value"><span class="num" data-count="68.4" data-decimals="1">68.4</span><span class="unit">%</span></div>
+        <div class="kpi-foot"><span class="delta up"><span class="arw">▲</span>전주 대비 +3.2%p</span></div>
+      </article>
+
+      <article class="kpi" tabindex="0" aria-label="리그 순위 2위, 1계단 상승">
+        <div class="kpi-cap">리그 순위</div>
+        <div class="kpi-value"><span class="num" data-count="2">2</span><span class="unit">위</span></div>
+        <div class="kpi-foot"><span class="delta up"><span class="arw">▲</span>1계단</span></div>
+      </article>
+
+      <article class="kpi" tabindex="0" aria-label="누적 상금 1억 8,400만원, 2,300만원 증가">
+        <div class="kpi-cap">누적 상금</div>
+        <div class="kpi-value"><span class="num" data-count="18400" data-format="eok">1억 8,400</span><span class="unit">만원</span></div>
+        <div class="kpi-foot"><span class="delta up"><span class="arw">▲</span>+2,300만원</span></div>
+      </article>
+
+      <article class="kpi" tabindex="0" aria-label="다음 경기 D-2, 팀 이클립스 상대">
+        <div class="kpi-cap">다음 경기</div>
+        <div class="kpi-value"><span class="unit pre">D-</span><span class="num" data-count="2">2</span></div>
+        <div class="kpi-foot"><span class="delta neutral">vs 팀 이클립스</span></div>
+      </article>
+    </section>
+
+    <!-- 메인 -->
+    <section class="main">
+      <!-- 차트 -->
+      <div class="card chart-card">
+        <div class="card-head">
+          <span class="card-title">최근 8주 승률 추이</span>
+          <span class="card-note">단위 %</span>
+        </div>
+        <div class="chart" role="img" aria-label="최근 8주 승률: 52, 58, 61, 55, 64, 71(6주 피크), 67, 68 퍼센트">
+          <div class="bars">
+            <div class="bar" style="--h:65%;--i:0" tabindex="0" aria-label="1주 52%">
+              <div class="track"><span class="bval">52</span><span class="fill"></span></div>
+              <span class="wk">1주</span>
+            </div>
+            <div class="bar" style="--h:72.5%;--i:1" tabindex="0" aria-label="2주 58%">
+              <div class="track"><span class="bval">58</span><span class="fill"></span></div>
+              <span class="wk">2주</span>
+            </div>
+            <div class="bar" style="--h:76.25%;--i:2" tabindex="0" aria-label="3주 61%">
+              <div class="track"><span class="bval">61</span><span class="fill"></span></div>
+              <span class="wk">3주</span>
+            </div>
+            <div class="bar" style="--h:68.75%;--i:3" tabindex="0" aria-label="4주 55%">
+              <div class="track"><span class="bval">55</span><span class="fill"></span></div>
+              <span class="wk">4주</span>
+            </div>
+            <div class="bar" style="--h:80%;--i:4" tabindex="0" aria-label="5주 64%">
+              <div class="track"><span class="bval">64</span><span class="fill"></span></div>
+              <span class="wk">5주</span>
+            </div>
+            <div class="bar peak" style="--h:88.75%;--i:5" tabindex="0" aria-label="6주 71%, 피크">
+              <div class="track"><span class="peak-badge">피크</span><span class="bval">71</span><span class="fill"></span></div>
+              <span class="wk">6주</span>
+            </div>
+            <div class="bar" style="--h:83.75%;--i:6" tabindex="0" aria-label="7주 67%">
+              <div class="track"><span class="bval">67</span><span class="fill"></span></div>
+              <span class="wk">7주</span>
+            </div>
+            <div class="bar" style="--h:85%;--i:7" tabindex="0" aria-label="8주 68%">
+              <div class="track"><span class="bval">68</span><span class="fill"></span></div>
+              <span class="wk">8주</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">로스터 현황</span>
+          <span class="card-note">선수 6명</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>선수</th>
+                <th>포지션</th>
+                <th class="num-col">KDA</th>
+                <th>폼</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr tabindex="0">
+                <td><span class="p-name">블레이즈</span></td>
+                <td><span class="p-pos">엔트리</span></td>
+                <td class="num-col"><span class="p-kda">1.42</span></td>
+                <td><span class="form up"><span class="fa">▲</span>상승</span></td>
+                <td><span class="badge b-done"><span class="bdot"></span>주전확정</span></td>
+              </tr>
+              <tr tabindex="0">
+                <td><span class="p-name">프로스트</span></td>
+                <td><span class="p-pos">서포터</span></td>
+                <td class="num-col"><span class="p-kda">0.98</span></td>
+                <td><span class="form hold"><span class="fa">→</span>유지</span></td>
+                <td><span class="badge b-active"><span class="bdot live"></span>활성</span></td>
+              </tr>
+              <tr tabindex="0">
+                <td><span class="p-name">레이븐</span></td>
+                <td><span class="p-pos">스나이퍼</span></td>
+                <td class="num-col"><span class="p-kda">1.67</span></td>
+                <td><span class="form up"><span class="fa">▲</span>상승</span></td>
+                <td><span class="badge b-done"><span class="bdot"></span>주전확정</span></td>
+              </tr>
+              <tr tabindex="0">
+                <td><span class="p-name">노바</span></td>
+                <td><span class="p-pos">리퍼</span></td>
+                <td class="num-col"><span class="p-kda">0.71</span></td>
+                <td><span class="form down"><span class="fa">▼</span>하락</span></td>
+                <td><span class="badge b-warn"><span class="bdot"></span>폼저하</span></td>
+              </tr>
+              <tr tabindex="0">
+                <td><span class="p-name">쿼츠</span></td>
+                <td><span class="p-pos">인게이저</span></td>
+                <td class="num-col"><span class="p-kda">1.15</span></td>
+                <td><span class="form hold"><span class="fa">→</span>유지</span></td>
+                <td><span class="badge b-active"><span class="bdot live"></span>활성</span></td>
+              </tr>
+              <tr tabindex="0">
+                <td><span class="p-name">에코</span></td>
+                <td><span class="p-pos">플렉스</span></td>
+                <td class="num-col"><span class="p-kda">1.03</span></td>
+                <td><span class="form hold"><span class="fa">→</span>유지</span></td>
+                <td><span class="badge b-wait"><span class="bdot"></span>로테이션대기</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>STYLE 03 · 트렌디 SaaS</footer>
+  </main>
+
+  <script>
+  (function(){
+    "use strict";
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function fmtEok(v){
+      v = Math.round(v);
+      var eok = Math.floor(v / 10000);
+      var man = v % 10000;
+      return (eok > 0 ? eok + '억 ' : '') + man.toLocaleString('ko-KR');
+    }
+
+    function finalText(el){
+      var to = parseFloat(el.getAttribute('data-count'));
+      var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var fmt = el.getAttribute('data-format');
+      return fmt === 'eok' ? fmtEok(to) : to.toFixed(dec);
+    }
+
+    function animate(el){
+      var to = parseFloat(el.getAttribute('data-count'));
+      var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var fmt = el.getAttribute('data-format');
+      var dur = 800, start = null;
+      function frame(now){
+        if(start === null) start = now;
+        var t = Math.min(1, (now - start) / dur);
+        var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        var v = to * e;
+        el.textContent = fmt === 'eok' ? fmtEok(v) : v.toFixed(dec);
+        if(t < 1){ requestAnimationFrame(frame); }
+        else { el.textContent = finalText(el); }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function run(){
+      var nums = document.querySelectorAll('.kpi-value .num[data-count]');
+      Array.prototype.forEach.call(nums, function(el){
+        // JS 실패해도 HTML 최종값이 남도록: 애니메이션만 담당
+        if(reduce){ el.textContent = finalText(el); return; }
+        el.textContent = fmtOrZero(el);
+        animate(el);
+      });
+    }
+
+    function fmtOrZero(el){
+      var fmt = el.getAttribute('data-format');
+      var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      return fmt === 'eok' ? fmtEok(0) : (0).toFixed(dec);
+    }
+
+    if(reduce){ return; } // 정적 최종 화면 유지
+    // 히어로 시퀀스: 카드 진입과 함께 카운트업 시작
+    setTimeout(run, 150);
+  })();
+  </script>
+</body>
+</html>

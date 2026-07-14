@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProGuild — e스포츠 팀 관제 대시보드 · STYLE 07</title>
+
+<!--
+  STYLE 07 — 미니멀 모노크롬.
+  이 스타일의 디스플레이 폰트는 "Pretendard 단일"이다(스타일 지시: 두 번째 폰트 금지).
+  따라서 별도 Google Fonts 디스플레이 페이스를 로드하지 않고 Pretendard CDN만 로드한다.
+  이것이 "Pretendard 단일 / 정의 외 폰트 금지" 규칙을 지키는 올바른 선택이다.
+-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+
+<style>
+  /* ── 리셋: 라운드 0 고정, 그림자·배경면 금지 원칙 강제 ── */
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; border-radius:0; }
+
+  :root{
+    --paper:#FFFFFF;   /* 종이 */
+    --ink:#111111;     /* 잉크 */
+    --gray:#767676;    /* 중간 회색 (12px 이상에서만) */
+    --hair:#E5E5E5;    /* 헤어라인 */
+    --point:#FF4D00;   /* 포인트 주황 — 정확히 3곳 */
+  }
+
+  html{ background:var(--paper); }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Pretendard','Pretendard Variable',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    line-height:1.4;
+  }
+
+  /* 숫자는 tabular-nums 로 자릿수 정렬 */
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1; }
+
+  /* ── 페이지 컨테이너 + 유일한 모션: 400ms 일괄 페이드인 ── */
+  .page{
+    max-width:1200px;
+    margin:0 auto;
+    padding:64px;
+    opacity:0;
+    animation:fade .4s ease forwards;
+  }
+  @keyframes fade{ to{ opacity:1; } }
+
+  /* 섹션 구획: 64px 여백 + 1px 헤어라인 (박스 없음) */
+  section{ padding-block:64px; }
+  section + section, .roster{ border-top:1px solid var(--hair); }
+
+  /* ── 헤더 ── */
+  header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:32px;
+    flex-wrap:wrap;
+    padding-bottom:64px;
+    border-bottom:1px solid var(--hair);
+  }
+  .brand{ font-size:36px; font-weight:800; letter-spacing:-0.02em; }
+  .stamp{ text-align:right; }
+  .stamp .lab{
+    display:block;
+    font-size:11px; font-weight:500; letter-spacing:.08em;
+    color:var(--ink); text-transform:uppercase;
+  }
+  .stamp .time{
+    display:block;
+    font-size:16px; font-weight:500; color:var(--gray);
+    margin-top:8px;
+  }
+
+  /* ── KPI 4개: 세로 헤어라인으로만 분리, 상자 없음 ── */
+  .kpis{ display:grid; grid-template-columns:repeat(4,1fr); }
+  .kpi{ padding:8px 16px; display:flex; flex-direction:column; }
+  .kpi:first-child{ padding-left:0; }
+  .kpi:last-child{ padding-right:0; }
+  .kpi:not(:first-child){ border-left:1px solid var(--hair); }
+
+  .kpi .lab{
+    font-size:11px; font-weight:500; letter-spacing:.08em;
+    color:var(--ink); text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  /* 숫자를 아래로 정렬 → 4개 값이 같은 baseline, 아래 delta 도 정렬 */
+  .kpi .valwrap{ display:flex; align-items:flex-end; min-height:112px; }
+  .kpi .val{
+    font-size:54px; font-weight:800; letter-spacing:-0.04em;
+    line-height:56px; color:var(--ink);
+    word-break:keep-all;
+  }
+  .kpi .val.accent{ color:var(--point); }   /* 주황 사용처 ③ — 문제(긴급) 관련 KPI */
+  .kpi .dlt{
+    font-size:16px; font-weight:500; color:var(--gray);
+    margin-top:16px;
+  }
+
+  /* KPI hover: 수치 아래 1px 헤어라인이 좌→우로 (선택 마이크로 인터랙션) */
+  .kpi{ position:relative; }
+  .kpi::after{
+    content:''; position:absolute; left:0; bottom:8px;
+    height:1px; width:0; background:var(--ink);
+    transition:width .3s ease;
+  }
+  .kpi:first-child::after{ left:0; }
+  .kpi:hover::after{ width:100%; }
+
+  /* ── 섹션 라벨 ── */
+  .slab{
+    font-size:11px; font-weight:500; letter-spacing:.08em;
+    color:var(--ink); text-transform:uppercase;
+    margin-bottom:32px;
+  }
+
+  /* ── 차트 ── */
+  .chart{ width:100%; height:auto; display:block; }
+  .chart .bars rect{
+    fill:var(--f);
+    transition:fill .2s ease;
+  }
+  /* 후퇴에 의한 강조: 그룹 hover 시 나머지가 헤어라인으로 물러남 */
+  .chart .bars:hover rect{ fill:var(--hair); }
+  .chart .bars rect:hover{ fill:var(--f); }
+  .chart text{ font-family:inherit; }
+
+  /* ── 로스터 테이블 ── */
+  .tablewrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; }
+  thead th{
+    font-size:11px; font-weight:500; letter-spacing:.08em;
+    color:var(--ink); text-transform:uppercase; text-align:left;
+    padding:16px 32px 16px 0; white-space:nowrap;
+    border-bottom:1px solid var(--ink);
+  }
+  tbody td{
+    font-size:16px; color:var(--ink);
+    padding:16px 32px 16px 0;
+    border-bottom:1px solid var(--hair);
+    white-space:nowrap;
+    position:relative;
+  }
+  tbody tr td:first-child{ font-weight:600; }
+  /* 테이블 행 hover: 배경 변화 없이 좌측 2px 잉크 바만 */
+  tbody tr td:first-child::before{
+    content:''; position:absolute; left:-2px; top:0; bottom:0;
+    width:2px; background:transparent; transition:background .15s ease;
+  }
+  tbody tr:hover td:first-child::before{ background:var(--ink); }
+
+  .form-up{ font-weight:600; color:var(--ink); }
+  .form-flat{ font-weight:500; color:var(--gray); }
+  .form-down{ font-weight:600; color:var(--ink); }
+
+  /* 상태 4종: 채움 없는 아웃라인 뱃지 (배경면 금지 준수), 라운드 0 */
+  .badge{
+    display:inline-block; font-size:11px; letter-spacing:.08em;
+    padding:8px 16px; border:1px solid; line-height:1;
+    text-transform:uppercase; white-space:nowrap;
+  }
+  .s-done   { border-color:var(--ink);  color:var(--ink);   font-weight:700; } /* 주전확정 — 완료계열: 강한 잉크 */
+  .s-active { border-color:var(--ink);  color:var(--ink);   font-weight:500; } /* 활성 — 진행계열: 잉크 중간 */
+  .s-problem{ border-color:var(--point);color:var(--point); font-weight:700; } /* 폼저하 — 문제계열: 주황(②) */
+  .s-wait   { border-color:var(--hair); color:var(--ink);   font-weight:400; } /* 로테이션대기 — 대기계열: 헤어라인 + 옅은 잉크 */
+
+  /* ── 푸터 ── */
+  footer{
+    padding-top:64px;
+    border-top:1px solid var(--hair);
+    font-size:11px; font-weight:500; letter-spacing:.08em;
+    color:var(--ink); text-transform:uppercase;
+  }
+
+  /* ── 반응형: 900px 이하 1~2열 ── */
+  @media (max-width:900px){
+    .page{ padding:32px; }
+    header{ padding-bottom:32px; }
+    section{ padding-block:32px; }
+    .brand{ font-size:36px; }
+    .kpis{ grid-template-columns:repeat(2,1fr); }
+    .kpi{ padding:16px; }
+    .kpi:first-child{ padding-left:16px; }
+    .kpi:last-child{ padding-right:16px; }
+    .kpi:not(:first-child){ border-left:none; }
+    .kpi:nth-child(2n){ border-left:1px solid var(--hair); }
+    .kpi:nth-child(n+3){ border-top:1px solid var(--hair); padding-top:32px; }
+    .kpi .valwrap{ min-height:56px; }
+  }
+  @media (max-width:560px){
+    .kpis{ grid-template-columns:1fr; }
+    .kpi{ padding:16px 0; }
+    .kpi:first-child, .kpi:last-child{ padding-left:0; padding-right:0; }
+    .kpi:not(:first-child){ border-left:none; border-top:1px solid var(--hair); padding-top:32px; }
+    .kpi:nth-child(2n){ border-left:none; }
+  }
+
+  /* ── 접근성: 모션 최소화 시 페이드·전환 제거 ── */
+  @media (prefers-reduced-motion:reduce){
+    .page{ opacity:1; animation:none; }
+    *, *::before, *::after{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="page fade">
+
+  <!-- 헤더 -->
+  <header>
+    <div class="brand">ProGuild</div>
+    <div class="stamp">
+      <span class="lab">갱신 시각</span>
+      <span class="time num">2026-07-10 16:00</span>
+    </div>
+  </header>
+
+  <!-- KPI 4개 -->
+  <section aria-label="핵심 지표">
+    <div class="kpis">
+      <div class="kpi">
+        <div class="lab">시즌 승률</div>
+        <div class="valwrap"><div class="val num">68.4%</div></div>
+        <div class="dlt num">전주 대비 +3.2%p</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">리그 순위</div>
+        <div class="valwrap"><div class="val num">2위</div></div>
+        <div class="dlt num">▲ 1계단</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">누적 상금</div>
+        <div class="valwrap"><div class="val num">1억 8,400만원</div></div>
+        <div class="dlt num">+2,300만원</div>
+      </div>
+      <div class="kpi">
+        <div class="lab">다음 경기</div>
+        <div class="valwrap"><div class="val num accent">D-2</div></div>
+        <div class="dlt">vs 팀 이클립스</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 차트: 최근 8주 승률 -->
+  <section aria-label="최근 8주 승률">
+    <div class="slab">최근 8주 승률 (%)</div>
+    <svg class="chart" viewBox="0 0 760 260" role="img"
+         aria-label="최근 8주 승률: 1주 52, 2주 58, 3주 61, 4주 55, 5주 64, 6주 71 피크, 7주 67, 8주 68 퍼센트">
+      <!-- 기준선 -->
+      <line x1="20" y1="220" x2="740" y2="220" stroke="#E5E5E5" stroke-width="1"/>
+
+      <!-- 막대 (기본 잉크 / 피크는 주황 ①) -->
+      <g class="bars">
+        <rect x="43"  y="103.00" width="44" height="117.00" style="--f:#111111"/>
+        <rect x="133" y="89.50"  width="44" height="130.50" style="--f:#111111"/>
+        <rect x="223" y="82.75"  width="44" height="137.25" style="--f:#111111"/>
+        <rect x="313" y="96.25"  width="44" height="123.75" style="--f:#111111"/>
+        <rect x="403" y="76.00"  width="44" height="144.00" style="--f:#111111"/>
+        <rect x="493" y="60.25"  width="44" height="159.75" style="--f:#FF4D00"/>
+        <rect x="583" y="69.25"  width="44" height="150.75" style="--f:#111111"/>
+        <rect x="673" y="67.00"  width="44" height="153.00" style="--f:#111111"/>
+      </g>
+
+      <!-- 값 라벨 (11px, 잉크) -->
+      <g fill="#111111" font-size="11" font-weight="500" text-anchor="middle"
+         style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">
+        <text x="65"  y="95">52</text>
+        <text x="155" y="81">58</text>
+        <text x="245" y="75">61</text>
+        <text x="335" y="88">55</text>
+        <text x="425" y="68">64</text>
+        <text x="605" y="61">67</text>
+        <text x="695" y="59">68</text>
+      </g>
+
+      <!-- 피크 명시: "피크" 라벨(잉크) + 값 71(24px, 잉크) -->
+      <text x="515" y="30" fill="#111111" font-size="11" font-weight="500"
+            letter-spacing="1.2" text-anchor="middle">피크</text>
+      <text x="515" y="53" fill="#111111" font-size="24" font-weight="800"
+            text-anchor="middle" style="font-variant-numeric:tabular-nums;font-feature-settings:'tnum'">71</text>
+
+      <!-- 주차 축 라벨 -->
+      <g fill="#111111" font-size="11" font-weight="500" text-anchor="middle">
+        <text x="65"  y="240">1주</text>
+        <text x="155" y="240">2주</text>
+        <text x="245" y="240">3주</text>
+        <text x="335" y="240">4주</text>
+        <text x="425" y="240">5주</text>
+        <text x="515" y="240">6주</text>
+        <text x="605" y="240">7주</text>
+        <text x="695" y="240">8주</text>
+      </g>
+    </svg>
+  </section>
+
+  <!-- 로스터 테이블 -->
+  <section class="roster" aria-label="선수 로스터">
+    <div class="slab">선수 로스터</div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">선수</th>
+            <th scope="col">포지션</th>
+            <th scope="col">KDA</th>
+            <th scope="col">폼</th>
+            <th scope="col">상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>블레이즈</td><td>엔트리</td><td class="num">1.42</td>
+            <td class="form-up">상승</td>
+            <td><span class="badge s-done">주전확정</span></td>
+          </tr>
+          <tr>
+            <td>프로스트</td><td>서포터</td><td class="num">0.98</td>
+            <td class="form-flat">유지</td>
+            <td><span class="badge s-active">활성</span></td>
+          </tr>
+          <tr>
+            <td>레이븐</td><td>스나이퍼</td><td class="num">1.67</td>
+            <td class="form-up">상승</td>
+            <td><span class="badge s-done">주전확정</span></td>
+          </tr>
+          <tr>
+            <td>노바</td><td>리퍼</td><td class="num">0.71</td>
+            <td class="form-down">하락</td>
+            <td><span class="badge s-problem">폼저하</span></td>
+          </tr>
+          <tr>
+            <td>쿼츠</td><td>인게이저</td><td class="num">1.15</td>
+            <td class="form-flat">유지</td>
+            <td><span class="badge s-active">활성</span></td>
+          </tr>
+          <tr>
+            <td>에코</td><td>플렉스</td><td class="num">1.03</td>
+            <td class="form-flat">유지</td>
+            <td><span class="badge s-wait">로테이션대기</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>STYLE 07 · 미니멀 모노크롬</footer>
+
+</main>
+
+<script>
+  /* 비필수 진행 향상: 실패해도 화면은 완전하다(모든 구조·스타일은 CSS 로 완결). */
+  try { document.documentElement.setAttribute('data-js', 'on'); } catch (e) {}
+</script>
+</body>
+</html>

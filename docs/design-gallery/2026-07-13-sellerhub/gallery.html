@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>셀러허브 — 결정 갤러리 (20종)</title>
+<style>
+  :root { color-scheme: dark; --bg:#0b0d12; --card:#14171f; --bd:#232733; --fg:#e7e9ee; --mut:#9aa0ad; --acc:#8ab4ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:'Pretendard',-apple-system,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  header { padding:28px 24px 6px; }
+  h1 { margin:0 0 4px; font-size:23px; letter-spacing:-.02em; }
+  .lead { color:var(--mut); font-size:13.5px; line-height:1.5; }
+  /* rubric */
+  .rubric { display:flex; flex-wrap:wrap; gap:10px; margin:14px 24px 0; }
+  .rubric label { display:flex; flex-direction:column; gap:4px; font-size:11px; color:var(--mut); }
+  .rubric input { width:200px; background:#0f121a; border:1px solid var(--bd); border-radius:8px; color:var(--fg); padding:7px 10px; font-size:13px; font-family:inherit; }
+  .rubric input:focus { outline:2px solid var(--acc); outline-offset:0; border-color:var(--acc); }
+  /* toolbar */
+  .bar2 { position:sticky; top:0; z-index:20; background:rgba(11,13,18,.9); backdrop-filter:blur(8px);
+          display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 24px; border-bottom:1px solid var(--bd); margin-top:16px; }
+  .bar2 .grow { flex:1; }
+  .btn { background:#181b24; border:1px solid var(--bd); color:var(--fg); border-radius:8px; padding:7px 12px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+  .btn:hover { border-color:#3a4560; }
+  .btn.on { background:var(--acc); color:#08122a; border-color:var(--acc); font-weight:700; }
+  .count { color:var(--mut); font-size:12px; }
+  /* families */
+  .fam { margin:26px 24px 2px; font-size:17px; display:flex; align-items:baseline; gap:9px; }
+  .fam span { font-size:12px; font-weight:400; color:#7c8698; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:18px; padding:12px 24px 4px; }
+  .card { background:var(--card); border:1px solid var(--bd); border-radius:13px; overflow:hidden; display:flex; flex-direction:column; transition:opacity .15s, border-color .15s; }
+  .card.fav { border-color:#e0b341; }
+  .card.elim { opacity:.32; }
+  .card.elim .name { text-decoration:line-through; }
+  .rowbar { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 11px; }
+  .name { font-weight:700; font-size:14px; }
+  .name .no { color:#7c8698; font-variant-numeric:tabular-nums; margin-right:7px; }
+  .acts { display:flex; gap:5px; }
+  .acts button, .acts a { background:#181b24; border:1px solid var(--bd); color:var(--fg); border-radius:7px; width:30px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; text-decoration:none; }
+  .acts button:hover, .acts a:hover { border-color:#3a4560; }
+  .star.on { color:#e0b341; border-color:#e0b341; }
+  .elimb.on { color:#ff7a7a; border-color:#ff7a7a; }
+  .frame { position:relative; width:380px; max-width:100%; height:268px; margin:0 auto; overflow:hidden; border-top:1px solid var(--bd); background:#fff; }
+  .frame iframe { position:absolute; top:0; left:0; width:1280px; height:900px; border:0; transform:scale(.297); transform-origin:top left; }
+  .cmp { position:absolute; top:8px; left:8px; z-index:3; display:none; background:rgba(11,13,18,.85); color:#fff; font-size:11.5px; padding:4px 8px; border-radius:7px; cursor:pointer; align-items:center; gap:5px; }
+  body.compare-on .cmp { display:inline-flex; }
+  .note { border:0; border-top:1px solid var(--bd); background:#0f121a; color:var(--fg); padding:8px 11px; font-size:12.5px; font-family:inherit; }
+  .note:focus { outline:none; background:#12151f; }
+  footer { color:#6b7280; font-size:12px; text-align:center; padding:24px; }
+  /* compare modal */
+  .modal { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.8); display:none; padding:24px; }
+  .modal.show { display:flex; flex-direction:column; }
+  .modal .top { display:flex; justify-content:space-between; align-items:center; color:#fff; padding-bottom:12px; }
+  .modal .pair { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:14px; min-height:0; }
+  .modal iframe { width:100%; height:100%; border:1px solid var(--bd); border-radius:10px; background:#fff; }
+  .modal .cap { color:var(--mut); font-size:12px; text-align:center; padding-top:6px; }
+  @media (max-width:820px){ .modal .pair{ grid-template-columns:1fr; } }
+  @media (max-width:440px){ .grid{ grid-template-columns:1fr; } .rubric input{ width:44vw; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>셀러허브 — 결정 갤러리 <span style="font-size:13px;color:var(--mut);font-weight:400">20종 · 콘텐츠 고정</span></h1>
+  <div class="lead">같은 데이터·같은 화면, 스타일만 다름 = 순수 비교. <b>3초 컷으로 탈락(✕) → 마음에 드는 것 별(⭐) → 결승 2개 나란히(⚖️)</b>. 메모·선택은 자동 저장돼요.</div>
+</header>
+
+<div class="rubric" id="rubric">
+  <label>브랜드 성격<input data-k="brand" placeholder="예: 신뢰+친근"></label>
+  <label>타겟<input data-k="target" placeholder="예: 2030 셀러"></label>
+  <label>1순위 목적<input data-k="goal" placeholder="예: 전환 / 신뢰 / 차별화"></label>
+</div>
+
+<div class="bar2">
+  <button class="btn on" data-filter="all">전체</button>
+  <button class="btn" data-filter="fav">⭐ 즐겨찾기만</button>
+  <button class="btn" data-filter="hide">탈락 숨김</button>
+  <span class="grow"></span>
+  <button class="btn" id="cmpToggle">⚖️ 비교 모드</button>
+  <button class="btn" id="cmpOpen" style="display:none">선택 2개 나란히</button>
+  <span class="count" id="count"></span>
+  <button class="btn" id="reset">초기화</button>
+</div>
+
+<main id="app"></main>
+<footer>dj-superkit · design-style-explorer · 결정 갤러리</footer>
+
+<div class="modal" id="modal">
+  <div class="top"><b id="mtitle">나란히 비교</b><button class="btn" id="mclose">닫기 ✕</button></div>
+  <div class="pair"><div><iframe id="mA"></iframe><div class="cap" id="capA"></div></div><div><iframe id="mB"></iframe><div class="cap" id="capB"></div></div></div>
+</div>
+
+<script>
+const STYLES = [
+  {n:'01',s:'sf-hud',ko:'SF HUD',f:0},{n:'02',s:'public-portal',ko:'공공포털',f:0},{n:'05',s:'brutalism',ko:'브루탈리즘',f:0},{n:'07',s:'minimal-mono',ko:'미니멀 모노크롬',f:0},
+  {n:'03',s:'trendy-saas',ko:'트렌디 SaaS',f:1},{n:'13',s:'aurora',ko:'오로라 그라디언트',f:1},{n:'14',s:'bento',ko:'벤토 그리드',f:1},{n:'16',s:'material',ko:'머티리얼',f:1},
+  {n:'06',s:'glassmorphism',ko:'글래스모피즘',f:2},{n:'12',s:'neumorphism',ko:'뉴모피즘',f:2},{n:'15',s:'claymorphism',ko:'클레이모피즘',f:2},{n:'11',s:'nature-organic',ko:'네이처 오가닉',f:2},
+  {n:'08',s:'luxury-dark',ko:'럭셔리 다크',f:3},{n:'10',s:'editorial',ko:'에디토리얼',f:3},{n:'18',s:'swiss',ko:'스위스',f:3},{n:'20',s:'dark-analytics',ko:'다크 대시보드',f:3},
+  {n:'04',s:'dense-terminal',ko:'고밀도 터미널',f:4},{n:'09',s:'retro-pixel',ko:'레트로 픽셀',f:4},{n:'17',s:'y2k',ko:'Y2K 베이퍼웨이브',f:4},{n:'19',s:'maximalism',ko:'맥시멀리즘',f:4},
+];
+const FAMS = [
+  {t:'⚡ 대비 최대', s:'첫인상 극과 극'},
+  {t:'🚀 모던·트렌드', s:'요즘 프로덕트'},
+  {t:'🫧 질감·촉감', s:'유리·촉감·자연'},
+  {t:'💎 품격·정밀·밀도', s:'럭셔리·에디토리얼·관제'},
+  {t:'🎨 개성·복고', s:'터미널·픽셀·Y2K·맥시멀'},
+];
+const file = x => `style-${x.n}-${x.s}.html`;
+const KEY='dg_sellerhub_v1';
+let st = JSON.parse(localStorage.getItem(KEY)||'{}');
+st.fav=st.fav||{}; st.elim=st.elim||{}; st.notes=st.notes||{}; st.rubric=st.rubric||{};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(st));
+let filter='all', compareOn=false, picks=[];
+
+function render(){
+  const app=document.getElementById('app'); app.innerHTML='';
+  FAMS.forEach((fam,fi)=>{
+    const items=STYLES.filter(x=>x.f===fi).filter(x=>{
+      if(filter==='fav') return st.fav[x.n];
+      if(filter==='hide') return !st.elim[x.n];
+      return true;
+    });
+    if(!items.length) return;
+    const h=document.createElement('h2'); h.className='fam'; h.innerHTML=`${fam.t} <span>${fam.s}</span>`; app.appendChild(h);
+    const g=document.createElement('div'); g.className='grid';
+    items.forEach(x=>{
+      const c=document.createElement('div'); c.className='card'+(st.fav[x.n]?' fav':'')+(st.elim[x.n]?' elim':''); c.dataset.id=x.n;
+      c.innerHTML=`<div class="rowbar"><div class="name"><span class="no">${x.n}</span>${x.ko}</div>
+        <div class="acts">
+          <button class="star${st.fav[x.n]?' on':''}" data-a="fav" title="즐겨찾기">${st.fav[x.n]?'★':'☆'}</button>
+          <button class="elimb${st.elim[x.n]?' on':''}" data-a="elim" title="탈락">✕</button>
+          <a href="${file(x)}" target="_blank" rel="noopener" title="새 탭">↗</a>
+        </div></div>
+        <div class="frame"><iframe src="${file(x)}" loading="lazy" title="${x.ko}"></iframe>
+          <label class="cmp"><input type="checkbox" data-a="cmp" ${picks.includes(x.n)?'checked':''}> 비교</label></div>
+        <input class="note" data-a="note" placeholder="메모…" value="${(st.notes[x.n]||'').replace(/"/g,'&quot;')}">`;
+      g.appendChild(c);
+    });
+    app.appendChild(g);
+  });
+  const total=STYLES.length, fav=Object.values(st.fav).filter(Boolean).length, elim=Object.values(st.elim).filter(Boolean).length;
+  document.getElementById('count').textContent=`전체 ${total} · ⭐ ${fav} · 탈락 ${elim}`;
+  document.getElementById('cmpOpen').style.display=(compareOn&&picks.length===2)?'':'none';
+}
+
+document.getElementById('app').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-a]'); if(!btn) return;
+  const card=e.target.closest('.card'); const id=card.dataset.id; const a=btn.dataset.a;
+  if(a==='fav'){ st.fav[id]=!st.fav[id]; save(); render(); }
+  if(a==='elim'){ st.elim[id]=!st.elim[id]; if(st.elim[id]) st.fav[id]=false; save(); render(); }
+  if(a==='cmp'){ // handled on change below; prevent default toggle re-render race
+  }
+});
+document.getElementById('app').addEventListener('change',e=>{
+  const b=e.target.closest('[data-a]'); if(!b) return;
+  const id=e.target.closest('.card').dataset.id;
+  if(b.dataset.a==='cmp'){
+    if(e.target.checked){ picks.push(id); if(picks.length>2){ picks.shift(); } }
+    else { picks=picks.filter(p=>p!==id); }
+    render();
+  }
+});
+document.getElementById('app').addEventListener('input',e=>{
+  const b=e.target.closest('[data-a="note"]'); if(!b) return;
+  st.notes[e.target.closest('.card').dataset.id]=e.target.value; save();
+});
+// rubric
+document.querySelectorAll('#rubric input').forEach(inp=>{
+  inp.value=st.rubric[inp.dataset.k]||'';
+  inp.addEventListener('input',()=>{ st.rubric[inp.dataset.k]=inp.value; save(); });
+});
+// filters
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('on')); b.classList.add('on'); filter=b.dataset.filter; render();
+}));
+// compare mode
+document.getElementById('cmpToggle').addEventListener('click',function(){
+  compareOn=!compareOn; this.classList.toggle('on',compareOn); document.body.classList.toggle('compare-on',compareOn);
+  if(!compareOn){ picks=[]; render(); } render();
+});
+document.getElementById('cmpOpen').addEventListener('click',()=>{
+  if(picks.length!==2) return;
+  const a=STYLES.find(x=>x.n===picks[0]), b=STYLES.find(x=>x.n===picks[1]);
+  document.getElementById('mA').src=file(a); document.getElementById('mB').src=file(b);
+  document.getElementById('capA').textContent=`${a.n} · ${a.ko}`; document.getElementById('capB').textContent=`${b.n} · ${b.ko}`;
+  document.getElementById('modal').classList.add('show');
+});
+document.getElementById('mclose').addEventListener('click',()=>document.getElementById('modal').classList.remove('show'));
+document.getElementById('reset').addEventListener('click',()=>{ if(confirm('별점·탈락·메모·기준 전부 초기화할까요?')){ st={fav:{},elim:{},notes:{},rubric:{}}; save(); picks=[]; document.querySelectorAll('#rubric input').forEach(i=>i.value=''); render(); } });
+render();
+</script>
+</body>
+</html>

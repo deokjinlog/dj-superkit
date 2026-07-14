@@ -1,0 +1,1404 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PromptHub · 프롬프트 라이브러리</title>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+/>
+<style>
+  :root {
+    /* ── 팔레트 (트렌디 SaaS v2) ── */
+    --bg: #fbfaff;
+    --surface: #ffffff;
+    --violet: #7c5cff;
+    --violet-strong: #6a48f5;
+    --pink: #ff8fc0;
+    --mint: #5ee6c8;
+    --ink: #17143a;
+    --muted: #7b7897;
+    --border: #ece9f7;
+    --border-strong: #e0dcf1;
+
+    /* 모델 시맨틱 색 */
+    --claude-fg: #6a48f5;
+    --claude-bg: #f0ecff;
+    --gpt-fg: #0f9d76;
+    --gpt-bg: #e4f8f1;
+
+    /* elevation */
+    --shadow-l1: 0 10px 30px rgba(23, 20, 58, 0.06);
+    --shadow-l2: 0 20px 40px rgba(124, 92, 255, 0.15);
+    --shadow-pop: 0 8px 24px rgba(23, 20, 58, 0.1);
+
+    /* 8px 그리드 */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-12: 48px;
+
+    /* radius */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 24px;
+    --r-2xl: 28px;
+
+    --grad: linear-gradient(120deg, var(--violet) 0%, var(--pink) 100%);
+
+    --sidebar-w: 248px;
+    --focus-ring: 0 0 0 3px rgba(124, 92, 255, 0.35);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+      sans-serif;
+    color: var(--ink);
+    background-color: var(--bg);
+    /* L0: 파스텔 블롭 2개 (우상단 바이올렛, 좌하단 민트) */
+    background-image: radial-gradient(
+        520px 420px at 92% -6%,
+        rgba(124, 92, 255, 0.22),
+        transparent 70%
+      ),
+      radial-gradient(
+        480px 420px at -4% 108%,
+        rgba(94, 230, 200, 0.2),
+        transparent 68%
+      );
+    background-attachment: fixed;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* ─────────────────────────  APP SHELL  ───────────────────────── */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ─────────────────────────  SIDEBAR  ───────────────────────── */
+  .sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    padding: var(--sp-6) var(--sp-4);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-right: 1px solid var(--border);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-2);
+  }
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: var(--grad);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 16px rgba(124, 92, 255, 0.35);
+    flex: none;
+  }
+  .brand-mark svg {
+    width: 20px;
+    height: 20px;
+  }
+  .brand-name {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .nav-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 var(--sp-3);
+    margin-bottom: var(--sp-2);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 9px var(--sp-3);
+    border-radius: var(--r-md);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background 0.18s ease, color 0.18s ease,
+      transform 0.18s ease;
+  }
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--muted);
+    transition: color 0.18s ease;
+  }
+  .nav-item:hover {
+    background: #f3f0ff;
+    transform: translateX(2px);
+  }
+  .nav-item:hover svg {
+    color: var(--violet);
+  }
+  .nav-item:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .nav-item.is-active {
+    background: var(--grad);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(124, 92, 255, 0.32);
+  }
+  .nav-item.is-active svg {
+    color: #fff;
+  }
+
+  .tree {
+    margin-top: auto;
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .tree-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 7px var(--sp-3);
+    border-radius: var(--r-sm);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  .tree-item svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+  .tree-item .count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted);
+    background: #f2f0fa;
+    border-radius: 999px;
+    padding: 1px 7px;
+  }
+  .tree-item:hover {
+    background: #f3f0ff;
+    color: var(--ink);
+  }
+  .tree-item:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .tree-item.is-active {
+    color: var(--violet-strong);
+  }
+  .tree-item.is-active .dot {
+    background: var(--violet);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex: none;
+  }
+
+  /* ─────────────────────────  MAIN  ───────────────────────── */
+  .main {
+    grid-column: 2;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* topbar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-8);
+    background: rgba(251, 250, 255, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    place-items: center;
+  }
+  .menu-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .search {
+    position: relative;
+    flex: 1 1 320px;
+    max-width: 440px;
+  }
+  .search svg {
+    position: absolute;
+    left: var(--sp-3);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--sp-3) 0 40px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .search input::placeholder {
+    color: var(--muted);
+  }
+  .search input:hover {
+    border-color: #cfc8ec;
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--violet);
+    box-shadow: var(--focus-ring);
+  }
+
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 40px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.18s ease, background 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .filter svg {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+  }
+  .filter:hover {
+    background: #f7f5ff;
+    border-color: #cfc8ec;
+  }
+  .filter:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 40px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--r-md);
+    border: none;
+    background: var(--grad);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 8px 18px rgba(124, 92, 255, 0.3);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  }
+  .btn-primary svg {
+    width: 16px;
+    height: 16px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(124, 92, 255, 0.4);
+    filter: saturate(1.08);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring), 0 8px 18px rgba(124, 92, 255, 0.3);
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ink), var(--violet));
+    box-shadow: var(--shadow-l1);
+    flex: none;
+    cursor: pointer;
+  }
+  .avatar:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* content */
+  .content {
+    padding: var(--sp-8);
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-6);
+  }
+  .page-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 4px 0 0;
+  }
+  .live-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #eafaf4;
+    border: 1px solid #cdf1e5;
+    color: #0f9d76;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .live-chip .pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #12c98e;
+    box-shadow: 0 0 0 0 rgba(18, 201, 142, 0.5);
+    animation: breathe 2s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(18, 201, 142, 0.5);
+      opacity: 1;
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(18, 201, 142, 0);
+      opacity: 0.65;
+    }
+  }
+
+  /* summary bar */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-8);
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: var(--sp-6);
+    box-shadow: var(--shadow-l1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .stat::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--grad);
+    opacity: 0.9;
+  }
+  .stat:hover,
+  .stat:focus-within {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-l2);
+  }
+  .stat-label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .stat-label svg {
+    width: 15px;
+    height: 15px;
+  }
+  .stat-value {
+    margin-top: 10px;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .stat-unit {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+
+  /* card grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--sp-6);
+  }
+
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2xl);
+    padding: var(--sp-6);
+    box-shadow: var(--shadow-l1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    min-height: 200px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease,
+      border-color 0.22s ease;
+  }
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-l2);
+    border-color: #e2dcfb;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .fav {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-sm);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--border-strong);
+    transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  }
+  .fav svg {
+    width: 19px;
+    height: 19px;
+  }
+  .fav:hover {
+    background: #fff4fa;
+    transform: scale(1.12);
+    color: var(--pink);
+  }
+  .fav:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .fav.is-on {
+    color: #ffb020;
+  }
+  .fav.is-on svg {
+    fill: #ffc043;
+    stroke: #f5a300;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .badge-tag {
+    background: #f2f0fa;
+    color: #6b6790;
+  }
+  .badge-model {
+    border: 1px solid transparent;
+  }
+  .badge-model .swatch {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+  .badge-claude {
+    background: var(--claude-bg);
+    color: var(--claude-fg);
+  }
+  .badge-claude .swatch {
+    background: var(--violet);
+  }
+  .badge-gpt {
+    background: var(--gpt-bg);
+    color: var(--gpt-fg);
+  }
+  .badge-gpt .swatch {
+    background: #12c98e;
+  }
+
+  .card-meta {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .meta-item svg {
+    width: 13px;
+    height: 13px;
+  }
+  .meta-runs {
+    color: var(--ink);
+  }
+  .ver {
+    background: #f2f0fa;
+    color: #6b6790;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .meta-time {
+    margin-left: auto;
+  }
+
+  /* hover actions */
+  .card-actions {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    display: flex;
+    gap: var(--sp-2);
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover .card-actions,
+  .card:focus-within .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .act {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--ink);
+    box-shadow: var(--shadow-pop);
+    transition: transform 0.16s ease, background 0.16s ease,
+      border-color 0.16s ease;
+  }
+  .act svg {
+    width: 13px;
+    height: 13px;
+  }
+  .act:hover {
+    transform: translateY(-1px);
+  }
+  .act:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .act-run {
+    background: var(--grad);
+    color: #fff;
+    border-color: transparent;
+  }
+  .act-run svg {
+    color: #fff;
+  }
+
+  /* footer */
+  .footer {
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .footer .brand-name {
+    font-size: 13px;
+  }
+
+  /* ─────────────────────────  LOAD SEQUENCE  ───────────────────────── */
+  .rise {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  @keyframes rise {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ─────────────────────────  RESPONSIVE  ───────────────────────── */
+  @media (max-width: 1080px) {
+    .summary {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 60;
+      width: 280px;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+      box-shadow: var(--shadow-pop);
+    }
+    .app.nav-open .sidebar {
+      transform: translateX(0);
+    }
+    .main {
+      grid-column: 1;
+    }
+    .menu-toggle {
+      display: grid;
+    }
+    .scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(23, 20, 58, 0.3);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .app.nav-open .scrim {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .content {
+      padding: var(--sp-6) var(--sp-4);
+    }
+    .topbar {
+      padding: var(--sp-3) var(--sp-4);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .filter {
+      display: none;
+    }
+    .btn-primary .btn-label {
+      display: none;
+    }
+    .btn-primary {
+      padding: 0 12px;
+    }
+    .page-title {
+      font-size: 24px;
+    }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .rise {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<div class="app" id="app">
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ─────────  SIDEBAR  ───────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h11" /><path d="M4 12h16" /><path d="M4 17h8" />
+          <circle cx="19" cy="7" r="2" fill="#fff" stroke="none" />
+        </svg>
+      </span>
+      <span class="brand-name">PromptHub</span>
+    </div>
+
+    <nav class="nav" aria-label="주요 메뉴">
+      <button class="nav-item is-active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        라이브러리
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+        에디터
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3h6" /><path d="M10 3v5.5L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9.5V3" />
+          <path d="M7.5 14h9" />
+        </svg>
+        테스트
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        팀
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.9 1.1V22a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 20.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 4.6h.09A1.65 1.65 0 0 0 12 3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 18 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09A1.65 1.65 0 0 0 21 12" />
+        </svg>
+        설정
+      </button>
+    </nav>
+
+    <div class="tree" aria-label="폴더">
+      <div class="nav-label">폴더</div>
+      <button class="tree-item is-active">
+        <span class="dot"></span>전체 프롬프트<span class="count num">128</span>
+      </button>
+      <button class="tree-item">
+        <span class="dot"></span>마케팅<span class="count num">21</span>
+      </button>
+      <button class="tree-item">
+        <span class="dot"></span>개발<span class="count num">44</span>
+      </button>
+      <button class="tree-item">
+        <span class="dot"></span>글쓰기<span class="count num">33</span>
+      </button>
+      <button class="tree-item">
+        <span class="dot"></span>CS<span class="count num">30</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─────────  MAIN  ───────── -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round">
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
+      </button>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+        </svg>
+        <input type="search" placeholder="프롬프트 검색" aria-label="프롬프트 검색" />
+      </div>
+
+      <button class="filter">
+        태그
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      <button class="filter">
+        모델
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <div class="spacer"></div>
+
+      <button class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span class="btn-label">새 프롬프트</span>
+      </button>
+
+      <button class="avatar" aria-label="계정">PH</button>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">프롬프트 라이브러리</h1>
+          <p class="page-sub">팀이 함께 쓰는 프롬프트를 한곳에서 관리하세요.</p>
+        </div>
+        <span class="live-chip">
+          <span class="pulse" aria-hidden="true"></span>실시간 동기화
+        </span>
+      </div>
+
+      <!-- 요약 바 -->
+      <section class="summary" aria-label="요약">
+        <div class="stat rise" tabindex="0" style="animation-delay: 0.05s">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+            </svg>
+            전체 프롬프트
+          </div>
+          <div class="stat-value">
+            <span class="num" data-count="128">128</span>
+            <span class="stat-unit">개</span>
+          </div>
+        </div>
+
+        <div class="stat rise" tabindex="0" style="animation-delay: 0.11s">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="6 4 20 12 6 20 6 4" />
+            </svg>
+            이번 주 실행
+          </div>
+          <div class="stat-value">
+            <span class="num" data-count="1240">1,240</span>
+            <span class="stat-unit">회</span>
+          </div>
+        </div>
+
+        <div class="stat rise" tabindex="0" style="animation-delay: 0.17s">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a3 3 0 1 0-2.83-4M6 8a3 3 0 1 1 2.83-4" />
+              <circle cx="12" cy="15" r="3" />
+              <path d="M6 21v-1a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v1" />
+            </svg>
+            팀 공유
+          </div>
+          <div class="stat-value">
+            <span class="num" data-count="34">34</span>
+            <span class="stat-unit">개</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 카드 그리드 -->
+      <section class="grid" aria-label="프롬프트 목록">
+
+        <!-- 1 -->
+        <article class="card rise" style="animation-delay: 0.22s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">블로그 초안 생성기</h2>
+            <button class="fav is-on" aria-pressed="true" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" stroke-width="1.8">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">주제만 넣으면 SEO 최적화 초안</p>
+          <div class="badges">
+            <span class="badge badge-tag">글쓰기</span>
+            <span class="badge badge-model badge-claude">
+              <span class="swatch"></span>Claude
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>340회
+            </span>
+            <span class="ver">v3</span>
+            <span class="meta-time">2시간 전</span>
+          </div>
+        </article>
+
+        <!-- 2 -->
+        <article class="card rise" style="animation-delay: 0.28s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">코드 리뷰어</h2>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">PR diff 붙여넣으면 라인별 리뷰</p>
+          <div class="badges">
+            <span class="badge badge-tag">개발</span>
+            <span class="badge badge-model badge-gpt">
+              <span class="swatch"></span>GPT-4
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>128회
+            </span>
+            <span class="ver">v2</span>
+            <span class="meta-time">어제</span>
+          </div>
+        </article>
+
+        <!-- 3 -->
+        <article class="card rise" style="animation-delay: 0.34s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">고객 응대 톤 변환기</h2>
+            <button class="fav is-on" aria-pressed="true" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" stroke-width="1.8">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">딱딱한 답변을 친근하게</p>
+          <div class="badges">
+            <span class="badge badge-tag">CS</span>
+            <span class="badge badge-model badge-claude">
+              <span class="swatch"></span>Claude
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>512회
+            </span>
+            <span class="ver">v5</span>
+            <span class="meta-time">3일 전</span>
+          </div>
+        </article>
+
+        <!-- 4 -->
+        <article class="card rise" style="animation-delay: 0.40s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">회의록 요약</h2>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">긴 회의록에서 액션 아이템 추출</p>
+          <div class="badges">
+            <span class="badge badge-tag">생산성</span>
+            <span class="badge badge-model badge-gpt">
+              <span class="swatch"></span>GPT-4
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>89회
+            </span>
+            <span class="ver">v1</span>
+            <span class="meta-time">1주 전</span>
+          </div>
+        </article>
+
+        <!-- 5 -->
+        <article class="card rise" style="animation-delay: 0.46s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">제품명 브레인스토머</h2>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">키워드 넣으면 이름 20개</p>
+          <div class="badges">
+            <span class="badge badge-tag">마케팅</span>
+            <span class="badge badge-model badge-claude">
+              <span class="swatch"></span>Claude
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>47회
+            </span>
+            <span class="ver">v2</span>
+            <span class="meta-time">2주 전</span>
+          </div>
+        </article>
+
+        <!-- 6 -->
+        <article class="card rise" style="animation-delay: 0.52s">
+          <div class="card-actions">
+            <button class="act act-run">
+              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>실행
+            </button>
+            <button class="act">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h2 class="card-title">SQL 생성기</h2>
+            <button class="fav is-on" aria-pressed="true" aria-label="즐겨찾기">
+              <svg viewBox="0 0 24 24" stroke-width="1.8">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          </div>
+          <p class="card-desc">자연어를 쿼리로</p>
+          <div class="badges">
+            <span class="badge badge-tag">개발</span>
+            <span class="badge badge-model badge-gpt">
+              <span class="swatch"></span>GPT-4
+            </span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-item meta-runs num">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>203회
+            </span>
+            <span class="ver">v4</span>
+            <span class="meta-time">4일 전</span>
+          </div>
+        </article>
+
+      </section>
+
+      <footer class="footer">
+        <span class="brand-name">PromptHub</span>
+        <span>· 트렌디 SaaS</span>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var reduce =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ── 카운트업 (연출만 담당 — 최종 숫자는 이미 HTML에 존재) ── */
+    if (!reduce) {
+      var fmt = function (n) {
+        return n.toLocaleString("en-US");
+      };
+      document.querySelectorAll("[data-count]").forEach(function (el) {
+        var target = parseInt(el.getAttribute("data-count"), 10);
+        if (isNaN(target)) return;
+        var dur = 800,
+          start = null;
+        el.textContent = "0";
+        function step(ts) {
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+          el.textContent = fmt(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = fmt(target);
+        }
+        requestAnimationFrame(step);
+      });
+    }
+
+    /* ── 즐겨찾기 토글 ── */
+    document.querySelectorAll(".fav").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var on = btn.classList.toggle("is-on");
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        var poly = btn.querySelector("polygon");
+        var svg = btn.querySelector("svg");
+        if (on) {
+          svg.setAttribute("fill", "currentColor");
+          svg.removeAttribute("stroke");
+        } else {
+          svg.setAttribute("fill", "none");
+          svg.setAttribute("stroke", "currentColor");
+        }
+      });
+    });
+
+    /* ── 모바일 사이드바 토글 ── */
+    var app = document.getElementById("app");
+    var toggle = document.getElementById("menuToggle");
+    var scrim = document.getElementById("scrim");
+    function close() {
+      app.classList.remove("nav-open");
+    }
+    if (toggle) {
+      toggle.addEventListener("click", function () {
+        app.classList.toggle("nav-open");
+      });
+    }
+    if (scrim) scrim.addEventListener("click", close);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
+  })();
+</script>

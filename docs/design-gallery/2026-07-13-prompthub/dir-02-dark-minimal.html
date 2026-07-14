@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptHub · 다크 프로 미니멀</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;620&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 저채도 다크 표면 */
+    --base: #0E0E11;
+    --surface: #131317;
+    --surface-raised: #17171C;
+    --surface-hover: #1C1C22;
+    /* 헤어라인 */
+    --border: #232326;
+    --border-strong: #2E2E33;
+    /* 텍스트 3단 위계 */
+    --fg: #EDEDEF;
+    --fg-secondary: #A0A0A8;
+    --fg-tertiary: #6E6E76;
+    /* 액센트 1 — 저채도 인디고 */
+    --accent: #8B8BF5;
+    --accent-dim: rgba(139, 139, 245, 0.12);
+    --accent-border: rgba(139, 139, 245, 0.35);
+    /* 저채도 상태색 */
+    --success: #4E9A76;
+    --warning: #C7A15A;
+    --danger: #C96A6A;
+    /* 모델 배지 계열 (저채도) */
+    --claude: #9A8BF0;
+    --claude-dim: rgba(154, 139, 240, 0.12);
+    --gpt: #5C9E7E;
+    --gpt-dim: rgba(92, 158, 126, 0.12);
+
+    --sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono-ui: "Inter", var(--sans);
+
+    /* 8px 그리드 */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+
+    --r-card: 10px;
+    --r-ctrl: 8px;
+    --r-icon: 6px;
+
+    --pop-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --sidebar-w: 240px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--base);
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.57;
+    letter-spacing: -0.006em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    animation: pageIn 220ms ease-out both;
+  }
+
+  @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .tnum { font-family: var(--mono-ui); font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+
+  ::selection { background: var(--accent-dim); color: var(--fg); }
+
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-icon);
+  }
+
+  /* ===== Layout ===== */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: var(--r-icon);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    display: grid; place-items: center;
+    color: var(--accent);
+    font-family: var(--mono-ui);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: var(--mono-ui);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .nav-section { padding: var(--sp-2) var(--sp-3); }
+  .nav-label {
+    font-family: var(--mono-ui);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-tertiary);
+    padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--r-ctrl);
+    color: var(--fg-secondary);
+    font-size: 14px;
+    position: relative;
+    transition: background 120ms ease, color 120ms ease;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+  }
+  .nav-item .ico { color: var(--fg-tertiary); flex-shrink: 0; transition: color 120ms ease; }
+  .nav-item:hover { background: var(--surface-hover); color: var(--fg); }
+  .nav-item:hover .ico { color: var(--fg-secondary); }
+  .nav-item::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 16px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+    transition: width 120ms ease;
+  }
+  .nav-item:hover::before { width: 2px; }
+  .nav-item[aria-current="page"] {
+    background: var(--surface-raised);
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .nav-item[aria-current="page"]::before { width: 2px; }
+  .nav-item[aria-current="page"] .ico { color: var(--accent); }
+
+  .nav-divider { height: 1px; background: var(--border); margin: var(--sp-3) var(--sp-3); }
+
+  .folder-tree { padding-bottom: var(--sp-5); }
+  .folder-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    padding-left: var(--sp-4);
+    border-radius: var(--r-ctrl);
+    color: var(--fg-secondary);
+    font-size: 13.5px;
+    transition: background 120ms ease, color 120ms ease;
+    width: 100%; background: none; border: none; text-align: left;
+    position: relative;
+  }
+  .folder-item::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%; transform: translateY(-50%);
+    width: 0; height: 14px; background: var(--accent);
+    border-radius: 0 2px 2px 0; transition: width 120ms ease;
+  }
+  .folder-item:hover { background: var(--surface-hover); color: var(--fg); }
+  .folder-item:hover::before { width: 2px; }
+  .folder-item .dot { color: var(--fg-tertiary); flex-shrink: 0; }
+  .folder-item .count {
+    margin-left: auto;
+    font-family: var(--mono-ui);
+    font-size: 12px;
+    color: var(--fg-tertiary);
+  }
+  .folder-item.root { color: var(--fg); font-weight: 500; }
+
+  /* ===== Main ===== */
+  .main { min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(14, 14, 17, 0.82);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-6);
+  }
+
+  .menu-toggle {
+    display: none;
+    width: 36px; height: 36px;
+    border-radius: var(--r-ctrl);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--fg-secondary);
+    place-items: center;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .menu-toggle:hover { background: var(--surface-hover); }
+
+  .search {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-ctrl);
+    padding: 0 var(--sp-3);
+    height: 36px;
+    flex: 1;
+    max-width: 420px;
+    transition: border-color 150ms ease;
+  }
+  .search:focus-within { border-color: var(--accent); }
+  .search .ico { color: var(--fg-tertiary); flex-shrink: 0; }
+  .search input {
+    background: none; border: none; outline: none;
+    color: var(--fg); font-family: var(--sans); font-size: 14px;
+    width: 100%; height: 100%;
+    letter-spacing: -0.006em;
+  }
+  .search input::placeholder { color: var(--fg-tertiary); }
+
+  .filter-btn {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 36px; padding: 0 var(--sp-3);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-ctrl);
+    color: var(--fg-secondary); font-size: 13.5px;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { background: var(--surface-hover); color: var(--fg); border-color: var(--border-strong); }
+  .filter-btn .chev { color: var(--fg-tertiary); }
+
+  .spacer { flex: 1; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    height: 36px; padding: 0 var(--sp-4);
+    background: var(--accent); color: #0E0E11;
+    border: 1px solid transparent;
+    border-radius: var(--r-ctrl);
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px;
+    letter-spacing: -0.01em;
+    transition: filter 120ms ease, transform 80ms ease;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:active { filter: brightness(0.96); transform: scale(0.98); }
+
+  .avatar {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: var(--r-icon);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    display: grid; place-items: center;
+    font-family: var(--mono-ui); font-weight: 600; font-size: 12px;
+    color: var(--fg-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  /* ===== Content ===== */
+  .content {
+    padding: var(--sp-6);
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .page-head { margin-bottom: var(--sp-5); }
+  .page-title {
+    font-size: 30px; line-height: 38px; font-weight: 620;
+    letter-spacing: -0.02em; color: var(--fg);
+    margin-bottom: var(--sp-1);
+  }
+  .page-sub { color: var(--fg-secondary); font-size: 14px; }
+
+  /* KPI 요약 바 */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 20px var(--sp-5);
+    animation: kpiIn 180ms ease-out both;
+  }
+  .kpi:nth-child(1) { animation-delay: 0ms; }
+  .kpi:nth-child(2) { animation-delay: 90ms; }
+  .kpi:nth-child(3) { animation-delay: 180ms; }
+  @keyframes kpiIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .kpi-label {
+    font-family: var(--mono-ui); font-size: 12px; font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--fg-tertiary); margin-bottom: var(--sp-3);
+    display: flex; align-items: center; gap: var(--sp-2);
+  }
+  .kpi-value {
+    font-family: var(--mono-ui); font-size: 28px; line-height: 1.1;
+    font-weight: 600; letter-spacing: -0.02em; color: var(--fg);
+  }
+  .kpi-value .unit { font-size: 15px; color: var(--fg-secondary); font-weight: 400; margin-left: 2px; }
+  .kpi-trend { margin-top: var(--sp-2); font-size: 12.5px; color: var(--fg-secondary); display: flex; align-items: center; gap: 6px; }
+  .kpi-trend.up { color: var(--success); }
+
+  /* 카드 그리드 */
+  .grid-head {
+    display: flex; align-items: baseline; gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .grid-head h2 {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--fg);
+  }
+  .grid-head .muted { color: var(--fg-tertiary); font-size: 13px; }
+  .sort-link {
+    margin-left: auto; color: var(--fg-secondary); font-size: 13px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: var(--sp-1) var(--sp-2); border-radius: var(--r-icon);
+    transition: color 120ms ease, background 120ms ease;
+  }
+  .sort-link:hover { color: var(--fg); background: var(--surface-hover); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-4);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 20px;
+    display: flex; flex-direction: column;
+    min-height: 176px;
+    position: relative;
+    transition: background 120ms ease, border-color 120ms ease;
+    animation: rowIn 240ms ease-out both;
+  }
+  @keyframes rowIn { from { opacity: 0; } to { opacity: 1; } }
+  .card:nth-child(1) { animation-delay: 40ms; }
+  .card:nth-child(2) { animation-delay: 64ms; }
+  .card:nth-child(3) { animation-delay: 88ms; }
+  .card:nth-child(4) { animation-delay: 112ms; }
+  .card:nth-child(5) { animation-delay: 136ms; }
+  .card:nth-child(6) { animation-delay: 160ms; }
+  .card:hover { background: var(--surface-raised); border-color: var(--border-strong); }
+
+  .card-top {
+    display: flex; align-items: flex-start; gap: var(--sp-3);
+    margin-bottom: var(--sp-2);
+  }
+  .card-title {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--fg); line-height: 1.4; flex: 1;
+  }
+  .fav {
+    width: 28px; height: 28px; margin: -4px -4px 0 0;
+    border-radius: var(--r-icon);
+    background: none; border: none; flex-shrink: 0;
+    display: grid; place-items: center;
+    color: var(--fg-tertiary);
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .fav:hover { background: var(--surface-hover); color: var(--fg-secondary); }
+  .fav[aria-pressed="true"] { color: var(--warning); }
+
+  .card-desc {
+    color: var(--fg-secondary); font-size: 13.5px; line-height: 1.5;
+    margin-bottom: var(--sp-4);
+  }
+
+  .badges { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: auto; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 22px; padding: 0 var(--sp-2);
+    border-radius: var(--r-ctrl);
+    font-family: var(--mono-ui); font-size: 11.5px; font-weight: 500;
+    letter-spacing: -0.01em;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    color: var(--fg-secondary);
+  }
+  .badge .swatch { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .badge.model-claude { color: var(--claude); background: var(--claude-dim); border-color: var(--accent-border); }
+  .badge.model-claude .swatch { background: var(--claude); }
+  .badge.model-gpt { color: var(--gpt); background: var(--gpt-dim); border-color: rgba(92,158,126,0.35); }
+  .badge.model-gpt .swatch { background: var(--gpt); }
+
+  .card-meta {
+    display: flex; align-items: center; gap: var(--sp-3);
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--fg-tertiary);
+  }
+  .card-meta .m { display: inline-flex; align-items: center; gap: 5px; }
+  .card-meta .m .tnum { color: var(--fg-secondary); }
+  .card-meta .ver {
+    font-family: var(--mono-ui); font-size: 11.5px;
+    padding: 1px 6px; border-radius: 5px;
+    border: 1px solid var(--border);
+    color: var(--fg-secondary);
+  }
+  .card-meta .when { margin-left: auto; }
+
+  /* hover 액션 */
+  .card-actions {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex; gap: 6px;
+    opacity: 0; transform: translateY(-2px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    pointer-events: none;
+  }
+  .card:hover .card-actions,
+  .card:focus-within .card-actions { opacity: 1; transform: none; pointer-events: auto; }
+  .action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 28px; padding: 0 10px;
+    border-radius: var(--r-ctrl);
+    font-size: 12px; font-weight: 500;
+    background: var(--surface-hover);
+    border: 1px solid var(--border-strong);
+    color: var(--fg-secondary);
+    transition: background 120ms ease, color 120ms ease, transform 80ms ease;
+  }
+  .action-btn:hover { color: var(--fg); background: #22222A; }
+  .action-btn:active { transform: scale(0.96); }
+  .action-btn.run { color: var(--accent); border-color: var(--accent-border); }
+  .action-btn.run:hover { background: var(--accent-dim); }
+
+  /* 즐겨찾기 별에 액션 겹치지 않게: 카드 hover 시 fav 살짝 좌측으로 (레이아웃 유지용 여백 확보) */
+  .card:hover .fav, .card:focus-within .fav { opacity: 0; pointer-events: none; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: var(--sp-5) var(--sp-6);
+    color: var(--fg-tertiary);
+    font-size: 12.5px;
+    display: flex; align-items: center; gap: var(--sp-2);
+  }
+  footer .dot-sep { color: var(--border-strong); }
+  footer .mono { font-family: var(--mono-ui); }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 1024px) {
+    .kpis { grid-template-columns: repeat(3, 1fr); }
+    .card-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-w);
+      z-index: 60;
+      transform: translateX(-100%);
+      transition: transform 220ms ease;
+    }
+    .sidebar.open { transform: none; }
+    .menu-toggle { display: grid; }
+    .scrim {
+      position: fixed; inset: 0; z-index: 55;
+      background: rgba(0,0,0,0.5);
+      opacity: 0; pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+    .scrim.show { opacity: 1; pointer-events: auto; }
+    .content { padding: var(--sp-5); }
+    .topbar { padding: var(--sp-3) var(--sp-4); }
+  }
+
+  @media (max-width: 640px) {
+    .kpis { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+    .filter-btn span.txt { display: none; }
+    .btn-primary span.txt { display: none; }
+    .page-title { font-size: 24px; line-height: 30px; }
+    .content { padding: var(--sp-4); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition-duration: 1ms !important; }
+    .card-actions { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar" aria-label="주 메뉴">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">P</div>
+      <div class="brand-name">PromptHub</div>
+    </div>
+
+    <nav class="nav-section" aria-label="워크스페이스">
+      <a class="nav-item" href="#" aria-current="page">
+        <svg class="ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="2.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        라이브러리
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9.5 2.5 13 6 5.5 13.5 2 14l.5-3.5L9.5 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        에디터
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 2v3.2L2.6 11a1.5 1.5 0 0 0 1.3 2.3h8.2A1.5 1.5 0 0 0 13.4 11L10 5.2V2" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 2h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        테스트
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="6" cy="5" r="2.3" stroke="currentColor" stroke-width="1.4"/><path d="M2 13.5c0-2.2 1.8-3.5 4-3.5s4 1.3 4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10.5 3.2a2.3 2.3 0 0 1 0 4M11 10.2c1.7.3 3 1.5 3 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        팀
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.5v1.8M8 12.7v1.8M14.5 8h-1.8M3.3 8H1.5M12.6 3.4l-1.3 1.3M4.7 11.3l-1.3 1.3M12.6 12.6l-1.3-1.3M4.7 4.7 3.4 3.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        설정
+      </a>
+    </nav>
+
+    <div class="nav-divider"></div>
+
+    <nav class="nav-section folder-tree" aria-label="폴더">
+      <div class="nav-label">폴더</div>
+      <a class="folder-item root" href="#">
+        <svg class="dot" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 4.5C2 3.7 2.7 3 3.5 3H6l1.5 1.5h5c.8 0 1.5.7 1.5 1.5V11c0 .8-.7 1.5-1.5 1.5h-9C2.7 12.5 2 11.8 2 11V4.5Z" stroke="currentColor" stroke-width="1.3"/></svg>
+        전체 프롬프트
+        <span class="count tnum">128</span>
+      </a>
+      <a class="folder-item" href="#">
+        <svg class="dot" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+        마케팅
+        <span class="count tnum">24</span>
+      </a>
+      <a class="folder-item" href="#">
+        <svg class="dot" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+        개발
+        <span class="count tnum">41</span>
+      </a>
+      <a class="folder-item" href="#">
+        <svg class="dot" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+        글쓰기
+        <span class="count tnum">33</span>
+      </a>
+      <a class="folder-item" href="#">
+        <svg class="dot" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+        CS
+        <span class="count tnum">18</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+
+      <div class="search">
+        <svg class="ico" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.3" stroke="currentColor" stroke-width="1.4"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="프롬프트 검색" aria-label="프롬프트 검색">
+      </div>
+
+      <button class="filter-btn">
+        <span class="txt">태그</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="filter-btn">
+        <span class="txt">모델</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="spacer"></div>
+
+      <button class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="txt">새 프롬프트</span>
+      </button>
+
+      <div class="avatar" title="워크스페이스">PH</div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <h1 class="page-title">프롬프트 라이브러리</h1>
+        <p class="page-sub">팀이 만든 프롬프트를 검색하고 실행하고 버전으로 관리하세요.</p>
+      </div>
+
+      <!-- 요약 바 -->
+      <section class="kpis" aria-label="요약">
+        <div class="kpi">
+          <div class="kpi-label">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="2" y="2" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="2" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="8" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="8" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+            전체 프롬프트
+          </div>
+          <div class="kpi-value tnum">128<span class="unit">개</span></div>
+          <div class="kpi-trend">5개 폴더에 분류됨</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 3v8M9 5v6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 12h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            이번 주 실행
+          </div>
+          <div class="kpi-value tnum">1,240<span class="unit">회</span></div>
+          <div class="kpi-trend up">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 8.5 5 6l2 2 2.5-4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 3.5h2v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            지난주 대비 상승
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="4.5" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="9.5" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 11.5c0-1.8 1.3-2.8 3-2.8s3 1 3 2.8M7.5 8.9c1.5.1 3 1 3 2.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            팀 공유
+          </div>
+          <div class="kpi-value tnum">34<span class="unit">개</span></div>
+          <div class="kpi-trend">전체의 27%</div>
+        </div>
+      </section>
+
+      <!-- 카드 그리드 -->
+      <div class="grid-head">
+        <h2>프롬프트</h2>
+        <span class="muted tnum">6개 표시 중</span>
+        <a href="#" class="sort-link">
+          최근 수정순
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <section class="card-grid" aria-label="프롬프트 목록">
+
+        <!-- 1 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">블로그 초안 생성기</h3>
+            <button class="fav" aria-pressed="true" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">주제만 넣으면 SEO 최적화 초안</p>
+          <div class="badges">
+            <span class="badge">글쓰기</span>
+            <span class="badge model-claude"><span class="swatch" aria-hidden="true"></span>Claude</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">340</span>회</span>
+            <span class="ver">v3</span>
+            <span class="when">2시간 전</span>
+          </div>
+        </article>
+
+        <!-- 2 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">코드 리뷰어</h3>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">PR diff 붙여넣으면 라인별 리뷰</p>
+          <div class="badges">
+            <span class="badge">개발</span>
+            <span class="badge model-gpt"><span class="swatch" aria-hidden="true"></span>GPT-4</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">128</span>회</span>
+            <span class="ver">v2</span>
+            <span class="when">어제</span>
+          </div>
+        </article>
+
+        <!-- 3 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">고객 응대 톤 변환기</h3>
+            <button class="fav" aria-pressed="true" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">딱딱한 답변을 친근하게</p>
+          <div class="badges">
+            <span class="badge">CS</span>
+            <span class="badge model-claude"><span class="swatch" aria-hidden="true"></span>Claude</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">512</span>회</span>
+            <span class="ver">v5</span>
+            <span class="when">3일 전</span>
+          </div>
+        </article>
+
+        <!-- 4 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">회의록 요약</h3>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">긴 회의록에서 액션 아이템 추출</p>
+          <div class="badges">
+            <span class="badge">생산성</span>
+            <span class="badge model-gpt"><span class="swatch" aria-hidden="true"></span>GPT-4</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">89</span>회</span>
+            <span class="ver">v1</span>
+            <span class="when">1주 전</span>
+          </div>
+        </article>
+
+        <!-- 5 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">제품명 브레인스토머</h3>
+            <button class="fav" aria-pressed="false" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">키워드 넣으면 이름 20개</p>
+          <div class="badges">
+            <span class="badge">마케팅</span>
+            <span class="badge model-claude"><span class="swatch" aria-hidden="true"></span>Claude</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">47</span>회</span>
+            <span class="ver">v2</span>
+            <span class="when">2주 전</span>
+          </div>
+        </article>
+
+        <!-- 6 -->
+        <article class="card" tabindex="0">
+          <div class="card-actions">
+            <button class="action-btn run">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3.5 2.5v7l6-3.5-6-3.5Z" fill="currentColor"/></svg>
+              실행
+            </button>
+            <button class="action-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M7 2 10 5 4.5 10.5 2 11l.5-2.5L7 2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              편집
+            </button>
+          </div>
+          <div class="card-top">
+            <h3 class="card-title">SQL 생성기</h3>
+            <button class="fav" aria-pressed="true" aria-label="즐겨찾기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z"/></svg>
+            </button>
+          </div>
+          <p class="card-desc">자연어를 쿼리로</p>
+          <div class="badges">
+            <span class="badge">개발</span>
+            <span class="badge model-gpt"><span class="swatch" aria-hidden="true"></span>GPT-4</span>
+          </div>
+          <div class="card-meta">
+            <span class="m"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2.5v7l5-3.5-5-3.5Z" fill="currentColor" opacity=".7"/></svg><span class="tnum">203</span>회</span>
+            <span class="ver">v4</span>
+            <span class="when">4일 전</span>
+          </div>
+        </article>
+
+      </section>
+    </main>
+
+    <footer>
+      <span class="mono">PromptHub</span>
+      <span class="dot-sep">·</span>
+      <span>다크 프로 미니멀</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+  (function () {
+    // 사이드바 접힘 토글 (900px↓)
+    var toggle = document.getElementById('menuToggle');
+    var sidebar = document.getElementById('sidebar');
+    var scrim = document.getElementById('scrim');
+
+    function open() {
+      sidebar.classList.add('open');
+      scrim.classList.add('show');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+    function close() {
+      sidebar.classList.remove('open');
+      scrim.classList.remove('show');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+    }
+    if (scrim) scrim.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+
+    // 즐겨찾기 토글
+    document.querySelectorAll('.fav').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var on = btn.getAttribute('aria-pressed') === 'true';
+        btn.setAttribute('aria-pressed', String(!on));
+        btn.innerHTML = !on
+          ? '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.8l1.7 3.9 4.2.4-3.2 2.8.97 4.1L8 10.9 4.3 13l1-4.1L2 6.1l4.2-.4L8 1.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+      });
+    });
+  })();
+</script>
+</body>
+</html>

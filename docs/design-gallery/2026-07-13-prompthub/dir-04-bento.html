@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptHub · 벤토 그리드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --card: #FFFFFF;
+    --card-alt: #FAFAFA;
+    --fg: #18181B;
+    --muted: #71717A;
+    --muted-2: #A1A1AA;
+    --border: #E4E4E7;
+    --border-strong: #D4D4D8;
+    --point: #6366F1;
+    --point-tint: rgba(99, 102, 241, 0.07);
+    --danger: #EF4444;
+    --ok: #10B981;
+    --claude: #7C3AED;
+    --claude-bg: rgba(124, 58, 237, 0.10);
+    --gpt: #059669;
+    --gpt-bg: rgba(5, 150, 105, 0.10);
+    --shadow-flat: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.10);
+    --radius-card: 22px;
+    --radius-inner: 10px;
+    --radius-pill: 999px;
+    --gap: 16px;
+    --sidebar-w: 248px;
+    --font: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #09090B;
+      --card: #18181B;
+      --card-alt: #1C1C20;
+      --fg: #FAFAFA;
+      --muted: #A1A1AA;
+      --muted-2: #71717A;
+      --border: #27272A;
+      --border-strong: #3F3F46;
+      --point-tint: rgba(99, 102, 241, 0.14);
+      --claude-bg: rgba(124, 58, 237, 0.20);
+      --gpt-bg: rgba(5, 150, 105, 0.18);
+      --shadow-flat: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09090B; --card: #18181B; --card-alt: #1C1C20; --fg: #FAFAFA;
+    --muted: #A1A1AA; --muted-2: #71717A; --border: #27272A; --border-strong: #3F3F46;
+    --point-tint: rgba(99,102,241,0.14); --claude-bg: rgba(124,58,237,0.20);
+    --gpt-bg: rgba(5,150,105,0.18); --shadow-flat: 0 1px 3px rgba(0,0,0,0.4);
+    --shadow-lift: 0 8px 24px rgba(0,0,0,0.55);
+  }
+  :root[data-theme="light"] {
+    --bg: #F4F4F5; --card: #FFFFFF; --card-alt: #FAFAFA; --fg: #18181B;
+    --muted: #71717A; --muted-2: #A1A1AA; --border: #E4E4E7; --border-strong: #D4D4D8;
+    --point-tint: rgba(99,102,241,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  /* ---------- App shell ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+  }
+  .brand-mark {
+    width: 32px; height: 32px;
+    flex: 0 0 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--point), #8B8DF5);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    box-shadow: var(--shadow-flat);
+  }
+  .brand-mark svg { width: 18px; height: 18px; }
+  .brand-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: var(--radius-inner);
+    color: var(--muted);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex: 0 0 18px; stroke-width: 1.8; }
+  .nav-item:hover { background: var(--card); color: var(--fg); }
+  .nav-item.active {
+    background: var(--point-tint);
+    color: var(--point);
+    font-weight: 600;
+  }
+  .nav-item.active svg { stroke: var(--point); }
+  .nav-item:focus-visible {
+    outline: 2px solid var(--point);
+    outline-offset: 2px;
+  }
+
+  .tree {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .tree-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    padding: 4px 12px 8px;
+  }
+  .tree-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .tree-item svg { width: 15px; height: 15px; flex: 0 0 15px; stroke-width: 1.8; opacity: 0.8; }
+  .tree-item:hover { background: var(--card); color: var(--fg); }
+  .tree-item.root { color: var(--fg); font-weight: 500; }
+  .tree-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted-2);
+  }
+
+  /* ---------- Main ---------- */
+  .main {
+    padding: 20px 28px 40px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    background: linear-gradient(var(--bg) 72%, rgba(244,244,245,0));
+    flex-wrap: wrap;
+  }
+  @media (prefers-color-scheme: dark) {
+    .topbar { background: linear-gradient(var(--bg) 72%, rgba(9,9,11,0)); }
+  }
+
+  .search {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 200px;
+    max-width: 420px;
+  }
+  .search svg {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    width: 17px; height: 17px;
+    stroke: var(--muted-2);
+    stroke-width: 1.9;
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 40px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    background: var(--card);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .search input::placeholder { color: var(--muted-2); }
+  .search input:focus {
+    outline: none;
+    border-color: var(--point);
+    box-shadow: 0 0 0 3px var(--point-tint);
+  }
+
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    background: var(--card);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .filter:hover { border-color: var(--border-strong); background: var(--card-alt); }
+  .filter:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+  .filter .chev { width: 13px; height: 13px; stroke: var(--muted); stroke-width: 2; }
+
+  .spacer { flex: 1 1 auto; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: var(--radius-inner);
+    background: var(--point);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-flat);
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  }
+  .btn-primary svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 2.2; }
+  .btn-primary:hover { background: #5457E5; box-shadow: var(--shadow-lift); }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+
+  .avatar {
+    width: 40px; height: 40px;
+    flex: 0 0 40px;
+    border-radius: var(--radius-pill);
+    display: grid;
+    place-items: center;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+  }
+  .avatar:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+
+  /* ---------- Bento grids ---------- */
+  .bento {
+    display: grid;
+    gap: var(--gap);
+  }
+
+  /* summary bento */
+  .bento-summary {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-areas: "s1 s1 s2 s3";
+  }
+  .kpi-1 { grid-area: s1; }
+  .kpi-2 { grid-area: s2; }
+  .kpi-3 { grid-area: s3; }
+
+  /* prompt bento */
+  .bento-prompts {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(132px, auto);
+    grid-template-areas:
+      "a a b c"
+      "a a d c"
+      "e e d f";
+  }
+  .card-a { grid-area: a; }
+  .card-b { grid-area: b; }
+  .card-c { grid-area: c; }
+  .card-d { grid-area: d; }
+  .card-e { grid-area: e; }
+  .card-f { grid-area: f; }
+
+  /* ---------- Card base ---------- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    box-shadow: var(--shadow-flat);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  .card:focus-visible {
+    outline: 2px solid var(--point);
+    outline-offset: 2px;
+  }
+  .card.hoverable:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+  .card.tint { background: var(--card-alt); }
+  .card.tint-point { background: var(--point-tint); }
+
+  /* ---------- KPI cards ---------- */
+  .kpi {
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .kpi-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .kpi-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--point);
+  }
+  .kpi-icon svg { width: 17px; height: 17px; stroke: var(--point); stroke-width: 1.9; }
+  .card.tint-point .kpi-icon { background: rgba(99,102,241,0.14); }
+  .kpi-value {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .kpi-value .unit {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+  }
+  .kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .kpi-trend .arrow { color: var(--muted-2); transition: color 0.2s ease; }
+  .kpi-1:hover .arrow.up { color: var(--ok); }
+  .kpi-3:hover .arrow.up { color: var(--ok); }
+
+  /* ---------- Prompt cards ---------- */
+  .prompt {
+    gap: 12px;
+    cursor: pointer;
+  }
+  .prompt-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .prompt-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .card-a .prompt-title { font-size: 22px; }
+  .fav {
+    flex: 0 0 auto;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--muted-2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 6px;
+    transition: transform 0.15s ease;
+  }
+  .fav.on { color: #F5B301; }
+  .fav:hover { transform: scale(1.15); }
+  .fav:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+
+  .prompt-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .card-a .prompt-desc { font-size: 15px; }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: var(--radius-pill);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .badge.tag {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .badge.model-claude { background: var(--claude-bg); color: var(--claude); }
+  .badge.model-gpt { background: var(--gpt-bg); color: var(--gpt); }
+  .badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    margin-right: 5px;
+  }
+  .badge.model-claude .dot { background: var(--claude); }
+  .badge.model-gpt .dot { background: var(--gpt); }
+
+  .prompt-meta {
+    margin-top: auto;
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .meta-item svg { width: 13px; height: 13px; stroke: var(--muted-2); stroke-width: 1.8; }
+  .ver {
+    display: inline-flex;
+    align-items: center;
+    height: 19px;
+    padding: 0 7px;
+    border-radius: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .meta-time { margin-left: auto; color: var(--muted-2); }
+
+  /* hover actions */
+  .actions {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+  }
+  .prompt:hover .actions,
+  .prompt:focus-within .actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-a .actions { top: 20px; right: 20px; }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 30px;
+    padding: 0 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-flat);
+    transition: background 0.14s ease, border-color 0.14s ease;
+  }
+  .action-btn svg { width: 13px; height: 13px; stroke-width: 2; }
+  .action-btn.run { background: var(--point); color: #fff; border-color: var(--point); }
+  .action-btn.run svg { stroke: #fff; }
+  .action-btn.run:hover { background: #5457E5; }
+  .action-btn.edit:hover { background: var(--card-alt); border-color: var(--border-strong); }
+  .action-btn:focus-visible { outline: 2px solid var(--point); outline-offset: 2px; }
+
+  /* fav card wrapper avoids conflicting with fav star focus */
+  .card-a { justify-content: flex-start; }
+  .card-a .prompt-desc { margin-bottom: 4px; }
+
+  /* ---------- Footer ---------- */
+  .foot {
+    margin-top: 8px;
+    padding: 8px 4px;
+    font-size: 12px;
+    color: var(--muted-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .foot .dot-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--muted-2); }
+
+  /* ---------- Stagger entrance ---------- */
+  .stagger {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 0.4s ease-out forwards;
+  }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .bento-prompts {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-areas:
+        "a a b"
+        "a a c"
+        "e d c"
+        "e d f";
+    }
+  }
+
+  @media (max-width: 900px) {
+    :root { --sidebar-w: 64px; }
+    .app { grid-template-columns: var(--sidebar-w) 1fr; }
+    .brand { justify-content: center; padding: 6px 0; }
+    .brand-name, .nav-item span, .tree, .tree-title { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .sidebar { padding: 20px 8px; }
+    .main { padding: 16px 18px 36px; }
+    .bento-summary {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-areas:
+        "s1 s1"
+        "s2 s3";
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bento-prompts {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: minmax(140px, auto);
+      grid-template-areas:
+        "a a"
+        "a a"
+        "b c"
+        "e c"
+        "e d"
+        "f d";
+    }
+    .search { flex-basis: 100%; max-width: none; order: -1; }
+  }
+
+  @media (max-width: 480px) {
+    .filter span { display: none; }
+    .btn-primary span { display: none; }
+    .btn-primary { padding: 0 12px; }
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .stagger { opacity: 1; transform: none; animation: none; }
+    .card.hoverable:hover { transform: none; }
+    .actions { transition: opacity 0.01s; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.08s !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" aria-label="사이드바">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      </span>
+      <span class="brand-name">PromptHub</span>
+    </div>
+
+    <nav class="nav" aria-label="주 메뉴">
+      <button class="nav-item active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>라이브러리</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>에디터</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+        <span>테스트</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>팀</span>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>설정</span>
+      </button>
+    </nav>
+
+    <div class="tree" aria-label="폴더">
+      <div class="tree-title">폴더</div>
+      <div class="tree-item root">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v13h18V9H12L10 7H3z"/></svg>
+        <span>전체 프롬프트</span><span class="tree-count num">128</span>
+      </div>
+      <div class="tree-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/></svg>
+        <span>마케팅</span><span class="tree-count num">21</span>
+      </div>
+      <div class="tree-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/></svg>
+        <span>개발</span><span class="tree-count num">44</span>
+      </div>
+      <div class="tree-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/></svg>
+        <span>글쓰기</span><span class="tree-count num">38</span>
+      </div>
+      <div class="tree-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 8V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/></svg>
+        <span>CS</span><span class="tree-count num">25</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <!-- ---------- Topbar ---------- -->
+    <div class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="프롬프트 검색" aria-label="프롬프트 검색">
+      </div>
+      <button class="filter"><span>태그</span> <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button class="filter"><span>모델</span> <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="spacer"></div>
+      <button class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span>새 프롬프트</span>
+      </button>
+      <div class="avatar" tabindex="0" role="button" aria-label="내 계정">PH</div>
+    </div>
+
+    <!-- ---------- Summary bento ---------- -->
+    <section class="bento bento-summary" aria-label="요약">
+      <div class="card kpi kpi-1 tint-point stagger" style="animation-delay:.02s">
+        <div class="kpi-top">
+          <span class="kpi-label">이번 주 실행</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+        </div>
+        <div class="kpi-value num"><span data-count="1240">1,240</span><span class="unit">회</span></div>
+        <span class="kpi-trend"><span class="arrow up">▲</span> 전주 대비 활발</span>
+      </div>
+
+      <div class="card kpi kpi-2 stagger" style="animation-delay:.08s">
+        <div class="kpi-top">
+          <span class="kpi-label">전체 프롬프트</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        </div>
+        <div class="kpi-value num"><span data-count="128">128</span><span class="unit">개</span></div>
+        <span class="kpi-trend"><span class="arrow">•</span> 라이브러리 전체</span>
+      </div>
+
+      <div class="card kpi kpi-3 stagger" style="animation-delay:.14s">
+        <div class="kpi-top">
+          <span class="kpi-label">팀 공유</span>
+          <span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+        </div>
+        <div class="kpi-value num"><span data-count="34">34</span><span class="unit">개</span></div>
+        <span class="kpi-trend"><span class="arrow up">▲</span> 공유 중</span>
+      </div>
+    </section>
+
+    <!-- ---------- Prompt bento ---------- -->
+    <section class="bento bento-prompts" aria-label="프롬프트 카드">
+
+      <!-- A — hero -->
+      <article class="card prompt hoverable card-a stagger" tabindex="0" style="animation-delay:.10s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">고객 응대 톤 변환기</h3>
+          <button class="fav on" aria-label="즐겨찾기" aria-pressed="true">★</button>
+        </div>
+        <p class="prompt-desc">딱딱한 답변을 친근하게</p>
+        <div class="badges">
+          <span class="badge tag">CS</span>
+          <span class="badge model-claude"><span class="dot"></span>Claude</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">512</span>회</span>
+          <span class="ver">v5</span>
+          <span class="meta-time">3일 전</span>
+        </div>
+      </article>
+
+      <!-- B — small -->
+      <article class="card prompt hoverable card-b stagger" tabindex="0" style="animation-delay:.16s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">제품명 브레인스토머</h3>
+          <button class="fav" aria-label="즐겨찾기" aria-pressed="false">☆</button>
+        </div>
+        <p class="prompt-desc">키워드 넣으면 이름 20개</p>
+        <div class="badges">
+          <span class="badge tag">마케팅</span>
+          <span class="badge model-claude"><span class="dot"></span>Claude</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">47</span>회</span>
+          <span class="ver">v2</span>
+          <span class="meta-time">2주 전</span>
+        </div>
+      </article>
+
+      <!-- C — tall -->
+      <article class="card prompt hoverable card-c stagger" tabindex="0" style="animation-delay:.22s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">블로그 초안 생성기</h3>
+          <button class="fav on" aria-label="즐겨찾기" aria-pressed="true">★</button>
+        </div>
+        <p class="prompt-desc">주제만 넣으면 SEO 최적화 초안</p>
+        <div class="badges">
+          <span class="badge tag">글쓰기</span>
+          <span class="badge model-claude"><span class="dot"></span>Claude</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">340</span>회</span>
+          <span class="ver">v3</span>
+          <span class="meta-time">2시간 전</span>
+        </div>
+      </article>
+
+      <!-- D — tall -->
+      <article class="card prompt hoverable card-d stagger" tabindex="0" style="animation-delay:.28s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">SQL 생성기</h3>
+          <button class="fav on" aria-label="즐겨찾기" aria-pressed="true">★</button>
+        </div>
+        <p class="prompt-desc">자연어를 쿼리로</p>
+        <div class="badges">
+          <span class="badge tag">개발</span>
+          <span class="badge model-gpt"><span class="dot"></span>GPT-4</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">203</span>회</span>
+          <span class="ver">v4</span>
+          <span class="meta-time">4일 전</span>
+        </div>
+      </article>
+
+      <!-- E — wide -->
+      <article class="card prompt hoverable card-e stagger" tabindex="0" style="animation-delay:.34s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">코드 리뷰어</h3>
+          <button class="fav" aria-label="즐겨찾기" aria-pressed="false">☆</button>
+        </div>
+        <p class="prompt-desc">PR diff 붙여넣으면 라인별 리뷰</p>
+        <div class="badges">
+          <span class="badge tag">개발</span>
+          <span class="badge model-gpt"><span class="dot"></span>GPT-4</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">128</span>회</span>
+          <span class="ver">v2</span>
+          <span class="meta-time">어제</span>
+        </div>
+      </article>
+
+      <!-- F — small -->
+      <article class="card prompt hoverable card-f stagger" tabindex="0" style="animation-delay:.40s">
+        <div class="actions">
+          <button class="action-btn run"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>실행</button>
+          <button class="action-btn edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>편집</button>
+        </div>
+        <div class="prompt-head">
+          <h3 class="prompt-title">회의록 요약</h3>
+          <button class="fav" aria-label="즐겨찾기" aria-pressed="false">☆</button>
+        </div>
+        <p class="prompt-desc">긴 회의록에서 액션 아이템 추출</p>
+        <div class="badges">
+          <span class="badge tag">생산성</span>
+          <span class="badge model-gpt"><span class="dot"></span>GPT-4</span>
+        </div>
+        <div class="prompt-meta">
+          <span class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg><span class="num">89</span>회</span>
+          <span class="ver">v1</span>
+          <span class="meta-time">1주 전</span>
+        </div>
+      </article>
+
+    </section>
+
+    <footer class="foot">
+      <span>PromptHub</span><span class="dot-sep"></span><span>벤토 그리드</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function fmt(n) { return n.toLocaleString("en-US"); }
+
+  function countUp(el) {
+    var target = parseInt(el.getAttribute("data-count"), 10);
+    if (isNaN(target)) return;
+    if (reduce) { el.textContent = fmt(target); return; }
+    var dur = 600, start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = fmt(target);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function run() {
+    var nums = document.querySelectorAll("[data-count]");
+    for (var i = 0; i < nums.length; i++) countUp(nums[i]);
+  }
+
+  // Favorite toggle
+  document.addEventListener("click", function (e) {
+    var fav = e.target.closest ? e.target.closest(".fav") : null;
+    if (!fav) return;
+    e.stopPropagation();
+    var on = fav.classList.toggle("on");
+    fav.textContent = on ? "★" : "☆";
+    fav.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else { run(); }
+})();
+</script>
+</body>
+</html>

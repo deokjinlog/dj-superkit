@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUJINE · 통계 리포트 · 컬러풀 모던</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  /* palette */
+  --bg:#F6F9FC;
+  --surface:#FFFFFF;
+  --surface-alt:#EEF2FF;
+  --border:#E3E8EF;
+  --border-strong:#D5DCE6;
+  --primary:#635BFF;
+  --primary-hover:#5548E8;
+  --on-primary:#FFFFFF;
+  --violet:#7A5AF8;
+  --teal:#00C2B8;
+  --pink:#FF6699;
+  --amber:#FFB020;
+  --text:#0A2540;
+  --subtext:#425466;
+  --muted:#8792A2;
+  --success:#00A87E;
+  --warning:#E5A000;
+  --danger:#E5484D;
+  --grad-primary:linear-gradient(135deg,#635BFF 0%,#7A5AF8 100%);
+  --grad-kpi:linear-gradient(135deg,#00C2B8 0%,#635BFF 100%);
+  /* shadow */
+  --shadow-rest:0 1px 2px rgba(10,37,64,.06),0 4px 12px rgba(10,37,64,.05);
+  --shadow-hover:0 4px 8px rgba(99,91,255,.12),0 12px 28px rgba(99,91,255,.14);
+  --shadow-pop:0 8px 24px rgba(10,37,64,.10);
+  /* radius */
+  --r-card:16px;
+  --r-ctl:10px;
+  --r-pill:999px;
+  /* motion */
+  --ease:cubic-bezier(.4,0,.2,1);
+  --num:"Pretendard",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Pretendard",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  font-size:15px;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+svg{display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+
+/* ===== app grid ===== */
+.app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+
+/* ===== sidebar (vivid gradient signature block) ===== */
+.side{
+  background:var(--grad-primary);
+  background-color:#635BFF;
+  color:#fff;
+  padding:24px 16px;
+  display:flex;flex-direction:column;gap:24px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  animation:slidein .28s var(--ease) both;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px}
+.brand-mark{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.16);display:grid;place-items:center;position:relative}
+.brand-mark span{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.22)}
+.brand-name{font-size:18px;font-weight:700;letter-spacing:.04em}
+.brand-sub{font-size:11px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.72);text-transform:uppercase}
+.nav-label{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.6);padding:0 10px;margin-bottom:2px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:var(--r-ctl);
+  color:rgba(255,255,255,.82);font-size:14px;font-weight:500;
+  transition:background .16s var(--ease),color .16s var(--ease),transform .16s var(--ease);
+}
+.nav-item svg{width:19px;height:19px;flex:none;stroke-width:1.75}
+.nav-item:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-item:active{transform:translateX(1px)}
+.nav-item.active{background:#fff;color:var(--primary);font-weight:600;box-shadow:0 4px 12px rgba(10,37,64,.18)}
+.nav-item:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.nav-badge{margin-left:auto;font-size:11px;font-weight:700;background:rgba(255,255,255,.2);border-radius:var(--r-pill);padding:1px 8px}
+.nav-item.active .nav-badge{background:var(--surface-alt);color:var(--primary)}
+.side-foot{margin-top:auto;padding:12px 10px 4px;border-top:1px solid rgba(255,255,255,.16);font-size:12px;color:rgba(255,255,255,.72);line-height:1.55}
+.side-foot b{color:#fff;font-weight:600}
+
+/* ===== main ===== */
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:none;
+  border-bottom:1px solid var(--border);
+  padding:16px 32px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.topbar-titles{margin-right:auto;min-width:0}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.page-crumb{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--muted);display:flex;align-items:center;gap:6px}
+.page-crumb .dot{width:4px;height:4px;border-radius:50%;background:var(--border-strong)}
+
+/* controls */
+.ctl{
+  display:inline-flex;align-items:center;gap:8px;height:38px;
+  padding:0 14px;border-radius:var(--r-ctl);
+  font-size:14px;font-weight:600;color:var(--subtext);
+  border:1px solid var(--border);background:var(--surface);
+  transition:border-color .16s var(--ease),box-shadow .16s var(--ease),background .16s var(--ease),color .16s var(--ease),transform .12s var(--ease);
+}
+.ctl svg{width:17px;height:17px;stroke-width:1.75}
+.ctl:hover{border-color:var(--border-strong);box-shadow:var(--shadow-rest)}
+.ctl:active{transform:translateY(1px)}
+.ctl:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.ctl .chev{color:var(--muted);transition:transform .18s var(--ease)}
+.ctl.period{color:var(--text)}
+.ctl.period .cal{color:var(--primary)}
+.ctl.compare .sw{width:15px;height:15px;color:var(--primary)}
+.ctl.primary{
+  background:var(--grad-primary);background-color:var(--primary);
+  color:var(--on-primary);border-color:transparent;position:relative;overflow:hidden;
+  box-shadow:0 2px 8px rgba(99,91,255,.28);
+}
+.ctl.primary:hover{background:linear-gradient(120deg,#6d64ff 0%,#8466ff 100%);box-shadow:0 4px 14px rgba(99,91,255,.4)}
+.ctl.primary:active{transform:scale(.98)}
+.ctl.primary .shimmer{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%)}
+
+/* content */
+.content{padding:24px 32px 8px;display:flex;flex-direction:column;gap:24px}
+.section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:-8px}
+.section-head h2{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.section-head .hint{font-size:12px;font-weight:500;color:var(--muted)}
+
+/* ===== KPI row ===== */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+  padding:20px;box-shadow:var(--shadow-rest);
+  display:flex;flex-direction:column;gap:14px;position:relative;
+  transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s var(--ease);
+  animation:rise .24s var(--ease) both;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);border-color:rgba(99,91,255,.35)}
+.kpi:nth-child(1){animation-delay:.02s}
+.kpi:nth-child(2){animation-delay:.07s}
+.kpi:nth-child(3){animation-delay:.12s}
+.kpi:nth-child(4){animation-delay:.17s}
+.kpi-top{display:flex;align-items:center;gap:10px}
+.kpi-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.kpi-ico svg{width:19px;height:19px;stroke-width:1.85}
+.ico-indigo{background:rgba(99,91,255,.12);color:var(--primary)}
+.ico-teal{background:rgba(0,194,184,.14);color:#00998f}
+.ico-amber{background:rgba(255,176,32,.16);color:#B57400}
+.ico-pink{background:rgba(255,102,153,.14);color:#D63A6E}
+.kpi-name{font-size:13px;font-weight:600;color:var(--subtext)}
+.kpi-val{font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.kpi-val .cur{font-size:19px;font-weight:600;color:var(--muted);margin-right:2px}
+.kpi-val .unit{font-size:15px;font-weight:600;color:var(--muted);margin-left:3px}
+.kpi-foot{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:500}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;border-radius:var(--r-pill);padding:2px 9px 2px 7px}
+.delta svg{width:12px;height:12px;stroke-width:2.4}
+.delta.up{background:rgba(0,168,126,.12);color:var(--success)}
+.delta.good{background:rgba(0,194,184,.14);color:#009087}
+.delta.down{background:rgba(255,102,153,.14);color:#D63A6E}
+
+/* highlight KPI — gradient surface (only one) */
+.kpi.hl{
+  background:var(--grad-kpi);background-color:var(--primary);
+  border-color:transparent;color:#fff;box-shadow:0 6px 20px rgba(45,120,220,.32);
+}
+.kpi.hl:hover{box-shadow:0 10px 30px rgba(45,120,220,.42)}
+.kpi.hl .kpi-name{color:rgba(255,255,255,.9)}
+.kpi.hl .kpi-ico{background:rgba(255,255,255,.2);color:#fff}
+.kpi.hl .kpi-val .cur,.kpi.hl .kpi-val .unit{color:rgba(255,255,255,.82)}
+.kpi.hl .kpi-foot{color:rgba(255,255,255,.82)}
+.kpi.hl .delta.up{background:rgba(255,255,255,.22);color:#fff}
+
+/* ===== charts row ===== */
+.charts{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+  box-shadow:var(--shadow-rest);padding:20px 22px;
+  transition:box-shadow .18s var(--ease),border-color .18s var(--ease);
+}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.card-head .ct{min-width:0}
+.card-head h3{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.card-head .sub{font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}
+.card-head .peaktag{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--primary);background:var(--surface-alt);border-radius:var(--r-pill);padding:4px 10px}
+.card-head .peaktag i{width:7px;height:7px;border-radius:50%;background:var(--primary);display:inline-block}
+
+/* line chart */
+.linewrap{width:100%;overflow-x:auto}
+.linechart{width:100%;min-width:520px;height:auto;font-variant-numeric:tabular-nums}
+.grid-line{stroke:var(--border);stroke-width:1}
+.grid-zero{stroke:var(--border-strong);stroke-width:1.5}
+.axis-label{fill:var(--muted);font-size:11px;font-weight:600;font-family:"Pretendard",sans-serif}
+.x-label{fill:var(--muted);font-size:11px;font-weight:600;font-family:"Pretendard",sans-serif}
+.line-path{fill:none;stroke:url(#lineGrad);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1800;stroke-dashoffset:0;}
+.dot{fill:#fff;stroke:var(--primary);stroke-width:2.5}
+.dot-peak{fill:var(--primary);stroke:#fff;stroke-width:2.5}
+.peak-cap{fill:var(--primary);font-size:12px;font-weight:700;font-family:"Pretendard",sans-serif}
+.peak-cap-bg{fill:#fff;opacity:.85}
+
+/* bar chart */
+.bars{display:flex;flex-direction:column;gap:16px}
+.bar-row{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px}
+.bar-cat{font-size:13px;font-weight:600;color:var(--subtext);white-space:nowrap}
+.bar-track{height:12px;border-radius:var(--r-pill);background:var(--surface-alt);overflow:hidden}
+.bar-fill{height:100%;border-radius:var(--r-pill);width:var(--w);transform-origin:left center;position:relative}
+.bar-fill::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,rgba(255,255,255,.18),transparent 60%)}
+.bar-meta{display:flex;align-items:center;gap:10px;justify-content:flex-end;min-width:118px}
+.bar-val{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.bar-pct{font-size:12px;font-weight:600;color:var(--muted);width:34px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ===== table ===== */
+.table-card{padding:0;overflow:hidden}
+.table-top{display:flex;align-items:center;gap:12px;padding:20px 22px 16px}
+.table-top h3{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.table-top .sub{font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}
+.table-search{margin-left:auto;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:var(--r-ctl);border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:border-color .16s var(--ease),box-shadow .16s var(--ease)}
+.table-search svg{width:16px;height:16px;stroke-width:1.75}
+.table-search input{border:none;outline:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--text);width:120px}
+.table-search input::placeholder{color:var(--muted)}
+.table-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,91,255,.16)}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:620px}
+thead th{
+  text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);padding:10px 22px;background:var(--surface-alt);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;
+  user-select:none;transition:color .14s var(--ease),background .14s var(--ease);white-space:nowrap;
+}
+thead th:hover{color:var(--primary);background:#E6EBFF}
+thead th.num{text-align:right}
+thead th .sortic{display:inline-flex;vertical-align:-2px;margin-left:4px;color:var(--primary)}
+thead th .sortic svg{width:13px;height:13px;stroke-width:2.2}
+tbody td{padding:14px 22px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
+tbody tr{transition:background .14s var(--ease)}
+tbody tr:hover{background:#F7F9FF}
+tbody tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.rank{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.rank-1{background:var(--grad-primary);background-color:var(--primary);color:#fff}
+.rank-2{background:rgba(122,90,248,.16);color:var(--violet)}
+.rank-3{background:rgba(0,194,184,.16);color:#009087}
+.rank-x{background:var(--surface-alt);color:var(--muted)}
+.prod{display:flex;align-items:center;gap:12px}
+.prod-thumb{width:38px;height:38px;border-radius:10px;flex:none;position:relative;overflow:hidden}
+.prod-name{font-weight:600;color:var(--text)}
+.prod-sku{font-size:12px;color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+.share{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.share-bar{width:52px;height:6px;border-radius:var(--r-pill);background:var(--surface-alt);overflow:hidden}
+.share-bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--grad-primary);background-color:var(--primary)}
+.share-pct{font-size:13px;font-weight:700;width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.trend{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700}
+.trend svg{width:12px;height:12px;stroke-width:2.4}
+.trend.up{color:var(--success)}
+.trend.down{color:var(--pink)}
+.table-foot{display:flex;align-items:center;gap:8px;padding:14px 22px;font-size:13px;color:var(--muted);font-weight:500;border-top:1px solid var(--border)}
+.table-foot .link{color:var(--primary);font-weight:700;margin-left:auto;position:relative;padding-bottom:2px}
+.table-foot .link::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1.5px;background:var(--primary);transition:width .16s var(--ease)}
+.table-foot .link:hover::after{width:100%}
+
+/* footer */
+.pagefoot{
+  padding:20px 32px 28px;color:var(--muted);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.pagefoot .fdot{width:5px;height:5px;border-radius:50%;background:var(--primary)}
+.pagefoot b{color:var(--subtext);font-weight:600}
+
+/* ===== animations (motion-safe only) ===== */
+@keyframes slidein{from{transform:translateX(-16px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+@keyframes drawline{from{stroke-dashoffset:1800}to{stroke-dashoffset:0}}
+@keyframes growbar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@keyframes areafill{from{opacity:0}to{opacity:1}}
+
+@media (prefers-reduced-motion:no-preference){
+  .side{animation:slidein .28s var(--ease) both}
+  .line-path{animation:drawline .8s var(--ease) .3s both}
+  .area-fill{animation:areafill .6s var(--ease) .5s both}
+  .bar-fill{animation:growbar .6s var(--ease) both}
+  .bar-row:nth-child(1) .bar-fill{animation-delay:.35s}
+  .bar-row:nth-child(2) .bar-fill{animation-delay:.42s}
+  .bar-row:nth-child(3) .bar-fill{animation-delay:.49s}
+  .bar-row:nth-child(4) .bar-fill{animation-delay:.56s}
+  .bar-row:nth-child(5) .bar-fill{animation-delay:.63s}
+  tbody tr{animation:fadein .3s var(--ease) both}
+  tbody tr:nth-child(1){animation-delay:.72s}
+  tbody tr:nth-child(2){animation-delay:.745s}
+  tbody tr:nth-child(3){animation-delay:.77s}
+  tbody tr:nth-child(4){animation-delay:.795s}
+  tbody tr:nth-child(5){animation-delay:.82s}
+  tbody tr:nth-child(6){animation-delay:.845s}
+  .ctl.primary .shimmer{animation:shimmer .7s var(--ease) .95s 1}
+}
+@media (prefers-reduced-motion:reduce){
+  .side,.kpi{animation:none!important}
+}
+
+/* ===== responsive ===== */
+@media (max-width:1180px){
+  .charts{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:1024px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px;padding:14px 20px}
+  .side .brand{margin-right:8px}
+  .nav-label,.side-foot{display:none}
+  .nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .nav-item{padding:8px 12px}
+  .nav-item .nav-badge{display:none}
+  .topbar{padding:16px 20px}
+  .content{padding:20px}
+  .pagefoot{padding:16px 20px 24px}
+}
+@media (max-width:620px){
+  .kpis{grid-template-columns:1fr}
+  .topbar{gap:10px}
+  .page-title{font-size:19px}
+  .ctl{height:36px;padding:0 11px;font-size:13px}
+  .content{padding:16px}
+  .card{padding:16px}
+  .table-search{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="side">
+    <div class="brand">
+      <span class="brand-mark"><span></span></span>
+      <div>
+        <div class="brand-name">MUJINE</div>
+        <div class="brand-sub">Seller Admin</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">통계 선택</div>
+      <nav class="nav" aria-label="통계 메뉴">
+        <a class="nav-item active" href="#" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          매출 통계<span class="nav-badge">LIVE</span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6h15l-1.5 8H8L6 6ZM6 6 5 3H3M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          주문 통계
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7l8-4 8 4-8 4-8-4ZM4 7v10l8 4 8-4V7M12 11v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          상품 통계
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM21 20v-2a4 4 0 0 0-3-3.87M16.5 3.13A4 4 0 0 1 16.5 11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          고객 통계
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18M7 14l3-3 3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          트래픽 분석
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9M3 12h4M12 3v4M8 15l4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          환불·취소
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 3v5h5M8 3h6l5 5v13H8a2 2 0 0 1-2-2v-3M4 8h4M4 12h4M4 16h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          정산 리포트
+        </a>
+      </nav>
+    </div>
+
+    <div class="side-foot">
+      데이터 기준 <b>2026.07.14 09:00 KST</b><br>
+      집계 주기 매시간 · 지연 최대 60분
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+
+    <!-- topbar -->
+    <header class="topbar">
+      <div class="topbar-titles">
+        <div class="page-crumb">통계 리포트 <span class="dot"></span> 매출</div>
+        <h1 class="page-title">매출 통계</h1>
+      </div>
+
+      <button class="ctl period" type="button">
+        <svg class="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        최근 30일
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <button class="ctl compare" type="button" aria-pressed="true">
+        <svg class="sw" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 7h11l-3-3M17 17H6l3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        전 기간 비교
+      </button>
+
+      <button class="ctl primary" type="button">
+        <span class="shimmer"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        내보내기
+      </button>
+    </header>
+
+    <div class="content">
+
+      <!-- KPI ROW -->
+      <section aria-label="핵심 지표">
+        <div class="kpis">
+
+          <!-- highlight (gradient) -->
+          <div class="kpi hl">
+            <div class="kpi-top">
+              <span class="kpi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="kpi-name">총 매출</span>
+            </div>
+            <div class="kpi-val tnum"><span class="cur">₩</span>1,265,400,000</div>
+            <div class="kpi-foot">
+              <span class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>12.4%</span>
+              전월 대비 <span class="tnum">+1.39억</span>
+            </div>
+          </div>
+
+          <!-- orders -->
+          <div class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-ico ico-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6h15l-1.5 8H8L6 6ZM6 6 5 3H3M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="kpi-name">주문 수</span>
+            </div>
+            <div class="kpi-val tnum">3,420<span class="unit">건</span></div>
+            <div class="kpi-foot">
+              <span class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>8.1%</span>
+              전월 대비 <span class="tnum">+256건</span>
+            </div>
+          </div>
+
+          <!-- AOV -->
+          <div class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-ico ico-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18M7 14l3-4 3 2 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="kpi-name">객단가 (AOV)</span>
+            </div>
+            <div class="kpi-val tnum"><span class="cur">₩</span>370,000</div>
+            <div class="kpi-foot">
+              <span class="delta up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>4.0%</span>
+              전월 대비 <span class="tnum">+14,200</span>
+            </div>
+          </div>
+
+          <!-- refund rate -->
+          <div class="kpi">
+            <div class="kpi-top">
+              <span class="kpi-ico ico-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9M3 12h4M12 3v4M8 15l4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="kpi-name">환불율</span>
+            </div>
+            <div class="kpi-val tnum">1.2<span class="unit">%</span></div>
+            <div class="kpi-foot">
+              <span class="delta good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>0.3%p</span>
+              개선 · 목표 &lt;2.0%
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- CHARTS ROW -->
+      <section class="charts" aria-label="추이 및 카테고리">
+
+        <!-- line: 매출 추이 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="ct">
+              <h3>매출 추이</h3>
+              <div class="sub">주간 매출 · 최근 8주 (단위 백만원)</div>
+            </div>
+            <span class="peaktag"><i></i>피크 06.23 · ₩189M</span>
+          </div>
+
+          <div class="linewrap">
+            <svg class="linechart" viewBox="0 0 720 268" role="img" aria-label="최근 8주 주간 매출 추이 라인 차트, 06월 23일 189백만원으로 피크">
+              <defs>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#635BFF"/>
+                  <stop offset="1" stop-color="#7A5AF8"/>
+                </linearGradient>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#635BFF" stop-opacity="0.22"/>
+                  <stop offset="1" stop-color="#635BFF" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- gridlines -->
+              <g>
+                <line class="grid-line" x1="48" y1="16"  x2="704" y2="16"/>
+                <line class="grid-line" x1="48" y1="69"  x2="704" y2="69"/>
+                <line class="grid-line" x1="48" y1="122" x2="704" y2="122"/>
+                <line class="grid-line" x1="48" y1="175" x2="704" y2="175"/>
+                <line class="grid-zero" x1="48" y1="228" x2="704" y2="228"/>
+              </g>
+              <!-- y labels -->
+              <g class="axis-label" text-anchor="end">
+                <text x="40" y="20">200</text>
+                <text x="40" y="73">150</text>
+                <text x="40" y="126">100</text>
+                <text x="40" y="179">50</text>
+                <text x="40" y="232">0</text>
+              </g>
+
+              <!-- area -->
+              <path class="area-fill" fill="url(#areaGrad)"
+                d="M48,92.3 141.71,77.5 235.43,82.8 329.14,53.1 422.86,60.5 516.57,27.7 610.29,41.4 704,45.7 L704,228 L48,228 Z"/>
+              <!-- line -->
+              <path class="line-path"
+                d="M48,92.3 141.71,77.5 235.43,82.8 329.14,53.1 422.86,60.5 516.57,27.7 610.29,41.4 704,45.7"/>
+
+              <!-- dots -->
+              <circle class="dot" cx="48"     cy="92.3" r="3.5"/>
+              <circle class="dot" cx="141.71" cy="77.5" r="3.5"/>
+              <circle class="dot" cx="235.43" cy="82.8" r="3.5"/>
+              <circle class="dot" cx="329.14" cy="53.1" r="3.5"/>
+              <circle class="dot" cx="422.86" cy="60.5" r="3.5"/>
+              <circle class="dot-peak" cx="516.57" cy="27.7" r="5"/>
+              <circle class="dot" cx="610.29" cy="41.4" r="3.5"/>
+              <circle class="dot" cx="704"    cy="45.7" r="3.5"/>
+
+              <!-- peak caption -->
+              <rect class="peak-cap-bg" x="486" y="6" width="62" height="17" rx="6"/>
+              <text class="peak-cap" x="517" y="18" text-anchor="middle">₩189M</text>
+
+              <!-- x labels -->
+              <g class="x-label" text-anchor="middle">
+                <text x="48"     y="252">05.19</text>
+                <text x="141.71" y="252">05.26</text>
+                <text x="235.43" y="252">06.02</text>
+                <text x="329.14" y="252">06.09</text>
+                <text x="422.86" y="252">06.16</text>
+                <text x="516.57" y="252">06.23</text>
+                <text x="610.29" y="252">06.30</text>
+                <text x="704"    y="252">07.07</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- bars: 카테고리별 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="ct">
+              <h3>카테고리별 매출</h3>
+              <div class="sub">전체 대비 비중 · 상위 5개</div>
+            </div>
+          </div>
+
+          <div class="bars">
+            <div class="bar-row">
+              <span class="bar-cat">여성의류</span>
+              <div class="bar-track"><span class="bar-fill" style="--w:100%;background:linear-gradient(90deg,#635BFF,#7A5AF8)"></span></div>
+              <span class="bar-meta"><span class="bar-val tnum">4.80억</span><span class="bar-pct tnum">38%</span></span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-cat">남성의류</span>
+              <div class="bar-track"><span class="bar-fill" style="--w:61.7%;background:#7A5AF8"></span></div>
+              <span class="bar-meta"><span class="bar-val tnum">2.96억</span><span class="bar-pct tnum">23%</span></span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-cat">가방·잡화</span>
+              <div class="bar-track"><span class="bar-fill" style="--w:47.5%;background:#00C2B8"></span></div>
+              <span class="bar-meta"><span class="bar-val tnum">2.28억</span><span class="bar-pct tnum">18%</span></span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-cat">슈즈</span>
+              <div class="bar-track"><span class="bar-fill" style="--w:31.7%;background:#FFB020"></span></div>
+              <span class="bar-meta"><span class="bar-val tnum">1.52억</span><span class="bar-pct tnum">12%</span></span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-cat">액세서리</span>
+              <div class="bar-track"><span class="bar-fill" style="--w:22.7%;background:#FF6699"></span></div>
+              <span class="bar-meta"><span class="bar-val tnum">1.09억</span><span class="bar-pct tnum">9%</span></span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- TABLE: 상위 상품 -->
+      <section aria-label="상위 상품">
+        <div class="card table-card">
+          <div class="table-top">
+            <div>
+              <h3>상위 판매 상품</h3>
+              <div class="sub">판매량 기준 · 최근 30일</div>
+            </div>
+            <label class="table-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 21-4.3-4.3M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <input type="text" placeholder="상품 검색" aria-label="상품 검색">
+            </label>
+          </div>
+
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:64px">순위</th>
+                  <th>상품</th>
+                  <th class="num">판매량 <span class="sortic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></th>
+                  <th class="num">매출</th>
+                  <th class="num" style="width:150px">비중</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="rank rank-1 tnum">1</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#635BFF,#7A5AF8)"></span><div><div class="prod-name">오버핏 코튼 셔츠</div><div class="prod-sku">MJ-1042 · 여성의류</div></div></div></td>
+                  <td class="num tnum">1,240</td>
+                  <td class="num tnum">₩186,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:100%"></i></span><span class="share-pct tnum">14.7%</span></span></td>
+                </tr>
+                <tr>
+                  <td><span class="rank rank-2 tnum">2</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#00C2B8,#3D8BFF)"></span><div><div class="prod-name">와이드 데님 팬츠</div><div class="prod-sku">MJ-0887 · 여성의류</div></div></div></td>
+                  <td class="num tnum">980</td>
+                  <td class="num tnum">₩147,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:79%"></i></span><span class="share-pct tnum">11.6%</span></span></td>
+                </tr>
+                <tr>
+                  <td><span class="rank rank-3 tnum">3</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#FFB020,#FF6699)"></span><div><div class="prod-name">램스울 니트 가디건</div><div class="prod-sku">MJ-1120 · 여성의류</div></div></div></td>
+                  <td class="num tnum">860</td>
+                  <td class="num tnum">₩128,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:69%"></i></span><span class="share-pct tnum">10.1%</span></span></td>
+                </tr>
+                <tr>
+                  <td><span class="rank rank-x tnum">4</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#7A5AF8,#FF6699)"></span><div><div class="prod-name">크로스백 미니</div><div class="prod-sku">MJ-0654 · 가방·잡화</div></div></div></td>
+                  <td class="num tnum">720</td>
+                  <td class="num tnum">₩108,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:58%"></i></span><span class="share-pct tnum">8.5%</span></span></td>
+                </tr>
+                <tr>
+                  <td><span class="rank rank-x tnum">5</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#425466,#0A2540)"></span><div><div class="prod-name">첼시 앵클 부츠</div><div class="prod-sku">MJ-0339 · 슈즈</div></div></div></td>
+                  <td class="num tnum">540</td>
+                  <td class="num tnum">₩97,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:52%"></i></span><span class="share-pct tnum">7.7%</span></span></td>
+                </tr>
+                <tr>
+                  <td><span class="rank rank-x tnum">6</span></td>
+                  <td><div class="prod"><span class="prod-thumb" style="background:linear-gradient(135deg,#00C2B8,#635BFF)"></span><div><div class="prod-name">실크 스카프</div><div class="prod-sku">MJ-1201 · 액세서리</div></div></div></td>
+                  <td class="num tnum">610</td>
+                  <td class="num tnum">₩73,000,000</td>
+                  <td class="num"><span class="share"><span class="share-bar"><i style="width:39%"></i></span><span class="share-pct tnum">5.8%</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-foot">
+            상위 6개 상품이 전체 매출의 <b style="color:var(--text)">&nbsp;58.4%</b>&nbsp;를 차지합니다
+            <a class="link" href="#">전체 상품 리포트 →</a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+
+    <footer class="pagefoot">
+      <span class="fdot"></span>
+      <b>MUJINE</b> · 통계 리포트(어드민) · 컬러풀 모던
+    </footer>
+
+  </div><!-- /main -->
+</div>
+</body>
+</html>

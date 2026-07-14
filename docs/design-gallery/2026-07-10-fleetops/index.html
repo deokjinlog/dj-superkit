@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FleetOps — 12 Style Gallery</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-2: #141925;
+    --card: #171c28;
+    --card-hover: #1d2333;
+    --border: #2a3244;
+    --text: #e6eaf2;
+    --muted: #8b93a7;
+    --accent: #5b8cff;
+    --accent-2: #7c5bff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(91,140,255,0.14), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(124,91,255,0.12), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+                 "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 56px 28px 28px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(92deg, #fff 20%, var(--accent) 70%, var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitle {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 640px;
+  }
+  .count-pill {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.02);
+  }
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 28px 80px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 18px 40px -18px rgba(91,140,255,0.5);
+    background: var(--card-hover);
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .num {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+  .name-wrap { min-width: 0; }
+  .style-name {
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .style-en {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .preview {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    background: #05070d;
+    border-bottom: 1px solid var(--border);
+  }
+  /* iframe rendered at a wider logical viewport, then scaled down so
+     the full desktop layout is visible inside the 400px preview box. */
+  .preview iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1400px;
+    height: 1000px;
+    border: 0;
+    transform: scale(0.386);
+    transform-origin: top left;
+    background: #fff;
+    pointer-events: none;
+  }
+  .preview .veil {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    margin-top: auto;
+  }
+  .slug {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .open-link {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text);
+    background: rgba(91,140,255,0.14);
+    border: 1px solid rgba(91,140,255,0.35);
+    transition: background 0.16s ease, border-color 0.16s ease;
+  }
+  .open-link:hover {
+    background: rgba(91,140,255,0.28);
+    border-color: var(--accent);
+  }
+  .open-link svg { width: 14px; height: 14px; }
+  footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 28px 60px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>FleetOps — 12 Style Gallery</h1>
+    <p class="subtitle">
+      동일한 FleetOps 함대 관제 대시보드를 12가지 디자인 언어로 재해석했습니다.
+      각 카드의 미리보기를 훑어보고, 마음에 드는 스타일은 새 탭에서 원본 그대로 열어 확인하세요.
+    </p>
+    <span class="count-pill">12개 스타일 · 반응형 카드 그리드</span>
+  </header>
+
+  <main>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>
+    미리보기는 각 원본 HTML을 iframe으로 축소 렌더링한 것입니다. 인터랙션은 새 탭에서 확인하세요.
+  </footer>
+
+  <script>
+    const styles = [
+      { n: "01", file: "01-sf-hud.html",         ko: "SF 게임 HUD",        en: "Sci-Fi Game HUD" },
+      { n: "02", file: "02-public-portal.html",  ko: "공공데이터 포털",     en: "Public Data Portal" },
+      { n: "03", file: "03-trendy-saas.html",    ko: "트렌디 SaaS",        en: "Trendy SaaS" },
+      { n: "04", file: "04-dense-terminal.html", ko: "고밀도 터미널",       en: "Dense Terminal" },
+      { n: "05", file: "05-brutalism.html",      ko: "브루탈리즘",          en: "Brutalism" },
+      { n: "06", file: "06-glassmorphism.html",  ko: "글래스모피즘",        en: "Glassmorphism" },
+      { n: "07", file: "07-minimal-mono.html",   ko: "미니멀 모노크롬",     en: "Minimal Monochrome" },
+      { n: "08", file: "08-luxury-dark.html",    ko: "럭셔리 다크",         en: "Luxury Dark" },
+      { n: "09", file: "09-retro-pixel.html",    ko: "레트로 픽셀",         en: "Retro Pixel" },
+      { n: "10", file: "10-editorial.html",      ko: "에디토리얼 매거진",   en: "Editorial Magazine" },
+      { n: "11", file: "11-nature-organic.html", ko: "네이처 오가닉",       en: "Nature Organic" },
+      { n: "12", file: "12-neumorphism.html",    ko: "뉴모피즘 소프트",     en: "Neumorphism Soft" },
+    ];
+
+    const openIcon =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M15 3h6v6"/><path d="M10 14 21 3"/>' +
+      '<path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>';
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = styles.map(s => `
+      <article class="card">
+        <div class="card-head">
+          <div class="num">${s.n}</div>
+          <div class="name-wrap">
+            <div class="style-name">${s.ko}</div>
+            <div class="style-en">${s.en}</div>
+          </div>
+        </div>
+        <div class="preview">
+          <iframe src="${s.file}" loading="lazy" title="${s.ko} 미리보기"
+                  scrolling="no" tabindex="-1"></iframe>
+          <div class="veil"></div>
+        </div>
+        <div class="card-foot">
+          <span class="slug">${s.file}</span>
+          <a class="open-link" href="${s.file}" target="_blank" rel="noopener">
+            ${openIcon}<span>새 탭에서 열기</span>
+          </a>
+        </div>
+      </article>
+    `).join("");
+  </script>
+</body>
+</html>

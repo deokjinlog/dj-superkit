@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mintly — 돈 관리, 다정하게</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    /* palette */
+    --bg: #FFFFFF;
+    --surface-soft: #F7F8FA;
+    --surface-hover: #F1F3F5;
+    --card: #FFFFFF;
+    --primary: #3182F6;
+    --primary-press: #1B64DA;
+    --primary-wash: #EAF2FE;
+    --mint: #00C6AE;
+    --mint-wash: #E5FAF6;
+    --up: #F04452;
+    --down: #3182F6;
+    --warning: #FF9500;
+    --fg: #191F28;
+    --fg-mid: #4E5968;
+    --fg-weak: #8B95A1;
+    --border: #E5E8EB;
+    /* shadows */
+    --shadow-sm: 0 2px 8px rgba(23,31,40,.04);
+    --shadow-md: 0 8px 24px rgba(23,31,40,.06);
+    --shadow-lg: 0 12px 32px rgba(23,31,40,.10);
+    /* radius */
+    --r-card: 20px;
+    --r-ctl: 14px;
+    --r-chip: 12px;
+    --r-pill: 999px;
+    /* type scale */
+    --t-cap: 13px;
+    --t-body: 15px;
+    --t-title: 17px;
+    --t-h3: 24px;
+    --t-h2: 32px;
+    --t-kpi: 40px;
+    --t-display: 48px;
+    /* motion */
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "tnum";
+  }
+
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ---------------- top bar ---------------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,.82);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--t-title);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), #4E97FF);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: var(--t-body);
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-links a {
+    padding: 8px 12px;
+    border-radius: var(--r-chip);
+    font-size: var(--t-body);
+    font-weight: 600;
+    color: var(--fg-mid);
+    transition: background .15s var(--ease), color .15s var(--ease);
+  }
+  .nav-links a:hover { background: var(--surface-hover); color: var(--fg); }
+  .nav-links a:active { background: var(--border); }
+
+  /* ---------------- buttons ---------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 52px;
+    padding: 0 24px;
+    border: none;
+    border-radius: var(--r-ctl);
+    font-family: inherit;
+    font-size: var(--t-title);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .12s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover { background: #2B7BF3; box-shadow: var(--shadow-md); }
+  .btn-primary:active { background: var(--primary-press); transform: scale(.97); }
+  .btn-secondary {
+    background: var(--surface-soft);
+    color: var(--fg);
+  }
+  .btn-secondary:hover { background: var(--surface-hover); }
+  .btn-secondary:active { background: var(--border); transform: scale(.98); }
+  .btn-sm { height: 40px; padding: 0 16px; font-size: var(--t-body); font-weight: 700; }
+
+  /* ---------------- hero ---------------- */
+  .hero { padding: 64px 0 40px; overflow: hidden; }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 48px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px 0 8px;
+    background: var(--mint-wash);
+    color: #067E6E;
+    border-radius: var(--r-pill);
+    font-size: var(--t-cap);
+    font-weight: 700;
+  }
+  .eyebrow .dot {
+    width: 8px; height: 8px; border-radius: var(--r-pill);
+    background: var(--mint);
+  }
+  .hero h1 {
+    margin: 20px 0 0;
+    font-size: var(--t-display);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .hero h1 .hl { color: var(--primary); }
+  .hero .sub {
+    margin-top: 16px;
+    font-size: var(--t-title);
+    line-height: 1.6;
+    color: var(--fg-mid);
+    font-weight: 500;
+    max-width: 460px;
+  }
+  .badges { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+  .store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 20px 0 16px;
+    background: var(--fg);
+    color: #fff;
+    border-radius: var(--r-ctl);
+    transition: transform .12s var(--ease), box-shadow .15s var(--ease), opacity .15s var(--ease);
+    box-shadow: var(--shadow-sm);
+  }
+  .store-badge:hover { box-shadow: var(--shadow-md); opacity: .94; }
+  .store-badge:active { transform: scale(.97); }
+  .store-badge .glyph { width: 24px; height: 24px; flex: none; }
+  .store-badge .txt { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+  .store-badge .txt small { font-size: 11px; font-weight: 500; opacity: .78; }
+  .store-badge .txt strong { font-size: var(--t-title); font-weight: 700; letter-spacing: -0.01em; }
+  .trust-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    font-size: var(--t-cap);
+    color: var(--fg-weak);
+    font-weight: 500;
+  }
+  .stars { color: var(--warning); letter-spacing: 1px; font-size: var(--t-body); }
+
+  /* ---------------- phone mockup ---------------- */
+  .phone-stage { display: flex; justify-content: center; }
+  .phone {
+    position: relative;
+    width: 300px;
+    height: 612px;
+    background: var(--fg);
+    border-radius: 44px;
+    padding: 10px;
+    box-shadow: var(--shadow-lg), 0 40px 80px rgba(23,31,40,.14);
+  }
+  .phone-notch {
+    position: absolute;
+    top: 18px; left: 50%;
+    transform: translateX(-50%);
+    width: 108px; height: 26px;
+    background: var(--fg);
+    border-radius: var(--r-pill);
+    z-index: 3;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    background: var(--surface-soft);
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+  .status-bar {
+    height: 44px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+  .status-bar .sig { display: flex; gap: 4px; align-items: center; }
+  .status-bar .bar { width: 3px; border-radius: 2px; background: var(--fg); }
+  .app-body { padding: 8px 16px 16px; }
+  .app-hi { font-size: var(--t-cap); color: var(--fg-weak); font-weight: 600; }
+  .app-hi strong { color: var(--fg); }
+
+  .balance-card {
+    margin-top: 12px;
+    background: linear-gradient(150deg, var(--primary) 0%, #2A74E8 60%, #1F63D6 100%);
+    border-radius: var(--r-card);
+    padding: 20px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(49,130,246,.28);
+  }
+  .balance-card .lbl { font-size: 12px; font-weight: 600; opacity: .82; }
+  .balance-card .amt {
+    margin-top: 4px;
+    font-size: var(--t-h2);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .balance-card .amt .won { font-size: var(--t-h3); font-weight: 700; margin-left: 2px; }
+  .balance-card .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+    height: 26px;
+    padding: 0 10px;
+    background: rgba(255,255,255,.18);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mini-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .mini-kpi {
+    background: var(--card);
+    border-radius: var(--r-chip);
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .mini-kpi .k-lbl { font-size: 11px; color: var(--fg-weak); font-weight: 600; }
+  .mini-kpi .k-val { margin-top: 2px; font-size: var(--t-title); font-weight: 800; letter-spacing: -0.01em; }
+  .mini-kpi .k-val.up { color: var(--up); }
+  .mini-kpi .k-val.down { color: var(--down); }
+
+  .tx-card {
+    margin-top: 12px;
+    background: var(--card);
+    border-radius: var(--r-card);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .tx-card .tx-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .tx-card .tx-head b { font-size: var(--t-body); font-weight: 700; }
+  .tx-card .tx-head a { font-size: 12px; color: var(--primary); font-weight: 700; }
+  .tx-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+  }
+  .tx-row + .tx-row { border-top: 1px solid var(--border); }
+  .tx-ic {
+    width: 36px; height: 36px; flex: none;
+    border-radius: var(--r-chip);
+    display: grid; place-items: center;
+    font-size: var(--t-body); font-weight: 800;
+  }
+  .tx-ic.a { background: var(--primary-wash); color: var(--primary); }
+  .tx-ic.b { background: var(--mint-wash); color: #067E6E; }
+  .tx-ic.c { background: #FFF3E0; color: var(--warning); }
+  .tx-meta { flex: 1; min-width: 0; }
+  .tx-meta .t { font-size: var(--t-cap); font-weight: 700; color: var(--fg); }
+  .tx-meta .d { font-size: 11px; color: var(--fg-weak); font-weight: 500; }
+  .tx-amt { font-size: var(--t-cap); font-weight: 800; }
+  .tx-amt.minus { color: var(--fg); }
+  .tx-amt.plus { color: var(--up); }
+
+  .fab {
+    position: absolute;
+    right: 20px; bottom: 24px;
+    width: 56px; height: 56px;
+    border-radius: var(--r-pill);
+    background: var(--primary);
+    color: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 8px 20px rgba(49,130,246,.36);
+    border: none;
+    cursor: pointer;
+    transition: transform .14s var(--ease), background .15s var(--ease);
+  }
+  .fab:hover { background: #2B7BF3; }
+  .fab:active { transform: scale(.92); background: var(--primary-press); }
+
+  /* ---------------- section shell ---------------- */
+  section { scroll-margin-top: 80px; }
+  .sec-head { max-width: 560px; margin-bottom: 40px; }
+  .sec-head .kicker {
+    font-size: var(--t-cap); font-weight: 800; color: var(--primary);
+    letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .sec-head h2 {
+    margin-top: 8px;
+    font-size: var(--t-h2);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .sec-head p {
+    margin-top: 12px;
+    font-size: var(--t-title);
+    color: var(--fg-mid);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  /* ---------------- features ---------------- */
+  .features { padding: 56px 0; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .18s var(--ease), box-shadow .18s var(--ease);
+  }
+  .feature-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .feat-ic {
+    width: 48px; height: 48px;
+    border-radius: var(--r-chip);
+    display: grid; place-items: center;
+    margin-bottom: 16px;
+  }
+  .feat-ic.blue { background: var(--primary-wash); color: var(--primary); }
+  .feat-ic.mint { background: var(--mint-wash); color: #067E6E; }
+  .feat-ic.warm { background: #FFF3E0; color: var(--warning); }
+  .feature-card h3 { font-size: var(--t-title); font-weight: 700; letter-spacing: -0.01em; }
+  .feature-card p {
+    margin-top: 8px;
+    font-size: var(--t-body);
+    color: var(--fg-mid);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  .feature-card .link {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-top: 16px;
+    font-size: var(--t-body); font-weight: 700; color: var(--primary);
+    transition: gap .15s var(--ease);
+  }
+  .feature-card:hover .link { gap: 8px; }
+  .feature-card .link:focus-visible { outline-offset: 4px; }
+
+  /* ---------------- metrics ---------------- */
+  .metrics { padding: 40px 0; }
+  .metric-band {
+    background: var(--surface-soft);
+    border-radius: var(--r-card);
+    padding: 40px 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .metric {
+    text-align: center;
+    padding: 8px 0;
+    position: relative;
+  }
+  .metric + .metric::before {
+    content: "";
+    position: absolute; left: -12px; top: 12px; bottom: 12px;
+    width: 1px; background: var(--border);
+  }
+  .metric .val {
+    font-size: var(--t-kpi);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--fg);
+  }
+  .metric .val .unit { font-size: var(--t-h3); font-weight: 700; color: var(--primary); margin-left: 2px; }
+  .metric .val .unit.mint { color: var(--mint); }
+  .metric .lbl {
+    margin-top: 8px;
+    font-size: var(--t-body);
+    color: var(--fg-mid);
+    font-weight: 600;
+  }
+
+  /* ---------------- testimonials ---------------- */
+  .testimonials { padding: 56px 0; }
+  .quote-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .quote-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .quote-mark { font-size: 40px; line-height: 1; color: var(--primary-wash); font-weight: 800; }
+  .quote-card blockquote p {
+    margin-top: -8px;
+    font-size: var(--t-title);
+    line-height: 1.6;
+    color: var(--fg);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .quote-foot { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+  .avatar {
+    width: 44px; height: 44px; flex: none;
+    border-radius: var(--r-pill);
+    display: grid; place-items: center;
+    font-size: var(--t-body); font-weight: 800; color: #fff;
+  }
+  .avatar.a { background: linear-gradient(135deg, var(--primary), #5AA0FF); }
+  .avatar.b { background: linear-gradient(135deg, var(--mint), #3ADFC8); }
+  .quote-foot .who .role { font-size: var(--t-body); font-weight: 700; color: var(--fg); }
+  .quote-foot .who .meta { font-size: var(--t-cap); color: var(--fg-weak); font-weight: 500; }
+
+  /* ---------------- CTA ---------------- */
+  .cta { padding: 40px 0 80px; }
+  .cta-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary) 0%, #2A74E8 55%, #1B5FD0 100%);
+    border-radius: var(--r-card);
+    padding: 56px 48px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 20px 48px rgba(49,130,246,.28);
+  }
+  .cta-card::before, .cta-card::after {
+    content: ""; position: absolute; border-radius: var(--r-pill);
+    background: rgba(255,255,255,.10);
+  }
+  .cta-card::before { width: 240px; height: 240px; top: -80px; right: -60px; }
+  .cta-card::after { width: 180px; height: 180px; bottom: -70px; left: -40px; }
+  .cta-card .inner { position: relative; z-index: 1; }
+  .cta-card h2 {
+    font-size: var(--t-h2);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .cta-card p {
+    margin-top: 12px;
+    font-size: var(--t-title);
+    opacity: .9;
+    font-weight: 500;
+  }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+  .btn-white {
+    background: #fff; color: var(--primary); font-weight: 800;
+  }
+  .btn-white:hover { background: #F3F8FF; box-shadow: var(--shadow-md); }
+  .btn-white:active { background: #E7F0FF; transform: scale(.97); }
+  .btn-white:focus-visible { outline-color: #fff; }
+  .btn-ghost-light {
+    background: rgba(255,255,255,.14); color: #fff; font-weight: 700;
+  }
+  .btn-ghost-light:hover { background: rgba(255,255,255,.22); }
+  .btn-ghost-light:active { background: rgba(255,255,255,.10); transform: scale(.98); }
+  .btn-ghost-light:focus-visible { outline-color: #fff; }
+
+  /* ---------------- footer ---------------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+  }
+  .foot-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .foot-inner .fbrand { display: flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: -0.02em; }
+  .foot-inner .fmeta { font-size: var(--t-cap); color: var(--fg-weak); font-weight: 500; }
+
+  /* ---------------- entrance anim ---------------- */
+  .reveal { opacity: 0; transform: translateY(16px); }
+  .reveal.in { opacity: 1; transform: none; transition: opacity .5s var(--ease), transform .5s var(--ease); }
+  .stagger > * { opacity: 0; transform: translateY(16px); }
+  .stagger.in > * { opacity: 1; transform: none; transition: opacity .45s var(--ease), transform .45s var(--ease); }
+  .stagger.in > *:nth-child(2) { transition-delay: .06s; }
+  .stagger.in > *:nth-child(3) { transition-delay: .12s; }
+
+  /* ---------------- responsive ---------------- */
+  @media (max-width: 1024px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; justify-items: start; }
+    .phone-stage { justify-self: center; }
+    .hero h1 { font-size: var(--t-h2); }
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .metric-band { grid-template-columns: 1fr; gap: 8px; padding: 24px; }
+    .metric + .metric::before { display: none; }
+    .metric + .metric { border-top: 1px solid var(--border); padding-top: 24px; }
+    .quote-grid { grid-template-columns: 1fr; }
+    .hero { padding: 40px 0 24px; }
+    .cta-card { padding: 40px 24px; }
+    .hero h1 { font-size: 28px; }
+  }
+  @media (max-width: 400px) {
+    .phone { width: 264px; height: 540px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal, .stagger > * { opacity: 1 !important; transform: none !important; transition: none !important; }
+    * { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="Mintly 홈">
+      <span class="brand-mark" aria-hidden="true">M</span>
+      Mintly
+    </a>
+    <nav class="nav-links" aria-label="주요 메뉴">
+      <a href="#features">기능</a>
+      <a href="#metrics">지표</a>
+      <a href="#voices">후기</a>
+    </nav>
+    <button class="btn btn-primary btn-sm" type="button">앱 열기</button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy reveal">
+        <span class="eyebrow"><span class="dot"></span>수수료 0원 · 자동 가계부</span>
+        <h1>돈 관리,<br><span class="hl">다정하게</span> 시작하세요</h1>
+        <p class="sub">흩어진 계좌와 카드를 한 곳에서. Mintly가 오늘 쓴 돈과 남은 예산을 큰 숫자로 쉽게 보여줍니다.</p>
+
+        <div class="badges">
+          <a class="store-badge" href="#" aria-label="App Store에서 다운로드">
+            <svg class="glyph" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M16.4 12.7c0-2 1.6-3 1.7-3.05-.9-1.36-2.35-1.55-2.86-1.57-1.22-.12-2.38.72-3 .72-.62 0-1.57-.7-2.58-.68-1.33.02-2.55.77-3.23 1.96-1.38 2.4-.35 5.94.99 7.88.65.95 1.43 2.02 2.45 1.98.98-.04 1.35-.63 2.54-.63 1.18 0 1.52.63 2.56.61 1.06-.02 1.73-.97 2.38-1.92.75-1.1 1.06-2.16 1.07-2.22-.02-.01-2.05-.79-2.07-3.12zM14.6 6.3c.54-.66.9-1.57.8-2.48-.78.03-1.72.52-2.28 1.17-.5.58-.94 1.5-.82 2.39.87.07 1.76-.44 2.3-1.08z"/>
+            </svg>
+            <span class="txt"><small>Download on the</small><strong>App Store</strong></span>
+          </a>
+          <a class="store-badge" href="#" aria-label="Google Play에서 다운로드">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.6 2.4c-.24.25-.38.64-.38 1.15v16.9c0 .5.14.9.38 1.15l.06.05L13.1 12.1v-.2L3.66 2.35l-.06.05z" fill="#4E97FF"/>
+              <path d="M16.3 15.3l-3.2-3.2v-.2l3.2-3.2.07.04 3.78 2.15c1.08.61 1.08 1.62 0 2.24l-3.78 2.15-.07.04z" fill="#00C6AE"/>
+              <path d="M16.37 15.26L13.1 12 3.6 21.6c.36.38.95.42 1.62.05l11.15-6.4z" fill="#F04452"/>
+              <path d="M16.37 8.74L5.22 2.34C4.55 1.97 3.96 2.02 3.6 2.4L13.1 12l3.27-3.26z" fill="#FF9500"/>
+            </svg>
+            <span class="txt"><small>지금 이용하기</small><strong>Google Play</strong></span>
+          </a>
+        </div>
+
+        <div class="trust-row">
+          <span class="stars num" aria-hidden="true">★★★★★</span>
+          <span>앱스토어 평점 <strong style="color:var(--fg-mid)" class="num">4.9</strong> · 리뷰 <span class="num">128,000</span>+개</span>
+        </div>
+      </div>
+
+      <!-- phone mockup -->
+      <div class="phone-stage reveal" aria-hidden="true">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="screen">
+            <div class="status-bar num">
+              <span>9:41</span>
+              <span class="sig">
+                <span class="bar" style="height:8px"></span>
+                <span class="bar" style="height:11px"></span>
+                <span class="bar" style="height:14px"></span>
+                <span style="font-size:11px;margin-left:4px">100%</span>
+              </span>
+            </div>
+            <div class="app-body">
+              <div class="app-hi">안녕하세요, <strong>오늘도 잘 쓰고 계세요</strong></div>
+
+              <div class="balance-card">
+                <div class="lbl">이번 달 남은 예산</div>
+                <div class="amt num">842,000<span class="won">원</span></div>
+                <div class="delta num">▼ 지난달 대비 12% 절약</div>
+              </div>
+
+              <div class="mini-kpis">
+                <div class="mini-kpi">
+                  <div class="k-lbl">오늘 지출</div>
+                  <div class="k-val down num">−23,400<span style="font-size:13px">원</span></div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="k-lbl">이번 주 수입</div>
+                  <div class="k-val up num">+1,280,000<span style="font-size:13px">원</span></div>
+                </div>
+              </div>
+
+              <div class="tx-card">
+                <div class="tx-head">
+                  <b>최근 거래</b>
+                  <a href="#">전체보기</a>
+                </div>
+                <div class="tx-row">
+                  <span class="tx-ic a">☕</span>
+                  <span class="tx-meta"><span class="t">카페 결제</span><span class="d">오늘 · 09:12</span></span>
+                  <span class="tx-amt minus num">−4,800원</span>
+                </div>
+                <div class="tx-row">
+                  <span class="tx-ic b">↩</span>
+                  <span class="tx-meta"><span class="t">모임 정산 입금</span><span class="d">어제 · 20:40</span></span>
+                  <span class="tx-amt plus num">+36,000원</span>
+                </div>
+                <div class="tx-row">
+                  <span class="tx-ic c">🚌</span>
+                  <span class="tx-meta"><span class="t">교통 · 대중교통</span><span class="d">어제 · 08:05</span></span>
+                  <span class="tx-amt minus num">−1,550원</span>
+                </div>
+              </div>
+            </div>
+            <button class="fab" type="button" tabindex="-1" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">왜 Mintly인가요</span>
+        <h2>복잡한 금융을, 친구가 설명하듯 쉽게</h2>
+        <p>전문 용어 대신 큰 숫자와 다정한 안내로. 처음 가계부를 쓰는 분도 3분이면 익숙해집니다.</p>
+      </div>
+
+      <div class="feature-grid stagger">
+        <article class="feature-card">
+          <div class="feat-ic blue" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M3 10h18"/><circle cx="17" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3>계좌·카드 자동 연결</h3>
+          <p>흩어진 은행과 카드를 한 번만 연결하면, 모든 거래가 자동으로 분류되어 모입니다.</p>
+          <a class="link" href="#">연결 방법 보기 <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="feature-card">
+          <div class="feat-ic mint" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l4-5 4 3 4-7 4 6"/><path d="M4 20h16"/></svg>
+          </div>
+          <h3>예산이 숨 쉬는 대시보드</h3>
+          <p>이번 달 남은 예산을 큰 숫자로. 과하게 쓴 날엔 색과 화살표로 부드럽게 알려드려요.</p>
+          <a class="link" href="#">대시보드 살펴보기 <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="feature-card">
+          <div class="feat-ic warm" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3>안전한 금융 보안</h3>
+          <p>읽기 전용 연결과 생체 인증으로 지킵니다. Mintly는 절대 임의로 이체하지 않습니다.</p>
+          <a class="link" href="#">보안 원칙 읽기 <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== METRICS ===== -->
+  <section class="metrics" id="metrics">
+    <div class="wrap">
+      <div class="metric-band reveal">
+        <div class="metric">
+          <div class="val num"><span data-count="2400000">0</span><span class="unit">명</span></div>
+          <div class="lbl">Mintly와 함께하는 사용자</div>
+        </div>
+        <div class="metric">
+          <div class="val num"><span data-count="18">0</span><span class="unit mint">%</span></div>
+          <div class="lbl">3개월 평균 지출 절감</div>
+        </div>
+        <div class="metric">
+          <div class="val num"><span data-count="4.9" data-decimals="1">0</span><span class="unit">점</span></div>
+          <div class="lbl">앱스토어·구글플레이 평점</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="testimonials" id="voices">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">사용자의 목소리</span>
+        <h2>돈 이야기가 더는 무섭지 않대요</h2>
+      </div>
+
+      <div class="quote-grid stagger">
+        <figure class="quote-card">
+          <div class="quote-mark" aria-hidden="true">&ldquo;</div>
+          <blockquote><p>매달 카드값에 놀라던 제가, 이제 남은 예산을 먼저 봐요. 큰 숫자 하나로 오늘 얼마 쓸 수 있는지 바로 알 수 있어서 마음이 편해졌어요.</p></blockquote>
+          <figcaption class="quote-foot">
+            <span class="avatar a" aria-hidden="true">SJ</span>
+            <span class="who">
+              <span class="role">사회초년생 · 직장인</span>
+              <span class="meta">가입 8개월 차</span>
+            </span>
+          </figcaption>
+        </figure>
+
+        <figure class="quote-card">
+          <div class="quote-mark" aria-hidden="true">&ldquo;</div>
+          <blockquote><p>부부 공동 지출을 따로 정리하느라 늘 다퉜는데, 자동 분류 덕분에 그럴 일이 없어졌어요. 서로 탓하지 않고 숫자만 같이 보게 됐습니다.</p></blockquote>
+          <figcaption class="quote-foot">
+            <span class="avatar b" aria-hidden="true">YH</span>
+            <span class="who">
+              <span class="role">프리랜서 · 자영업자</span>
+              <span class="meta">가입 1년 차</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta">
+    <div class="wrap">
+      <div class="cta-card reveal">
+        <div class="inner">
+          <h2>오늘부터, 돈이 편해집니다</h2>
+          <p>설치 3분. 첫 연결까지 무료. 카드 등록 없이 바로 시작하세요.</p>
+          <div class="cta-actions">
+            <button class="btn btn-white" type="button">무료로 시작하기</button>
+            <button class="btn btn-ghost-light" type="button">기능 더 보기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="wrap foot-inner">
+    <span class="fbrand"><span class="brand-mark" style="width:24px;height:24px;border-radius:8px;font-size:13px" aria-hidden="true">M</span>Mintly</span>
+    <span class="fmeta">모바일 앱 랜딩 · 핀테크 소프트</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fmt(n, decimals) {
+    if (decimals) return n.toFixed(decimals);
+    return Math.round(n).toLocaleString('ko-KR');
+  }
+  function countUp(el) {
+    var target = parseFloat(el.getAttribute('data-count'));
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    if (reduce) { el.textContent = fmt(target, decimals); return; }
+    var dur = 900, start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased, decimals);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = fmt(target, decimals);
+    }
+    requestAnimationFrame(step);
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal, .stagger').forEach(function (el) { el.classList.add('in'); });
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      var d = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      el.textContent = fmt(parseFloat(el.getAttribute('data-count')), d);
+    });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      e.target.querySelectorAll('[data-count]').forEach(countUp);
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.reveal, .stagger').forEach(function (el) { io.observe(el); });
+
+  document.querySelectorAll('.hero .reveal').forEach(function (el) {
+    requestAnimationFrame(function () { el.classList.add('in'); });
+  });
+})();
+</script>
+
+</body>
+</html>

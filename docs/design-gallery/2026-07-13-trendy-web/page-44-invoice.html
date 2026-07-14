@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인보이스 · Slate</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* ============================================================
+     Slate — 인보이스/청구서 (공공포털 신뢰 톤 + 프로덕션 마감)
+     팔레트: 기관 네이비 단일 액센트. 상태 3색은 배지에만 국소.
+     8px 그리드 · 제한 타이포 스케일 · radius 0 격자 · 인쇄 정직.
+     ============================================================ */
+  :root {
+    --bg:          #F5F6F8;
+    --surface:     #FFFFFF;
+    --navy:        #00447C;
+    --navy-dark:   #003060;
+    --th-blue:     #E8F1F9;
+    --row-hover:   #EEF5FC;
+    --text:        #1A1A1A;
+    --muted:       #55606B;
+    --border:      #D5DBE1;
+    --border-strong:#B9C2CC;
+    --stripe:      #FAFBFC;
+    --success:     #1A7F3C;
+    --success-bg:  #EAF5EE;
+    --danger:      #C62828;
+    --danger-bg:   #FBEBEB;
+    --pending:     #9A6700;
+    --pending-bg:  #FBF3E2;
+
+    /* 8px 그리드 스페이싱 스케일 */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+    --sp-6: 24px; --sp-8: 32px; --sp-12: 48px;
+
+    /* 제한된 타이포 스케일 (공공포털 규격) */
+    --fs-foot:  11px;
+    --fs-cell:  12.5px;
+    --fs-body:  13px;
+    --fs-label: 12px;
+    --fs-sec:   15px;
+    --fs-title: 20px;
+
+    --focus: 0 0 0 2px var(--surface), 0 0 0 4px var(--navy);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: var(--fs-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  a { color: var(--navy); text-decoration: none; }
+  a:hover { color: var(--navy-dark); text-decoration: underline; text-underline-offset: 2px; }
+  a:focus-visible { outline: none; box-shadow: var(--focus); }
+
+  /* ---------- 최상단 기관 헤더 바 ---------- */
+  .agency-bar {
+    background: var(--navy);
+    color: #fff;
+  }
+  .agency-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--sp-3) var(--sp-8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .brand { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+  .brand-mark {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    background: #fff; color: var(--navy);
+    font-weight: 800; font-size: 13px; letter-spacing: -0.02em;
+    flex: none;
+  }
+  .brand-name {
+    font-weight: 700; font-size: 14px; letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .brand-sub { font-size: var(--fs-foot); color: #C7D6E6; letter-spacing: 0.02em; }
+  .agency-meta {
+    text-align: right; font-size: var(--fs-foot); color: #C7D6E6;
+    white-space: nowrap; line-height: 1.5;
+  }
+  .agency-meta b { color: #fff; font-weight: 600; }
+
+  /* ---------- 안내 밴드 ---------- */
+  .band {
+    max-width: 960px; margin: 0 auto;
+    background: var(--th-blue);
+    border-bottom: 1px solid var(--border);
+    padding: var(--sp-2) var(--sp-8);
+    font-size: var(--fs-label); color: var(--navy-dark);
+    display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-3);
+    align-items: baseline;
+  }
+  .band strong { font-weight: 700; }
+  .band .dot { color: var(--border-strong); }
+
+  /* ---------- 문서 본문 ---------- */
+  main {
+    max-width: 960px; margin: 0 auto var(--sp-12);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+  .doc { padding: var(--sp-8); }
+
+  /* 문서 제목 행 */
+  .doc-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: var(--sp-4); flex-wrap: wrap;
+    padding-bottom: var(--sp-6);
+    border-bottom: 2px solid var(--navy);
+  }
+  .doc-title { font-size: var(--fs-title); font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .doc-title small { display: block; font-size: var(--fs-label); font-weight: 500; color: var(--muted); letter-spacing: 0; margin-top: var(--sp-1); }
+  .doc-no { text-align: right; font-size: var(--fs-label); color: var(--muted); line-height: 1.7; }
+  .doc-no .no { font-size: var(--fs-sec); font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+
+  /* 섹션 제목 — 좌측 4px 네이비 보더 */
+  .sec-title {
+    font-size: var(--fs-sec); font-weight: 700; margin: var(--sp-8) 0 var(--sp-3);
+    padding-left: var(--sp-3); border-left: 4px solid var(--navy);
+    line-height: 1.3;
+  }
+  .sec-title:first-of-type { margin-top: var(--sp-6); }
+
+  /* 발신/수신 + 인보이스 정보 그리드 */
+  .meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4);
+    margin-top: var(--sp-4);
+  }
+  .party {
+    border: 1px solid var(--border);
+    padding: var(--sp-4);
+    background: var(--surface);
+  }
+  .party .lbl {
+    font-size: var(--fs-foot); font-weight: 700; letter-spacing: 0.06em;
+    color: var(--navy); text-transform: uppercase; margin-bottom: var(--sp-2);
+  }
+  .party .org { font-size: var(--fs-body); font-weight: 700; }
+  .party dl { margin: var(--sp-2) 0 0; display: grid; grid-template-columns: 76px 1fr; gap: 2px var(--sp-2); }
+  .party dt { color: var(--muted); font-size: var(--fs-cell); }
+  .party dd { margin: 0; font-size: var(--fs-cell); }
+
+  /* 인보이스 발행 정보 정의표 */
+  .facts {
+    border: 1px solid var(--border); border-collapse: collapse; width: 100%;
+    margin-top: var(--sp-4);
+  }
+  .facts th, .facts td {
+    border: 1px solid var(--border); padding: var(--sp-2) var(--sp-3);
+    font-size: var(--fs-cell); text-align: left; vertical-align: middle;
+  }
+  .facts th {
+    background: var(--th-blue); color: var(--navy-dark);
+    font-weight: 700; width: 120px; white-space: nowrap;
+  }
+
+  /* ---------- 항목 테이블 ---------- */
+  .table-wrap { overflow-x: auto; margin-top: var(--sp-4); }
+  table.items {
+    width: 100%; border-collapse: collapse; min-width: 640px;
+    border: 1px solid var(--border);
+  }
+  table.items caption { text-align: left; font-size: var(--fs-foot); color: var(--muted); padding: 0 0 var(--sp-2); }
+  table.items thead th {
+    background: var(--th-blue); color: var(--navy-dark);
+    font-size: var(--fs-cell); font-weight: 700;
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--border);
+    text-align: left; white-space: nowrap;
+    position: sticky; top: 0;
+  }
+  table.items thead th.num { text-align: right; }
+  table.items thead th.ctr { text-align: center; }
+  table.items tbody td {
+    font-size: var(--fs-cell); padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--border); vertical-align: top;
+  }
+  table.items tbody tr:nth-child(even) td { background: var(--stripe); }
+  table.items tbody tr:hover td { background: var(--row-hover); }
+  table.items td.num { text-align: right; white-space: nowrap; }
+  table.items td.ctr { text-align: center; white-space: nowrap; }
+  table.items td .item-name { font-weight: 600; }
+  table.items td .item-desc { color: var(--muted); font-size: var(--fs-foot); margin-top: 2px; }
+  table.items td.idx { color: var(--muted); text-align: center; width: 34px; }
+  table.items .unit { color: var(--muted); font-size: var(--fs-foot); }
+
+  /* ---------- 합계 블록 ---------- */
+  .totals-row { display: flex; justify-content: flex-end; margin-top: var(--sp-4); }
+  table.totals {
+    border-collapse: collapse; min-width: 320px;
+    border: 1px solid var(--border);
+  }
+  table.totals th, table.totals td {
+    font-size: var(--fs-cell); padding: var(--sp-2) var(--sp-4);
+    border: 1px solid var(--border);
+  }
+  table.totals th { background: var(--stripe); text-align: left; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  table.totals td { text-align: right; white-space: nowrap; font-weight: 600; }
+  table.totals tr.grand th {
+    background: var(--navy); color: #fff; font-size: var(--fs-body); font-weight: 700;
+    border-color: var(--navy);
+  }
+  table.totals tr.grand td {
+    background: var(--navy-dark); color: #fff; font-size: var(--fs-sec); font-weight: 800;
+    border-color: var(--navy-dark);
+  }
+
+  /* ---------- 결제 안내 박스 ---------- */
+  .pay-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--sp-4); margin-top: var(--sp-4); align-items: start; }
+  .pay-box { border: 1px solid var(--border); padding: var(--sp-4); }
+  .pay-box .lbl {
+    font-size: var(--fs-foot); font-weight: 700; letter-spacing: 0.06em;
+    color: var(--navy); text-transform: uppercase; margin-bottom: var(--sp-3);
+  }
+  .pay-box dl { margin: 0; display: grid; grid-template-columns: 88px 1fr; gap: var(--sp-2); }
+  .pay-box dt { color: var(--muted); font-size: var(--fs-cell); }
+  .pay-box dd { margin: 0; font-size: var(--fs-cell); font-weight: 600; }
+  .pay-note { font-size: var(--fs-cell); color: var(--muted); line-height: 1.6; }
+  .pay-note p { margin: 0 0 var(--sp-2); }
+  .pay-note b { color: var(--text); font-weight: 700; }
+
+  /* 상태 배지 (색 + 텍스트 병기) */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: var(--fs-cell); font-weight: 700; line-height: 1;
+    padding: 5px var(--sp-2); border: 1px solid;
+    white-space: nowrap;
+  }
+  .badge::before { content: ""; width: 7px; height: 7px; flex: none; }
+  .badge.pending { color: var(--pending); background: var(--pending-bg); border-color: #E4C77A; }
+  .badge.pending::before { background: var(--pending); }
+  .badge.success { color: var(--success); background: var(--success-bg); border-color: #A9D6BA; }
+  .badge.success::before { background: var(--success); }
+  .badge.danger  { color: var(--danger);  background: var(--danger-bg);  border-color: #E7A9A9; }
+  .badge.danger::before  { background: var(--danger); }
+
+  .status-line { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .status-line .amt { font-size: var(--fs-sec); font-weight: 800; }
+  .status-line .amt small { font-weight: 500; font-size: var(--fs-label); color: var(--muted); }
+
+  /* 상태 범례 (배지 3종 의미) */
+  .legend { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-3); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-foot); color: var(--muted); }
+  .legend i { width: 8px; height: 8px; flex: none; }
+  .legend i.s { background: var(--success); }
+  .legend i.p { background: var(--pending); }
+  .legend i.d { background: var(--danger); }
+
+  /* ---------- 다음 행동 버튼 ---------- */
+  .actions {
+    display: flex; flex-wrap: wrap; gap: var(--sp-2);
+    margin-top: var(--sp-8); padding-top: var(--sp-6);
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    font: inherit; font-size: var(--fs-cell); font-weight: 600;
+    height: 38px; padding: 0 var(--sp-4);
+    display: inline-flex; align-items: center; gap: var(--sp-2);
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background .12s ease, border-color .12s ease, color .12s ease;
+    user-select: none;
+  }
+  .btn:hover { background: var(--row-hover); border-color: var(--navy); }
+  .btn:active { background: #E1ECF7; }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+  .btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .btn.primary:hover { background: var(--navy-dark); border-color: var(--navy-dark); }
+  .btn.primary:active { background: #002247; }
+  .btn.ghost { border-color: transparent; background: transparent; color: var(--navy); }
+  .btn.ghost:hover { background: var(--row-hover); border-color: var(--border); color: var(--navy-dark); }
+  .btn:disabled, .btn[aria-disabled="true"] {
+    opacity: .5; cursor: not-allowed; background: var(--stripe);
+    border-color: var(--border); color: var(--muted);
+  }
+  .btn:disabled:hover, .btn[aria-disabled="true"]:hover { background: var(--stripe); border-color: var(--border); }
+  .btn .ico { width: 14px; height: 14px; flex: none; }
+  .btn .ico line, .btn .ico path, .btn .ico rect, .btn .ico polyline { stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: square; }
+
+  /* ---------- 각주 ---------- */
+  .foot {
+    margin-top: var(--sp-6); padding-top: var(--sp-4);
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-foot); color: var(--muted); line-height: 1.7;
+  }
+  .foot p { margin: 0 0 var(--sp-1); }
+  .foot .mark { color: var(--navy-dark); font-weight: 700; }
+
+  /* ---------- 페이지 푸터 ---------- */
+  .page-foot {
+    max-width: 960px; margin: 0 auto;
+    padding: var(--sp-4) var(--sp-8) var(--sp-8);
+    font-size: var(--fs-foot); color: var(--muted);
+    display: flex; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap;
+  }
+  .page-foot .sig { letter-spacing: 0.04em; }
+  .page-foot .sig b { color: var(--text); font-weight: 700; }
+
+  /* ---------- 반응형 ---------- */
+  @media (max-width: 720px) {
+    .agency-inner, .band, .doc, .page-foot { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+    .meta-grid, .pay-grid { grid-template-columns: 1fr; }
+    .doc-head { flex-direction: column; }
+    .doc-no { text-align: left; }
+    .totals-row { justify-content: stretch; }
+    table.totals { width: 100%; min-width: 0; }
+  }
+
+  /* ---------- 모션 최소화 ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+
+  /* ---------- 인쇄 CSS (배경/hover 제거, 격자 유지, 각주·페이지 표시) ---------- */
+  @media print {
+    :root { --bg: #fff; }
+    body { background: #fff; font-size: 11pt; }
+    .actions, .agency-bar .agency-meta small { display: none !important; }
+    .agency-bar { background: #fff; color: var(--text); border-bottom: 2px solid var(--navy); }
+    .agency-bar .brand-mark { background: var(--navy); color: #fff; }
+    .agency-bar .brand-name, .agency-bar .brand-sub, .agency-bar .agency-meta, .agency-bar .agency-meta b { color: var(--text); }
+    main { border: none; }
+    table.items tbody tr:hover td { background: transparent; }
+    table.items tbody tr:nth-child(even) td { background: #fff; }
+    .band { background: #fff; }
+    table.items thead th, .facts th, .party .lbl, .pay-box .lbl { background: #fff !important; }
+    table.totals tr.grand th { background: #fff !important; color: var(--navy-dark) !important; border: 1px solid var(--navy-dark); }
+    table.totals tr.grand td { background: #fff !important; color: var(--navy-dark) !important; border: 1px solid var(--navy-dark); }
+    .page-foot::after { content: "1 / 1 쪽"; }
+    a { color: var(--text); text-decoration: none; }
+    table.items, .facts, table.totals, .party, .pay-box { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 최상단 기관 헤더 바 -->
+  <header class="agency-bar">
+    <div class="agency-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">NG</div>
+        <div>
+          <div class="brand-name">NORTHGATE DESIGN LAB</div>
+          <div class="brand-sub">노스게이트 디자인랩 · 재무팀</div>
+        </div>
+      </div>
+      <div class="agency-meta">
+        <div>문서 상태 <b>발행 완료</b></div>
+        <small>최종 갱신 2026-07-13 09:12</small>
+      </div>
+    </div>
+  </header>
+
+  <!-- 안내 밴드: 이 문서가 무엇인지 + 발행 기준일 + 발행 기관 -->
+  <div class="band">
+    <strong>세금계산서 겸 청구서(인보이스)</strong>
+    <span class="dot">·</span> 발행 기준일 2026-07-13
+    <span class="dot">·</span> 발행 기관 노스게이트 디자인랩 재무팀
+    <span class="dot">·</span> 통화 단위 원(KRW, 부가세 포함)
+  </div>
+
+  <main>
+    <div class="doc">
+
+      <!-- 문서 제목 + 번호 -->
+      <div class="doc-head">
+        <h1 class="doc-title">
+          청구서 (INVOICE)
+          <small>2026년 6월 디자인 용역 대금 청구</small>
+        </h1>
+        <div class="doc-no">
+          <div class="no tnum">NG-2026-0442</div>
+          발행일 <span class="tnum">2026-07-13</span><br>
+          만기일 <span class="tnum">2026-08-12</span> (발행 후 30일)
+        </div>
+      </div>
+
+      <!-- 발신 / 수신 -->
+      <h2 class="sec-title">발신 · 수신 정보</h2>
+      <div class="meta-grid">
+        <section class="party">
+          <div class="lbl">발신 (공급자)</div>
+          <div class="org">노스게이트 디자인랩</div>
+          <dl>
+            <dt>사업자번호</dt><dd class="tnum">214-88-01592</dd>
+            <dt>담당</dt><dd>디자인 총괄 (J.K.)</dd>
+            <dt>주소</dt><dd>서울 성동구 왕십리로 241, 6층</dd>
+            <dt>연락</dt><dd>billing@northgate.example</dd>
+          </dl>
+        </section>
+        <section class="party">
+          <div class="lbl">수신 (공급받는 자)</div>
+          <div class="org">블루하버 커머스</div>
+          <dl>
+            <dt>사업자번호</dt><dd class="tnum">128-81-77304</dd>
+            <dt>담당</dt><dd>구매팀 담당 (S.L.)</dd>
+            <dt>주소</dt><dd>부산 해운대구 센텀중앙로 90, 12층</dd>
+            <dt>연락</dt><dd>purchasing@bluehaven.example</dd>
+          </dl>
+        </section>
+      </div>
+
+      <!-- 인보이스 발행 정보 -->
+      <h2 class="sec-title">발행 정보</h2>
+      <table class="facts">
+        <tbody>
+          <tr>
+            <th scope="row">인보이스 번호</th><td class="tnum">NG-2026-0442</td>
+            <th scope="row">발행일</th><td class="tnum">2026-07-13</td>
+          </tr>
+          <tr>
+            <th scope="row">공급 기간</th><td class="tnum">2026-06-01 ~ 2026-06-30</td>
+            <th scope="row">만기일</th><td class="tnum">2026-08-12</td>
+          </tr>
+          <tr>
+            <th scope="row">계약 번호</th><td class="tnum">CT-2026-018</td>
+            <th scope="row">결제 조건</th><td>발행일로부터 30일 이내 계좌 이체</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 항목 테이블 -->
+      <h2 class="sec-title">청구 항목</h2>
+      <div class="table-wrap">
+        <table class="items">
+          <caption>단위: 원(KRW) · 금액은 부가세 별도 · 수치는 우측 정렬(tabular-nums)</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="ctr" style="width:34px">No</th>
+              <th scope="col">항목</th>
+              <th scope="col" class="num">수량</th>
+              <th scope="col" class="num">단가</th>
+              <th scope="col" class="num">금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="idx tnum">1</td>
+              <td>
+                <div class="item-name">브랜드 아이덴티티 설계</div>
+                <div class="item-desc">로고 · 컬러 시스템 · 타이포 가이드 일괄</div>
+              </td>
+              <td class="num tnum">1 <span class="unit">식</span></td>
+              <td class="num tnum">4,800,000</td>
+              <td class="num tnum">4,800,000</td>
+            </tr>
+            <tr>
+              <td class="idx tnum">2</td>
+              <td>
+                <div class="item-name">UI 컴포넌트 시스템 구축</div>
+                <div class="item-desc">버튼 · 폼 · 테이블 등 재사용 컴포넌트</div>
+              </td>
+              <td class="num tnum">24 <span class="unit">개</span></td>
+              <td class="num tnum">180,000</td>
+              <td class="num tnum">4,320,000</td>
+            </tr>
+            <tr>
+              <td class="idx tnum">3</td>
+              <td>
+                <div class="item-name">반응형 웹 시안 디자인</div>
+                <div class="item-desc">데스크톱 · 태블릿 · 모바일 3종 브레이크포인트</div>
+              </td>
+              <td class="num tnum">8 <span class="unit">페이지</span></td>
+              <td class="num tnum">320,000</td>
+              <td class="num tnum">2,560,000</td>
+            </tr>
+            <tr>
+              <td class="idx tnum">4</td>
+              <td>
+                <div class="item-name">디자인 QA 및 핸드오프</div>
+                <div class="item-desc">개발 인수인계 · 스펙 문서화 지원</div>
+              </td>
+              <td class="num tnum">16 <span class="unit">시간</span></td>
+              <td class="num tnum">95,000</td>
+              <td class="num tnum">1,520,000</td>
+            </tr>
+            <tr>
+              <td class="idx tnum">5</td>
+              <td>
+                <div class="item-name">디자인 가이드 문서화</div>
+                <div class="item-desc">사용 규칙 · 접근성 체크리스트 포함</div>
+              </td>
+              <td class="num tnum">1 <span class="unit">건</span></td>
+              <td class="num tnum">800,000</td>
+              <td class="num tnum">800,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 소계 · 세금 · 합계 -->
+      <div class="totals-row">
+        <table class="totals" aria-label="금액 합계">
+          <tbody>
+            <tr>
+              <th scope="row">소계 (공급가액)</th>
+              <td class="tnum">14,000,000</td>
+            </tr>
+            <tr>
+              <th scope="row">부가세 (VAT 10%)</th>
+              <td class="tnum">1,400,000</td>
+            </tr>
+            <tr class="grand">
+              <th scope="row">총 청구금액</th>
+              <td class="tnum">15,400,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 결제 안내 + 상태 -->
+      <h2 class="sec-title">결제 안내</h2>
+      <div class="pay-grid">
+        <section class="pay-box">
+          <div class="lbl">입금 계좌</div>
+          <dl>
+            <dt>은행</dt><dd>한빛은행</dd>
+            <dt>계좌번호</dt><dd class="tnum">210-45-889201</dd>
+            <dt>예금주</dt><dd>노스게이트 디자인랩</dd>
+            <dt>입금 기한</dt><dd class="tnum">2026-08-12</dd>
+          </dl>
+        </section>
+        <section class="pay-box">
+          <div class="lbl">결제 상태</div>
+          <div class="status-line">
+            <span class="badge pending">결제 대기</span>
+            <span class="amt tnum">15,400,000<small> 원</small></span>
+          </div>
+          <div class="pay-note" style="margin-top:var(--sp-3)">
+            <p>입금 시 <b>공급받는 자 상호(블루하버 커머스)</b>를 함께 기재해 주세요.</p>
+            <p>세금계산서는 입금 확인 후 익영업일에 발행됩니다.</p>
+          </div>
+          <div class="legend" aria-hidden="false">
+            <span><i class="s"></i> 결제 완료</span>
+            <span><i class="p"></i> 결제 대기</span>
+            <span><i class="d"></i> 연체</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- 다음 행동 -->
+      <nav class="actions" aria-label="문서 작업">
+        <button type="button" class="btn primary">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="9"></rect><polyline points="2.5,4 8,9 13.5,4"></polyline></svg>
+          온라인 결제하기
+        </button>
+        <button type="button" class="btn">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5 v7"></path><polyline points="5,7 8,10 11,7"></polyline><line x1="3" y1="13" x2="13" y2="13"></line></svg>
+          PDF 내려받기
+        </button>
+        <button type="button" class="btn" onclick="window.print()">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="2.5" width="8" height="4"></rect><path d="M3 6.5 h10 v4 h-2 v3 h-6 v-3 h-2 z"></path></svg>
+          인쇄
+        </button>
+        <a class="btn ghost" href="#">이전 회차 인보이스 비교 +</a>
+        <button type="button" class="btn" disabled aria-disabled="true" title="관리자 권한이 필요합니다">재발행 (관리자 전용)</button>
+      </nav>
+
+      <!-- 각주: 출처 · 집계 기준 · 갱신 · 문의 -->
+      <div class="foot">
+        <p><span class="mark">※</span> 발행 기관 노스게이트 디자인랩 재무팀 · 발행 기준일 2026-07-13 · 통화 단위 원(KRW, 부가세 포함) · 문의 billing@northgate.example</p>
+        <p>본 청구서는 계약(CT-2026-018)에 근거해 발행되었으며, 금액 이의는 발행일로부터 7일 이내에 서면으로 접수합니다.</p>
+        <p>단가·수량·금액은 부가세 별도 기준이며, 총 청구금액은 부가세를 포함한 실 결제액입니다. 비어 있는 항목은 "–"로 표기합니다.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 페이지 푸터 -->
+  <footer class="page-foot">
+    <div class="sig">인보이스/청구서 · <b>Slate</b></div>
+    <div class="tnum">NG-2026-0442 · 1 / 1 쪽</div>
+  </footer>
+
+</body>
+</html>
