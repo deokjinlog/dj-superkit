@@ -10,7 +10,7 @@
     {
       "name": "dj-superkit",
       "description": "superpowers를 계승한 프로덕션 안전성 에이전틱 플러그인",
-      "version": "0.26.0",
+      "version": "1.0.0",
       "source": "./",
       "homepage": "https://github.com/deokjinlog/dj-superkit",
       "repository": "https://github.com/deokjinlog/dj-superkit",
