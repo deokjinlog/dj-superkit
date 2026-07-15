@@ -7,7 +7,7 @@
 ### 기획 의도를 고정하고, 그 위에서만 코드가 자란다
 
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.6.1-7c3aed?style=flat-square&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.6.2-7c3aed?style=flat-square&labelColor=0d1117">
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-Plugin-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="Skills" src="https://img.shields.io/badge/skills-27-06b6d4?style=flat-square&labelColor=0d1117">
   <img alt="Upstream" src="https://img.shields.io/badge/superpowers-5.0.7%20계승-f97316?style=flat-square&labelColor=0d1117">
@@ -122,6 +122,17 @@
 **"아니다" 라고 하면** 그 자리에서 고칩니다. 코드는 아직 한 줄도 안 짰으니까요. **게이트는 사람만 엽니다.**
 
 > 스킬이 27개지만 **당신이 치는 건 `/brainstorming` 하나**입니다. 나머지 26개는 도구가 알아서 부릅니다.
+
+<br/>
+
+> **⚠️ 스킬과 명령은 이름 규칙이 다릅니다** — 처음에 꼭 걸리는 지점이에요.
+>
+> | | 예 | 그냥 치면 | 앞에 플러그인명을 붙이면 |
+> |---|---|---|---|
+> | **스킬** | `/brainstorming` | **✅ 됩니다** | ✅ 됩니다 |
+> | **명령** | `/audit-risk` | **❌ `Unknown command`** | ✅ `/intent-locked-workflow:audit-risk` |
+>
+> **명령은 `<플러그인명>:<명령명>` 이 필요합니다.** 그래서 이 README 의 명령은 전부 `/intent-locked-workflow:` 로 시작해요. 슬래시만 치면 자동완성이 뜨니 거기서 고르는 게 제일 편합니다.
 
 ---
 
@@ -277,9 +288,56 @@ docs/features/2026-05-31-출금기능/
 - **`.html` 사본** — `.md` 와 내용이 1:1인 사본을 같이 남깁니다. AI는 `.md` 를, 사람은 `.html` 을 봐요. 기획자가 코드를 몰라도 게이트에서 검토하라고요. *(내려받아 더블클릭하면 열립니다 — 외부 의존 0)* → [실물 보기](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-requirements.html)
 - **`# RISK` 주석** — 위험한 코드 줄에 카테고리(`side-effect` · `breaking` · `race`)와 이유를 남깁니다.
 - **[`docs/features/`](docs/features/) 에 기능 24개** — 전부 이 워크플로로 만든 실제 기록입니다.
-- **[① 만 만들고 ②③④ 를 무인으로](docs/랄프에게-넘기기.md)** — 요구사항까지만 승인하고 나머지는 `ralph-loop` 플러그인에 넘겨, 자고 일어나면 돼 있게 하는 방법. `PROMPT.md` 템플릿 포함. **뭘 잃는지도 같이 적어놨습니다.**
 
 </details>
+
+---
+
+## 자고 일어나면 돼 있게 — 무인 실행
+
+**요구사항까지만 승인하고, 나머지는 맡깁니다.** `ralph-loop` 플러그인이 종료를 막고 같은 프롬프트를 계속 먹여요.
+
+```
+1️⃣  기획 자료를 프로젝트에 둡니다        docs/발표자료.pptx  (pptx · pdf · 워드 · 뭐든)
+
+2️⃣  /brainstorming 내기능                → ① requirements.md → 당신이 승인
+                                            여기까지가 당신 몫입니다
+
+3️⃣  /intent-locked-workflow:ralph-handoff 내기능                → 워크트리 + PROMPT.md 자동 준비
+
+4️⃣  cd ../<프로젝트>-ralph-내기능 && claude
+    /ralph-loop:ralph-loop "PROMPT.md 를 읽고 그대로 따라라. 매 반복 그 파일이 지시서다." --completion-promise "DONE" --max-iterations 30
+```
+
+**당신이 하는 건 — 승인 한 번, 명령 두 번.** 아침에 `VERIFY.md` 와 `BLOCKED.md` 를 읽으면 됩니다.
+
+### ★ 랄프가 받아야 하는 건 **3개**입니다
+
+**무인 루프는 채팅을 못 봅니다. 파일에 없으면 없는 겁니다.**
+
+| 파일 | 답하는 질문 | 누가 쓰나 | 없으면 |
+|---|---|---|---|
+| **`CLAUDE.md`** | **뭘로** 만드나 (스택 · 구조) | **사람** — 프로젝트당 1번 | **랄프가 스택을 지어냅니다** |
+| **`①-requirements.md`** | **뭘** 만드나 (기술 중립) | `/brainstorming` — 피처당 1번 | 만들 게 없습니다 |
+| **`PROMPT.md`** | 랄프가 **어떻게 도나** | `/intent-locked-workflow:ralph-handoff` | 무한 루프 / 거짓 완료 |
+
+> **실제로 터진 사고** — `CLAUDE.md` 없이 넘길 뻔했습니다. 요구사항은 **일부러 기술 중립**이라 (`brainstorming` 규칙: *"기술 결정은 여기 박지 마세요"*) 스택 키워드가 **0건**이었어요. 스택이 **채팅에만** 있었던 겁니다. 그대로 돌렸으면 랄프가 Flask 든 Express 든 자기 맘대로 골랐습니다.
+>
+> **요구사항이 기술 중립인 건 버그가 아니라 규칙입니다.** 스택은 원래 `CLAUDE.md` 자리예요. **자리가 비어 있던 게** 문제였습니다. 그래서 `/intent-locked-workflow:ralph-handoff` 의 **첫 번째 일이 `CLAUDE.md` 확인**입니다 — 없으면 기획서를 읽고 초안을 만들어 **당신 승인**을 받습니다.
+
+### 무인 루프는 사람과 반대로 굴러요
+
+이 워크플로는 **"막히면 멈추고 물어봐"**, 랄프는 **"막히면 계속 시도"**. **정반대**라 번역이 필요합니다. `/intent-locked-workflow:ralph-handoff` 가 만드는 `PROMPT.md` 에 **실제로 터진 것들**이 다 들어갑니다:
+
+| 장치 | 뭘 막나 |
+|---|---|
+| **묻지 말고 `BLOCKED.md`** | 새벽 3시엔 답할 사람이 없습니다. 질문하면 **무한 루프** |
+| **한 반복 = 한 단계** | `auto-*` 는 다음 단계를 자동 호출 → 한 번에 다 하려다 **컨텍스트 터짐** |
+| **완료 조건에 사람이 센 숫자 금지** | 계획서엔 `22건`, 실제는 `25건` 이었습니다. **기계끼리 대조**시킵니다 |
+| **③.5 검문 관문** | **자기 답안지로 자기 채점.** 다른 목적의 서브에이전트가 계획서만 가로질러 읽습니다 |
+| **`VERIFY.md` 증거 강제** | 훅이 **9군데**에서 루프를 죽입니다. 막지 말고 **터미널 출력을 남기게** |
+
+> 📖 **[랄프에게 넘기기](docs/랄프에게-넘기기.md)** — `PROMPT.md` 전문 + **뭘 잃는지** (② 의 기술 선택권 · ③ 을 검토할 사람)
 
 ---
 
@@ -331,9 +389,9 @@ claude plugin update intent-locked-workflow@intent-locked-workflow
 | **API 테스트 (1)** | api-auto-testing |
 | **메타 (1)** | using-superpowers |
 
-명령어도 있어요 — `/ralph-handoff`(무인 루프에 넘길 워크트리 싸기), `/audit-risk`(배포 전 보안 감사), `/fast-tasks`(잡일 묶어 처리), `/sync-html`, `/api-test`, 빌더 3종(`/list-skills` · `/new-skill` · `/remove-skill`).
+명령어도 있어요 — `/intent-locked-workflow:ralph-handoff`(무인 루프에 넘길 워크트리 싸기), `/intent-locked-workflow:audit-risk`(배포 전 보안 감사), `/intent-locked-workflow:fast-tasks`(잡일 묶어 처리), `/intent-locked-workflow:sync-html`, `/intent-locked-workflow:api-test`, 빌더 3종(`/intent-locked-workflow:list-skills` · `/intent-locked-workflow:new-skill` · `/intent-locked-workflow:remove-skill`).
 
-**스킬이 아니라 명령인 것들**이 있죠 — 빌더 3종과 `/ralph-handoff` 는 **일부러** 명령입니다. 스킬은 설명문만 맞으면 저절로 발동하는데, *"랄프한테 넘길까"* 라고 말만 해도 워크트리가 생기고 파일이 지워지면 안 되니까요. **명시 호출만** 받습니다.
+**스킬이 아니라 명령인 것들**이 있죠 — 빌더 3종과 `/intent-locked-workflow:ralph-handoff` 는 **일부러** 명령입니다. 스킬은 설명문만 맞으면 저절로 발동하는데, *"랄프한테 넘길까"* 라고 말만 해도 워크트리가 생기고 파일이 지워지면 안 되니까요. **명시 호출만** 받습니다.
 
 </details>
 
@@ -342,7 +400,7 @@ claude plugin update intent-locked-workflow@intent-locked-workflow
 ## superpowers 계승
 
 [superpowers](https://github.com/obra/superpowers) 5.0.7 (MIT, Jesse Vincent) 위에 프로덕션 안전성을 얹은 파생 프로젝트입니다.
-원본 흐름 그대로가 필요하면 `/og-brainstorm` · `/og-write-plan` · `/og-execute-plan` 로 쓸 수 있어요.
+원본 흐름 그대로가 필요하면 `/intent-locked-workflow:og-brainstorm` · `/intent-locked-workflow:og-write-plan` · `/intent-locked-workflow:og-execute-plan` 로 쓸 수 있어요.
 
 ---
 
