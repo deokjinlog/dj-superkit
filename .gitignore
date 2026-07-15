@@ -1,6 +1,10 @@
 # generating-html 이 만드는 파생 뷰 (.md 가 원본 — .html 은 사람용 derived view)
 docs/features/**/*.html
 
+# 예외 1개 — README 가 가리키는 쇼케이스. 실제 산출물의 .md ↔ .html 쌍을 보여주려고 추적한다.
+# generating-html 스킬을 실제로 돌려서 나온 결과물 (손으로 쓴 게 아님).
+!docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-requirements.html
+
 # dj-superkit silent log / cache
 .dj-superkit/
 

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v2.5 — --no-ask 플래그 (AskUserQuestion 도구 우회)</title>
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#08090d;
+  --bg-2:#0d0f16;
+  --surface:rgba(255,255,255,0.045);
+  --surface-2:rgba(255,255,255,0.07);
+  --stroke:rgba(255,255,255,0.10);
+  --stroke-2:rgba(255,255,255,0.18);
+  --text:#eef2f8;
+  --text-2:#c3cbdb;
+  --muted:#9aa5bb;
+  --cyan:#22d3ee;
+  --violet:#a78bfa;
+  --pink:#f472b6;
+  --lime:#7ee787;
+  --amber:#f0b849;
+  --red:#ff7b72;
+  --shadow:0 24px 60px -20px rgba(0,0,0,.75);
+  --glow:0 0 0 1px rgba(167,139,250,.28), 0 18px 50px -18px rgba(124,109,255,.45);
+  --mono:ui-monospace,"SFMono-Regular","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",Segoe UI,Roboto,sans-serif;
+}
+html[data-theme="light"]{
+  --bg:#f4f5f9;
+  --bg-2:#eceef5;
+  --surface:rgba(255,255,255,0.78);
+  --surface-2:rgba(255,255,255,0.95);
+  --stroke:rgba(15,20,40,0.10);
+  --stroke-2:rgba(15,20,40,0.20);
+  --text:#0f1424;
+  --text-2:#333b52;
+  --muted:#535d78;
+  --cyan:#0891b2;
+  --violet:#6d3ff0;
+  --pink:#c0267c;
+  --lime:#1a7f37;
+  --amber:#8a5a00;
+  --red:#c0342b;
+  --shadow:0 24px 60px -24px rgba(20,25,60,.22);
+  --glow:0 0 0 1px rgba(109,63,240,.22), 0 18px 44px -20px rgba(109,63,240,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:var(--sans);font-size:16px;line-height:1.72;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* ============ aurora bg ============ */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aurora::before{
+  content:"";position:absolute;inset:-30%;
+  background:
+    radial-gradient(42vw 42vw at 12% 8%, rgba(34,211,238,.20), transparent 62%),
+    radial-gradient(46vw 46vw at 88% 4%, rgba(167,139,250,.24), transparent 60%),
+    radial-gradient(40vw 40vw at 70% 82%, rgba(244,114,182,.16), transparent 62%),
+    radial-gradient(52vw 52vw at 22% 92%, rgba(56,189,248,.12), transparent 64%);
+  filter:blur(28px);animation:drift 26s ease-in-out infinite alternate;
+}
+.aurora::after{
+  content:"";position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(80% 60% at 50% 0%,#000,transparent 78%);
+}
+html[data-theme="light"] .aurora::before{opacity:.65}
+html[data-theme="light"] .aurora::after{background-image:linear-gradient(rgba(15,20,40,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(15,20,40,.045) 1px,transparent 1px)}
+@keyframes drift{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(-2%,2%,0) scale(1.06)}
+  100%{transform:translate3d(2%,-1%,0) scale(1.02)}
+}
+@media (prefers-reduced-motion:reduce){.aurora::before{animation:none}*{transition:none!important}}
+
+/* ============ topbar ============ */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:14px;
+  padding:10px 22px;
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter:blur(16px) saturate(150%);
+  border-bottom:1px solid var(--stroke);
+}
+.brand{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);
+}
+.brand b{
+  background:linear-gradient(92deg,var(--cyan),var(--violet) 55%,var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+}
+.topbar .spacer{flex:1}
+.tbtn{
+  font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  color:var(--text-2);background:var(--surface);border:1px solid var(--stroke);
+  padding:6px 13px;border-radius:999px;transition:.18s ease;
+  display:inline-flex;align-items:center;gap:7px;
+}
+.tbtn:hover{color:var(--text);border-color:var(--stroke-2);background:var(--surface-2);transform:translateY(-1px)}
+
+/* ============ hero ============ */
+.hero{position:relative;z-index:1;padding:56px 22px 30px;max-width:1280px;margin:0 auto}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid color-mix(in srgb,var(--cyan) 40%, transparent);
+  background:color-mix(in srgb,var(--cyan) 10%, transparent);
+  padding:5px 13px;border-radius:999px;margin-bottom:20px;
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35;transform:scale(.75)}}
+h1{
+  margin:0 0 18px;font-size:clamp(2.05rem,5.2vw,3.9rem);line-height:1.12;
+  font-weight:850;letter-spacing:-.03em;
+  background:linear-gradient(96deg,var(--text) 8%, var(--violet) 52%, var(--cyan) 88%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h1 code{
+  font-family:var(--mono);font-size:.72em;font-weight:800;letter-spacing:-.01em;
+  -webkit-text-fill-color:var(--pink);color:var(--pink);
+  background:color-mix(in srgb,var(--pink) 12%, transparent);
+  border:1px solid color-mix(in srgb,var(--pink) 34%, transparent);
+  padding:.06em .3em;border-radius:9px;
+}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.chip{
+  font-family:var(--mono);font-size:12.5px;font-weight:600;
+  color:var(--text-2);background:var(--surface);
+  border:1px solid var(--stroke);border-radius:999px;padding:6px 14px;
+  backdrop-filter:blur(8px);
+}
+.chip b{color:var(--violet)}
+
+/* ============ layout ============ */
+.layout{
+  position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:10px 22px 90px;
+  display:grid;grid-template-columns:230px minmax(0,1fr);gap:38px;align-items:start;
+}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;gap:14px}.toc{display:none}}
+
+/* ============ toc ============ */
+.toc{position:sticky;top:78px;max-height:calc(100vh - 100px);overflow-y:auto;padding-right:6px}
+.toc-h{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 12px;padding-left:12px;
+}
+.toc a{
+  display:block;color:var(--muted);text-decoration:none;font-size:13.5px;
+  padding:5px 12px;border-left:2px solid var(--stroke);
+  transition:.16s ease;line-height:1.45;
+}
+.toc a:hover{color:var(--text);border-left-color:var(--violet);background:var(--surface)}
+.toc a.sub{padding-left:24px;font-size:12.5px;font-family:var(--mono)}
+.toc a.active{
+  color:var(--text);border-left-color:var(--cyan);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--cyan) 14%, transparent),transparent);
+  font-weight:650;
+}
+.toc::-webkit-scrollbar{width:5px}
+.toc::-webkit-scrollbar-thumb{background:var(--stroke-2);border-radius:9px}
+
+/* ============ sections ============ */
+main{min-width:0}
+section{margin-bottom:66px;scroll-margin-top:88px}
+h2{
+  position:relative;margin:0 0 26px;padding-bottom:14px;
+  font-size:clamp(1.5rem,3vw,2.05rem);font-weight:800;letter-spacing:-.02em;
+  color:var(--text);border-bottom:1px solid var(--stroke);
+  display:flex;align-items:center;gap:14px;
+}
+h2::before{
+  content:"";width:5px;height:1.05em;border-radius:99px;flex:none;
+  background:linear-gradient(180deg,var(--cyan),var(--violet) 60%,var(--pink));
+  box-shadow:0 0 18px color-mix(in srgb,var(--violet) 60%, transparent);
+}
+h2::after{
+  content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),transparent);
+  transition:width 1.1s cubic-bezier(.2,.8,.2,1);
+}
+section.seen h2::after{width:100%}
+h3{
+  margin:0 0 14px;font-size:1.13rem;font-weight:750;letter-spacing:-.01em;color:var(--text);
+  line-height:1.45;
+}
+p{margin:0 0 15px;color:var(--text-2)}
+a{color:var(--cyan)}
+ul{margin:0 0 15px;padding-left:20px;color:var(--text-2)}
+li{margin-bottom:7px}
+li::marker{color:var(--violet)}
+strong{color:var(--text);font-weight:700}
+
+code:not(pre code){
+  font-family:var(--mono);font-size:.855em;
+  color:var(--cyan);
+  background:color-mix(in srgb,var(--cyan) 11%, transparent);
+  border:1px solid color-mix(in srgb,var(--cyan) 24%, transparent);
+  padding:.1em .4em;border-radius:6px;white-space:nowrap;
+}
+
+/* ============ prose card (배경) ============ */
+.glass{
+  background:var(--surface);border:1px solid var(--stroke);border-radius:18px;
+  padding:26px 28px;backdrop-filter:blur(14px);box-shadow:var(--shadow);
+}
+blockquote{
+  margin:22px 0;padding:20px 24px;border-radius:0 16px 16px 0;
+  border-left:3px solid var(--pink);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--pink) 12%, transparent),transparent 85%);
+  color:var(--text);font-size:1.02rem;line-height:1.75;
+}
+blockquote p{margin:0;color:var(--text)}
+blockquote::before{
+  content:"“";display:block;font-size:2.4rem;line-height:0;height:20px;
+  color:var(--pink);opacity:.55;font-family:Georgia,serif;
+}
+.lead{font-size:1.06rem;color:var(--text)}
+.kicker{
+  margin-top:20px;padding:16px 20px;border-radius:14px;
+  border:1px solid color-mix(in srgb,var(--violet) 34%, transparent);
+  background:color-mix(in srgb,var(--violet) 10%, transparent);
+  color:var(--text);font-weight:600;box-shadow:var(--glow);
+}
+
+/* ============ decision cards ============ */
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:20px}
+.dcard{
+  position:relative;overflow:hidden;
+  background:var(--surface);border:1px solid var(--stroke);border-radius:18px;
+  padding:24px 26px 26px;backdrop-filter:blur(14px);
+  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.dcard::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet) 50%,var(--pink));
+  opacity:.75;
+}
+.dcard:hover{transform:translateY(-4px);border-color:var(--stroke-2);box-shadow:var(--glow)}
+.dcard.wide{grid-column:1/-1}
+.dbadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.06em;
+  color:#08090d;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  border-radius:8px;padding:3px 9px;margin-bottom:12px;
+  box-shadow:0 6px 18px -6px color-mix(in srgb,var(--violet) 80%, transparent);
+}
+html[data-theme="light"] .dbadge{color:#fff}
+.dcard p:last-child{margin-bottom:0}
+
+/* ============ table ============ */
+.tablewrap{
+  overflow-x:auto;border:1px solid var(--stroke);border-radius:16px;
+  background:var(--surface);backdrop-filter:blur(12px);
+}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+thead th{
+  position:sticky;top:0;z-index:2;text-align:left;
+  padding:13px 18px;font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  background:color-mix(in srgb,var(--bg-2) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--stroke-2);
+}
+tbody td{padding:14px 18px;border-bottom:1px solid var(--stroke);color:var(--text-2);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:rgba(255,255,255,.018)}
+html[data-theme="light"] tbody tr:nth-child(even){background:rgba(15,20,40,.028)}
+tbody tr{transition:background .16s ease}
+tbody tr:hover{background:color-mix(in srgb,var(--violet) 9%, transparent)}
+td .mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:7px;flex:none;
+  font-family:var(--mono);font-weight:800;font-size:13px;margin-right:8px;
+  vertical-align:-6px;
+}
+td .mark.yes{color:var(--lime);background:color-mix(in srgb,var(--lime) 15%, transparent);border:1px solid color-mix(in srgb,var(--lime) 40%, transparent)}
+td .mark.no{color:var(--red);background:color-mix(in srgb,var(--red) 15%, transparent);border:1px solid color-mix(in srgb,var(--red) 40%, transparent)}
+tr.is-no td:first-child{opacity:.86}
+td code{white-space:nowrap}
+
+/* ============ code blocks ============ */
+.codebox{position:relative;margin:18px 0}
+.codebar{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px 8px 16px;
+  background:color-mix(in srgb,var(--bg-2) 88%, transparent);
+  border:1px solid var(--stroke);border-bottom:0;border-radius:14px 14px 0 0;
+}
+.lang{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);
+}
+.codebar .spacer{flex:1}
+.copy{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;
+  cursor:pointer;color:var(--text-2);
+  background:var(--surface-2);border:1px solid var(--stroke);
+  border-radius:7px;padding:4px 10px;transition:.16s ease;
+}
+.copy:hover{color:var(--text);border-color:var(--violet);background:color-mix(in srgb,var(--violet) 16%, transparent)}
+.copy.ok{color:var(--lime);border-color:var(--lime)}
+pre{
+  margin:0;padding:18px 20px;overflow-x:auto;
+  background:color-mix(in srgb,#04050a 82%, transparent);
+  border:1px solid var(--stroke);border-radius:0 0 14px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+html[data-theme="light"] pre{background:rgba(255,255,255,.92)}
+pre code{
+  font-family:var(--mono);font-size:13.4px;line-height:1.72;color:var(--text);
+  white-space:pre;display:block;
+}
+pre code .tok-flag{color:var(--pink);font-weight:700}
+pre code .tok-cmd{color:var(--cyan)}
+pre code .tok-arg{color:var(--muted)}
+.codebox.warn pre{border-color:color-mix(in srgb,var(--amber) 46%, transparent);background:color-mix(in srgb,var(--amber) 8%, transparent)}
+.codebox.warn .codebar{border-color:color-mix(in srgb,var(--amber) 46%, transparent);background:color-mix(in srgb,var(--amber) 10%, transparent)}
+.codebox.warn .lang{color:var(--amber)}
+.codebox.warn pre code{color:var(--text);white-space:pre-wrap}
+.codebox.info pre{border-color:color-mix(in srgb,var(--cyan) 42%, transparent);background:color-mix(in srgb,var(--cyan) 8%, transparent)}
+.codebox.info .codebar{border-color:color-mix(in srgb,var(--cyan) 42%, transparent);background:color-mix(in srgb,var(--cyan) 10%, transparent)}
+.codebox.info pre code{color:var(--text);white-space:pre-wrap}
+
+/* ============ risk cards ============ */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.rcard{
+  position:relative;overflow:hidden;
+  border-radius:18px;padding:22px 24px;
+  background:var(--surface);border:1px solid var(--stroke);
+  backdrop-filter:blur(14px);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.rcard:hover{transform:translateY(-4px);border-color:var(--stroke-2)}
+.rcard::after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--rc,var(--violet));box-shadow:0 0 18px var(--rc,var(--violet));
+}
+.rcard h3{display:flex;align-items:flex-start;gap:11px}
+.rid{
+  font-family:var(--mono);font-size:11.5px;font-weight:800;letter-spacing:.05em;
+  color:var(--rc);background:color-mix(in srgb,var(--rc) 15%, transparent);
+  border:1px solid color-mix(in srgb,var(--rc) 42%, transparent);
+  border-radius:7px;padding:3px 8px;flex:none;margin-top:2px;
+}
+.rcard.c-red{--rc:var(--red)}
+.rcard.c-amber{--rc:var(--amber)}
+.rcard.c-violet{--rc:var(--violet)}
+.rcard.c-cyan{--rc:var(--cyan)}
+.rcard.c-pink{--rc:var(--pink)}
+.label{
+  display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin:14px 0 6px;
+}
+.label:first-of-type{margin-top:4px}
+.risk-body{color:var(--text-2);margin:0}
+.fix-body{color:var(--text);margin:0}
+.rcard ul{margin:0;padding-left:19px}
+.rcard ul li{color:var(--text)}
+.rcard ul li::marker{color:var(--rc)}
+
+/* ============ next steps ============ */
+.steps{list-style:none;padding:0;margin:0}
+.steps li{
+  position:relative;padding:20px 24px 20px 60px;margin:0;
+  background:var(--surface);border:1px solid var(--stroke);border-radius:16px;
+  backdrop-filter:blur(12px);color:var(--text-2);
+  transition:.2s ease;
+}
+.steps li:hover{border-color:var(--stroke-2);transform:translateX(3px)}
+.steps li::before{
+  content:"→";position:absolute;left:22px;top:20px;
+  font-family:var(--mono);font-size:17px;font-weight:800;
+  color:var(--cyan);
+}
+
+/* ============ change history ============ */
+details.ch{
+  background:var(--surface);border:1px solid var(--stroke);border-radius:16px;
+  backdrop-filter:blur(12px);overflow:hidden;
+}
+details.ch summary{
+  cursor:pointer;padding:16px 22px;list-style:none;
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:10px;transition:.16s ease;
+}
+details.ch summary::-webkit-details-marker{display:none}
+details.ch summary::before{content:"▸";color:var(--violet);font-size:14px;transition:transform .2s ease}
+details.ch[open] summary::before{transform:rotate(90deg)}
+details.ch summary:hover{color:var(--text);background:var(--surface-2)}
+details.ch .ch-body{padding:6px 22px 22px;border-top:1px solid var(--stroke)}
+.ch-entry{
+  display:grid;gap:8px;padding:16px 18px;margin-top:14px;
+  background:color-mix(in srgb,var(--violet) 7%, transparent);
+  border:1px solid var(--stroke);border-radius:12px;
+  font-size:14px;color:var(--text-2);line-height:1.7;
+}
+.ch-entry .tag{
+  font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.05em;
+  color:var(--violet);background:color-mix(in srgb,var(--violet) 14%, transparent);
+  border:1px solid color-mix(in srgb,var(--violet) 40%, transparent);
+  border-radius:6px;padding:2px 8px;justify-self:start;
+}
+.ch-entry .cid{font-family:var(--mono);color:var(--cyan);font-size:12.5px}
+
+/* ============ reveal ============ */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.reveal.seen{opacity:1;transform:none}
+
+footer.pagefoot{
+  position:relative;z-index:1;max-width:1280px;margin:0 auto;
+  padding:26px 22px 60px;border-top:1px solid var(--stroke);
+  color:var(--muted);font-size:12.5px;font-family:var(--mono);
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;
+}
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+
+<div class="topbar">
+  <span class="brand"><b>dj-superkit</b> &nbsp;/&nbsp; requirements</span>
+  <span class="spacer"></span>
+  <button class="tbtn" id="themeBtn" type="button" aria-label="테마 전환"><span id="themeIcon">◐</span> <span id="themeLabel">Light</span></button>
+</div>
+
+<header class="hero">
+  <div class="eyebrow"><span class="dot"></span> v2.5 · requirements</div>
+  <h1>v2.5 — <code>--no-ask</code> 플래그 (AskUserQuestion 도구 우회)</h1>
+  <div class="hero-meta">
+    <span class="chip">Mode: <b>socratic-free-form</b></span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="toc" aria-label="목차">
+    <p class="toc-h">Contents</p>
+    <nav id="tocNav">
+      <a href="#sec-background">배경</a>
+      <a href="#sec-decisions">핵심 결정</a>
+      <a class="sub" href="#d1">D1 — 적용 범위</a>
+      <a class="sub" href="#d2">D2 — 플래그 이름</a>
+      <a class="sub" href="#d3">D3 — 위치 자유</a>
+      <a class="sub" href="#d4">D4 — critical 처리</a>
+      <a class="sub" href="#d5">D5 — 안내 boilerplate</a>
+      <a class="sub" href="#d6">D6 — persistence</a>
+      <a class="sub" href="#d7">D7 — ad-hoc 결정</a>
+      <a href="#sec-risks">우려 / 해결</a>
+      <a class="sub" href="#r1">R-1 — 도구 호출 0</a>
+      <a class="sub" href="#r2">R-2 — 게이트 skip</a>
+      <a class="sub" href="#r3">R-3 — escalation</a>
+      <a class="sub" href="#r4">R-4 — catch 실패</a>
+      <a class="sub" href="#r5">R-5 — parsing</a>
+      <a class="sub" href="#r6">R-6 — og-* 회귀</a>
+      <a class="sub" href="#r7">R-7 — 무인지 활성화</a>
+      <a href="#sec-next">다음 단계</a>
+      <a href="#sec-history">변경이력</a>
+    </nav>
+  </aside>
+
+  <main>
+
+    <!-- ================= 배경 ================= -->
+    <section id="sec-background" class="reveal">
+      <h2>배경</h2>
+      <div class="glass">
+        <p class="lead">v2.0.3+ 에서 8 skill body (PRD 4 + auto-* 4) 에 박힌 boilerplate ("사용자 질문 룰" + v2.3.5+ "AskUserQuestion 도구 우선") 가 모든 사용자 질문을 <code>AskUserQuestion</code> 도구 호출로 강제. 의도는 알람 누락 방지 (<code>Notification.elicitation_dialog</code> 매처 → <code>repeat-alert.sh</code> 발화).</p>
+
+        <p>하지만 사용자 신고:</p>
+
+        <blockquote><p>"요즘 AskUseQuestion 이게 꽤 불안정해 막 대답이 엄청 느려.. 그래서 그.. 예를들어 /brainstorming --no-ask 하면 그 AskUseQuestion 도구를 절대 하지않는 버전을 만들고 싶어"</p></blockquote>
+
+        <p><code>AskUserQuestion</code> 도구 응답이 느리거나 가끔 안 돌아오는 케이스 신고. 4 단계 게이트 + 흐름 중간 clarifying Q 누적되면 사용자 마찰 ↑.</p>
+
+        <div class="kicker">본 release 는 옵트인 플래그로 우회 — 도구 호출 자체를 0 으로 만들고, 질문은 prose (메인 turn 채팅 메시지) 로 처리.</div>
+      </div>
+    </section>
+
+    <!-- ================= 핵심 결정 ================= -->
+    <section id="sec-decisions" class="reveal">
+      <h2>핵심 결정</h2>
+
+      <div class="dgrid">
+
+        <div class="dcard wide" id="d1">
+          <span class="dbadge">D1</span>
+          <h3>D1 — 적용 범위 (8 skill)</h3>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr><th>영역</th><th>--no-ask 적용</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>brainstorming</code> / <code>designing-direction</code> / <code>writing-plans</code> / <code>executing-plans</code></td>
+                  <td><span class="mark yes">O</span></td>
+                </tr>
+                <tr>
+                  <td><code>auto-brainstorming</code> / <code>auto-designing-direction</code> / <code>auto-writing-plans</code> / <code>auto-executing-plans</code></td>
+                  <td><span class="mark yes">O</span></td>
+                </tr>
+                <tr class="is-no">
+                  <td><code>fast-tasks</code></td>
+                  <td><span class="mark no">X</span>— Socratic 2~3 Q × N 형식이 본질 기능, <code>--no-ask</code> 와 충돌</td>
+                </tr>
+                <tr class="is-no">
+                  <td><code>worktree-merge-back</code></td>
+                  <td><span class="mark no">X</span>— destructive 작업 후처리 게이트가 본질. default yes 안 됨</td>
+                </tr>
+                <tr class="is-no">
+                  <td>og-* (upstream mirror)</td>
+                  <td><span class="mark no">X</span>— 보존 룰</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dcard" id="d2">
+          <span class="dbadge">D2</span>
+          <h3>D2 — 플래그 이름 <code>--no-ask</code></h3>
+          <p>사용자 신고 표현 답습 (<code>/brainstorming --no-ask</code>). 짧고 의미 명확. 영어 식별자 보존 룰 따름.</p>
+          <p>대안 (<code>--prose-only</code>, <code>--quick</code>, <code>--silent</code>) 보다 사용자 인지 비용 최저.</p>
+        </div>
+
+        <div class="dcard" id="d3">
+          <span class="dbadge">D3</span>
+          <h3>D3 — 플래그 위치 자유</h3>
+          <div class="codebox">
+            <div class="codebar"><span class="lang">shell</span><span class="spacer"></span><button class="copy" type="button">COPY</button></div>
+            <pre><code><span class="tok-cmd">/brainstorm</span> <span class="tok-arg">&lt;slug&gt;</span> <span class="tok-flag">--no-ask</span>
+<span class="tok-cmd">/brainstorm</span> <span class="tok-flag">--no-ask</span> <span class="tok-arg">&lt;slug&gt;</span></code></pre>
+          </div>
+          <p>slug 앞/뒤 모두 허용. argument parser 강건성 위해 메인이 <code>--no-ask</code> 토큰을 별도 검출.</p>
+        </div>
+
+        <div class="dcard wide" id="d4">
+          <span class="dbadge">D4</span>
+          <h3>D4 — critical 케이스 처리 = 모든 case prose + 안내 보강</h3>
+          <p><code>--no-ask</code> 진입 시 v2.3.5+ critical 7 case (파일 삭제 / <code>git push --force</code> / DB migration / mass commit / 외부 메시지 등 위험 명령) 도 prose 로 묻습니다. 도구 호출 0 일관성 우선.</p>
+          <p>단 안전성 보강: 위험 명령 진입 직전 prose 에 다음 한 줄 boilerplate 박음.</p>
+          <div class="codebox warn">
+            <div class="codebar"><span class="lang">⚠ boilerplate</span><span class="spacer"></span><button class="copy" type="button">COPY</button></div>
+            <pre><code>⚠️ 위험 명령 진입 — 응답 기다림. 백그라운드 작업 중이면 직접 catch 해주세요.</code></pre>
+          </div>
+          <p>사용자가 명시적으로 <code>--no-ask</code> invoke 했으니 알람 X 인지 가정. 단 위험 명령은 catch 손실 영향이 크므로 prose 안내 라인을 다른 일반 질문보다 두드러지게 (<code>⚠️</code> 마커 + 별도 줄).</p>
+        </div>
+
+        <div class="dcard wide" id="d5">
+          <span class="dbadge">D5</span>
+          <h3>D5 — 알람 X 안내 boilerplate</h3>
+          <p>skill 진입 시 1회만 박음 (turn 마다 반복 X).</p>
+          <div class="codebox info">
+            <div class="codebar"><span class="lang">ℹ boilerplate</span><span class="spacer"></span><button class="copy" type="button">COPY</button></div>
+            <pre><code>ℹ️ --no-ask 모드 진입 — AskUserQuestion 도구 호출 X, 응답 알람 X. 백그라운드 작업 중이면 응답 시점을 직접 체크해주세요.</code></pre>
+          </div>
+          <p>skill body 의 "Announce at start" 라인 직후 또는 첫 사용자 질문 prose 직전에 박음 (skill 별 자연스러운 위치 선택).</p>
+        </div>
+
+        <div class="dcard" id="d6">
+          <span class="dbadge">D6</span>
+          <h3>D6 — 플래그 persistence = 매 invoke 명시</h3>
+          <p>세션 전체 지속 X. 매 슬래시 invoke 마다 명시 (<code>/brainstorm &lt;slug&gt; --no-ask</code>). 사용자 통제권 우선.</p>
+        </div>
+
+        <div class="dcard" id="d7">
+          <span class="dbadge">D7</span>
+          <h3>D7 — ad-hoc 메인 turn 결정 = 구현 후 dogfood</h3>
+          <p>skill body 외 흐름 중간에 메인이 ad-hoc 결정 요청하는 경우 (<code>이렇게 진행할까요?</code> 류) <code>--no-ask</code> 컨텍스트 인지하고 prose 전환 가능한지는 구현 후 dogfood 단계에서 검증. 1차 release 핵심 범위 아님.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= 우려 / 해결 ================= -->
+    <section id="sec-risks" class="reveal">
+      <h2>우려 / 해결</h2>
+
+      <div class="rgrid">
+
+        <div class="rcard c-red" id="r1">
+          <h3><span class="rid">R-1</span> R-1 — 도구 호출 0 보장 깨짐</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: 8 skill body 분기 추가 후에도 메인이 무의식 중 <code>AskUserQuestion</code> 호출.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>8 skill body 분기 명시 — "도구 호출 0 보장" 문구 반복</li>
+            <li>grep 회귀 catch (CLAUDE.md 결합 메모 안 박음) — <code>--no-ask</code> 플래그 매치 + 분기 본문 매치 둘 다 검증</li>
+          </ul>
+        </div>
+
+        <div class="rcard c-amber" id="r2">
+          <h3><span class="rid">R-2</span> R-2 — 게이트 자체 skip 회귀</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: <code>--no-ask</code> 진입 시 메인이 "도구도 X 게이트도 X" 로 잘못 해석 → 자동 진행.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>분기 본문에 "게이트는 살아 있음 — 사용자 prose 응답 기다림" 명시</li>
+            <li>안티 패턴 표에 "게이트 skip" 명시</li>
+          </ul>
+        </div>
+
+        <div class="rcard c-violet" id="r3">
+          <h3><span class="rid">R-3</span> R-3 — auto-* 내부 escalation 회귀</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: auto-* skill 의 내부 escalation (BLOCKED 자가복구 실패 / critical 7 재질문 / Other 모호 응답 재질문) 에서 도구 호출 잔존.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>auto-* 4 skill 분기 본문에 "내부 escalation 경로도 도구 호출 0 보장" 명시</li>
+            <li>clarifying Q 자체는 그대로 prose 유지 (기존 auto-* 의 prose default 답습)</li>
+          </ul>
+        </div>
+
+        <div class="rcard c-red" id="r4">
+          <h3><span class="rid">R-4</span> R-4 — 위험 명령 사용자 catch 실패</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: 알람 X 라 백그라운드 작업 중이면 사용자가 위험 명령 진입 직전 prose 를 놓침 → 의도치 않은 실행.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결: D4 의 <code>⚠️ 위험 명령 진입</code> boilerplate. 일반 prose 보다 두드러지게.</p>
+        </div>
+
+        <div class="rcard c-cyan" id="r5">
+          <h3><span class="rid">R-5</span> R-5 — 플래그 parsing 약함</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: slug 위치 / 공백 / 따옴표 등 parsing edge case 실패 → 사용자가 <code>--no-ask</code> 명시했는데 인식 못 함.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>메인이 slug argument 토큰화 시 <code>--no-ask</code> 별도 검출 (<code>if "--no-ask" in args.split()</code> 패턴)</li>
+            <li>commands/*.md 본문에 "위치 자유 — slug 앞/뒤 모두 허용" 명시</li>
+          </ul>
+        </div>
+
+        <div class="rcard c-pink" id="r6">
+          <h3><span class="rid">R-6</span> R-6 — og-* 회귀</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: upstream mirror 의 og-* 3 skill (og-brainstorming / og-designing-direction / og-writing-plans / og-executing-plans) 에 실수로 <code>--no-ask</code> 분기 추가.</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>og-* 절대 변경 X (CLAUDE.md 보존 룰)</li>
+            <li>회귀 catch grep — og-* SKILL.md 에 <code>--no-ask</code> 매치 0 보장</li>
+          </ul>
+        </div>
+
+        <div class="rcard c-amber" id="r7">
+          <h3><span class="rid">R-7</span> R-7 — 사용자 무인지 활성화</h3>
+          <span class="label">위험</span>
+          <p class="risk-body">위험: 메인이 사용자 의도 아닌 상황에서 임의로 <code>--no-ask</code> 분기 활성화 (예: 빠른 답변 의도로 자동 적용).</p>
+          <span class="label">해결</span>
+          <p class="fix-body">해결:</p>
+          <ul>
+            <li>분기 진입 조건 = "사용자가 슬래시 명령에 <code>--no-ask</code> 토큰을 <strong>명시</strong> 했을 때만"</li>
+            <li>메인 자체 판단으로 활성화 X — 안티 패턴 표 명시</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= 다음 단계 ================= -->
+    <section id="sec-next" class="reveal">
+      <h2>다음 단계</h2>
+      <ul class="steps">
+        <li><code>/design v2.5-no-ask-flag</code> — tech-design 진입. 8 skill body 분기 schema / commands/*.md 본문 / CLAUDE.md 결합 메모 / 회귀 catch grep 설계</li>
+      </ul>
+    </section>
+
+    <!-- ================= 변경이력 ================= -->
+    <section id="sec-history" class="reveal">
+      <h2>변경이력</h2>
+      <details class="ch">
+        <summary>append-only 감사 로그 · 1 entry</summary>
+        <div class="ch-body">
+          <div class="ch-entry">
+            <span class="tag">[요구사항-수정]</span>
+            <span class="cid">CH-20260524-001 | 2026-05-24</span>
+            <span>v2.5-no-ask-flag-requirements.md 신규 생성 | AskUserQuestion 도구 우회 옵트인 플래그 (<code>--no-ask</code>) 도입 — 8 skill body boilerplate 분기 추가, 도구 호출 0 보장, 게이트 자체는 보존. critical 7 케이스 처리는 모든 case prose + 위험 명령 직전 ⚠️ 안내 라인 보강</span>
+          </div>
+        </div>
+      </details>
+    </section>
+
+  </main>
+</div>
+
+<footer class="pagefoot">
+  <span>v2.5-no-ask-flag-requirements</span>
+  <span>socratic-free-form</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- theme toggle (default dark, OS light 존중) ---- */
+  var root = document.documentElement;
+  var btn = document.getElementById("themeBtn");
+  var icon = document.getElementById("themeIcon");
+  var label = document.getElementById("themeLabel");
+  try{
+    if(window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches){
+      root.setAttribute("data-theme","light");
+    }
+  }catch(e){}
+  function paint(){
+    var light = root.getAttribute("data-theme") === "light";
+    icon.textContent = light ? "◑" : "◐";
+    label.textContent = light ? "Dark" : "Light";
+  }
+  paint();
+  btn.addEventListener("click", function(){
+    root.setAttribute("data-theme", root.getAttribute("data-theme")==="light" ? "dark" : "light");
+    paint();
+  });
+
+  /* ---- copy buttons ---- */
+  Array.prototype.forEach.call(document.querySelectorAll(".copy"), function(b){
+    b.addEventListener("click", function(){
+      var box = b.closest(".codebox");
+      var text = box.querySelector("pre code").innerText;
+      var done = function(){
+        var old = b.textContent;
+        b.textContent = "COPIED"; b.classList.add("ok");
+        setTimeout(function(){ b.textContent = old; b.classList.remove("ok"); }, 1400);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(text, done); });
+      } else { fallback(text, done); }
+    });
+  });
+  function fallback(text, cb){
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); cb(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  /* ---- reveal on scroll ---- */
+  var reveals = document.querySelectorAll(".reveal");
+  if("IntersectionObserver" in window){
+    var ro = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("seen"); ro.unobserve(en.target); }
+      });
+    }, {threshold:0.08, rootMargin:"0px 0px -6% 0px"});
+    Array.prototype.forEach.call(reveals, function(el){ ro.observe(el); });
+  } else {
+    Array.prototype.forEach.call(reveals, function(el){ el.classList.add("seen"); });
+  }
+
+  /* ---- scroll-spy TOC ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("#tocNav a"));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute("href")); })
+                     .filter(Boolean);
+  function spy(){
+    var best = null, bestTop = -Infinity;
+    targets.forEach(function(t){
+      var top = t.getBoundingClientRect().top - 100;
+      if(top <= 0 && top > bestTop){ bestTop = top; best = t; }
+    });
+    links.forEach(function(a){
+      a.classList.toggle("active", !!best && a.getAttribute("href") === "#" + best.id);
+    });
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if(!ticking){ ticking = true; window.requestAnimationFrame(function(){ spy(); ticking = false; }); }
+  }, {passive:true});
+  spy();
+})();
+</script>
+</body>
+</html>

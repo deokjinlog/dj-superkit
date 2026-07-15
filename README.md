@@ -104,10 +104,12 @@ AI는 코드를 너무 빨리 짭니다. 문제는 속도가 아니라 **방향*
 
 | 단계 | 문서 | 분량 |
 |---|---|---|
-| **① 기획** | [요구사항](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-requirements.md) | 136줄 |
+| **① 기획** | [요구사항](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-requirements.md) · [`.html` 사본](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-requirements.html) | 136줄 |
 | **② 설계** | [개발방향](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-tech-design.md) | 292줄 |
 | **③ 계획** | [구현계획서](docs/features/2026-05-24-v2.5-no-ask-flag/v2.5-no-ask-flag-implementation-plan.md) | 425줄 |
 | **④ 실행** | 같은 구현계획서 하단 `## 변경이력` | 실제 커밋 5개 — `fc3f7cf` … `b846957` |
+
+① 옆의 **`.html` 사본**이 "같은 문서, 두 얼굴"입니다 — AI 는 `.md` 를, 사람은 `.html` 을 봅니다. 내용은 1:1이고, 기획자가 코드를 몰라도 게이트에서 검토할 수 있게 하는 장치예요. *(내려받아 더블클릭하면 오프라인에서도 열립니다 — 외부 의존 0)*
 
 각 문서 하단 `## 변경이력` 에 **실제 CH id**(`CH-20260524-004`)와 **실제 커밋 SHA**가 박혀 있습니다.
 데모용으로 꾸며낸 게 아니라, 이 저장소가 실제로 그렇게 만들어졌어요.
