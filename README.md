@@ -7,7 +7,7 @@
 ### 기획 의도를 고정하고, 그 위에서만 코드가 자란다
 
 <p>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.7.0-7c3aed?style=flat-square&labelColor=0d1117">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.7.1-7c3aed?style=flat-square&labelColor=0d1117">
   <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-Plugin-a78bfa?style=flat-square&labelColor=0d1117">
   <img alt="Skills" src="https://img.shields.io/badge/skills-27-06b6d4?style=flat-square&labelColor=0d1117">
   <img alt="Upstream" src="https://img.shields.io/badge/superpowers-5.0.7%20계승-f97316?style=flat-square&labelColor=0d1117">
@@ -80,7 +80,15 @@
 > **입력 출처**: `DartWeave_발표_최종완성본1.pptx` **30장**. 30장 전체는 이미 동작하는 시스템 전체를 다루므로, 그중 **첫 수직 슬라이스**만 이 PRD 범위로 잡음.
 
 발표자료 30장 하나가 → **`FR` 10개 · `NFR` 4개 · `AC` 7개 · 범위밖 10건** 으로 분해됐습니다.
-원본 `.pptx` 는 gitignore 로 막습니다 — **기획서는 로컬에, 뽑아낸 요구사항만 git 에.**
+
+**기획서는 프로젝트 안에 두세요.** 그리고 `.gitignore` 로 막으면 됩니다 — **기획서는 로컬에, 뽑아낸 요구사항만 git 에.**
+
+```bash
+mkdir -p 내프로젝트/docs && mv 기획서.pptx 내프로젝트/docs/
+printf 'docs/*.pptx\ndocs/*.pdf\n' >> 내프로젝트/.gitignore
+```
+
+*(채팅에 붙여넣어도 됩니다. 파일이면 경로만 알려주세요.)*
 
 <br/>
 

@@ -1,7 +1,7 @@
 {
   "name": "intent-locked-workflow",
   "description": "기획 의도를 고정하고, 그 위에서만 코드가 자란다 — 기획·설계·계획·실행 4단계 게이트 워크플로 (superpowers 5.0.7 계승)",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "author": {
     "name": "djchoi",
     "email": "deokjinlog@users.noreply.github.com"
