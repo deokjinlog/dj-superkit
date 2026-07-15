@@ -32,8 +32,6 @@
   <a href="#지금-바로-시작">시작하기</a>
   &nbsp;·&nbsp;
   <a href="#스킬-27개">스킬</a>
-  &nbsp;·&nbsp;
-  <a href="#라이선스--기여">라이선스</a>
 </sub>
 
 </div>
@@ -142,13 +140,6 @@ Claude Code 안에서:
 
 [superpowers](https://github.com/obra/superpowers) 5.0.7 (MIT, Jesse Vincent) 위에 프로덕션 안전성을 얹은 파생 프로젝트입니다.
 원본 흐름 그대로가 필요하면 `/og-brainstorm` · `/og-write-plan` · `/og-execute-plan` 로 쓸 수 있어요.
-
----
-
-## 라이선스 · 기여
-
-MIT — [LICENSE](LICENSE)
-기여 · 버그 제보 — [CONTRIBUTING](CONTRIBUTING.md) · [Issues](https://github.com/deokjinlog/intent-locked-workflow/issues)
 
 ---
 
