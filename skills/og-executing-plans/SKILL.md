@@ -16,7 +16,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the og-executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill (untouched-upstream, no og- variant needed — intent-locked-workflow did not modify it).
+**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use intent-locked-workflow:subagent-driven-development instead of this skill (untouched-upstream, no og- variant needed — intent-locked-workflow did not modify it).
 
 ## Checklist
 
@@ -44,7 +44,7 @@ For each task:
 
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
+- **REQUIRED SUB-SKILL:** Use intent-locked-workflow:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help
@@ -76,6 +76,6 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
+- **격리 워크스페이스 (전용 스킬 없음 — 직접 실행)** - 시작 전에 `git worktree add ../<repo>-<slug> -b <slug>` 로 격리. 이 플러그인엔 워크트리 스킬이 없으므로 스킬 호출을 기다리지 말 것
 - **intent-locked-workflow:og-writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **intent-locked-workflow:finishing-a-development-branch** - Complete development after all tasks

@@ -65,7 +65,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or intent-locked-workflow:og-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use intent-locked-workflow:subagent-driven-development (recommended) or intent-locked-workflow:og-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -160,7 +160,7 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use **`superpowers:subagent-driven-development`** (upstream-untouched). ⚠️ NOT `subagent-driven` — that's the intent-locked-workflow extended variant with wave-parallel + RISK + 변경이력. og 흐름은 upstream 원본만 사용.
+- **REQUIRED SUB-SKILL:** Use **`intent-locked-workflow:subagent-driven-development`** (upstream-untouched). ⚠️ NOT `subagent-driven` — that's the intent-locked-workflow extended variant with wave-parallel + RISK + 변경이력. og 흐름은 upstream 원본만 사용.
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
@@ -171,4 +171,4 @@ After saving the plan, offer execution choice:
 
 | Wrong | Right |
 |---|---|
-| `subagent-driven` 매치 — intent-locked-workflow 확장 wave-parallel 발화 | `superpowers:subagent-driven-development` upstream 원본만 사용. og 흐름은 단순 fresh subagent + 2-stage review 유지. |
+| `subagent-driven` 매치 — intent-locked-workflow 확장 wave-parallel 발화 | `intent-locked-workflow:subagent-driven-development` upstream 원본만 사용. og 흐름은 단순 fresh subagent + 2-stage review 유지. |
