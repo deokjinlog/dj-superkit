@@ -128,16 +128,18 @@ Three categories. Apply only when there is a CONCRETE, ARTICULABLE readability i
 ## Category B — 자명한 정리
 - Remove dead comments explicitly marked (e.g., `// TODO: 삭제예정`)
 - Standardize quote/semicolon style within the block
-- Rename variables ONLY if context is overwhelmingly clear (e.g., `tmp` → `cartTotal` when the surrounding lines unambiguously imply the meaning)
 - Add labeling comments next to magic numbers (do NOT extract to const)
 
-## Category C — 중복 통합
-- Merge duplicate imports
-- Merge duplicate const declarations of the same value
-- Merge duplicate inline helpers — ONLY when call-site contexts are byte-identical
+## Category C — 중복 통합 → **폐지**
+
+**이 범주는 폐지됐습니다.** import·const·helper 병합은 **블록 밖의 참조와 스코프를 바꾸는데**, 이 스킬은 코드 블록만 보고 파일 전체를 보지 않습니다. "call-site contexts are byte-identical" 은 블록만 보고는 판정할 수 없는 조건이었습니다.
 
 # FORBIDDEN — never do any of these
 
+> **왜 의미 변경이 전부 금지인가:** 이 스킬은 `verifying-spec` **통과 후**에 돕니다. 그리고 `수정 후` 블록은 implementer 가 **STRICT BYTE-COPY** 로 코드베이스에 그대로 넣습니다. 즉 여기서 의미를 바꾸면 **검증된 코드와 실행되는 코드가 달라집니다.** `plan_byte_check.py` 는 `원본` 블록만 검사하므로 `수정 후` 의 변조를 잡아주지 못합니다. **서식만 만지세요.**
+
+- **Do NOT rename variables.** 블록 밖 참조가 깨지고, 그 사실을 이 스킬은 볼 수 없다
+- **Do NOT merge imports / const / inline helpers.** 스코프와 구조가 바뀐다
 - Do NOT touch "원본" blocks
 - Do NOT touch prose, headings, lists, tables, frontmatter, or `## 변경이력`
 - Do NOT extract magic numbers to named constants

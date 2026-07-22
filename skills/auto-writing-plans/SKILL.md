@@ -1,6 +1,6 @@
 ---
 name: auto-writing-plans
-description: auto-flow 3단계 — requirements + tech-design 읽기 + AI 자동 task 분해 (TDD bite-sized + Model hint 자동) + RISK 코드 지점 §2 자동 + verifying-spec 자동 + code-pretty 호출 X (D-T12 와 일관) + change-history 자동 + auto-executing-plans 자동 invoke. AskUserQuestion / generating-html 호출 X.
+description: auto-flow 3단계 — requirements + tech-design 읽기 + AI 자동 task 분해 (TDD bite-sized + Model hint 자동) + RISK 코드 지점 §2 자동 + verifying-spec 자동 + code-pretty 호출 X (D-T12 와 일관) + change-history 자동 + auto-executing-plans 자동 invoke. 추가 AskUserQuestion 호출 X (사용자 입력은 clarifying Q 답변에만, 그 질문 자체는 AskUserQuestion 도구로). generating-html 은 Step 4.5 fire-and-forget dispatch (v2.3.2+ — v1.1.17 '호출 부재' 룰이 반전됨).
 ---
 
 # Auto Writing Plans → <slug>-implementation-plan.md (auto)

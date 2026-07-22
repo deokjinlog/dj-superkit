@@ -1,6 +1,6 @@
 ---
 name: auto-executing-plans
-description: "auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + Entry Guard (preflight.subagent_task_entry_check) + DAG 자동 build + 무조건 wave-parallel subagent 강제 (Gate #14 override) + failure isolation 그대로 + End-of-run consolidator 자동 + finishing-a-development-branch 자동 호출. AskUserQuestion / generating-html 호출 X."
+description: "auto-flow 4단계 (마지막) — implementation-plan.md 읽기 + Entry Guard (preflight.subagent_task_entry_check) + DAG 자동 build + 무조건 wave-parallel subagent 강제 (Gate #14 override) + failure isolation 그대로 + End-of-run consolidator 자동 + finishing-a-development-branch 자동 호출. 추가 AskUserQuestion 호출 X (사용자 입력은 clarifying Q 답변에만, 그 질문 자체는 AskUserQuestion 도구로). generating-html 은 Step 4.5 fire-and-forget dispatch (v2.3.2+ — v1.1.17 '호출 부재' 룰이 반전됨)."
 ---
 
 # Auto Executing Plans → wave-parallel + finishing (auto)

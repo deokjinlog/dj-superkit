@@ -1,6 +1,6 @@
 ---
 name: auto-brainstorming
-description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-tech-design 자동 invoke. 사용자 입력은 clarifying Q 답변에만. AskUserQuestion / Visual Companion / generating-html 호출 X.
+description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-tech-design 자동 invoke. 사용자 입력은 clarifying Q 답변에만. Visual Companion 호출 X. 추가 AskUserQuestion 호출 X (사용자 입력은 clarifying Q 답변에만, 그 질문 자체는 AskUserQuestion 도구로). generating-html 은 Step 4.5 fire-and-forget dispatch (v2.3.2+ — v1.1.17 '호출 부재' 룰이 반전됨).
 ---
 
 # Auto Brainstorming → <slug>-requirements.md (Socratic auto)
