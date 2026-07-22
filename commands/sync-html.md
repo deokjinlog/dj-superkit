@@ -1,3 +1,7 @@
+---
+description: "`.md` 문서의 `.html` 동봉본을 다시 만든다. `--rebuild` 로 전체 재생성."
+---
+
 # /sync-html
 
 `<slug>` 인자는 선택입니다. 누락 시 `scripts/auto_flow.find_latest_slug(Path("docs/features"))` 를 호출해서 가장 최근 폴더를 자동으로 선택합니다. `--rebuild` 플래그도 선택입니다.

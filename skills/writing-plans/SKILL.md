@@ -68,7 +68,7 @@ You MUST create a TaskCreate task for each of these items and complete them in o
 6. **사양 정합성 검증** — main agent runs A+C verification on the plan via `verifying-spec` (Tolerance for missing skill)
 7. **코드 블록 포맷 정리** — pre-review code-block prettify on the draft via `code-pretty` skill (Sonnet subagent). Runs AFTER verifying-spec passes and BEFORE generating-html. Targets only `**수정 후**`-labeled code blocks. Stops once first change-history entry is logged.
 8. **문서 포맷 정리 (사용자 리뷰 전)** — pre-review format pass on the draft via `generating-html` skill (Sonnet subagent). Runs immediately after code-pretty and BEFORE showing the plan to the user. Re-fires together with code-pretty after each revision iteration (per-draft-state).
-9. **사용자 검토 (구현계획서)** — show the prettified plan + verifying-spec report + code-pretty diff summary; get approval (loop until OK; on changes → revise → back to step 6 verifying-spec)
+9. **사용자 검토 (구현계획서)** — show the RAW plan + verifying-spec report + code-pretty diff summary; get approval (loop until OK; on changes → revise → back to step 6 verifying-spec)
 10. **변경이력 기록** — append first `[구현계획서-수정]` entry via `change-history` skill
 11. **구현 단계 핸드오프** — count tasks first, then offer the choice using the Execution Handoff message below (`executing-plans` or `subagent-driven`). Upstream `subagent-driven-development` is NOT offered here; only invoke it if the user explicitly asks for the upstream original.
 
@@ -427,7 +427,7 @@ This summarizes the corrected order (matches Checklist + Process Flow above):
    - Standard format-only pass (Sonnet subagent)
 
 4. **Single combined approval gate** — present in ONE message:
-   - The full PRETTIFIED `<slug>-implementation-plan.md` (or summary if very long, with link)
+   - The full RAW `<slug>-implementation-plan.md` (or summary if very long, with link)
    - The verify-spec 4-axis report
    - The code-pretty diff summary
    - **Gate #13 — plan + verify 결합 승인**

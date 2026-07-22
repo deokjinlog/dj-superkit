@@ -35,7 +35,7 @@ Two modes are offered at the start, both producing the same file path (`<slug>-r
 - **Socratic mode** — free-form upstream-superpowers-style dialogue: one question at a time, propose 2-3 approaches with tradeoffs, section-by-section approval. Output is free-form prose under the same filename. Use this for internal/exploratory work where the PRD template would be over-structure.
 
 <HARD-GATE>
-This skill is for PRD only — NOT writing <slug>-tech-design.md, NOT touching code, NOT writing implementation plans. brainstorming = PRD only.
+This skill is for **requirements only (PRD mode or Socratic mode)** — NOT writing <slug>-tech-design.md, NOT touching code, NOT writing implementation plans. 요구사항 단계에서 멈춘다.
 
 After <slug>-requirements.md is approved AND change-history is logged, **automatically invoke** the `tech-design` skill via the Skill tool (v1.1.9+ — the separate "proceed?" gate has been removed). Output a one-line interrupt-notice `ℹ️ /tech-design 단계로 자동 넘어갑니다. 멈추려면 "stop" 입력해주세요.` so the user can pause if needed. If they explicitly type "stop"/"멈춰"/"잠깐", exit cleanly with `ℹ️ 알겠습니다. /tech-design 은 나중에 직접 실행해주세요.`. The original combined approval gate (#8) already captured the user's intent; a separate proceed gate just adds friction.
 </HARD-GATE>
@@ -76,7 +76,7 @@ You MUST create a TaskCreate task for each of these items and complete them in o
    - **[Socratic mode]** **Visual Companion offer** (if visual questions ahead — own message) → Free-form upstream-style dialogue: one question at a time, propose 2-3 approaches with tradeoffs, section-by-section approval. See "Socratic Mode" below.
 5. **자체 점검** — mode-specific (PRD: 6-item PRD scan + 4-item abstract scan; Socratic: 4-item abstract scan only)
 6. **문서 포맷 정리 (사용자 리뷰 전)** — format-only pass (Sonnet subagent) on the RAW draft BEFORE user review. Re-fires on each user-fix iteration (per-draft). Uses `generating-html` skill.
-7. **사용자 검토 (PRD 초안)** — show the prettified file, get approval (loop until OK; on changes → revise → back to step 6 → re-show prettified). Stops once first change-history entry is logged.
+7. **사용자 검토 (PRD 초안)** — show the RAW `.md` file, get approval (loop until OK; on changes → revise → back to step 6 → re-show the RAW `.md`). Stops once first change-history entry is logged.
 8. **변경이력 기록** — append first `[요구사항-수정]` entry via `change-history` skill
 9. **개발방향 단계 자동 진행** — Right after the change-history entry is logged, auto-invoke `tech-design` via the Skill tool with a one-line interrupt-notice. On user "stop"/"멈춰"/"잠깐" → exit cleanly with notice telling the user to run /tech-design later.
 
@@ -174,9 +174,9 @@ digraph brainstorm_flow {
     "[Socratic] Present design sections\n(section-by-section approval)" -> "Self-review (mode-specific)";
 
     "Self-review (mode-specific)" -> "Invoke generating-html\n(pre-review, Sonnet subagent, per-draft)";
-    "Invoke generating-html\n(pre-review, Sonnet subagent, per-draft)" -> "User reviews <slug>-requirements.md\n(prettified)";
-    "User reviews <slug>-requirements.md\n(prettified)" -> "Invoke generating-html\n(pre-review, Sonnet subagent, per-draft)" [label="changes — revise → re-pretty"];
-    "User reviews <slug>-requirements.md\n(prettified)" -> "Invoke change-history\n(first entry: 요구사항-수정/생성)" [label="approve"];
+    "Invoke generating-html\n(pre-review, Sonnet subagent, per-draft)" -> "User reviews <slug>-requirements.md\n(RAW .md — .html 은 배경 사이드카)";
+    "User reviews <slug>-requirements.md\n(RAW .md — .html 은 배경 사이드카)" -> "Invoke generating-html\n(pre-review, Sonnet subagent, per-draft)" [label="changes — revise → re-dispatch .html"];
+    "User reviews <slug>-requirements.md\n(RAW .md — .html 은 배경 사이드카)" -> "Invoke change-history\n(first entry: 요구사항-수정/생성)" [label="approve"];
     "Invoke change-history\n(first entry: 요구사항-수정/생성)" -> "Auto-invoke /tech-design (no gate, v1.1.9+)";
     "Auto-invoke /tech-design (no gate, v1.1.9+)" -> "Auto-invoke tech-design skill";
 }
@@ -226,17 +226,17 @@ If the user says "없음" or equivalent, §5 = the consolidated list as-is. If t
 
 **6. Invoke generating-html skill** (v1.1.15+ pre-review, per-draft)
 - Runs BEFORE user reviews the draft — format-only pass on the RAW content
-- Re-fires on each user-fix iteration (per-draft loop): revise RAW → generating-html → show prettified
+- Re-fires on each user-fix iteration (per-draft loop): revise RAW → generating-html → show the RAW `.md`
 - Stops the moment the first change-history entry is logged
 - Dispatches a Sonnet subagent for a strict format-only pass (no rewording, no reordering, footer/frontmatter byte-preserved)
 - See `generating-html` skill for full pre-flight + sanity-check protocol
 
-**7. Show the prettified doc + user review gate**
-- Show the full prettified document; await approval or change requests
-- If changes requested, revise per feedback → loop back to step 6 (generating-html re-fires → re-show prettified)
+**7. Show the RAW doc + user review gate**
+- Show the full RAW document; await approval or change requests
+- If changes requested, revise per feedback → loop back to step 6 (generating-html re-fires → re-show the RAW `.md`)
 - On approval → continue to step 8
 
-**Gate #8 — prettified 산출물 승인**
+**Gate #8 — RAW 산출물 승인**
 
 **Tool form (preferred)**
 
@@ -245,7 +245,7 @@ Call `AskUserQuestion`:
 ```json
 {
   "question": "<slug>-requirements.md 승인?",
-  "context": "prettified 산출물 검토 — 승인 시 change-history 진행",
+  "context": "RAW 산출물 검토 — 승인 시 change-history 진행",
   "choices": [
     {"value": "yes", "label": "예 — 승인하고 change-history 진행"},
     {"value": "no", "label": "아니오 — 사용자 피드백 받아 수정 후 generating-html 재발화"}

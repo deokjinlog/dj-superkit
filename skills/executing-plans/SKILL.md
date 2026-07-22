@@ -26,7 +26,7 @@ Load plan, review critically, execute all tasks task-by-task, with strict per-ed
 - [ ] Step 1 — Plan 로드 + 비판적 검토 (Plan Loading)
 - [ ] Step 2 — Code Edit Discipline (git-fast / memory-fallback 모드 선택)
 - [ ] Per-edit — risk-annotation 3-checklist + RISK comments
-- [ ] Per-task — consolidated [코드-수정] entry 1개 (change-history)
+- [ ] Per-task — 코드만 커밋 (git-fast) / Per-run — Phase 3 에서 batch entry 1개 (change-history)
 - [ ] Step 3 — Complete Development (테스트 + finishing-a-development-branch)
 
 ## Plan Loading
@@ -183,9 +183,11 @@ digraph exec_flow {
     "All pass?" [shape=diamond];
     "[git-fast] git diff HEAD -- <code>\n→ extract before/after" [shape=box];
     "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" [shape=box];
-    "[git-fast] git add <code> <plan>\n+ git commit (one atomic task commit)" [shape=box];
+    "[git-fast] accumulate entry\nIN MEMORY (plan.md untouched)" [shape=box];
+    "[git-fast] git add <code> ONLY\n+ git commit (code-only task commit)" [shape=box];
+    "[git-fast] Phase 3 (all tasks done):\nONE batch entry → append plan.md once\n→ [log] commit" [shape=box];
     "[memory-fallback] Commit if possible" [shape=box];
-    "Mark task [x]" [shape=box];
+    "Mark task [x]\n(TaskCreate list — NOT plan.md)" [shape=box];
     "All tasks done?" [shape=diamond];
     "Fix and retry" [shape=box];
     "Use finishing-a-development-branch" [shape=doublecircle];
@@ -207,17 +209,19 @@ digraph exec_flow {
     "More edits in task?" -> "Run tests for this task" [label="no — task edits done"];
     "Run tests for this task" -> "All pass?";
     "All pass?" -> "[git-fast] git diff HEAD -- <code>\n→ extract before/after" [label="yes (git-fast)"];
+    "[git-fast] git diff HEAD -- <code>\n→ extract before/after" -> "[git-fast] accumulate entry\nIN MEMORY (plan.md untouched)";
+    "[git-fast] accumulate entry\nIN MEMORY (plan.md untouched)" -> "[git-fast] git add <code> ONLY\n+ git commit (code-only task commit)";
     "All pass?" -> "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" [label="yes (memory-fallback)"];
     "All pass?" -> "Fix and retry" [label="no"];
     "Fix and retry" -> "Apply Edit (with RISK comments)";
-    "[git-fast] git diff HEAD -- <code>\n→ extract before/after" -> "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)";
-    "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" -> "[git-fast] git add <code> <plan>\n+ git commit (one atomic task commit)" [label="git-fast"];
-    "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" -> "[memory-fallback] Commit if possible" [label="memory-fallback"];
-    "[git-fast] git add <code> <plan>\n+ git commit (one atomic task commit)" -> "Mark task [x]";
-    "[memory-fallback] Commit if possible" -> "Mark task [x]";
-    "Mark task [x]" -> "All tasks done?";
+    "BATCHED LOG: ONE [코드-수정] entry\nfor whole task\n(Read+Edit 구현계획서.md once)" -> "[memory-fallback] Commit if possible";
+    "[git-fast] git add <code> ONLY\n+ git commit (code-only task commit)" -> "Mark task [x]\n(TaskCreate list — NOT plan.md)";
+    "[memory-fallback] Commit if possible" -> "Mark task [x]\n(TaskCreate list — NOT plan.md)";
+    "Mark task [x]\n(TaskCreate list — NOT plan.md)" -> "All tasks done?";
     "All tasks done?" -> "Pick next [ ] task" [label="no"];
-    "All tasks done?" -> "Use finishing-a-development-branch" [label="yes"];
+    "All tasks done?" -> "[git-fast] Phase 3 (all tasks done):\nONE batch entry → append plan.md once\n→ [log] commit" [label="yes (git-fast)"];
+    "All tasks done?" -> "Use finishing-a-development-branch" [label="yes (memory-fallback)"];
+    "[git-fast] Phase 3 (all tasks done):\nONE batch entry → append plan.md once\n→ [log] commit" -> "Use finishing-a-development-branch";
 }
 ```
 
@@ -277,7 +281,8 @@ After all tasks complete and verified:
 - Pick mode (git-fast vs memory-fallback) at task-start mode-check; do not switch
 - Follow plan steps exactly
 - Per-edit discipline: risk-check → apply (memory-fallback adds before-snapshot Read upfront)
-- Per-task discipline: tests pass → (git-fast: commit + git diff) → batched log → mark task done
+- Per-task discipline (git-fast): tests pass → git diff → accumulate in memory → **commit code only** → mark task done. The batched log is appended and committed **once in Phase 3**, not per task
+- Per-task discipline (memory-fallback): tests pass → batched log → commit if possible → mark task done
 - Don't skip verifications — if a step says "run X, expect Y", run X and confirm Y
 - Reference skills when the plan says to (e.g., "use risk-annotation here")
 - Never start implementation on main/master without explicit user consent

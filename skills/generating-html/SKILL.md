@@ -12,7 +12,7 @@ This skill prettifies a freshly written or rewritten feature MD just before the 
 <HARD-GATE>
 Trigger timing (v1.1.15+ 통일 — pre-review per-draft):
 
-모든 doc 타입에서 동일하게 발화: 메인이 RAW 작성 → generating-html (사용자 리뷰 직전) → 사용자가 prettified 본문 검토 → 승인 → change-history. 사용자 fix 요청 시 메인이 in-memory raw 갱신 후 generating-html 재발화 (per-draft loop).
+모든 doc 타입에서 동일하게 발화: 메인이 RAW 작성 → generating-html (사용자 리뷰 직전) → 사용자가 RAW `.md` 본문 검토 → 승인 → change-history. 사용자 fix 요청 시 메인이 in-memory raw 갱신 후 generating-html 재발화 (per-draft loop).
 
 - **requirements.md** — brainstorming 흐름 끝, 사용자 리뷰 직전. user-fix 시 재발화.
 - **tech-design.md** — tech-design 흐름 끝, 사용자 리뷰 직전 (combined approval gate 와 결합). user-fix 시 재발화.
@@ -35,7 +35,7 @@ If you are unsure whether this is still in the "initial creation phase" — STOP
 |---|---|
 | `brainstorming` just wrote RAW `<slug>-requirements.md`, about to show to user for review, no entries yet | User asked to update FR-3 wording in an already-live requirements.md (one with change-history entries) |
 | `tech-design` just wrote RAW `<slug>-tech-design.md`, about to show combined approval gate (doc + verify report), no entries yet | `change-propagation` is cascading edits across MDs |
-| `writing-plans` just completed verifying-spec + code-pretty on `<slug>-implementation-plan.md`, about to show prettified plan to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/executing-plans` |
+| `writing-plans` just completed verifying-spec + code-pretty on `<slug>-implementation-plan.md`, about to show RAW plan to user, no `## 변경이력` entries yet | `change-history` is appending a `[코드-수정]` entry mid-`/executing-plans` |
 | `brainstorming` or `tech-design` user requested fix on draft — revise RAW, re-fire generating-html (per-draft loop) | First change-history entry has been logged — doc is now "live", do NOT fire |
 | `writing-plans` user requested revision, plan re-written, verifying-spec re-ran, code-pretty re-ran — fire generating-html again | (none for pre-review timing — generating-html now fires before every user review) |
 
@@ -88,7 +88,7 @@ sys.exit(0 if result.ok else 1)
 
 ### Step 2 — Dispatch single B subagent fire-and-forget (v2.2.1+)
 
-Use ONE `Task` tool call with `run_in_background: true`. Main agent does NOT wait.
+Use ONE `Agent` tool call with `run_in_background: true`. Main agent does NOT wait.
 
 **Subagent B — `.html` companion**:
 - `subagent_type`: `general-purpose`
@@ -128,36 +128,23 @@ digraph generating_html {
     "Calling skill ready\n(brainstorming/tech-design/writing-plans)" [shape=box];
     "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" [shape=diamond];
     "STOP — log reason, return to caller" [shape=box];
-    "Dispatch subagent\n(general-purpose, model=sonnet)" [shape=box];
-    "Subagent: Read → format-only → Write" [shape=box];
-    "Main: Read file back\nspot-check headers/frontmatter/footer" [shape=box];
-    "Sanity OK?" [shape=diamond];
-    "Report to user, return to caller\n(caller now invokes change-history)" [shape=doublecircle];
-    "Roll back: ask user to choose\n(restore from memory or accept)" [shape=box];
+    "Dispatch B subagent\n(general-purpose, model=sonnet,\nrun_in_background: true)" [shape=box];
+    "Main returns IMMEDIATELY\n(RAW .md is the review surface)" [shape=doublecircle];
+    "silent log → .intent-locked/html-regen.log\n(dispatch / done / fail / cancel)" [shape=box];
 
     "Calling skill ready\n(brainstorming/tech-design/writing-plans)" -> "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?";
     "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" -> "STOP — log reason, return to caller" [label="any check fails"];
-    "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" -> "Dispatch subagent\n(general-purpose, model=sonnet)" [label="all pass"];
-    "Dispatch subagent\n(general-purpose, model=sonnet)" -> "Subagent: Read → format-only → Write";
-    "Subagent: Read → format-only → Write" -> "Main: Read file back\nspot-check headers/frontmatter/footer";
-    "Main: Read file back\nspot-check headers/frontmatter/footer" -> "Sanity OK?";
-    "Sanity OK?" -> "Report to user, return to caller\n(caller now invokes change-history)" [label="yes"];
-    "Sanity OK?" -> "Roll back: ask user to choose\n(restore from memory or accept)" [label="no"];
+    "Pre-flight: file exists?\n변경이력 empty?\nfilename matches pattern?" -> "Dispatch B subagent\n(general-purpose, model=sonnet,\nrun_in_background: true)" [label="all pass"];
+    "Dispatch B subagent\n(general-purpose, model=sonnet,\nrun_in_background: true)" -> "silent log → .intent-locked/html-regen.log\n(dispatch / done / fail / cancel)";
+    "Dispatch B subagent\n(general-purpose, model=sonnet,\nrun_in_background: true)" -> "Main returns IMMEDIATELY\n(RAW .md is the review surface)" [label="does NOT wait"];
 }
 ```
 
-## Sanity-Check Details (post-dispatch)
+## B 서브에이전트가 스스로 검사한다 (메인은 안 기다린다)
 
-The main agent's spot-check after the subagent returns:
+v2.2.1 이전엔 메인이 서브에이전트 완료를 기다렸다가 `.md` 를 되읽어 검사했습니다. **지금은 둘 다 불가능합니다** — 메인은 기다리지 않고(`Main does NOT wait`), B 는 `.html` 만 쓰므로 검사할 `.md` 변경분 자체가 없습니다.
 
-| Check | How |
-|---|---|
-| Frontmatter intact | First Read line still `---`; closing `---` present at expected position |
-| Section header count unchanged | Grep `^#{1,6} ` → count matches the pre-dispatch count (which the calling skill already knows from generating the doc) |
-| `## 변경이력` heading present and footer empty | Grep `^## 변경이력` → 1 match; Grep `^### \[` after that line → 0 matches |
-| Korean identifier headers preserved | Grep for the expected Korean section names (`요구사항`, `개발방향`, `구현계획서`, etc. as applicable to the doc type) |
-
-If any check fails, the main agent reports the failure and asks the user whether to (a) accept the prettified version anyway, (b) revert (caller is responsible for restore — typically by re-running the doc-writing step from memory), or (c) skip generating-html and proceed.
+검증 책임은 **B 프롬프트 안의 "Verification before writing" 룰**로 옮겨갔습니다. 실패는 `.intent-locked/html-regen.log` 에 남고, 사용자에게 push 하지 않습니다.
 
 ## Anti-Patterns
 
@@ -169,7 +156,6 @@ If any check fails, the main agent reports the failure and asks the user whether
 | Use Opus / Haiku / main agent for the formatting | Sonnet only — Opus wastes the call, Haiku risks rephrasing Korean. |
 | Let the subagent "make the prose flow better" | Forbidden. Pass prompt forbids all rewording. |
 | Reformat the `## 변경이력` footer "to match the new style" | The footer is an audit trail with byte-identical preservation. |
-| Skip the post-dispatch sanity check | The HARD-GATE on meaning preservation needs verification. |
 | Re-run generating-html if the user later complains the doc "still looks rough" | One shot only. Subsequent improvements are normal Edit + change-history entries. |
 | Read or reference the `.html` companion from any AI workflow (v2.2.0+) | NEVER. AI reads `.md` only. `.html` is human-only derived view. |
 | Reference external CDN / URL in the `.html` (v2.2.0+) | NEVER. Self-contained inline only (D4). |
@@ -193,8 +179,8 @@ If any check fails, the main agent reports the failure and asks the user whether
 A generating-html run is correct when ALL hold:
 
 1. Pre-flight checks all passed (file exists, `## 변경이력` empty, filename pattern matches)
-2. Subagent was dispatched with `model: sonnet` and the strict format-only prompt
-3. Post-dispatch sanity checks all passed (frontmatter intact, header count unchanged, footer empty, Korean identifiers preserved)
+2. B subagent was dispatched with `model: sonnet`, `run_in_background: true`, and the strict format-only prompt
+3. A DISPATCH entry was written to `.intent-locked/html-regen.log` (메인이 결과를 기다렸다는 증거가 아니라, **던졌다는** 증거다)
 4. The calling skill received control back and is about to invoke `change-history` for the first entry
 5. No `## 변경이력` entry was added by generating-html itself (logging is the caller's job, with `[<doc-type>-수정]` tag for "신규 ... 결과")
 
@@ -203,7 +189,7 @@ A generating-html run is correct when ALL hold:
 - `brainstorming` — calls this on first save of `<slug>-requirements.md`
 - `tech-design` — calls this on first save of `<slug>-tech-design.md`
 - `writing-plans` — calls this on first save of `<slug>-implementation-plan.md`
-- `change-history` — invoked by the caller AFTER generating-html returns; logs the first entry on the now-prettified doc
+- `change-history` — invoked by the caller AFTER generating-html returns; logs the first entry on the now-RAW doc
 - `change-propagation` — for any post-init revision; generating-html is NEVER part of that flow
 
 ## 비동기 신뢰성 룰 (v2.4+) — silent log monitor (v2.4+)

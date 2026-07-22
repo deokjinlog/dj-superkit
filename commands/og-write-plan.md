@@ -18,7 +18,7 @@ description: upstream superpowers 원본 writing-plans 를 호출합니다. /og-
 | 위험 코드 지점 §2 섹션 | 있음 | 없음 |
 | 변경이력 footer | 자동 누적 | 없음 |
 | verifying-spec 게이트 | 자동 실행 | 없음 |
-| docs-pretty 포맷 정돈 | 자동 1회 | 없음 |
+| generating-html 포맷 정돈 | 자동 1회 | 없음 |
 | Execution Handoff | Inline / Subagent (subagent-driven) 양자택일 | Subagent-Driven (subagent-driven-development) / Inline (og-executing-plans) 양자택일 |
 
 ## 다음 단계

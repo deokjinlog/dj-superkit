@@ -1,3 +1,7 @@
+---
+description: "요구사항·개발방향·구현계획서 `.md` 를 정형 포맷으로 다듬는다. 자동 발동 없음 — 사용자가 명시로 부를 때만 (v2.2.2+ opt-in)."
+---
+
 # /pretty-md
 
 `<slug>` 인자는 선택입니다. 누락 시 `scripts/auto_flow.find_latest_slug(Path("docs/features"))` 를 호출해서 가장 최근 폴더를 자동으로 선택합니다.

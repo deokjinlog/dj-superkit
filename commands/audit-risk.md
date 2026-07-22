@@ -1,3 +1,7 @@
+---
+description: "프로젝트 전체를 1회성으로 감사한다 (보안 / 거버넌스 / 비용). 코드는 안 건드리고 HTML 보고서 1개만 낸다."
+---
+
 # /audit-risk
 
 이 슬래시는 프로젝트 전체의 **보안 / 거버넌스 / 비용을 1회성으로 감사**하는 명령입니다. 코드는 변경하지 않고, HTML 보고서 1개를 산출합니다 (`docs/audit/<timestamp>-audit-risk.html`, gitignored).

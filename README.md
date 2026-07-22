@@ -301,6 +301,22 @@ docs/features/2026-05-31-출금기능/
 
 ---
 
+## ⚠️ `auto-*` 4종은 게이트를 전부 건너뜁니다
+
+이 워크플로의 핵심 주장은 **"게이트는 사람만 엽니다"** 인데, `auto-brainstorming` · `auto-tech-design` · `auto-writing-plans` · `auto-executing-plans` 는 **그 약속의 명시적 예외**입니다.
+
+| | 정식 흐름 | `auto-*` |
+|---|---|---|
+| 승인 게이트 | 단계마다 사람 | **없음** — 다음 단계를 자동 invoke |
+| 사용자 입력 | 게이트마다 | **clarifying Q 답변에만** (prose 질의) |
+| 실행 모드 | 사람이 선택 | **wave-parallel subagent 강제** (Gate #14 override) |
+
+`/auto-brainstorming` 하나를 치면 요구사항 → 개발방향 → 구현계획서 → 실행까지 **멈추지 않고 갑니다.** 방향이 틀려도 중간에 못 잡습니다. **의도를 잠그고 싶으면 정식 흐름을, 빠르게 밀어붙일 때만 `auto-*`** 를 쓰세요.
+
+`/pretty-md` 는 `.md` 를 정형 포맷으로 다듬는 **명시 호출 전용** 유틸입니다 (자동 발동 없음).
+
+---
+
 ## 설치
 
 Claude Code 안에서:
@@ -351,7 +367,7 @@ claude plugin update intent-locked-workflow@intent-locked-workflow
 
 명령어도 있어요 — `/intent-locked-workflow:audit-risk`(배포 전 보안 감사), `/intent-locked-workflow:fast-tasks`(잡일 묶어 처리), `/intent-locked-workflow:sync-html`, `/intent-locked-workflow:api-test`, 빌더 3종(`/intent-locked-workflow:list-skills` · `/intent-locked-workflow:new-skill` · `/intent-locked-workflow:remove-skill`).
 
-**스킬이 아니라 명령인 것들**이 있죠 — 빌더 3종은 **일부러** 명령입니다. 스킬은 설명문만 맞으면 저절로 발동하는데, *"랄프한테 넘길까"* 라고 말만 해도 워크트리가 생기고 파일이 지워지면 안 되니까요. **명시 호출만** 받습니다.
+**스킬이 아니라 명령인 것들**이 있죠 — 빌더 3종은 **일부러** 명령입니다. 스킬은 설명문만 맞으면 저절로 발동하는데, *"스킬 하나 지워줘"* 라고 말만 해도 `rm -rf` 가 돌면 안 되니까요 (`/remove-skill` 이 그렇습니다). **명시 호출만** 받습니다.
 
 </details>
 

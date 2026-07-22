@@ -1,6 +1,6 @@
 ---
 name: og-writing-plans
-description: "Upstream-original (superpowers 5.0.7) writing-plans, exposed under intent-locked-workflow. Use when invoked via /og-write-plan after /og-brainstorm. Identical behavior to upstream writing-plans except for the og- naming and downstream pointer (handoff goes to og-executing-plans / subagent-driven-development). Use this when the intent-locked-workflow extended workflow (변경이력 / 위험주석 / verifying-spec / docs-pretty) feels heavy and you want the original superpowers experience."
+description: "Upstream-original (superpowers 5.0.7) writing-plans, exposed under intent-locked-workflow. Use when invoked via /og-write-plan after /og-brainstorm. Identical behavior to upstream writing-plans except for the og- naming and downstream pointer (handoff goes to og-executing-plans / subagent-driven-development). Use this when the intent-locked-workflow extended workflow (변경이력 / 위험주석 / verifying-spec / generating-html) feels heavy and you want the original superpowers experience."
 ---
 
 # Writing Plans (og — upstream original)

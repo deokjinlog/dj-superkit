@@ -1,6 +1,6 @@
 ---
 name: auto-brainstorming
-description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-tech-design 자동 invoke. 사용자 입력은 clarifying Q 답변에만. Visual Companion 호출 X. 추가 AskUserQuestion 호출 X (사용자 입력은 clarifying Q 답변에만, 그 질문 자체는 AskUserQuestion 도구로). generating-html 은 Step 4.5 fire-and-forget dispatch (v2.3.2+ — v1.1.17 '호출 부재' 룰이 반전됨).
+description: auto-flow 진입점 — Socratic clarifying Q (1~5개 적응) + AI 자동 approach 선택 + 자동 section 작성 + change-history 자동 + auto-tech-design 자동 invoke. 사용자 입력은 clarifying Q 답변에만. Visual Companion 호출 X. AskUserQuestion 호출 X — clarifying Q 는 prose 질의다 (본문 Anti-Patterns 와 CLAUDE.md 정본). generating-html 은 Step 4.5 fire-and-forget dispatch (v2.3.2+ — v1.1.17 '호출 부재' 룰이 반전됨).
 ---
 
 # Auto Brainstorming → <slug>-requirements.md (Socratic auto)
@@ -99,7 +99,7 @@ mkdir -p docs/features/$(date +%Y-%m-%d)-<slug>/
 
 `<slug>-requirements.md` 작성 (Socratic free-form):
 - H1 + Mode line + 배경 + 핵심 결정 + 우려/해결 + 다음 단계 + 변경이력 footer
-- RAW 본문 그대로.
+- RAW `.md` 본문 그대로.
 
 ### Step 4.5 — generating-html fire-and-forget dispatch (v2.3.2+)
 

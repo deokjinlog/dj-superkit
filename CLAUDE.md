@@ -10,7 +10,7 @@ This repo has a 94% PR rejection rate. Almost every rejected PR was submitted by
 
 Before you open a PR against this repo, you MUST:
 
-1. **Read the entire PR template** at `.github/PULL_REQUEST_TEMPLATE.md` and fill in every section with real, specific answers. Not summaries. Not placeholders.
+1. **Read the entire PR template** at `.github/PULL_REQUEST_TEMPLATE.md` and fill in every section with real, specific answers. Not summaries. Not placeholders. *(이 포크엔 그 파일이 없습니다 — upstream 에 PR 할 때만 해당합니다. 없으면 이 항목은 건너뛰고 2~5 는 그대로 지키세요.)*
 2. **Search for existing PRs** — open AND closed — that address the same problem. If duplicates exist, STOP and tell your human partner. Do not open another duplicate.
 3. **Verify this is a real problem.** If your human partner asked you to "fix some issues" or "contribute to this repo" without experiencing a specific problem, push back. Ask them what broke, what failed, what the user experience was.
 4. **Confirm the change belongs in core.** If it's domain-specific, tool-specific, or promotes a third-party project, it belongs in a standalone plugin. Tell your human partner.
@@ -99,7 +99,7 @@ Before proposing changes to skill design, workflow philosophy, or architecture, 
 
 ## General
 
-- Read `.github/PULL_REQUEST_TEMPLATE.md` before submitting
+- Read `.github/PULL_REQUEST_TEMPLATE.md` before submitting *(upstream 에 PR 할 때. 이 포크엔 없음)*
 - One problem per PR
 - Test on at least one harness and report results in the environment table
 - Describe the problem you solved, not just what you changed
@@ -139,9 +139,9 @@ Before proposing changes to skill design, workflow philosophy, or architecture, 
 
 ## writing-plans `**Model**:` 필드 ↔ subagent-driven 결합
 
-`writing-plans` 의 task block 신규 `**Model**:` 필드 (v1.1.14+) 는 `subagent-driven` 의 implementer dispatch model 결정에 직접 사용된다 (`skills/subagent-driven/SKILL.md` Plan Analysis & Wave Build 단계). 즉:
+`writing-plans` 의 task block `**Model**:` 필드 (v1.1.14+) 는 **v2.0.0 이후 dispatch 에 쓰이지 않는다** — implementer 는 `haiku` **고정**이고 (`skills/subagent-driven/implementer-prompt.md:7` 이 정본), 이 필드는 사람이 읽는 **참고 메타데이터**로만 남는다. 즉:
 
-- writing-plans 의 평가 룰 (haiku/sonnet/opus 분기) 변경 시 `subagent-driven` 의 dispatch 단계도 동시 수정
+- writing-plans 의 평가 룰을 바꿔도 `subagent-driven` 의 dispatch 는 **안 바뀐다** (고정값). 바꾸려면 `implementer-prompt.md` 를 고쳐야 한다
 - 한쪽만 건드리면 다음 회귀 발생: plan 작성 시 의도한 모델과 실제 dispatch 모델 불일치
 
 요약: 이 두 skill 의 `**Model**:` 룰 변경은 atomic 하게 묶어 처리할 것.
@@ -259,11 +259,11 @@ boilerplate 가 동기. 변경 시 atomic patch.
 
 ## Other / 모호 응답 처리 룰 결합 (v2.1.1+)
 
-v2.1.1+ 에서 6곳 (5 skill + 1 command) 에 "Other / 모호 응답 처리" boilerplate
+v2.1.1+ 에서 5곳 (4 skill + 1 command) 에 "Other / 모호 응답 처리" boilerplate
 추가. AskUserQuestion 묶음 응답 중 사용자가 "Other" 자유 응답 또는 "모르겠음 /
 이해 안 됨" 류 답변 시 → 그 질문만 단독 재호출 + prose 설명 추가. 자동 진행 X.
 
-### 적용 6곳
+### 적용 5곳
 
 - `skills/brainstorming/SKILL.md`
 - `skills/tech-design/SKILL.md`
@@ -280,7 +280,7 @@ v2.1.1+ 에서 6곳 (5 skill + 1 command) 에 "Other / 모호 응답 처리" boi
 
 ### 영향 범위
 
-- 6곳 본문 변경. 다른 skill / og-* / auto-* (auto-brainstorming 외) 영향 0
+- 5곳 본문 변경. 다른 skill / og-* / auto-* (auto-brainstorming 외) 영향 0
 - AskUserQuestion 도구 schema 변경 X (호출 패턴만 추가)
 - Notification.elicitation_dialog 매처 / repeat-alert.sh — 변경 X
 
@@ -296,7 +296,7 @@ grep -c "Other / 모호 응답 처리 (v2.1.1+)" \
 # expected: 각 1 (5곳 모두 박혀 있어야 함)
 ```
 
-요약: 6 파일 + CLAUDE.md 결합 메모 변경은 묶어서 처리. 7+ 파일 atomic patch.
+요약: 5 파일 + CLAUDE.md 결합 메모 변경은 묶어서 처리. 7+ 파일 atomic patch.
 
 요약: 8 skill body + CLAUDE.md 결합 메모 변경은 묶어서 처리. 5+ 파일 atomic patch.
 
@@ -349,7 +349,7 @@ grep -nE "https?://.*\.(css|js)|read_file.*\.html|Read.*\.html" \
 
 # Anti-Pattern: 다른 skill 본문에 .html 참조
 grep -rn "\.html" \
-  skills/{brainstorming,tech-design,writing-plans,executing-plans,auto-*,og-*}/SKILL.md
+  skills/{brainstorming,tech-design,writing-plans,executing-plans,og-*}/SKILL.md   # auto-* 제외 — v2.3.2+ 는 .html dispatch 가 필수라 매치가 나는 게 정상
 # expected: 0 (.html 흐름은 generating-html 전용)
 
 # v2.2.1+ Anti-Pattern: 메인이 결과 대기 (fire-and-forget 위반)
@@ -402,7 +402,7 @@ grep -c "적극 시각화 v2.2.3" skills/generating-html/html-companion-prompt.m
 v2.2.2+ 에서 `docs-pretty` → `generating-html` skill 명칭 + `/regen-html` → `/sync-html` slash command 명칭 일괄 교체. 다음 룰 atomic patch:
 
 - **5 항목 atomic** — skill 디렉토리 rename + slash command rename + 13 파일 단어 swap + CLAUDE.md 결합 메모 + manifest 항목
-- **단어 grep 0 검증** — `grep -rn "docs-pretty\|regen-html" skills/ commands/ CLAUDE.md README.md --exclude-dir=og-* --exclude-dir=H4-preflight-fail --exclude-dir=H5-docs-pretty-pre-review --exclude-dir=H6-task-name-friendly` → 0
+- **단어 grep 0 검증** — `grep -rn "docs-pretty\|regen-html" skills/ commands/ CLAUDE.md README.md --exclude-dir=og-brainstorming --exclude-dir=og-writing-plans --exclude-dir=og-executing-plans --exclude-dir=H4-preflight-fail --exclude-dir=H5-docs-pretty-pre-review --exclude-dir=H6-task-name-friendly` → 0
 - **Acceptance 5번 자동→안내** — `change-propagation` 마지막 단계의 `/sync-html` 자동 호출 → 사용자 안내로 완화 (auto-fire X). 사용자가 명시 호출
 - **commands/regen-html.md 삭제** — old slash command 제거 (sync-html.md 신규 생성으로 대체)
 
@@ -620,7 +620,7 @@ grep -c "silent log monitor (v2.4+)" skills/generating-html/SKILL.md
 
 - anchor 본격 4 (brain / design / write / auto-brain): "사용자 질문 룰" 섹션 직후 sub-section
 - anchor 짧은 reference 4 (executing / auto-design / auto-write / auto-execute): body 끝 sub-section
-- og-* / fast-tasks / worktree-merge-back — 비적용 (회귀 catch grep 으로 보장)
+- og-* / fast-tasks — 비적용 (회귀 catch grep 으로 보장)
 
 ### 핵심 룰
 
@@ -669,7 +669,6 @@ v2.5.2+ 에서 9 skill body 에 `## Checklist` 섹션 신규 추가 — `using-s
 ### 비적용 영역 (의도적 제외)
 
 - `og-brainstorming` — 이미 Checklist 보유 (upstream 그대로 답습)
-- 워크트리 2 (`worktree-merge-back`, `worktree-remove`) — Step 수 적음, 사용자 catch 우선순위 낮음
 - `api-auto-testing`, `finishing-a-development-branch`, `subagent-driven-development` — 사용자 의사 미선택
 - 1회성 / 메타 skill — `change-history`, `risk-annotation`, `generating-html`, `verifying-spec`, `using-superpowers` 등 (task 분해 의미 없음)
 

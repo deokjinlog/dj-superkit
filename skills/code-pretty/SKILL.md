@@ -1,6 +1,6 @@
 ---
 name: code-pretty
-description: Use AFTER verifying-spec passes and BEFORE generating-html during the initial-creation iteration loop of <slug>-implementation-plan.md ONLY. Dispatches a Sonnet subagent that performs a strict format + 자명한 정리 + 중복 통합 pass on every "수정 후" code block in the plan. NEVER touches "원본" blocks, prose, or tables. Stops firing once the first change-history entry is logged. Idempotent on already-clean blocks (no-op rule).
+description: Use AFTER verifying-spec passes and BEFORE generating-html during the initial-creation iteration loop of <slug>-implementation-plan.md ONLY. Dispatches a Sonnet subagent that performs a strict format + 자명한 정리 pass on every "수정 후" code block in the plan. NEVER touches "원본" blocks, prose, or tables. Stops firing once the first change-history entry is logged. Idempotent on already-clean blocks (no-op rule).
 ---
 
 # Code Pretty (Pre-Review Code Block Formatting)
@@ -145,10 +145,9 @@ Three categories. Apply only when there is a CONCRETE, ARTICULABLE readability i
 - Do NOT extract magic numbers to named constants
 - Do NOT flatten nested if statements
 - Do NOT split or merge functions
-- Do NOT rename anything unless context is overwhelming (Category B last bullet)
 - Do NOT change behavior, side-effects, exception flow, or output
 - Do NOT modify a target block if it is already well-formatted (consistent whitespace, no obvious readability issues, no Category B / C candidates) — leave byte-identical
-- If you have ≥1% suspicion that a Category B or C change might alter behavior, SKIP that change
+- If you have ≥1% suspicion that a Category A or B change might alter behavior, SKIP that change
 
 # How to apply
 
@@ -157,7 +156,7 @@ Three categories. Apply only when there is a CONCRETE, ARTICULABLE readability i
 3. For each target block:
    a. Articulate (mentally) the concrete readability improvement
    b. If you cannot articulate one — leave byte-identical, mark as "no-op"
-   c. Otherwise apply A/B/C transformations within the constraints above
+   c. Otherwise apply A/B transformations within the constraints above (C 는 폐지됨)
 4. Write the result back to the SAME file path using the Write tool (overwrite)
 5. Report a diff summary in this format:
 
@@ -165,7 +164,7 @@ Three categories. Apply only when there is a CONCRETE, ARTICULABLE readability i
    code-pretty done on <path>.
 
    Target blocks: <total>
-   - Modified: <N> (<categories: A/B/C breakdown>)
+   - Modified: <N> (<categories: A/B breakdown>)
    - No-op (already clean): <N>
    - Skipped (1% suspicion): <N> (with reasons)
 
@@ -230,7 +229,7 @@ digraph code_pretty {
 | Thought | Reality |
 |---|---|
 | "The block is short, just inline-prettify in main agent" | Subagent dispatch is mandatory — clean main context + model isolation. |
-| "I'll consolidate this duplicate, looks safe enough" | Need byte-identical call-site contexts. If not, SKIP. |
+| "이 중복 병합해도 안전해 보임" | **병합은 FORBIDDEN (Category C 폐지).** 블록만 보고는 호출부 스코프를 판정할 수 없다. |
 | "Two passes will catch more" | One shot only. Idempotent by design — second pass should produce 0 changes. |
 
 ## Acceptance
